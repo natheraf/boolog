@@ -1,0 +1,30 @@
+{
+  "name": "boolog",
+  "version": "1.0.0",
+  "description": "Eric Ma",
+  "main": "index.js",
+  "scripts": {
+    "help": "node help",
+    "in": "npm i && concurrently \"cd server && npm i \" \"cd rclient && npm i\"",
+    "build": "cd rclient && npm run build",
+    "prod": "cd server && npm run prod",
+    "prod-drop": "cd server && npm run prod-drop",
+    "full": "concurrently \"cd server && npm run dev\" \"cd rclient && npm start\"",
+    "full-drop": "concurrently \"cd server && npm run dev-drop\" \"cd rclient && npm start\"",
+    "front": "cd rclient && npm start",
+    "back": "cd server && npm run dev",
+    "back-drop": "cd server && npm run dev drop",
+    "jsdoc": "cd rclient && npm run jsdoc && cd ../server && npm run jsdoc",
+    "jsdoc-open": "cd rclient && npm run jsdoc-open && cd ../server && npm run jsdoc-open",
+    "jsdoc-front": "cd rclient && npm run jsdoc",
+    "jsdoc-front-open": "cd rclient && npm run jsdoc-open",
+    "jsdoc-back": "cd server && npm run jsdoc",
+    "jsdoc-back-open": "cd server && npm run jsdoc-open"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "jsdoc": "^4.0.3"
+  }
+}
