@@ -1,17 +1,6 @@
-Template project
+Simple book tracking web app
 
-Stack:
-NodeJS
-
-- express
-- bcryptjs
-- cookie-parser
-- cors
-- jsonwebtoken
-- sequelize
-
-ReactJS
-
-- material ui
-- axios
-- react router dom
+Node
+Express
+React
+PostgreSQL
