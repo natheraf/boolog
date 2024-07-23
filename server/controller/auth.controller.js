@@ -95,7 +95,7 @@ exports.signIn = (req, res) => {
     const expiresIn = "7d"; // 7 days
     res.cookie(
       "accessToken",
-      jwt.sign({ id: user.id }, config.secret, {
+      jwt.sign({ userId: user.id, userRoleId: user.roleId }, config.secret, {
         algorithm: "HS256",
         expiresIn: expiresIn,
       }),
@@ -109,10 +109,8 @@ exports.signIn = (req, res) => {
     );
 
     res.status(200).send({
-      userId: user.id,
       userName: user.name,
       userEmail: user.email,
-      userRoleId: user.roleId,
       message: `Successfully Signed In. Expires in ${expiresIn}.`,
     });
   });
