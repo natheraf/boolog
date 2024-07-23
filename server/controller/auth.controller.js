@@ -26,7 +26,7 @@ exports.createSuperAdmin = () => {
     });
 };
 
-exports.createUser = (req, res) => {
+exports.signUp = (req, res) => {
   const userRequiredBody = ["name", "email", "password", "role", "active"];
   const missing = [];
   userRequiredBody.forEach((key) => {
@@ -109,15 +109,16 @@ exports.signIn = (req, res) => {
     );
 
     res.status(200).send({
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      userId: user.id,
+      userName: user.name,
+      userEmail: user.email,
+      userRoleId: user.roleId,
       message: `Successfully Signed In. Expires in ${expiresIn}.`,
     });
   });
 };
 
-exports.signout = (req, res) => {
+exports.signOut = (req, res) => {
   // Set token to null and expire after 5 seconds
   res.clearCookie("accessToken");
   res.status(200).send({
