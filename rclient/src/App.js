@@ -3,6 +3,7 @@ import Container from "@mui/material/Container";
 import * as React from "react";
 
 import { Login } from "./views/Login";
+import { SearchBook } from "./views/SearchBook";
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
           <Route path="" element={<h1>Home</h1>} />
           <Route path="*" element={<h1>Wrong path</h1>} />
           <Route path="login" element={<Login />} />
-          <Route path="loggedin" element={<h1>Logged In</h1>} />
+          <Route path="loggedIn" element={<h1>Logged In</h1>} />
+          <Route path="searchBook" element={<SearchBook />} />
         </Routes>
       </Container>
     </Router>
