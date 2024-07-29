@@ -24,7 +24,29 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-const hasRole = (requiredRoleName) => (req, res, next) => {
+const creatingAccountVerifyToken = (req, res, next) => {
+  const token = req.signedCookies["accessToken"];
+
+  if (!token) {
+    req.userRoleId = 3;
+    req.body.role = "user";
+    next();
+    return;
+  }
+
+  jwt.verify(token, config.secret, (error, decoded) => {
+    if (error) {
+      return res.status(401).send({
+        message: "Unauthorized",
+      });
+    }
+    req.userId = decoded.userId.toString();
+    req.userRoleId = decoded.userRoleId;
+    next();
+  });
+};
+
+const hasRole = (req, res, next) => {
   Role.findOne(req.userRoleId).then((role) => {
     role.name === requiredRoleName
       ? next()
@@ -41,9 +63,10 @@ const authorizedToCreateUser = (req, res, next) => {
     });
     return;
   }
-  if (req.body.role === "admin") {
-    hasRole("super_admin")(req, res, next);
-  } else if (req.body.role === "user") {
+  if (
+    req.body.role === "user" ||
+    (req.body.role === "admin" && req.userRoleId === 0)
+  ) {
     next();
   } else {
     res.status(400).send({
@@ -56,6 +79,7 @@ const authorizedToCreateUser = (req, res, next) => {
 const authJwt = {
   verifyToken,
   authorizedToCreateUser,
+  creatingAccountVerifyToken,
 };
 
 module.exports = authJwt;
