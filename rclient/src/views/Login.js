@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button, Stack, TextField, Typography } from "@mui/material";
 import bgImage from "../assets/authentication_bg_med.jpg";
-import { handleSimpleRequest } from "../api/AxiosAPI";
+import { handleSimpleRequest } from "../api/Axios";
 
 export const Login = () => {
   const [showLogin, setShowLogin] = React.useState(true);
