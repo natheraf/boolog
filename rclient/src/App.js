@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Container from "@mui/material/Container";
 import * as React from "react";
 
-import "./App.css";
 import { Login } from "./views/Login";
 
 function App() {
