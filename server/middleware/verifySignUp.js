@@ -31,11 +31,7 @@ const checkDuplicateNameOrEmail = (req, res, next) => {
 };
 
 const checkRolesExist = (req, res, next) => {
-  if (
-    !req.body.role ||
-    req.body.role === "super_admin" ||
-    !ROLES.includes(req.body.role)
-  ) {
+  if (!req.body.role || !ROLES.includes(req.body.role)) {
     res.status(400).send({
       message: "Blank role or role does not exit",
     });
