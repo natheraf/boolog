@@ -13,12 +13,13 @@ module.exports = function (app) {
   app.post(
     "/api/auth/signup",
     [
-      authJwt.verifyToken,
+      authJwt.creatingAccountVerifyToken,
       verifySignUp.checkRolesExist,
       authJwt.authorizedToCreateUser,
       verifySignUp.checkDuplicateNameOrEmail,
+      controller.signUp,
     ],
-    controller.signUp
+    controller.signIn
   );
 
   app.post("/api/auth/signin", controller.signIn);

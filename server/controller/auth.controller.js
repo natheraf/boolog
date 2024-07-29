@@ -26,7 +26,7 @@ exports.createSuperAdmin = () => {
     });
 };
 
-exports.signUp = (req, res) => {
+exports.signUp = (req, res, next) => {
   const userRequiredBody = ["name", "email", "password", "role", "active"];
   const missing = [];
   userRequiredBody.forEach((key) => {
@@ -52,7 +52,13 @@ exports.signUp = (req, res) => {
     .then((user) => {
       Role.findOne({ where: { name: req.body.role } }).then((role) => {
         role.addUser(user).then(() => {
-          console.log("User created successfully");
+          if (req.userRoleId === 3) {
+            next();
+          } else {
+            res.status(200).send({
+              message: "User successfully created",
+            });
+          }
         });
       });
     })
@@ -71,13 +77,15 @@ exports.signIn = (req, res) => {
     return;
   }
 
-  Users.findOne({
+  User.findOne({
     where: {
       email: req.body.email,
     },
   }).then((user) => {
     if (!user) {
-      return res.status(400).send({ message: "Email not found" });
+      return res
+        .status(401)
+        .send({ message: "Email and Password are not found" });
     }
 
     const passwordIsValid = bcrypt.compareSync(
@@ -87,8 +95,7 @@ exports.signIn = (req, res) => {
 
     if (!passwordIsValid) {
       return res.status(401).send({
-        accessToken: null,
-        message: "Wrong Password",
+        message: "Email and Password are not found",
       });
     }
 
