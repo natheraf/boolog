@@ -1,5 +1,5 @@
 export const searchOpenLib = (query) => {
-  const url = `https://openlibrary.org/search.json?q=${query}&limit=5`;
+  const url = `https://openlibrary.org/search.json?${query}&limit=5`;
   const options = {
     method: "GET",
   };
