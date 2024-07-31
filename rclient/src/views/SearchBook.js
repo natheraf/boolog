@@ -21,20 +21,43 @@ export const SearchBook = () => {
   const [searchResults, setSearchResults] = React.useState({ numFound: 0 });
 
   const handleSearch = () => {
+    const query = useDetailedSearch
+      ? [
+          ["Title"],
+          ["Author"],
+          ["Publisher"],
+          ["Year", "first_publish_year"],
+          ["ISBN"],
+          ["Subject"],
+        ]
+          .filter(
+            ([label, key]) =>
+              document.getElementById(`tfDetailedSearch${label}`).value.length >
+              0
+          )
+          .map(
+            ([label, key]) =>
+              `${key ?? label.toLowerCase()}=${
+                document.getElementById(`tfDetailedSearch${label}`).value
+              }`
+          )
+          .join("&")
+      : `q=${document.getElementById("tfQuerySearch").value}`;
+    console.log(query);
     setIsSearching(true);
-    searchOpenLib(document.getElementById("tfQuerySearch").value).then(
-      (res) => {
-        setSearchResults(res);
-        setIsSearching(false);
-      }
-    );
+    searchOpenLib(query).then((res) => {
+      setSearchResults(res);
+      setIsSearching(false);
+    });
   };
 
   const printArray = (arr) => {
     return (
       arr.slice(0, Math.min(2, arr.length - 1)).join(", ") +
       (arr.length > 1 ? " and " : "") +
-      (arr.length < 4 ? arr[arr.length - 1] : arr.length - 3 + " others")
+      (arr.length < 4
+        ? arr[arr.length - 1]
+        : arr.length - 3 + " other" + (arr.length - 3 > 1 ? "s" : ""))
     );
   };
 
@@ -80,7 +103,11 @@ export const SearchBook = () => {
                       ? { timeout: 400 * index + 800 }
                       : {})}
                   >
-                    <TextField label={label} fullWidth />
+                    <TextField
+                      id={`tfDetailedSearch${label}`}
+                      label={label}
+                      fullWidth
+                    />
                   </Grow>
                 </Grid>
               ))}
@@ -159,7 +186,7 @@ export const SearchBook = () => {
                         >{`${label} ${
                           Array.isArray(bookObj[key])
                             ? printArray(bookObj[key])
-                            : bookObj[key] ?? "None"
+                            : bookObj[key] ?? "N/A"
                         }`}</Typography>
                       ))}
                     </Stack>
