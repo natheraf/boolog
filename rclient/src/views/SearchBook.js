@@ -101,7 +101,7 @@ export const SearchBook = () => {
           ) : (
             searchResults.docs.map((bookObj, index) => (
               <Grow
-                key={bookObj.isbn[0]}
+                key={bookObj.key}
                 in={searchResults.numFound > 0}
                 style={{ transformOrigin: "0 0 0" }}
                 timeout={600 * index + 1000}
