@@ -30,6 +30,14 @@ export const SearchBook = () => {
     );
   };
 
+  const printArray = (arr) => {
+    return (
+      arr.slice(0, Math.min(2, arr.length - 1)).join(", ") +
+      (arr.length > 1 ? " and " : "") +
+      (arr.length < 4 ? arr[arr.length - 1] : arr.length - 3 + " others")
+    );
+  };
+
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
       <Grid item sx={{ maxWidth: "40rem" }}>
@@ -58,10 +66,10 @@ export const SearchBook = () => {
             >
               {[
                 ["Title", "100%"],
-                ["Author", "40%"],
-                ["Publisher", "40%"],
+                ["Author", "50%"],
+                ["Publisher", "50%"],
                 ["Year", "20%"],
-                ["ISBN", "20%"],
+                ["ISBN", "50%"],
                 ["Subject", "20%"],
               ].map(([label, width], index) => (
                 <Grid item key={label} sx={{ minWidth: width }}>
@@ -94,8 +102,8 @@ export const SearchBook = () => {
           </Button>
         </Stack>
       </Grid>
-      <Grid item sx={{ width: "40rem" }}>
-        <Stack spacing={2} sx={{ backgroundColor: "gray" }}>
+      <Grid item sx={{ width: "50rem" }}>
+        <Stack spacing={2} sx={{ backgroundColor: "gray" }} p={2}>
           {searchResults.numFound === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
@@ -106,36 +114,57 @@ export const SearchBook = () => {
                 style={{ transformOrigin: "0 0 0" }}
                 timeout={600 * index + 1000}
               >
-                <Stack direction="row" spacing={2}>
-                  <Box
-                    component="img"
-                    src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-M.jpg?default=false`}
-                    alt={`cover for ${bookObj.title}`}
+                <Grid
+                  container
+                  direction={"row"}
+                  justifyContent={"left"}
+                  alignItems={"center"}
+                  p={1}
+                  sx={{ backgroundColor: "white" }}
+                  gap={2}
+                >
+                  <Grid item sx={{ width: "25%" }}>
+                    <Box
+                      component="img"
+                      src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-M.jpg?default=false`}
+                      alt={`cover for ${bookObj.title}`}
+                      sx={{
+                        borderRadius: "5px",
+                        objectFit: "cover",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
                     sx={{
-                      width: "auto",
-                      height: "auto",
-                      maxWidth: "160px",
-                      maxHeight: "240px",
-                      display: "block",
-                      borderRadius: "5px",
+                      height: "100%",
+                      width: "70%",
                     }}
-                  />
-
-                  <Stack spacing={1}>
-                    {[
-                      "title",
-                      "author_name",
-                      "publisher",
-                      "first_publish_year",
-                      "isbn",
-                      "number_of_pages_median",
-                    ].map((key) => (
-                      <Typography
-                        key={key}
-                      >{`${key}: ${bookObj[key]}`}</Typography>
-                    ))}
-                  </Stack>
-                </Stack>
+                  >
+                    <Stack spacing={1}>
+                      {[
+                        ["title", "", "h4"],
+                        ["author_name", "by ", "h6"],
+                        ["publisher", "Published by ", "body"],
+                        ["first_publish_year", "First published in ", "body2"],
+                        ["number_of_pages_median", "Pages: ", "body2"],
+                        ["isbn", "ISBN: ", "subtitle2"],
+                      ].map(([key, label, variant]) => (
+                        <Typography
+                          key={key}
+                          variant={variant}
+                          sx={{ wordBreak: "break-word", textWrap: "balance" }}
+                        >{`${label} ${
+                          Array.isArray(bookObj[key])
+                            ? printArray(bookObj[key])
+                            : bookObj[key] ?? "None"
+                        }`}</Typography>
+                      ))}
+                    </Stack>
+                  </Grid>
+                </Grid>
               </Grow>
             ))
           )}
