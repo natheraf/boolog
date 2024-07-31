@@ -68,7 +68,9 @@ export const SearchBook = () => {
                   <Grow
                     in={useDetailedSearch}
                     style={{ transformOrigin: "0 0 0" }}
-                    {...(useDetailedSearch ? { timeout: 400 * index } : {})}
+                    {...(useDetailedSearch
+                      ? { timeout: 400 * index + 800 }
+                      : {})}
                   >
                     <TextField label={label} fullWidth />
                   </Grow>
@@ -108,8 +110,15 @@ export const SearchBook = () => {
                   <Box
                     component="img"
                     src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-M.jpg?default=false`}
-                    alt={`no cover for ${bookObj.title}`}
-                    sx={{ maxWidth: "500px", height: "auto" }}
+                    alt={`cover for ${bookObj.title}`}
+                    sx={{
+                      width: "auto",
+                      height: "auto",
+                      maxWidth: "160px",
+                      maxHeight: "240px",
+                      display: "block",
+                      borderRadius: "5px",
+                    }}
                   />
 
                   <Stack spacing={1}>
