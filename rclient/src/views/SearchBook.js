@@ -6,6 +6,8 @@ import {
   FormControlLabel,
   Grid,
   Grow,
+  ListItemIcon,
+  MenuItem,
   Stack,
   Switch,
   TextField,
@@ -19,31 +21,36 @@ export const SearchBook = () => {
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState({ numFound: 0 });
+  const [sortHelperText, setSortHelperText] = React.useState(
+    "Best Results Descending"
+  );
+  const [sortType, setSortType] = React.useState("");
 
   const handleSearch = () => {
-    const query = useDetailedSearch
-      ? [
-          ["Title"],
-          ["Author"],
-          ["Publisher"],
-          ["Year", "first_publish_year"],
-          ["ISBN"],
-          ["Subject"],
-        ]
-          .filter(
-            ([label, key]) =>
-              document.getElementById(`tfDetailedSearch${label}`).value.length >
-              0
-          )
-          .map(
-            ([label, key]) =>
-              `${key ?? label.toLowerCase()}=${
+    const query = `${
+      useDetailedSearch
+        ? [
+            ["Title"],
+            ["Author"],
+            ["Publisher"],
+            ["Year", "first_publish_year"],
+            ["ISBN"],
+            ["Subject"],
+          ]
+            .filter(
+              ([label, key]) =>
                 document.getElementById(`tfDetailedSearch${label}`).value
-              }`
-          )
-          .join("&")
-      : `q=${document.getElementById("tfQuerySearch").value}`;
-    console.log(query);
+                  .length > 0
+            )
+            .map(
+              ([label, key]) =>
+                `${key ?? label.toLowerCase()}=${
+                  document.getElementById(`tfDetailedSearch${label}`).value
+                }`
+            )
+            .join("&")
+        : `q=${document.getElementById("tfQuerySearch").value}`
+    }&sort=${sortType}`;
     setIsSearching(true);
     searchOpenLib(query).then((res) => {
       setSearchResults(res);
@@ -66,11 +73,85 @@ export const SearchBook = () => {
       <Grid item sx={{ maxWidth: "40rem" }}>
         <Stack spacing={1}>
           <Typography variant="h3">Search Books</Typography>
-          <FormControlLabel
-            control={<Switch />}
-            label={"Detailed Search"}
-            onChange={() => setUseDetailedSearch((prev) => !prev)}
-          />
+          <Stack direction="row" justifyContent={"space-between"}>
+            <TextField
+              id="selSort"
+              label="Sort by"
+              defaultValue={"relevance"}
+              select
+              sx={{ minWidth: "40%" }}
+              helperText={sortHelperText}
+            >
+              {[
+                {
+                  value: "relevance",
+                  label: <em>Relevance</em>,
+                  helperText: "Best Results Descending",
+                },
+                {
+                  value: "new",
+                  label: "New",
+                  helperText: "Release Date Descending",
+                },
+                {
+                  value: "old",
+                  label: "Old",
+                  helperText: "Release Date Ascending",
+                },
+                {
+                  value: "rating",
+                  label: "Rated Best",
+                  helperText: "Rating Descending",
+                },
+                {
+                  value: "rating asc",
+                  label: "Rated Worst",
+                  helperText: "Rating Ascending",
+                },
+                {
+                  value: "readinglog",
+                  label: "Popular on OpenLibrary",
+                  helperText: "OpenLibrary Users Count Descending",
+                },
+                {
+                  value: "already_read",
+                  label: "Most Read",
+                  helperText: "Read Count Descending",
+                },
+                {
+                  value: "currently_reading",
+                  label: "Most being Read",
+                  helperText: "Reading Count Descending",
+                },
+                {
+                  value: "want_to_read",
+                  label: "Most Desired Reads",
+                  helperText: "Plan to Read Count Descending",
+                },
+                {
+                  value: "title",
+                  label: "Title Alphabetically",
+                  helperText: "Title Alphabetically Descending",
+                },
+              ].map((obj) => (
+                <MenuItem
+                  key={obj.value}
+                  value={obj.value}
+                  onClick={() => {
+                    setSortHelperText(obj.helperText);
+                    setSortType(obj.value === "relevance" ? "" : obj.value);
+                  }}
+                >
+                  {obj.label}
+                </MenuItem>
+              ))}
+            </TextField>
+            <FormControlLabel
+              control={<Switch />}
+              label={"Detailed Search"}
+              onChange={() => setUseDetailedSearch((prev) => !prev)}
+            />
+          </Stack>
           <Collapse in={!useDetailedSearch}>
             <TextField
               id="tfQuerySearch"
@@ -153,7 +234,7 @@ export const SearchBook = () => {
                   <Grid item sx={{ width: "25%" }}>
                     <Box
                       component="img"
-                      src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-M.jpg?default=false`}
+                      src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`}
                       alt={`cover for ${bookObj.title}`}
                       sx={{
                         borderRadius: "5px",
