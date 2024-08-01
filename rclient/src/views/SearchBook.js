@@ -6,7 +6,6 @@ import {
   FormControlLabel,
   Grid,
   Grow,
-  ListItemIcon,
   MenuItem,
   Stack,
   Switch,
@@ -26,31 +25,31 @@ export const SearchBook = () => {
   );
   const [sortType, setSortType] = React.useState("");
 
-  const handleSearch = () => {
+  const handleSearch = (sortValue) => {
     const query = `${
       useDetailedSearch
         ? [
-            ["Title"],
-            ["Author"],
-            ["Publisher"],
-            ["Year", "first_publish_year"],
-            ["ISBN"],
-            ["Subject"],
+            { label: "Title", key: "title" },
+            { label: "Author", key: "author" },
+            { label: "Publisher", key: "publisher" },
+            { label: "Year", key: "first_publish_year" },
+            { label: "ISBN", key: "isbn" },
+            { label: "Subject", key: "subject" },
           ]
             .filter(
-              ([label, key]) =>
-                document.getElementById(`tfDetailedSearch${label}`).value
+              (obj) =>
+                document.getElementById(`tfDetailedSearch${obj.label}`).value
                   .length > 0
             )
             .map(
-              ([label, key]) =>
-                `${key ?? label.toLowerCase()}=${
-                  document.getElementById(`tfDetailedSearch${label}`).value
+              (obj) =>
+                `${obj.key}=${
+                  document.getElementById(`tfDetailedSearch${obj.label}`).value
                 }`
             )
             .join("&")
         : `q=${document.getElementById("tfQuerySearch").value}`
-    }&sort=${sortType}`;
+    }&sort=${sortValue ?? sortType}`;
     setIsSearching(true);
     searchOpenLib(query).then((res) => {
       setSearchResults(res);
@@ -169,14 +168,14 @@ export const SearchBook = () => {
               alignItems={"flex-start"}
             >
               {[
-                ["Title", "100%"],
-                ["Author", "50%"],
-                ["Publisher", "50%"],
-                ["Year", "20%"],
-                ["ISBN", "50%"],
-                ["Subject", "20%"],
-              ].map(([label, width], index) => (
-                <Grid item key={label} sx={{ minWidth: width }}>
+                { label: "Title", width: "100%" },
+                { label: "Author", width: "50%" },
+                { label: "Publisher", width: "50%" },
+                { label: "Year", width: "20%" },
+                { label: "ISBN", width: "50%" },
+                { label: "Subject", width: "20%" },
+              ].map((obj, index) => (
+                <Grid item key={obj.label} sx={{ minWidth: obj.width }}>
                   <Grow
                     in={useDetailedSearch}
                     style={{ transformOrigin: "0 0 0" }}
@@ -185,8 +184,8 @@ export const SearchBook = () => {
                       : {})}
                   >
                     <TextField
-                      id={`tfDetailedSearch${label}`}
-                      label={label}
+                      id={`tfDetailedSearch${obj.label}`}
+                      label={obj.label}
                       fullWidth
                     />
                   </Grow>
@@ -253,21 +252,33 @@ export const SearchBook = () => {
                   >
                     <Stack spacing={1}>
                       {[
-                        ["title", "", "h4"],
-                        ["author_name", "by ", "h6"],
-                        ["publisher", "Published by ", "body"],
-                        ["first_publish_year", "First published in ", "body2"],
-                        ["number_of_pages_median", "Pages: ", "body2"],
-                        ["isbn", "ISBN: ", "subtitle2"],
-                      ].map(([key, label, variant]) => (
+                        { key: "title", label: "", variant: "h4" },
+                        { key: "author_name", label: "by ", variant: "h6" },
+                        {
+                          key: "publisher",
+                          label: "Published by ",
+                          variant: "body",
+                        },
+                        {
+                          key: "first_publish_year",
+                          label: "First published in ",
+                          variant: "body2",
+                        },
+                        {
+                          key: "number_of_pages_median",
+                          label: "Pages: ",
+                          variant: "body2",
+                        },
+                        { key: "isbn", label: "ISBN: ", variant: "subtitle2" },
+                      ].map((obj) => (
                         <Typography
-                          key={key}
-                          variant={variant}
+                          key={obj.key}
+                          variant={obj.variant}
                           sx={{ wordBreak: "break-word", textWrap: "balance" }}
-                        >{`${label} ${
-                          Array.isArray(bookObj[key])
-                            ? printArray(bookObj[key])
-                            : bookObj[key] ?? "N/A"
+                        >{`${obj.label} ${
+                          Array.isArray(bookObj[obj.key])
+                            ? printArray(bookObj[obj.key])
+                            : bookObj[obj.key] ?? "N/A"
                         }`}</Typography>
                       ))}
                     </Stack>
