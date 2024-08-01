@@ -25,7 +25,7 @@ export const SearchBook = () => {
   );
   const [sortType, setSortType] = React.useState("");
 
-  const handleSearch = (sortValue) => {
+  const handleSearch = () => {
     const query = `${
       useDetailedSearch
         ? [
@@ -49,7 +49,7 @@ export const SearchBook = () => {
             )
             .join("&")
         : `q=${document.getElementById("tfQuerySearch").value}`
-    }&sort=${sortValue ?? sortType}`;
+    }&sort=${sortType}`;
     setIsSearching(true);
     searchOpenLib(query).then((res) => {
       setSearchResults(res);
