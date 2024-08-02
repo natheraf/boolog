@@ -33,6 +33,7 @@ export const SearchBook = () => {
   const [searchSortType, setSearchSortType] = React.useState("");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
+  const [tfQuerySearchValue, setTfQuerySearch] = React.useState("Chainsaw Man");
 
   const handleSearch = React.useCallback(() => {
     const query = `${
@@ -57,14 +58,20 @@ export const SearchBook = () => {
                 }`
             )
             .join("&")
-        : `q=${document.getElementById("tfQuerySearch").value}`
+        : `q=${tfQuerySearchValue}`
     }&sort=${searchSortType}`;
     setIsSearching(true);
     searchOpenLib(query, searchRowsPerPage, searchPage).then((res) => {
       setSearchResults(res);
       setIsSearching(false);
     });
-  }, [searchPage, searchRowsPerPage, searchSortType, useDetailedSearch]);
+  }, [
+    searchPage,
+    searchRowsPerPage,
+    searchSortType,
+    useDetailedSearch,
+    tfQuerySearchValue,
+  ]);
 
   const handlePageChange = (event, newPage) => {
     setSearchPage(event.target.value ?? newPage + 1);
@@ -83,17 +90,26 @@ export const SearchBook = () => {
     setSearchPage(1);
   };
 
+  const handleNewSearch = () => {
+    setSearchPage(1);
+    setTfQuerySearch(document.getElementById("tfQuerySearch").value);
+  };
+
   const keyPress = (event) => {
     const enterKey = 13;
     const value = event.target.value;
-    if (
-      event.target.id === "tfPageNum" &&
-      event.keyCode === enterKey &&
-      isNaN(parseInt(value)) === false &&
-      value >= 1 &&
-      value <= Math.ceil(searchResults.numFound / searchRowsPerPage)
-    ) {
-      setSearchPage(parseInt(value));
+    if (event.keyCode === enterKey) {
+      if (
+        event.target.id === "tfPageNum" &&
+        isNaN(parseInt(value)) === false &&
+        value >= 1 &&
+        value <= Math.ceil(searchResults.numFound / searchRowsPerPage)
+      ) {
+        setSearchPage(parseInt(value));
+      }
+      if (event.target.id === "tfQuerySearch" && isSearching === false) {
+        handleNewSearch();
+      }
     }
   };
 
@@ -263,6 +279,7 @@ export const SearchBook = () => {
               id="tfQuerySearch"
               label="Search"
               defaultValue={"Chainsaw Man"}
+              onKeyDown={keyPress}
               disabled={useDetailedSearch}
               fullWidth
             />
@@ -303,7 +320,7 @@ export const SearchBook = () => {
           </Collapse>
           <Button
             variant="contained"
-            onClick={handleSearch}
+            onClick={handleNewSearch}
             endIcon={
               isSearching ? (
                 <CircularProgress color="inherit" size={16} />
