@@ -3,10 +3,15 @@ import {
   Box,
   Button,
   Collapse,
+  FormControl,
   FormControlLabel,
+  FormHelperText,
   Grid,
   Grow,
+  InputAdornment,
+  InputLabel,
   MenuItem,
+  Select,
   Stack,
   Switch,
   TablePagination,
@@ -15,6 +20,7 @@ import {
 } from "@mui/material";
 import { searchOpenLib } from "../api/OpenLibrary";
 import SearchIcon from "@mui/icons-material/Search";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export const SearchBook = () => {
@@ -60,26 +66,97 @@ export const SearchBook = () => {
     });
   }, [searchPage, searchRowsPerPage, searchSortType, useDetailedSearch]);
 
-  const handleChangePage = (event, newPage) => {
-    setSearchPage(newPage + 1, handleSearch);
+  const handlePageChange = (event, newPage) => {
+    setSearchPage(event.target.value ?? newPage + 1);
   };
 
   const handleChangeRowsPerPage = (event, newRows) => {
     setSearchRowsPerPage(event.target.value);
-    setSearchPage(1, handleSearch);
+    setSearchPage(1);
+  };
+
+  const handleSortChange = (event, newElement) => {
+    setSortHelperText(newElement.props.name);
+    setSearchSortType(
+      newElement.props.value === "relevance" ? "" : newElement.props.value
+    );
+    setSearchPage(1);
+  };
+
+  const keyPress = (event) => {
+    const enterKey = 13;
+    const value = event.target.value;
+    if (
+      event.target.id === "tfPageNum" &&
+      event.keyCode === enterKey &&
+      isNaN(parseInt(value)) === false &&
+      value >= 1 &&
+      value <= Math.ceil(searchResults.numFound / searchRowsPerPage)
+    ) {
+      setSearchPage(parseInt(value));
+    }
   };
 
   const SearchTablePagination = () => (
-    <TablePagination
-      component="div"
-      count={Math.ceil(searchResults.numFound / searchRowsPerPage)}
-      page={searchPage - 1}
-      onPageChange={handleChangePage}
-      rowsPerPage={searchRowsPerPage}
-      rowsPerPageOptions={[5, 10, 15, 20]}
-      onRowsPerPageChange={handleChangeRowsPerPage}
-      disabled={isSearching}
-    />
+    <Grid
+      container
+      direction="row"
+      justifyContent={"space-between"}
+      alignItems={"center"}
+    >
+      {Math.ceil(searchResults.numFound / searchRowsPerPage) === 0 ||
+      Math.ceil(searchResults.numFound / searchRowsPerPage) > 10 ? (
+        <TextField
+          id="tfPageNum"
+          label="Page"
+          onKeyDown={keyPress}
+          sx={{ width: "10rem" }}
+          size="small"
+          defaultValue={searchPage}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Typography>{`/ ${Math.ceil(
+                  searchResults.numFound / searchRowsPerPage
+                )}`}</Typography>
+              </InputAdornment>
+            ),
+          }}
+        />
+      ) : (
+        <FormControl>
+          <InputLabel id="selPageNumLabel">Page</InputLabel>
+          <Select
+            labelId="selPageNumLabel"
+            id="selPageNum"
+            label="Page"
+            value={searchPage}
+            onChange={handlePageChange}
+            sx={{ minWidth: "40%" }}
+          >
+            {[
+              ...Array(
+                Math.ceil(searchResults.numFound / searchRowsPerPage)
+              ).keys(),
+            ].map((pageValue) => (
+              <MenuItem key={pageValue} value={pageValue + 1}>
+                {pageValue + 1}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
+      <TablePagination
+        component="div"
+        count={searchResults.numFound}
+        page={searchPage - 1}
+        onPageChange={handlePageChange}
+        rowsPerPage={searchRowsPerPage}
+        rowsPerPageOptions={[5, 10, 15, 20]}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        disabled={isSearching}
+      />
+    </Grid>
   );
 
   const printArray = (arr) => {
@@ -102,81 +179,79 @@ export const SearchBook = () => {
         <Stack spacing={1}>
           <Typography variant="h3">Search Books</Typography>
           <Stack direction="row" justifyContent={"space-between"}>
-            <TextField
-              id="selSort"
-              label="Sort by"
-              defaultValue={"relevance"}
-              select
-              sx={{ minWidth: "40%" }}
-              helperText={sortHelperText}
-            >
-              {[
-                {
-                  value: "relevance",
-                  label: <em>Relevance</em>,
-                  helperText: "Best Results Descending",
-                },
-                {
-                  value: "new",
-                  label: "New",
-                  helperText: "Release Date Descending",
-                },
-                {
-                  value: "old",
-                  label: "Old",
-                  helperText: "Release Date Ascending",
-                },
-                {
-                  value: "rating",
-                  label: "Rated Best",
-                  helperText: "Rating Descending",
-                },
-                {
-                  value: "rating asc",
-                  label: "Rated Worst",
-                  helperText: "Rating Ascending",
-                },
-                {
-                  value: "readinglog",
-                  label: "Popular on OpenLibrary",
-                  helperText: "OpenLibrary Users Count Descending",
-                },
-                {
-                  value: "already_read",
-                  label: "Most Read",
-                  helperText: "Read Count Descending",
-                },
-                {
-                  value: "currently_reading",
-                  label: "Most being Read",
-                  helperText: "Reading Count Descending",
-                },
-                {
-                  value: "want_to_read",
-                  label: "Most Desired Reads",
-                  helperText: "Plan to Read Count Descending",
-                },
-                {
-                  value: "title",
-                  label: "Title Alphabetically",
-                  helperText: "Title Alphabetically Descending",
-                },
-              ].map((obj) => (
-                <MenuItem
-                  key={obj.value}
-                  value={obj.value}
-                  onClick={() => {
-                    setSortHelperText(obj.helperText);
-                    setSearchSortType(
-                      obj.value === "relevance" ? "" : obj.value
-                    );
-                    setSearchPage(1);
-                  }}
-                >
-                  {obj.label}
-                </MenuItem>
-              ))}
-            </TextField>
+            <FormControl>
+              <InputLabel id="selSortLabel">Sort By</InputLabel>
+              <Select
+                id="selSort"
+                labelId="selSortLabel"
+                label="Sort by"
+                defaultValue="relevance"
+                onChange={handleSortChange}
+                sx={{ minWidth: "40%" }}
+              >
+                {[
+                  {
+                    value: "relevance",
+                    label: <em>Relevance</em>,
+                    helperText: "Best Results Descending",
+                  },
+                  {
+                    value: "new",
+                    label: "New",
+                    helperText: "Release Date Descending",
+                  },
+                  {
+                    value: "old",
+                    label: "Old",
+                    helperText: "Release Date Ascending",
+                  },
+                  {
+                    value: "rating",
+                    label: "Rated Best",
+                    helperText: "Rating Descending",
+                  },
+                  {
+                    value: "rating asc",
+                    label: "Rated Worst",
+                    helperText: "Rating Ascending",
+                  },
+                  {
+                    value: "readinglog",
+                    label: "Popular on OpenLibrary",
+                    helperText: "OpenLibrary Users Count Descending",
+                  },
+                  {
+                    value: "already_read",
+                    label: "Most Read",
+                    helperText: "Read Count Descending",
+                  },
+                  {
+                    value: "currently_reading",
+                    label: "Most being Read",
+                    helperText: "Reading Count Descending",
+                  },
+                  {
+                    value: "want_to_read",
+                    label: "Most Desired Reads",
+                    helperText: "Plan to Read Count Descending",
+                  },
+                  {
+                    value: "title",
+                    label: "Title Alphabetically",
+                    helperText: "Title Alphabetically Descending",
+                  },
+                ].map((obj) => (
+                  <MenuItem
+                    key={obj.value}
+                    name={obj.helperText}
+                    value={obj.value}
+                  >
+                    {obj.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              <FormHelperText>{sortHelperText}</FormHelperText>
+            </FormControl>
             <FormControlLabel
               control={<Switch />}
               label={"Detailed Search"}
@@ -187,6 +262,7 @@ export const SearchBook = () => {
             <TextField
               id="tfQuerySearch"
               label="Search"
+              defaultValue={"Chainsaw Man"}
               disabled={useDetailedSearch}
               fullWidth
             />
