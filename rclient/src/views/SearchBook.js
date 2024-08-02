@@ -9,6 +9,7 @@ import {
   MenuItem,
   Stack,
   Switch,
+  TablePagination,
   TextField,
   Typography,
 } from "@mui/material";
@@ -23,9 +24,11 @@ export const SearchBook = () => {
   const [sortHelperText, setSortHelperText] = React.useState(
     "Best Results Descending"
   );
-  const [sortType, setSortType] = React.useState("");
+  const [searchSortType, setSearchSortType] = React.useState("");
+  const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
+  const [searchPage, setSearchPage] = React.useState(1);
 
-  const handleSearch = () => {
+  const handleSearch = React.useCallback(() => {
     const query = `${
       useDetailedSearch
         ? [
@@ -49,13 +52,35 @@ export const SearchBook = () => {
             )
             .join("&")
         : `q=${document.getElementById("tfQuerySearch").value}`
-    }&sort=${sortType}`;
+    }&sort=${searchSortType}`;
     setIsSearching(true);
-    searchOpenLib(query).then((res) => {
+    searchOpenLib(query, searchRowsPerPage, searchPage).then((res) => {
       setSearchResults(res);
       setIsSearching(false);
     });
+  }, [searchPage, searchRowsPerPage, searchSortType, useDetailedSearch]);
+
+  const handleChangePage = (event, newPage) => {
+    setSearchPage(newPage + 1, handleSearch);
   };
+
+  const handleChangeRowsPerPage = (event, newRows) => {
+    setSearchRowsPerPage(event.target.value);
+    setSearchPage(1, handleSearch);
+  };
+
+  const SearchTablePagination = () => (
+    <TablePagination
+      component="div"
+      count={Math.ceil(searchResults.numFound / searchRowsPerPage)}
+      page={searchPage - 1}
+      onPageChange={handleChangePage}
+      rowsPerPage={searchRowsPerPage}
+      rowsPerPageOptions={[5, 10, 15, 20]}
+      onRowsPerPageChange={handleChangeRowsPerPage}
+      disabled={isSearching}
+    />
+  );
 
   const printArray = (arr) => {
     return (
@@ -66,6 +91,10 @@ export const SearchBook = () => {
         : arr.length - 3 + " other" + (arr.length - 3 > 1 ? "s" : ""))
     );
   };
+
+  React.useEffect(() => {
+    handleSearch();
+  }, [handleSearch]);
 
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
@@ -138,7 +167,10 @@ export const SearchBook = () => {
                   value={obj.value}
                   onClick={() => {
                     setSortHelperText(obj.helperText);
-                    setSortType(obj.value === "relevance" ? "" : obj.value);
+                    setSearchSortType(
+                      obj.value === "relevance" ? "" : obj.value
+                    );
+                    setSearchPage(1);
                   }}
                 >
                   {obj.label}
@@ -210,7 +242,8 @@ export const SearchBook = () => {
         </Stack>
       </Grid>
       <Grid item sx={{ width: "50rem" }}>
-        <Stack spacing={2} sx={{ backgroundColor: "gray" }} p={2}>
+        <Stack spacing={2} p={2}>
+          <SearchTablePagination />
           {searchResults.numFound === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
@@ -287,6 +320,7 @@ export const SearchBook = () => {
               </Grow>
             ))
           )}
+          <SearchTablePagination />
         </Stack>
       </Grid>
     </Grid>
