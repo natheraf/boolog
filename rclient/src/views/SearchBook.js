@@ -31,7 +31,8 @@ export const SearchBook = () => {
   const [searchSortType, setSearchSortType] = React.useState("");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
-  const [querySearch, setQuerySearch] = React.useState("");
+  const defaultSearch = "The Empty Box and Zeroth Maria";
+  const [querySearch, setQuerySearch] = React.useState(`q=${defaultSearch}`);
 
   const handleSearch = React.useCallback(() => {
     setIsSearching(true);
@@ -131,7 +132,7 @@ export const SearchBook = () => {
       <Grid item sx={{ maxWidth: "40rem" }}>
         <Stack spacing={1}>
           <Typography variant="h3">Search Books</Typography>
-          <Stack direction="row" justifyContent={"space-between"}>
+          <Stack direction="row" justifyContent={"end"}>
             <FormControlLabel
               control={<Switch />}
               label={"Detailed Search"}
@@ -142,7 +143,7 @@ export const SearchBook = () => {
             <TextField
               id="tfQuerySearch"
               label="Search"
-              defaultValue={"Chainsaw Man"}
+              defaultValue={defaultSearch}
               onKeyDown={keyPress}
               disabled={useDetailedSearch}
               fullWidth
