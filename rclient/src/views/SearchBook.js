@@ -8,19 +8,17 @@ import {
   FormHelperText,
   Grid,
   Grow,
-  InputAdornment,
   InputLabel,
   MenuItem,
+  Pagination,
   Select,
   Stack,
   Switch,
-  TablePagination,
   TextField,
   Typography,
 } from "@mui/material";
 import { searchOpenLib } from "../api/OpenLibrary";
 import SearchIcon from "@mui/icons-material/Search";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import CircularProgress from "@mui/material/CircularProgress";
 
 export const SearchBook = () => {
@@ -33,48 +31,22 @@ export const SearchBook = () => {
   const [searchSortType, setSearchSortType] = React.useState("");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
-  const [tfQuerySearchValue, setTfQuerySearch] = React.useState("Chainsaw Man");
+  const [querySearch, setQuerySearch] = React.useState("");
 
   const handleSearch = React.useCallback(() => {
-    const query = `${
-      useDetailedSearch
-        ? [
-            { label: "Title", key: "title" },
-            { label: "Author", key: "author" },
-            { label: "Publisher", key: "publisher" },
-            { label: "Year", key: "first_publish_year" },
-            { label: "ISBN", key: "isbn" },
-            { label: "Subject", key: "subject" },
-          ]
-            .filter(
-              (obj) =>
-                document.getElementById(`tfDetailedSearch${obj.label}`).value
-                  .length > 0
-            )
-            .map(
-              (obj) =>
-                `${obj.key}=${
-                  document.getElementById(`tfDetailedSearch${obj.label}`).value
-                }`
-            )
-            .join("&")
-        : `q=${tfQuerySearchValue}`
-    }&sort=${searchSortType}`;
     setIsSearching(true);
-    searchOpenLib(query, searchRowsPerPage, searchPage).then((res) => {
+    searchOpenLib(
+      `${querySearch}${searchSortType}`,
+      searchRowsPerPage,
+      searchPage
+    ).then((res) => {
       setSearchResults(res);
       setIsSearching(false);
     });
-  }, [
-    searchPage,
-    searchRowsPerPage,
-    searchSortType,
-    useDetailedSearch,
-    tfQuerySearchValue,
-  ]);
+  }, [querySearch, searchSortType, searchRowsPerPage, searchPage]);
 
   const handlePageChange = (event, newPage) => {
-    setSearchPage(event.target.value ?? newPage + 1);
+    setSearchPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event, newRows) => {
@@ -85,14 +57,41 @@ export const SearchBook = () => {
   const handleSortChange = (event, newElement) => {
     setSortHelperText(newElement.props.name);
     setSearchSortType(
-      newElement.props.value === "relevance" ? "" : newElement.props.value
+      newElement.props.value === "relevance"
+        ? ""
+        : `&sort=${newElement.props.value}`
     );
-    setSearchPage(1);
   };
 
   const handleNewSearch = () => {
     setSearchPage(1);
-    setTfQuerySearch(document.getElementById("tfQuerySearch").value);
+    setQuerySearch(
+      `${
+        useDetailedSearch
+          ? [
+              { label: "Title", key: "title" },
+              { label: "Author", key: "author" },
+              { label: "Publisher", key: "publisher" },
+              { label: "Year", key: "first_publish_year" },
+              { label: "ISBN", key: "isbn" },
+              { label: "Subject", key: "subject" },
+            ]
+              .filter(
+                (obj) =>
+                  document.getElementById(`tfDetailedSearch${obj.label}`).value
+                    .length > 0
+              )
+              .map(
+                (obj) =>
+                  `${obj.key}=${
+                    document.getElementById(`tfDetailedSearch${obj.label}`)
+                      .value
+                  }`
+              )
+              .join("&")
+          : `q=${document.getElementById("tfQuerySearch").value}`
+      }`
+    );
   };
 
   const keyPress = (event) => {
@@ -107,73 +106,11 @@ export const SearchBook = () => {
       ) {
         setSearchPage(parseInt(value));
       }
-      if (event.target.id === "tfQuerySearch" && isSearching === false) {
+      if (event.target.id === "tfQuerySearch") {
         handleNewSearch();
       }
     }
   };
-
-  const SearchTablePagination = () => (
-    <Grid
-      container
-      direction="row"
-      justifyContent={"space-between"}
-      alignItems={"center"}
-    >
-      {Math.ceil(searchResults.numFound / searchRowsPerPage) === 0 ||
-      Math.ceil(searchResults.numFound / searchRowsPerPage) > 10 ? (
-        <TextField
-          id="tfPageNum"
-          label="Page"
-          onKeyDown={keyPress}
-          sx={{ width: "10rem" }}
-          size="small"
-          defaultValue={searchPage}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <Typography>{`/ ${Math.ceil(
-                  searchResults.numFound / searchRowsPerPage
-                )}`}</Typography>
-              </InputAdornment>
-            ),
-          }}
-        />
-      ) : (
-        <FormControl>
-          <InputLabel id="selPageNumLabel">Page</InputLabel>
-          <Select
-            labelId="selPageNumLabel"
-            id="selPageNum"
-            label="Page"
-            value={searchPage}
-            onChange={handlePageChange}
-            sx={{ minWidth: "40%" }}
-          >
-            {[
-              ...Array(
-                Math.ceil(searchResults.numFound / searchRowsPerPage)
-              ).keys(),
-            ].map((pageValue) => (
-              <MenuItem key={pageValue} value={pageValue + 1}>
-                {pageValue + 1}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      )}
-      <TablePagination
-        component="div"
-        count={searchResults.numFound}
-        page={searchPage - 1}
-        onPageChange={handlePageChange}
-        rowsPerPage={searchRowsPerPage}
-        rowsPerPageOptions={[5, 10, 15, 20]}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        disabled={isSearching}
-      />
-    </Grid>
-  );
 
   const printArray = (arr) => {
     return (
@@ -195,79 +132,6 @@ export const SearchBook = () => {
         <Stack spacing={1}>
           <Typography variant="h3">Search Books</Typography>
           <Stack direction="row" justifyContent={"space-between"}>
-            <FormControl>
-              <InputLabel id="selSortLabel">Sort By</InputLabel>
-              <Select
-                id="selSort"
-                labelId="selSortLabel"
-                label="Sort by"
-                defaultValue="relevance"
-                onChange={handleSortChange}
-                sx={{ minWidth: "40%" }}
-              >
-                {[
-                  {
-                    value: "relevance",
-                    label: <em>Relevance</em>,
-                    helperText: "Best Results Descending",
-                  },
-                  {
-                    value: "new",
-                    label: "New",
-                    helperText: "Release Date Descending",
-                  },
-                  {
-                    value: "old",
-                    label: "Old",
-                    helperText: "Release Date Ascending",
-                  },
-                  {
-                    value: "rating",
-                    label: "Rated Best",
-                    helperText: "Rating Descending",
-                  },
-                  {
-                    value: "rating asc",
-                    label: "Rated Worst",
-                    helperText: "Rating Ascending",
-                  },
-                  {
-                    value: "readinglog",
-                    label: "Popular on OpenLibrary",
-                    helperText: "OpenLibrary Users Count Descending",
-                  },
-                  {
-                    value: "already_read",
-                    label: "Most Read",
-                    helperText: "Read Count Descending",
-                  },
-                  {
-                    value: "currently_reading",
-                    label: "Most being Read",
-                    helperText: "Reading Count Descending",
-                  },
-                  {
-                    value: "want_to_read",
-                    label: "Most Desired Reads",
-                    helperText: "Plan to Read Count Descending",
-                  },
-                  {
-                    value: "title",
-                    label: "Title Alphabetically",
-                    helperText: "Title Alphabetically Descending",
-                  },
-                ].map((obj) => (
-                  <MenuItem
-                    key={obj.value}
-                    name={obj.helperText}
-                    value={obj.value}
-                  >
-                    {obj.label}
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText>{sortHelperText}</FormHelperText>
-            </FormControl>
             <FormControlLabel
               control={<Switch />}
               label={"Detailed Search"}
@@ -336,7 +200,79 @@ export const SearchBook = () => {
       </Grid>
       <Grid item sx={{ width: "50rem" }}>
         <Stack spacing={2} p={2}>
-          <SearchTablePagination />
+          <FormControl>
+            <InputLabel id="selSortLabel">Sort By</InputLabel>
+            <Select
+              id="selSort"
+              labelId="selSortLabel"
+              label="Sort by"
+              defaultValue="relevance"
+              onChange={handleSortChange}
+              sx={{ minWidth: "40%" }}
+            >
+              {[
+                {
+                  value: "relevance",
+                  label: <em>Relevance</em>,
+                  helperText: "Best Results Descending",
+                },
+                {
+                  value: "new",
+                  label: "New",
+                  helperText: "Release Date Descending",
+                },
+                {
+                  value: "old",
+                  label: "Old",
+                  helperText: "Release Date Ascending",
+                },
+                {
+                  value: "rating",
+                  label: "Rated Best",
+                  helperText: "Rating Descending",
+                },
+                {
+                  value: "rating asc",
+                  label: "Rated Worst",
+                  helperText: "Rating Ascending",
+                },
+                {
+                  value: "readinglog",
+                  label: "Popular on OpenLibrary",
+                  helperText: "OpenLibrary Users Count Descending",
+                },
+                {
+                  value: "already_read",
+                  label: "Most Read",
+                  helperText: "Read Count Descending",
+                },
+                {
+                  value: "currently_reading",
+                  label: "Most being Read",
+                  helperText: "Reading Count Descending",
+                },
+                {
+                  value: "want_to_read",
+                  label: "Most Desired Reads",
+                  helperText: "Plan to Read Count Descending",
+                },
+                {
+                  value: "title",
+                  label: "Title Alphabetically",
+                  helperText: "Title Alphabetically Descending",
+                },
+              ].map((obj) => (
+                <MenuItem
+                  key={obj.value}
+                  name={obj.helperText}
+                  value={obj.value}
+                >
+                  {obj.label}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText>{sortHelperText}</FormHelperText>
+          </FormControl>
           {searchResults.numFound === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
@@ -413,7 +349,18 @@ export const SearchBook = () => {
               </Grow>
             ))
           )}
-          <SearchTablePagination />
+          <Grid
+            container
+            direction="row"
+            justifyContent={"center"}
+            alignItems={"center"}
+          >
+            <Pagination
+              count={Math.ceil(searchResults.numFound / searchRowsPerPage)}
+              page={searchPage}
+              onChange={handlePageChange}
+            />
+          </Grid>
         </Stack>
       </Grid>
     </Grid>
