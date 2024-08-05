@@ -31,7 +31,7 @@ export const SearchBook = () => {
   );
   const defaultSearchApi = "Google Books";
   const [apiHelperText, setApiHelperText] = React.useState(defaultSearchApi);
-  const [searchSortType, setSearchSortType] = React.useState("");
+  const [searchSortType, setSearchSortType] = React.useState("relevance");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
   const [selApi, setSelApi] = React.useState(defaultSearchApi);
@@ -97,7 +97,11 @@ export const SearchBook = () => {
       "Google Books": searchGoogleBooks,
     };
     searchFunction[selApi](
-      `${querySearch}${searchSortType}`,
+      `${querySearch}${selApi === "Google Books" ? "&orderBy=" : "&sort="}${
+        selApi === "Open Library" && searchSortType === "relevance"
+          ? ""
+          : searchSortType
+      }`,
       searchRowsPerPage,
       searchPage
     ).then((res) => {
@@ -120,17 +124,15 @@ export const SearchBook = () => {
 
   const handleSortChange = (event, selectedElement) => {
     setSortHelperText(selectedElement.props.name);
-    setSearchSortType(
-      selectedElement.props.value === "relevance"
-        ? ""
-        : `&sort=${selectedElement.props.value}`
-    );
+    setSearchSortType(selectedElement.props.value);
     setPerformNewSearch(true);
   };
 
   const handleApiChange = (event, selectedElement) => {
     setApiHelperText(selectedElement.props.name);
     setSelApi(selectedElement.props.value);
+    setSortHelperText("Best Results Descending");
+    setSearchSortType("relevance");
     setPerformNewSearch(false);
   };
 
@@ -324,62 +326,77 @@ export const SearchBook = () => {
               id="selSort"
               labelId="selSortLabel"
               label="Sort by"
-              defaultValue="relevance"
+              value={searchSortType}
+              disabled={isSearching}
               onChange={handleSortChange}
               sx={{ minWidth: "40%" }}
             >
-              {[
-                {
-                  value: "relevance",
-                  label: <em>Relevance</em>,
-                  helperText: "Best Results Descending",
-                },
-                {
-                  value: "new",
-                  label: "New",
-                  helperText: "Release Date Descending",
-                },
-                {
-                  value: "old",
-                  label: "Old",
-                  helperText: "Release Date Ascending",
-                },
-                {
-                  value: "rating",
-                  label: "Rated Best",
-                  helperText: "Rating Descending",
-                },
-                {
-                  value: "rating asc",
-                  label: "Rated Worst",
-                  helperText: "Rating Ascending",
-                },
-                {
-                  value: "readinglog",
-                  label: "Popular on OpenLibrary",
-                  helperText: "OpenLibrary Users Count Descending",
-                },
-                {
-                  value: "already_read",
-                  label: "Most Read",
-                  helperText: "Read Count Descending",
-                },
-                {
-                  value: "currently_reading",
-                  label: "Most being Read",
-                  helperText: "Reading Count Descending",
-                },
-                {
-                  value: "want_to_read",
-                  label: "Most Desired Reads",
-                  helperText: "Plan to Read Count Descending",
-                },
-                {
-                  value: "title",
-                  label: "Title Alphabetically",
-                  helperText: "Title Alphabetically Descending",
-                },
-              ].map((obj) => (
+              {(selApi === "Google Books"
+                ? [
+                    {
+                      value: "relevance",
+                      label: <em>Relevance</em>,
+                      helperText: "Best Results Descending",
+                    },
+                    {
+                      value: "newest",
+                      label: "New",
+                      helperText: "Release Date Descending",
+                    },
+                  ]
+                : [
+                    {
+                      value: "relevance",
+                      label: <em>Relevance</em>,
+                      helperText: "Best Results Descending",
+                    },
+                    {
+                      value: "new",
+                      label: "New",
+                      helperText: "Release Date Descending",
+                    },
+                    {
+                      value: "old",
+                      label: "Old",
+                      helperText: "Release Date Ascending",
+                    },
+                    {
+                      value: "rating",
+                      label: "Rated Best",
+                      helperText: "Rating Descending",
+                    },
+                    {
+                      value: "rating asc",
+                      label: "Rated Worst",
+                      helperText: "Rating Ascending",
+                    },
+                    {
+                      value: "readinglog",
+                      label: "Popular on OpenLibrary",
+                      helperText: "OpenLibrary Users Count Descending",
+                    },
+                    {
+                      value: "already_read",
+                      label: "Most Read",
+                      helperText: "Read Count Descending",
+                    },
+                    {
+                      value: "currently_reading",
+                      label: "Most being Read",
+                      helperText: "Reading Count Descending",
+                    },
+                    {
+                      value: "want_to_read",
+                      label: "Most Desired Reads",
+                      helperText: "Plan to Read Count Descending",
+                    },
+                    {
+                      value: "title",
+                      label: "Title Alphabetically",
+                      helperText: "Title Alphabetically Descending",
+                    },
+                  ]
+              ).map((obj) => (
                 <MenuItem
                   key={obj.value}
                   name={obj.helperText}
@@ -492,6 +509,7 @@ export const SearchBook = () => {
                         searchRowsPerPage
                     )
               }
+              disabled={isSearching}
               page={searchPage}
               onChange={handlePageChange}
             />
