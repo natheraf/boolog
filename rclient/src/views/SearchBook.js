@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { searchOpenLib } from "../api/OpenLibrary";
+import { searchGoogleBooks } from "../api/GoogleAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 
@@ -28,26 +29,87 @@ export const SearchBook = () => {
   const [sortHelperText, setSortHelperText] = React.useState(
     "Best Results Descending"
   );
+  const [apiHelperText, setApiHelperText] = React.useState("Open Library");
   const [searchSortType, setSearchSortType] = React.useState("");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
+  const [selApi, setSelApi] = React.useState("Open Library");
+  const [renderSearchResultsApi, setRenderSearchResultsApi] =
+    React.useState("Open Library");
+  const [performNewSearch, setPerformNewSearch] = React.useState(true);
   const defaultSearch = "The Empty Box and Zeroth Maria";
-  const [querySearch, setQuerySearch] = React.useState(`q=${defaultSearch}`);
 
   const handleSearch = React.useCallback(() => {
+    if (performNewSearch === false) {
+      return;
+    }
+    const querySearch = `${
+      selApi === "Google Books" && useDetailedSearch ? "q=" : ""
+    }${
+      useDetailedSearch
+        ? [
+            {
+              label: "Title",
+              "Open Library": "title=",
+              "Google Books": "intitle:",
+            },
+            {
+              label: "Author",
+              "Open Library": "author=",
+              "Google Books": "inauthor:",
+            },
+            {
+              label: "Publisher",
+              "Open Library": "publisher=",
+              "Google Books": "inpublisher:",
+            },
+            {
+              label: "Year",
+              "Open Library": "first_publish_year=",
+              "Google Books": "",
+            },
+            { label: "ISBN", "Open Library": "isbn=", "Google Books": "isbn:" },
+            {
+              label: "Subject",
+              "Open Library": "subject=",
+              "Google Books": "subject:",
+            },
+          ]
+            .filter(
+              (obj) =>
+                (document.getElementById(`tfDetailedSearch${obj.label}`).value
+                  .length === 0 ||
+                  (selApi === "Google Books" && obj.label === "Year")) === false
+            )
+            .map(
+              (obj) =>
+                `${obj[selApi]}${
+                  document.getElementById(`tfDetailedSearch${obj.label}`).value
+                }`
+            )
+            .join(selApi === "Google Books" ? "+" : "&")
+        : `q=${document.getElementById("tfQuerySearch").value}`
+    }`;
     setIsSearching(true);
-    searchOpenLib(
+    const searchFunction = {
+      "Open Library": searchOpenLib,
+      "Google Books": searchGoogleBooks,
+    };
+    searchFunction[selApi](
       `${querySearch}${searchSortType}`,
       searchRowsPerPage,
       searchPage
     ).then((res) => {
       setSearchResults(res);
+      setRenderSearchResultsApi(selApi);
       setIsSearching(false);
+      setPerformNewSearch(false);
     });
-  }, [querySearch, searchSortType, searchRowsPerPage, searchPage]);
+  }, [performNewSearch, selApi, searchPage, searchSortType, searchRowsPerPage]);
 
   const handlePageChange = (event, newPage) => {
     setSearchPage(newPage);
+    setPerformNewSearch(true);
   };
 
   const handleChangeRowsPerPage = (event, newRows) => {
@@ -55,44 +117,20 @@ export const SearchBook = () => {
     setSearchPage(1);
   };
 
-  const handleSortChange = (event, newElement) => {
-    setSortHelperText(newElement.props.name);
+  const handleSortChange = (event, selectedElement) => {
+    setSortHelperText(selectedElement.props.name);
     setSearchSortType(
-      newElement.props.value === "relevance"
+      selectedElement.props.value === "relevance"
         ? ""
-        : `&sort=${newElement.props.value}`
+        : `&sort=${selectedElement.props.value}`
     );
+    setPerformNewSearch(true);
   };
 
-  const handleNewSearch = () => {
-    setSearchPage(1);
-    setQuerySearch(
-      `${
-        useDetailedSearch
-          ? [
-              { label: "Title", key: "title" },
-              { label: "Author", key: "author" },
-              { label: "Publisher", key: "publisher" },
-              { label: "Year", key: "first_publish_year" },
-              { label: "ISBN", key: "isbn" },
-              { label: "Subject", key: "subject" },
-            ]
-              .filter(
-                (obj) =>
-                  document.getElementById(`tfDetailedSearch${obj.label}`).value
-                    .length > 0
-              )
-              .map(
-                (obj) =>
-                  `${obj.key}=${
-                    document.getElementById(`tfDetailedSearch${obj.label}`)
-                      .value
-                  }`
-              )
-              .join("&")
-          : `q=${document.getElementById("tfQuerySearch").value}`
-      }`
-    );
+  const handleApiChange = (event, selectedElement) => {
+    setApiHelperText(selectedElement.props.name);
+    setSelApi(selectedElement.props.value);
+    setPerformNewSearch(false);
   };
 
   const keyPress = (event) => {
@@ -103,14 +141,48 @@ export const SearchBook = () => {
         event.target.id === "tfPageNum" &&
         isNaN(parseInt(value)) === false &&
         value >= 1 &&
-        value <= Math.ceil(searchResults.numFound / searchRowsPerPage)
+        value <=
+          Math.ceil(
+            searchApiInterface(searchResults, "numFound") / searchRowsPerPage
+          )
       ) {
         setSearchPage(parseInt(value));
       }
       if (event.target.id === "tfQuerySearch") {
-        handleNewSearch();
+        setPerformNewSearch(true);
+        handleSearch();
       }
     }
+  };
+
+  const searchApiInterface = (obj, key) => {
+    const apiMap = {
+      "Open Library": {
+        numFound: obj?.numFound,
+        title: obj?.title,
+        author_name: obj?.author_name,
+        publisher: obj?.publisher,
+        first_publish_year: obj?.first_publish_year,
+        number_of_pages_median: obj?.number_of_pages_median,
+        isbn: obj?.isbn,
+        docs: obj?.docs,
+      },
+      "Google Books": {
+        numFound: obj?.totalItems,
+        docs: obj?.items,
+        title: obj?.volumeInfo?.title,
+        author_name: obj?.volumeInfo?.authors,
+        description: obj?.volumeInfo?.description,
+        publisher: obj?.volumeInfo?.publisher,
+        first_publish_year: obj?.volumeInfo?.publishedDate,
+        number_of_pages_median: obj?.volumeInfo?.pageCount,
+        isbn: obj?.volumeInfo?.industryIdentifiers
+          ?.filter((obj) => obj?.type?.indexOf("ISBN") === 0)
+          ?.map((obj) => obj?.identifier),
+        id: obj?.id,
+      },
+    };
+    return apiMap[renderSearchResultsApi]?.[key];
   };
 
   const printArray = (arr) => {
@@ -125,14 +197,47 @@ export const SearchBook = () => {
 
   React.useEffect(() => {
     handleSearch();
-  }, [handleSearch]);
+  }, [handleSearch, selApi]);
 
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
       <Grid item sx={{ maxWidth: "40rem" }}>
-        <Stack spacing={1}>
+        <Stack spacing={2}>
           <Typography variant="h3">Search Books</Typography>
-          <Stack direction="row" justifyContent={"end"}>
+          <Stack direction="row" justifyContent={"space-between"}>
+            <FormControl>
+              <InputLabel id="selApiLabel">Search Source</InputLabel>
+              <Select
+                id="selApi"
+                labelId="selApiLabel"
+                label="Search Source"
+                defaultValue="Open Library"
+                onChange={handleApiChange}
+                sx={{ minWidth: "40%" }}
+              >
+                {[
+                  {
+                    value: "Open Library",
+                    label: "Open Library",
+                    helperText: "Open Library",
+                  },
+                  {
+                    value: "Google Books",
+                    label: "Google Books",
+                    helperText: "Google Books",
+                  },
+                ].map((obj) => (
+                  <MenuItem
+                    key={obj.value}
+                    name={obj.helperText}
+                    value={obj.value}
+                  >
+                    {obj.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {/* <FormHelperText>{apiHelperText}</FormHelperText> */}
+            </FormControl>
             <FormControlLabel
               control={<Switch />}
               label={"Detailed Search"}
@@ -176,6 +281,14 @@ export const SearchBook = () => {
                     <TextField
                       id={`tfDetailedSearch${obj.label}`}
                       label={obj.label}
+                      disabled={
+                        selApi === "Google Books" && obj.label === "Year"
+                      }
+                      helperText={
+                        selApi === "Google Books" && obj.label === "Year"
+                          ? "Not Available with Google Books"
+                          : ""
+                      }
                       fullWidth
                     />
                   </Grow>
@@ -185,7 +298,10 @@ export const SearchBook = () => {
           </Collapse>
           <Button
             variant="contained"
-            onClick={handleNewSearch}
+            onClick={() => {
+              setPerformNewSearch(true);
+              handleSearch();
+            }}
             endIcon={
               isSearching ? (
                 <CircularProgress color="inherit" size={16} />
@@ -274,13 +390,13 @@ export const SearchBook = () => {
             </Select>
             <FormHelperText>{sortHelperText}</FormHelperText>
           </FormControl>
-          {searchResults.numFound === 0 ? (
+          {searchApiInterface(searchResults, "numFound") === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
-            searchResults.docs.map((bookObj, index) => (
+            searchApiInterface(searchResults, "docs")?.map((bookObj, index) => (
               <Grow
                 key={bookObj.key}
-                in={searchResults.numFound > 0}
+                in={searchApiInterface(searchResults, "numFound") > 0}
                 style={{ transformOrigin: "0 0 0" }}
                 timeout={600 * index + 1000}
               >
@@ -296,7 +412,11 @@ export const SearchBook = () => {
                   <Grid item sx={{ width: "25%" }}>
                     <Box
                       component="img"
-                      src={`https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`}
+                      src={
+                        renderSearchResultsApi === "Open Library"
+                          ? `https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`
+                          : `https://books.google.com/books/publisher/content/images/frontcover/${bookObj.id}?fife=w480-h690`
+                      }
                       alt={`cover for ${bookObj.title}`}
                       sx={{
                         borderRadius: "5px",
@@ -339,9 +459,9 @@ export const SearchBook = () => {
                           variant={obj.variant}
                           sx={{ wordBreak: "break-word", textWrap: "balance" }}
                         >{`${obj.label} ${
-                          Array.isArray(bookObj[obj.key])
-                            ? printArray(bookObj[obj.key])
-                            : bookObj[obj.key] ?? "N/A"
+                          Array.isArray(searchApiInterface(bookObj, obj.key))
+                            ? printArray(searchApiInterface(bookObj, obj.key))
+                            : searchApiInterface(bookObj, obj.key) ?? "N/A"
                         }`}</Typography>
                       ))}
                     </Stack>
@@ -357,7 +477,20 @@ export const SearchBook = () => {
             alignItems={"center"}
           >
             <Pagination
-              count={Math.ceil(searchResults.numFound / searchRowsPerPage)}
+              count={
+                renderSearchResultsApi === "Google Books"
+                  ? Math.min(
+                      99,
+                      Math.ceil(
+                        searchApiInterface(searchResults, "numFound") /
+                          searchRowsPerPage
+                      )
+                    )
+                  : Math.ceil(
+                      searchApiInterface(searchResults, "numFound") /
+                        searchRowsPerPage
+                    )
+              }
               page={searchPage}
               onChange={handlePageChange}
             />
