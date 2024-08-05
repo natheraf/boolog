@@ -29,13 +29,14 @@ export const SearchBook = () => {
   const [sortHelperText, setSortHelperText] = React.useState(
     "Best Results Descending"
   );
-  const [apiHelperText, setApiHelperText] = React.useState("Open Library");
+  const defaultSearchApi = "Google Books";
+  const [apiHelperText, setApiHelperText] = React.useState(defaultSearchApi);
   const [searchSortType, setSearchSortType] = React.useState("");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
   const [searchPage, setSearchPage] = React.useState(1);
-  const [selApi, setSelApi] = React.useState("Open Library");
+  const [selApi, setSelApi] = React.useState(defaultSearchApi);
   const [renderSearchResultsApi, setRenderSearchResultsApi] =
-    React.useState("Open Library");
+    React.useState(defaultSearchApi);
   const [performNewSearch, setPerformNewSearch] = React.useState(true);
   const defaultSearch = "The Empty Box and Zeroth Maria";
 
@@ -211,7 +212,7 @@ export const SearchBook = () => {
                 id="selApi"
                 labelId="selApiLabel"
                 label="Search Source"
-                defaultValue="Open Library"
+                value={selApi}
                 onChange={handleApiChange}
                 sx={{ minWidth: "40%" }}
               >
