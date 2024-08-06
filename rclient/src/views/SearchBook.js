@@ -209,7 +209,7 @@ export const SearchBook = () => {
 
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
-      <Paper sx={{ position: "sticky", top: 10, zIndex: 2 }}>
+      <Paper sx={{ position: "sticky", top: "88px", zIndex: 2 }}>
         <Grid item sx={{ maxWidth: "40rem" }} m={2}>
           <Stack spacing={2}>
             <Typography variant="h3">Search Books</Typography>
