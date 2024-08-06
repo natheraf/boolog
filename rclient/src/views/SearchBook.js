@@ -11,6 +11,7 @@ import {
   InputLabel,
   MenuItem,
   Pagination,
+  Paper,
   Select,
   Stack,
   Switch,
@@ -109,6 +110,10 @@ export const SearchBook = () => {
       setRenderSearchResultsApi(selApi);
       setIsSearching(false);
       setPerformNewSearch(false);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     });
   }, [performNewSearch, selApi, searchPage, searchSortType, searchRowsPerPage]);
 
@@ -204,120 +209,122 @@ export const SearchBook = () => {
 
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
-      <Grid item sx={{ maxWidth: "40rem" }}>
-        <Stack spacing={2}>
-          <Typography variant="h3">Search Books</Typography>
-          <Stack direction="row" justifyContent={"space-between"}>
-            <FormControl>
-              <InputLabel id="selApiLabel">Search Source</InputLabel>
-              <Select
-                id="selApi"
-                labelId="selApiLabel"
-                label="Search Source"
-                value={selApi}
-                onChange={handleApiChange}
-                sx={{ minWidth: "40%" }}
+      <Paper sx={{ position: "sticky", top: 10, zIndex: 2 }}>
+        <Grid item sx={{ maxWidth: "40rem" }} m={2}>
+          <Stack spacing={2}>
+            <Typography variant="h3">Search Books</Typography>
+            <Stack direction="row" justifyContent={"space-between"}>
+              <FormControl>
+                <InputLabel id="selApiLabel">Search Source</InputLabel>
+                <Select
+                  id="selApi"
+                  labelId="selApiLabel"
+                  label="Search Source"
+                  value={selApi}
+                  onChange={handleApiChange}
+                  sx={{ minWidth: "40%" }}
+                >
+                  {[
+                    {
+                      value: "Open Library",
+                      label: "Open Library",
+                      helperText: "Open Library",
+                    },
+                    {
+                      value: "Google Books",
+                      label: "Google Books",
+                      helperText: "Google Books",
+                    },
+                  ].map((obj) => (
+                    <MenuItem
+                      key={obj.value}
+                      name={obj.helperText}
+                      value={obj.value}
+                    >
+                      {obj.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {/* <FormHelperText>{apiHelperText}</FormHelperText> */}
+              </FormControl>
+              <FormControlLabel
+                control={<Switch />}
+                label={"Detailed Search"}
+                onChange={() => setUseDetailedSearch((prev) => !prev)}
+              />
+            </Stack>
+            <Collapse in={!useDetailedSearch}>
+              <TextField
+                id="tfQuerySearch"
+                label="Search"
+                defaultValue={defaultSearch}
+                onKeyDown={keyPress}
+                disabled={useDetailedSearch}
+                fullWidth
+              />
+            </Collapse>
+            <Collapse in={useDetailedSearch}>
+              <Grid
+                spacing={2}
+                container
+                direction={"row"}
+                justifyContent={"left"}
+                alignItems={"flex-start"}
               >
                 {[
-                  {
-                    value: "Open Library",
-                    label: "Open Library",
-                    helperText: "Open Library",
-                  },
-                  {
-                    value: "Google Books",
-                    label: "Google Books",
-                    helperText: "Google Books",
-                  },
-                ].map((obj) => (
-                  <MenuItem
-                    key={obj.value}
-                    name={obj.helperText}
-                    value={obj.value}
-                  >
-                    {obj.label}
-                  </MenuItem>
+                  { label: "Title", width: "100%" },
+                  { label: "Author", width: "50%" },
+                  { label: "Publisher", width: "50%" },
+                  { label: "Year", width: "20%" },
+                  { label: "ISBN", width: "50%" },
+                  { label: "Subject", width: "20%" },
+                ].map((obj, index) => (
+                  <Grid item key={obj.label} sx={{ minWidth: obj.width }}>
+                    <Grow
+                      in={useDetailedSearch}
+                      style={{ transformOrigin: "0 0 0" }}
+                      {...(useDetailedSearch
+                        ? { timeout: 400 * index + 800 }
+                        : {})}
+                    >
+                      <TextField
+                        id={`tfDetailedSearch${obj.label}`}
+                        label={obj.label}
+                        disabled={
+                          selApi === "Google Books" && obj.label === "Year"
+                        }
+                        helperText={
+                          selApi === "Google Books" && obj.label === "Year"
+                            ? "Not Available with Google Books"
+                            : ""
+                        }
+                        fullWidth
+                      />
+                    </Grow>
+                  </Grid>
                 ))}
-              </Select>
-              {/* <FormHelperText>{apiHelperText}</FormHelperText> */}
-            </FormControl>
-            <FormControlLabel
-              control={<Switch />}
-              label={"Detailed Search"}
-              onChange={() => setUseDetailedSearch((prev) => !prev)}
-            />
-          </Stack>
-          <Collapse in={!useDetailedSearch}>
-            <TextField
-              id="tfQuerySearch"
-              label="Search"
-              defaultValue={defaultSearch}
-              onKeyDown={keyPress}
-              disabled={useDetailedSearch}
-              fullWidth
-            />
-          </Collapse>
-          <Collapse in={useDetailedSearch}>
-            <Grid
-              spacing={2}
-              container
-              direction={"row"}
-              justifyContent={"left"}
-              alignItems={"flex-start"}
+              </Grid>
+            </Collapse>
+            <Button
+              variant="contained"
+              onClick={() => {
+                setPerformNewSearch(true);
+                handleSearch();
+              }}
+              endIcon={
+                isSearching ? (
+                  <CircularProgress color="inherit" size={16} />
+                ) : (
+                  <SearchIcon />
+                )
+              }
+              disabled={isSearching}
             >
-              {[
-                { label: "Title", width: "100%" },
-                { label: "Author", width: "50%" },
-                { label: "Publisher", width: "50%" },
-                { label: "Year", width: "20%" },
-                { label: "ISBN", width: "50%" },
-                { label: "Subject", width: "20%" },
-              ].map((obj, index) => (
-                <Grid item key={obj.label} sx={{ minWidth: obj.width }}>
-                  <Grow
-                    in={useDetailedSearch}
-                    style={{ transformOrigin: "0 0 0" }}
-                    {...(useDetailedSearch
-                      ? { timeout: 400 * index + 800 }
-                      : {})}
-                  >
-                    <TextField
-                      id={`tfDetailedSearch${obj.label}`}
-                      label={obj.label}
-                      disabled={
-                        selApi === "Google Books" && obj.label === "Year"
-                      }
-                      helperText={
-                        selApi === "Google Books" && obj.label === "Year"
-                          ? "Not Available with Google Books"
-                          : ""
-                      }
-                      fullWidth
-                    />
-                  </Grow>
-                </Grid>
-              ))}
-            </Grid>
-          </Collapse>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setPerformNewSearch(true);
-              handleSearch();
-            }}
-            endIcon={
-              isSearching ? (
-                <CircularProgress color="inherit" size={16} />
-              ) : (
-                <SearchIcon />
-              )
-            }
-            disabled={isSearching}
-          >
-            {`Search${isSearching ? "ing" : ""}`}
-          </Button>
-        </Stack>
-      </Grid>
+              {`Search${isSearching ? "ing" : ""}`}
+            </Button>
+          </Stack>
+        </Grid>
+      </Paper>
       <Grid item sx={{ width: "50rem" }}>
         <Stack spacing={2} p={2}>
           <FormControl>
@@ -418,73 +425,81 @@ export const SearchBook = () => {
                 style={{ transformOrigin: "0 0 0" }}
                 timeout={600 * index + 1000}
               >
-                <Grid
-                  container
-                  direction={"row"}
-                  justifyContent={"left"}
-                  alignItems={"center"}
-                  p={1}
-                  sx={{ backgroundColor: "white" }}
-                  gap={2}
-                >
-                  <Grid item sx={{ width: "25%" }}>
-                    <Box
-                      component="img"
-                      src={
-                        renderSearchResultsApi === "Open Library"
-                          ? `https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`
-                          : `https://books.google.com/books/publisher/content/images/frontcover/${bookObj.id}?fife=w480-h690`
-                      }
-                      alt={`cover for ${bookObj.title}`}
-                      sx={{
-                        borderRadius: "5px",
-                        objectFit: "cover",
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    />
-                  </Grid>
+                <Paper>
                   <Grid
-                    item
-                    sx={{
-                      height: "100%",
-                      width: "70%",
-                    }}
+                    container
+                    direction={"row"}
+                    justifyContent={"left"}
+                    alignItems={"center"}
+                    p={1}
+                    gap={2}
                   >
-                    <Stack spacing={1}>
-                      {[
-                        { key: "title", label: "", variant: "h4" },
-                        { key: "author_name", label: "by ", variant: "h6" },
-                        {
-                          key: "publisher",
-                          label: "Published by ",
-                          variant: "body",
-                        },
-                        {
-                          key: "first_publish_year",
-                          label: "First published in ",
-                          variant: "body2",
-                        },
-                        {
-                          key: "number_of_pages_median",
-                          label: "Pages: ",
-                          variant: "body2",
-                        },
-                        { key: "isbn", label: "ISBN: ", variant: "subtitle2" },
-                      ].map((obj) => (
-                        <Typography
-                          key={obj.key}
-                          variant={obj.variant}
-                          sx={{ wordBreak: "break-word", textWrap: "balance" }}
-                        >{`${obj.label} ${
-                          Array.isArray(searchApiInterface(bookObj, obj.key))
-                            ? printArray(searchApiInterface(bookObj, obj.key))
-                            : searchApiInterface(bookObj, obj.key) ?? "N/A"
-                        }`}</Typography>
-                      ))}
-                    </Stack>
+                    <Grid item sx={{ width: "25%" }}>
+                      <Box
+                        component="img"
+                        src={
+                          renderSearchResultsApi === "Open Library"
+                            ? `https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`
+                            : `https://books.google.com/books/publisher/content/images/frontcover/${bookObj.id}?fife=w480-h690`
+                        }
+                        alt={`cover for ${bookObj.title}`}
+                        sx={{
+                          borderRadius: "5px",
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      />
+                    </Grid>
+                    <Grid
+                      item
+                      sx={{
+                        height: "100%",
+                        width: "70%",
+                      }}
+                    >
+                      <Stack spacing={1}>
+                        {[
+                          { key: "title", label: "", variant: "h4" },
+                          { key: "author_name", label: "by ", variant: "h6" },
+                          {
+                            key: "publisher",
+                            label: "Published by ",
+                            variant: "body",
+                          },
+                          {
+                            key: "first_publish_year",
+                            label: "First published in ",
+                            variant: "body2",
+                          },
+                          {
+                            key: "number_of_pages_median",
+                            label: "Pages: ",
+                            variant: "body2",
+                          },
+                          {
+                            key: "isbn",
+                            label: "ISBN: ",
+                            variant: "subtitle2",
+                          },
+                        ].map((obj) => (
+                          <Typography
+                            key={obj.key}
+                            variant={obj.variant}
+                            sx={{
+                              wordBreak: "break-word",
+                              textWrap: "balance",
+                            }}
+                          >{`${obj.label} ${
+                            Array.isArray(searchApiInterface(bookObj, obj.key))
+                              ? printArray(searchApiInterface(bookObj, obj.key))
+                              : searchApiInterface(bookObj, obj.key) ?? "N/A"
+                          }`}</Typography>
+                        ))}
+                      </Stack>
+                    </Grid>
                   </Grid>
-                </Grid>
+                </Paper>
               </Grow>
             ))
           )}
