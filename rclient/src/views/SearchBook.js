@@ -270,6 +270,7 @@ export const SearchBook = () => {
                 direction={"row"}
                 justifyContent={"left"}
                 alignItems={"flex-start"}
+                sx={{ height: { xs: "7rem", sm: "auto" }, overflow: "auto" }}
               >
                 {[
                   { label: "Title", width: "100%" },
