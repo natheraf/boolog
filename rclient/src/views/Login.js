@@ -1,5 +1,14 @@
 import * as React from "react";
-import { Button, Stack, TextField, Typography } from "@mui/material";
+import {
+  Button,
+  Collapse,
+  Fade,
+  Grow,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import bgImage from "../assets/authentication_bg_med.jpg";
 import { handleSimpleRequest } from "../api/Axios";
 
@@ -23,7 +32,7 @@ export const Login = () => {
 
   const handleSignup = () => {
     if (
-      document.getElementById("signupPassword").value !==
+      document.getElementById("loginPassword").value !==
       document.getElementById("signupConfirmPassword").value
     ) {
       window.alert("Passwords do not match");
@@ -33,8 +42,8 @@ export const Login = () => {
       "post",
       {
         name: document.getElementById("signupName").value,
-        email: document.getElementById("signupEmail").value,
-        password: document.getElementById("signupPassword").value,
+        email: document.getElementById("loginEmail").value,
+        password: document.getElementById("loginPassword").value,
         active: true,
       },
       "auth/signup"
@@ -66,73 +75,84 @@ export const Login = () => {
         direction="column"
         alignItems={"center"}
         justifyContent={"center"}
-        spacing={4}
         height="100%"
       >
-        {showLogin ? (
-          <Stack
-            spacing={2}
-            direction="column"
-            alignItems={"center"}
-            justifyContent={"center"}
-            sx={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              padding: "3rem",
-              width: "300px",
-            }}
-          >
-            <Typography variant="h4">Sign in</Typography>
-            <TextField id="loginEmail" label="Email" type="email" fullWidth />
-            <TextField
-              id="loginPassword"
-              label="Password"
-              type="password"
-              fullWidth
-            />
-            <Button onClick={handleLogin} variant="contained" fullWidth>
-              Sign In
-            </Button>
-            <Button onClick={() => setShowLogin((prev) => !prev)}>
-              Sign Up
-            </Button>
-          </Stack>
-        ) : (
-          <Stack
-            spacing={2}
-            direction="column"
-            alignItems={"center"}
-            justifyContent={"center"}
-            sx={{
-              backgroundColor: "white",
-              borderRadius: "10px",
-              padding: "3rem",
-              width: "300px",
-            }}
-          >
-            <Typography variant="h4">Sign up</Typography>
-            <TextField id="signupName" label="Username" fullWidth />
-            <TextField id="signupEmail" label="Email" type="email" fullWidth />
-            <TextField
-              id="signupPassword"
-              label="Password"
-              type="password"
-              fullWidth
-            />
-            <TextField
-              id="signupConfirmPassword"
-              label="Confirm Password"
-              type="password"
-              fullWidth
-            />
-            <Button onClick={handleSignup} variant="contained" fullWidth>
-              Sign Up
-            </Button>
-            <Button onClick={() => setShowLogin((prev) => !prev)}>
-              Sign In
-            </Button>
-          </Stack>
-        )}
+        <Grow in={true}>
+          <Paper>
+            <Stack
+              spacing={2}
+              direction="column"
+              alignItems={"center"}
+              justifyContent={"center"}
+              sx={{
+                borderRadius: "10px",
+                padding: "3rem",
+                width: { md: "400px", xs: "auto" },
+              }}
+            >
+              <Fade
+                in={showLogin}
+                timeout={2000}
+                sx={!showLogin ? { display: "none" } : {}}
+              >
+                <Typography variant="h4">Sign in</Typography>
+              </Fade>
+              <Fade
+                in={!showLogin}
+                timeout={2000}
+                sx={showLogin ? { display: "none" } : {}}
+              >
+                <Typography variant="h4">Sign up</Typography>
+              </Fade>
+              <Collapse timeout={1000} in={!showLogin} sx={{ width: "100%" }}>
+                <TextField id="signupName" label="Username" fullWidth />
+              </Collapse>
+              <TextField id="loginEmail" label="Email" type="email" fullWidth />
+              <TextField
+                id="loginPassword"
+                label="Password"
+                type="password"
+                fullWidth
+              />
+              <Collapse timeout={1000} in={!showLogin} sx={{ width: "100%" }}>
+                <TextField
+                  id="signupConfirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                  fullWidth
+                />
+              </Collapse>
+              <Fade
+                in={showLogin}
+                timeout={2000}
+                sx={!showLogin ? { display: "none" } : { width: "100%" }}
+              >
+                <Stack spacing={2}>
+                  <Button onClick={handleLogin} variant="contained" fullWidth>
+                    Sign In
+                  </Button>
+                  <Button onClick={() => setShowLogin((prev) => !prev)}>
+                    Sign Up
+                  </Button>
+                </Stack>
+              </Fade>
+              <Fade
+                in={!showLogin}
+                timeout={2000}
+                sx={showLogin ? { display: "none" } : { width: "100%" }}
+              >
+                <Stack spacing={2}>
+                  <Button onClick={handleSignup} variant="contained">
+                    Sign Up
+                  </Button>
+                  <Button onClick={() => setShowLogin((prev) => !prev)}>
+                    Sign In
+                  </Button>
+                </Stack>
+              </Fade>
+            </Stack>
+          </Paper>
+        </Grow>
       </Stack>
     </Stack>
   );
