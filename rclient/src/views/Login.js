@@ -87,7 +87,7 @@ export const Login = () => {
               sx={{
                 borderRadius: "10px",
                 padding: "3rem",
-                width: { md: "400px", xs: "auto" },
+                width: { xs: "auto", sm: "400px" },
               }}
             >
               <Fade
