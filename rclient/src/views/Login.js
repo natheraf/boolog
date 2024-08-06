@@ -104,7 +104,7 @@ export const Login = () => {
               >
                 <Typography variant="h4">Sign up</Typography>
               </Fade>
-              <Collapse timeout={1000} in={!showLogin} sx={{ width: "100%" }}>
+              <Collapse timeout={500} in={!showLogin} sx={{ width: "100%" }}>
                 <TextField id="signupName" label="Username" fullWidth />
               </Collapse>
               <TextField id="loginEmail" label="Email" type="email" fullWidth />
@@ -114,7 +114,7 @@ export const Login = () => {
                 type="password"
                 fullWidth
               />
-              <Collapse timeout={1000} in={!showLogin} sx={{ width: "100%" }}>
+              <Collapse timeout={500} in={!showLogin} sx={{ width: "100%" }}>
                 <TextField
                   id="signupConfirmPassword"
                   label="Confirm Password"
