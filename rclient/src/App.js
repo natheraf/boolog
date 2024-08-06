@@ -5,6 +5,7 @@ import * as React from "react";
 import { Login } from "./views/Login";
 import { SearchBook } from "./views/SearchBook";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
+import { Header } from "./components/Header";
 
 export const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
@@ -48,6 +49,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
+          <Header />
           <Container maxWidth="xl" sx={{ mt: "88px" }}>
             <Routes>
               <Route path="" element={<h1>Home</h1>} />
