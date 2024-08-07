@@ -24,7 +24,6 @@ export const Login = () => {
       "auth/signin"
     )
       .then((res) => {
-        console.log(res);
         window.location.href = `${window.location.protocol}//${window.location.hostname}:3000/loggedin`;
       })
       .catch((error) => console.log(error));
@@ -49,7 +48,6 @@ export const Login = () => {
       "auth/signup"
     )
       .then((res) => {
-        console.log(res);
         window.location.href = `${window.location.protocol}//${window.location.hostname}:3000/`;
       })
       .catch((error) => console.log(error));
