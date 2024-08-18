@@ -10,7 +10,7 @@ const printArray = (arr) => {
   );
 };
 
-export const Tiles = ({ objectArray, keysData }) => {
+export const Tiles = ({ objectArray, keysData, actionArea }) => {
   return objectArray.items?.map((dataObject, index) => (
     <Grow
       key={dataObject.key}
@@ -42,30 +42,32 @@ export const Tiles = ({ objectArray, keysData }) => {
               }}
             />
           </Grid>
-          <Grid
-            item
-            sx={{
-              height: "100%",
-              width: "70%",
-            }}
-          >
-            <Stack spacing={1}>
-              {keysData.map((obj) => (
-                <Typography
-                  key={obj.key}
-                  variant={obj.variant}
-                  sx={{
-                    wordBreak: "break-word",
-                    textWrap: "balance",
-                  }}
-                >{`${obj.label} ${
-                  Array.isArray(dataObject[obj.key])
-                    ? printArray(dataObject[obj.key])
-                    : dataObject[obj.key] ?? "N/A"
-                }`}</Typography>
-              ))}
-            </Stack>
-          </Grid>
+          <Stack direction="row" sx={{ width: "70%" }}>
+            <Grid
+              item
+              sx={{
+                height: "100%",
+              }}
+            >
+              <Stack spacing={1}>
+                {keysData.map((obj) => (
+                  <Typography
+                    key={obj.key}
+                    variant={obj.variant}
+                    sx={{
+                      wordBreak: "break-word",
+                      textWrap: "pretty",
+                    }}
+                  >{`${obj.label} ${
+                    Array.isArray(dataObject[obj.key])
+                      ? printArray(dataObject[obj.key])
+                      : dataObject[obj.key] ?? "N/A"
+                  }`}</Typography>
+                ))}
+              </Stack>
+            </Grid>
+            {actionArea ? actionArea() : null}
+          </Stack>
         </Grid>
       </Paper>
     </Grow>
