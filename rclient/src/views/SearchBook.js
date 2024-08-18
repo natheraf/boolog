@@ -1,6 +1,5 @@
 import * as React from "react";
 import {
-  Box,
   Button,
   Collapse,
   FormControl,
@@ -23,6 +22,7 @@ import { searchGoogleBooks } from "../api/GoogleAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Tiles } from "../components/Tiles";
+import { MediaStatus } from "../components/MediaStatus";
 
 export const SearchBook = () => {
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
@@ -459,6 +459,7 @@ export const SearchBook = () => {
                   variant: "subtitle2",
                 },
               ]}
+              actionArea={MediaStatus}
             />
           )}
           <Grid
