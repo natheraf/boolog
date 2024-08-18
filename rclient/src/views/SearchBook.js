@@ -26,7 +26,10 @@ import CircularProgress from "@mui/material/CircularProgress";
 export const SearchBook = () => {
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
-  const [searchResults, setSearchResults] = React.useState({ numFound: 0 });
+  const [searchResults, setSearchResults] = React.useState({
+    total_items: 0,
+    items: [],
+  });
   const [sortHelperText, setSortHelperText] = React.useState(
     "Best Results Descending"
   );
@@ -106,7 +109,7 @@ export const SearchBook = () => {
       searchRowsPerPage,
       searchPage
     ).then((res) => {
-      setSearchResults(res);
+      setSearchResults(repackApiResponse(res));
       setRenderSearchResultsApi(selApi);
       setIsSearching(false);
       setPerformNewSearch(false);
@@ -116,6 +119,30 @@ export const SearchBook = () => {
       });
     });
   }, [performNewSearch, selApi, searchPage, searchSortType, searchRowsPerPage]);
+
+  const repackApiResponse = (response) => {
+    const res = {
+      total_items: searchApiInterface(response, "total_items"),
+      items: [],
+    };
+    for (const item of searchApiInterface(response, "items")) {
+      res.items.push({
+        title: searchApiInterface(item, "title"),
+        authors: searchApiInterface(item, "authors"),
+        description: searchApiInterface(item, "description"),
+        publisher: searchApiInterface(item, "publisher"),
+        publish_year: searchApiInterface(item, "publish_year"),
+        number_of_pages: searchApiInterface(item, "number_of_pages"),
+        isbn: searchApiInterface(item, "isbn"),
+        api_source: selApi,
+        cover_url:
+          selApi === "Open Library"
+            ? `https://covers.openlibrary.org/b/id/${item.cover_i}-L.jpg?default=false`
+            : `https://books.google.com/books/publisher/content/images/frontcover/${item.id}?fife=w480-h690`,
+      });
+    }
+    return res;
+  };
 
   const handlePageChange = (event, newPage) => {
     setSearchPage(newPage);
@@ -149,10 +176,7 @@ export const SearchBook = () => {
         event.target.id === "tfPageNum" &&
         isNaN(parseInt(value)) === false &&
         value >= 1 &&
-        value <=
-          Math.ceil(
-            searchApiInterface(searchResults, "numFound") / searchRowsPerPage
-          )
+        value <= Math.ceil(searchResults.total_items / searchRowsPerPage)
       ) {
         setSearchPage(parseInt(value));
       }
@@ -166,31 +190,30 @@ export const SearchBook = () => {
   const searchApiInterface = (obj, key) => {
     const apiMap = {
       "Open Library": {
-        numFound: obj?.numFound,
+        total_items: obj?.numFound,
+        items: obj?.docs,
         title: obj?.title,
-        author_name: obj?.author_name,
+        authors: obj?.author_name,
         publisher: obj?.publisher,
-        first_publish_year: obj?.first_publish_year,
-        number_of_pages_median: obj?.number_of_pages_median,
+        publish_year: obj?.first_publish_year,
+        number_of_pages: obj?.number_of_pages_median,
         isbn: obj?.isbn,
-        docs: obj?.docs,
       },
       "Google Books": {
-        numFound: obj?.totalItems,
-        docs: obj?.items,
+        total_items: obj?.totalItems,
+        items: obj?.items,
         title: obj?.volumeInfo?.title,
-        author_name: obj?.volumeInfo?.authors,
+        authors: obj?.volumeInfo?.authors,
         description: obj?.volumeInfo?.description,
         publisher: obj?.volumeInfo?.publisher,
-        first_publish_year: obj?.volumeInfo?.publishedDate,
-        number_of_pages_median: obj?.volumeInfo?.pageCount,
+        publish_year: obj?.volumeInfo?.publishedDate,
+        number_of_pages: obj?.volumeInfo?.pageCount,
         isbn: obj?.volumeInfo?.industryIdentifiers
           ?.filter((obj) => obj?.type?.indexOf("ISBN") === 0)
           ?.map((obj) => obj?.identifier),
-        id: obj?.id,
       },
     };
-    return apiMap[renderSearchResultsApi]?.[key];
+    return apiMap[selApi]?.[key];
   };
 
   const printArray = (arr) => {
@@ -416,13 +439,13 @@ export const SearchBook = () => {
             </Select>
             <FormHelperText>{sortHelperText}</FormHelperText>
           </FormControl>
-          {searchApiInterface(searchResults, "numFound") === 0 ? (
+          {searchResults.total_items === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
-            searchApiInterface(searchResults, "docs")?.map((bookObj, index) => (
+            searchResults.items?.map((bookObj, index) => (
               <Grow
                 key={bookObj.key}
-                in={searchApiInterface(searchResults, "numFound") > 0}
+                in={searchResults.total_items > 0}
                 style={{ transformOrigin: "0 0 0" }}
                 timeout={600 * index + 1000}
               >
@@ -438,11 +461,7 @@ export const SearchBook = () => {
                     <Grid item sx={{ width: "25%" }}>
                       <Box
                         component="img"
-                        src={
-                          renderSearchResultsApi === "Open Library"
-                            ? `https://covers.openlibrary.org/b/id/${bookObj.cover_i}-L.jpg?default=false`
-                            : `https://books.google.com/books/publisher/content/images/frontcover/${bookObj.id}?fife=w480-h690`
-                        }
+                        src={bookObj.cover_url}
                         alt={`cover for ${bookObj.title}`}
                         sx={{
                           borderRadius: "5px",
@@ -462,19 +481,19 @@ export const SearchBook = () => {
                       <Stack spacing={1}>
                         {[
                           { key: "title", label: "", variant: "h4" },
-                          { key: "author_name", label: "by ", variant: "h6" },
+                          { key: "authors", label: "by ", variant: "h6" },
                           {
                             key: "publisher",
                             label: "Published by ",
                             variant: "body",
                           },
                           {
-                            key: "first_publish_year",
-                            label: "First published in ",
+                            key: "publish_year",
+                            label: "Published in ",
                             variant: "body2",
                           },
                           {
-                            key: "number_of_pages_median",
+                            key: "number_of_pages",
                             label: "Pages: ",
                             variant: "body2",
                           },
@@ -492,9 +511,9 @@ export const SearchBook = () => {
                               textWrap: "balance",
                             }}
                           >{`${obj.label} ${
-                            Array.isArray(searchApiInterface(bookObj, obj.key))
-                              ? printArray(searchApiInterface(bookObj, obj.key))
-                              : searchApiInterface(bookObj, obj.key) ?? "N/A"
+                            Array.isArray(bookObj[obj.key])
+                              ? printArray(bookObj[obj.key])
+                              : bookObj[obj.key] ?? "N/A"
                           }`}</Typography>
                         ))}
                       </Stack>
@@ -515,15 +534,9 @@ export const SearchBook = () => {
                 renderSearchResultsApi === "Google Books"
                   ? Math.min(
                       99,
-                      Math.ceil(
-                        searchApiInterface(searchResults, "numFound") /
-                          searchRowsPerPage
-                      )
+                      Math.ceil(searchResults.total_items / searchRowsPerPage)
                     )
-                  : Math.ceil(
-                      searchApiInterface(searchResults, "numFound") /
-                        searchRowsPerPage
-                    )
+                  : Math.ceil(searchResults.total_items / searchRowsPerPage)
               }
               disabled={isSearching}
               page={searchPage}
