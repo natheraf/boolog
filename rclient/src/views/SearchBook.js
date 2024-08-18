@@ -22,6 +22,7 @@ import { searchOpenLib } from "../api/OpenLibrary";
 import { searchGoogleBooks } from "../api/GoogleAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
+import { Tiles } from "../components/Tiles";
 
 export const SearchBook = () => {
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
@@ -214,16 +215,6 @@ export const SearchBook = () => {
       },
     };
     return apiMap[selApi]?.[key];
-  };
-
-  const printArray = (arr) => {
-    return (
-      arr.slice(0, Math.min(2, arr.length - 1)).join(", ") +
-      (arr.length > 1 ? " and " : "") +
-      (arr.length < 4
-        ? arr[arr.length - 1]
-        : arr.length - 3 + " other" + (arr.length - 3 > 1 ? "s" : ""))
-    );
   };
 
   React.useEffect(() => {
@@ -442,86 +433,33 @@ export const SearchBook = () => {
           {searchResults.total_items === 0 ? (
             <Typography variant="h4">No Result</Typography>
           ) : (
-            searchResults.items?.map((bookObj, index) => (
-              <Grow
-                key={bookObj.key}
-                in={searchResults.total_items > 0}
-                style={{ transformOrigin: "0 0 0" }}
-                timeout={600 * index + 1000}
-              >
-                <Paper>
-                  <Grid
-                    container
-                    direction={"row"}
-                    justifyContent={"left"}
-                    alignItems={"center"}
-                    p={1}
-                    gap={2}
-                  >
-                    <Grid item sx={{ width: "25%" }}>
-                      <Box
-                        component="img"
-                        src={bookObj.cover_url}
-                        alt={`cover for ${bookObj.title}`}
-                        sx={{
-                          borderRadius: "5px",
-                          objectFit: "cover",
-                          width: "100%",
-                          height: "100%",
-                        }}
-                      />
-                    </Grid>
-                    <Grid
-                      item
-                      sx={{
-                        height: "100%",
-                        width: "70%",
-                      }}
-                    >
-                      <Stack spacing={1}>
-                        {[
-                          { key: "title", label: "", variant: "h4" },
-                          { key: "authors", label: "by ", variant: "h6" },
-                          {
-                            key: "publisher",
-                            label: "Published by ",
-                            variant: "body",
-                          },
-                          {
-                            key: "publish_year",
-                            label: "Published in ",
-                            variant: "body2",
-                          },
-                          {
-                            key: "number_of_pages",
-                            label: "Pages: ",
-                            variant: "body2",
-                          },
-                          {
-                            key: "isbn",
-                            label: "ISBN: ",
-                            variant: "subtitle2",
-                          },
-                        ].map((obj) => (
-                          <Typography
-                            key={obj.key}
-                            variant={obj.variant}
-                            sx={{
-                              wordBreak: "break-word",
-                              textWrap: "balance",
-                            }}
-                          >{`${obj.label} ${
-                            Array.isArray(bookObj[obj.key])
-                              ? printArray(bookObj[obj.key])
-                              : bookObj[obj.key] ?? "N/A"
-                          }`}</Typography>
-                        ))}
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                </Paper>
-              </Grow>
-            ))
+            <Tiles
+              objectArray={searchResults}
+              keysData={[
+                { key: "title", label: "", variant: "h4" },
+                { key: "authors", label: "by ", variant: "h6" },
+                {
+                  key: "publisher",
+                  label: "Published by ",
+                  variant: "body",
+                },
+                {
+                  key: "publish_year",
+                  label: "Published in ",
+                  variant: "body2",
+                },
+                {
+                  key: "number_of_pages",
+                  label: "Pages: ",
+                  variant: "body2",
+                },
+                {
+                  key: "isbn",
+                  label: "ISBN: ",
+                  variant: "subtitle2",
+                },
+              ]}
+            />
           )}
           <Grid
             container
