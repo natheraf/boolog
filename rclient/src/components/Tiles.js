@@ -24,7 +24,7 @@ export const Tiles = ({ objectArray, keysData, actionArea }) => {
         <Grid
           container
           direction={"row"}
-          justifyContent={"left"}
+          justifyContent={"center"}
           alignItems={"center"}
           p={1}
           gap={2}
@@ -42,32 +42,31 @@ export const Tiles = ({ objectArray, keysData, actionArea }) => {
               }}
             />
           </Grid>
-          <Stack direction="row" sx={{ width: "70%" }}>
-            <Grid
-              item
-              sx={{
-                height: "100%",
-              }}
-            >
-              <Stack spacing={1}>
-                {keysData.map((obj) => (
-                  <Typography
-                    key={obj.key}
-                    variant={obj.variant}
-                    sx={{
-                      wordBreak: "break-word",
-                      textWrap: "pretty",
-                    }}
-                  >{`${obj.label} ${
-                    Array.isArray(dataObject[obj.key])
-                      ? printArray(dataObject[obj.key])
-                      : dataObject[obj.key] ?? "N/A"
-                  }`}</Typography>
-                ))}
-              </Stack>
-            </Grid>
-            {actionArea ? actionArea() : null}
-          </Stack>
+          <Grid
+            item
+            sx={{
+              height: "100%",
+              width: "60%",
+            }}
+          >
+            <Stack spacing={1}>
+              {keysData.map((obj) => (
+                <Typography
+                  key={obj.key}
+                  variant={obj.variant}
+                  sx={{
+                    wordBreak: "break-word",
+                    textWrap: "pretty",
+                  }}
+                >{`${obj.label} ${
+                  Array.isArray(dataObject[obj.key])
+                    ? printArray(dataObject[obj.key])
+                    : dataObject[obj.key] ?? "N/A"
+                }`}</Typography>
+              ))}
+            </Stack>
+          </Grid>
+          {actionArea ? actionArea() : null}
         </Grid>
       </Paper>
     </Grow>
