@@ -1,4 +1,13 @@
-import { Box, Grid, Grow, Paper, Stack, Typography } from "@mui/material";
+import { useTheme } from "@emotion/react";
+import {
+  Box,
+  Grid,
+  Grow,
+  Paper,
+  Stack,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 
 const printArray = (arr) => {
   return (
@@ -11,6 +20,9 @@ const printArray = (arr) => {
 };
 
 export const Tiles = ({ objectArray, keysData, actionArea }) => {
+  const theme = useTheme();
+  const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
+
   return objectArray.items?.map((dataObject, index) => (
     <Grow
       key={dataObject.key}
@@ -46,7 +58,7 @@ export const Tiles = ({ objectArray, keysData, actionArea }) => {
             item
             sx={{
               height: "100%",
-              width: "60%",
+              width: greaterThanMid && actionArea ? "65%" : "70%",
             }}
           >
             <Stack spacing={1}>

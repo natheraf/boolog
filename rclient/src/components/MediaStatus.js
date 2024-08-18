@@ -18,6 +18,7 @@ export const MediaStatus = () => {
   return (
     <ToggleButtonGroup
       orientation={greaterThanMid ? "vertical" : "horizontal"}
+      size={greaterThanMid ? "small" : "medium"}
       exclusive
     >
       {[
