@@ -31,7 +31,10 @@ export const Header = () => {
               }}
               onClick={() => navigate("/")}
             />
-            <Link to={"/"} style={{ textDecoration: "none", color: "white" }}>
+            <Link
+              to={"/books"}
+              style={{ textDecoration: "none", color: "white" }}
+            >
               <Typography variant="h6">Library</Typography>
             </Link>
             <Link
