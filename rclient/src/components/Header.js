@@ -38,7 +38,7 @@ export const Header = () => {
               <Typography variant="h6">Library</Typography>
             </Link>
             <Link
-              to={"/searchBook"}
+              to={"/books/search"}
               style={{ textDecoration: "none", color: "white" }}
             >
               <Typography variant="h6">Search</Typography>

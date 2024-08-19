@@ -22,7 +22,7 @@ export const CollapsibleFab = () => {
       label: "search",
       color: "secondary",
       icon: <SearchIcon />,
-      onClick: () => navigate("/searchBook"),
+      onClick: () => navigate("/books/search"),
     },
   ];
 
