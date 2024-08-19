@@ -5,6 +5,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Paper,
   Stack,
   Typography,
 } from "@mui/material";
@@ -14,8 +15,10 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
+import { useTheme } from "@emotion/react";
 
 export const BookLog = () => {
+  const theme = useTheme();
   const [library, setLibrary] = React.useState();
 
   React.useEffect(() => {
@@ -69,42 +72,44 @@ export const BookLog = () => {
             </Stack>
           </AccordionSummary>
           <AccordionDetails>
-            <Tiles
-              objectArray={{
-                items: library?.items?.filter(
-                  (bookObj) => bookObj.status === obj.status
-                ),
-                total_items: library?.items?.filter(
-                  (bookObj) => bookObj.status === obj.status
-                ).length,
-              }}
-              keysData={[
-                { key: "title", label: "", variant: "h4" },
-                { key: "authors", label: "by ", variant: "h6" },
-                {
-                  key: "publisher",
-                  label: "Published by ",
-                  variant: "body",
-                },
-                {
-                  key: "publish_year",
-                  label: "Published in ",
-                  variant: "body2",
-                },
-                {
-                  key: "number_of_pages",
-                  label: "Pages: ",
-                  variant: "body2",
-                },
-                {
-                  key: "isbn",
-                  label: "ISBN: ",
-                  variant: "subtitle2",
-                },
-              ]}
-              actionArea={true}
-              apiFunctions={indexedDBBooksInterface}
-            />
+            <Paper elevation={0} sx={{ p: 2 }}>
+              <Tiles
+                objectArray={{
+                  items: library?.items?.filter(
+                    (bookObj) => bookObj.status === obj.status
+                  ),
+                  total_items: library?.items?.filter(
+                    (bookObj) => bookObj.status === obj.status
+                  ).length,
+                }}
+                keysData={[
+                  { key: "title", label: "", variant: "h4" },
+                  { key: "authors", label: "by ", variant: "h6" },
+                  {
+                    key: "publisher",
+                    label: "Published by ",
+                    variant: "body",
+                  },
+                  {
+                    key: "publish_year",
+                    label: "Published in ",
+                    variant: "body2",
+                  },
+                  {
+                    key: "number_of_pages",
+                    label: "Pages: ",
+                    variant: "body2",
+                  },
+                  {
+                    key: "isbn",
+                    label: "ISBN: ",
+                    variant: "subtitle2",
+                  },
+                ]}
+                actionArea={true}
+                apiFunctions={indexedDBBooksInterface}
+              />
+            </Paper>
           </AccordionDetails>
         </Accordion>
       ))}
