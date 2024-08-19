@@ -22,7 +22,7 @@ import { searchGoogleBooks } from "../api/GoogleAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Tiles } from "../components/Tiles";
-import { MediaStatus } from "../components/MediaStatus";
+import { indexedDBBooksInterface } from "../api/IndexedDB";
 
 export const SearchBook = () => {
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
@@ -169,6 +169,12 @@ export const SearchBook = () => {
     setPerformNewSearch(false);
   };
 
+  const handlePerformNewSearch = () => {
+    setPerformNewSearch(true);
+    setSearchPage(1);
+    handleSearch();
+  };
+
   const keyPress = (event) => {
     const enterKey = 13;
     const value = event.target.value;
@@ -182,8 +188,7 @@ export const SearchBook = () => {
         setSearchPage(parseInt(value));
       }
       if (event.target.id === "tfQuerySearch") {
-        setPerformNewSearch(true);
-        handleSearch();
+        handlePerformNewSearch();
       }
     }
   };
@@ -322,10 +327,7 @@ export const SearchBook = () => {
             </Collapse>
             <Button
               variant="contained"
-              onClick={() => {
-                setPerformNewSearch(true);
-                handleSearch();
-              }}
+              onClick={handlePerformNewSearch}
               endIcon={
                 isSearching ? (
                   <CircularProgress color="inherit" size={16} />
@@ -459,7 +461,8 @@ export const SearchBook = () => {
                   variant: "subtitle2",
                 },
               ]}
-              actionArea={MediaStatus}
+              actionArea={true}
+              apiFunctions={indexedDBBooksInterface}
             />
           )}
           <Grid
