@@ -1,5 +1,12 @@
 import * as React from "react";
 import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
@@ -18,6 +25,7 @@ export const MediaStatus = ({ mediaObj, apiFunctions }) => {
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   const [status, setStatus] = React.useState();
   apiFunctions.getBookStatus(mediaObj, setStatus);
+  const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
 
   React.useEffect(() => {
     setStatus(null);
@@ -25,40 +33,71 @@ export const MediaStatus = ({ mediaObj, apiFunctions }) => {
 
   const handleStatusOnChange = (event, value) => {
     if (value === null) {
-      // delete
+      setOpenDeleteAlert(true);
     } else {
-      // add
       apiFunctions.setBookStatus({ status: value, ...mediaObj });
       setStatus(value);
     }
   };
 
   return (
-    <ToggleButtonGroup
-      orientation={greaterThanMid ? "vertical" : "horizontal"}
-      size={greaterThanMid ? "small" : "medium"}
-      value={status}
-      onChange={handleStatusOnChange}
-      exclusive
-    >
-      {[
-        { title: "Read", value: "Reading", icon: PlayArrowIcon },
-        { title: "Pause", value: "Paused", icon: PauseIcon },
-        { title: "Drop", value: "Dropped", icon: StopIcon },
-        { title: "Plan to Read", value: "Planning", icon: PlaylistAddIcon },
-        { title: "Finish", value: "Finished", icon: DoneIcon },
-      ].map((obj) => (
-        <Tooltip
-          key={obj.value}
-          title={obj.title}
-          placement={greaterThanMid ? "left" : "bottom"}
-        >
-          <ToggleButton value={obj.value} aria-label={obj.value}>
-            <obj.icon />
-          </ToggleButton>
-        </Tooltip>
-      ))}
-    </ToggleButtonGroup>
+    <Box>
+      <Dialog
+        open={openDeleteAlert}
+        onClose={() => setOpenDeleteAlert(false)}
+        aria-labelledby="delete-entry"
+        aria-describedby="delete-this-media-from-library"
+      >
+        <DialogTitle>Delete this from library?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Deleting this from your library will delete all data relating to
+            this entry. Please reconsider to drop instead.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button variant="outlined" onClick={() => setOpenDeleteAlert(false)}>
+            Cancel
+          </Button>
+          <Button
+            color="error"
+            onClick={() => {
+              setOpenDeleteAlert(false);
+              setStatus(null);
+              apiFunctions.deleteBook(mediaObj);
+            }}
+            autoFocus
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <ToggleButtonGroup
+        orientation={greaterThanMid ? "vertical" : "horizontal"}
+        size={greaterThanMid ? "small" : "medium"}
+        value={status}
+        onChange={handleStatusOnChange}
+        exclusive
+      >
+        {[
+          { title: "Read", value: "Reading", icon: PlayArrowIcon },
+          { title: "Pause", value: "Paused", icon: PauseIcon },
+          { title: "Drop", value: "Dropped", icon: StopIcon },
+          { title: "Plan to Read", value: "Planning", icon: PlaylistAddIcon },
+          { title: "Finish", value: "Finished", icon: DoneIcon },
+        ].map((obj) => (
+          <Tooltip
+            key={obj.value}
+            title={obj.title}
+            placement={greaterThanMid ? "left" : "bottom"}
+          >
+            <ToggleButton value={obj.value} aria-label={obj.value}>
+              <obj.icon />
+            </ToggleButton>
+          </Tooltip>
+        ))}
+      </ToggleButtonGroup>
+    </Box>
   );
 };
 
