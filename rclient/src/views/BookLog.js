@@ -5,6 +5,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Paper,
   Slide,
   Stack,
@@ -17,6 +18,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
+import { CollapsibleFab } from "../components/CollapsibleFab";
 
 export const BookLog = () => {
   const theme = useTheme();
@@ -29,93 +31,96 @@ export const BookLog = () => {
   }, []);
 
   return (
-    <Stack>
-      {[
-        {
-          status: "Reading",
-          label: "Reading",
-          labelIcon: <PlayArrowIcon />,
-          defaultExpanded: true,
-        },
-        {
-          status: "Paused",
-          label: "Paused",
-          labelIcon: <PauseIcon />,
-          defaultExpanded: true,
-        },
-        {
-          status: "Planning",
-          label: "Planning to Read",
-          labelIcon: <PlaylistAddIcon />,
-          defaultExpanded: true,
-        },
-        {
-          status: "Dropped",
-          label: "Dropped",
-          labelIcon: <StopIcon />,
-          defaultExpanded: false,
-        },
-        {
-          status: "Finished",
-          label: "Finished",
-          labelIcon: <DoneIcon />,
-          defaultExpanded: true,
-        },
-      ].map((obj, index) => (
-        <Slide key={obj.status} timeout={600 * index} in={true}>
-          <Accordion defaultExpanded={obj.defaultExpanded}>
-            <AccordionSummary
-              aria-controls={obj.label}
-              expandIcon={<ExpandMoreIcon />}
-            >
-              <Stack direction="row" spacing={2} alignItems={"center"}>
-                {obj.labelIcon}
-                <Typography variant="h5">{obj.label}</Typography>
-              </Stack>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Paper elevation={0} sx={{ p: 2 }}>
-                <Tiles
-                  objectArray={{
-                    items: library?.items?.filter(
-                      (bookObj) => bookObj.status === obj.status
-                    ),
-                    total_items: library?.items?.filter(
-                      (bookObj) => bookObj.status === obj.status
-                    ).length,
-                  }}
-                  keysData={[
-                    { key: "title", label: "", variant: "h4" },
-                    { key: "authors", label: "by ", variant: "h6" },
-                    {
-                      key: "publisher",
-                      label: "Published by ",
-                      variant: "body",
-                    },
-                    {
-                      key: "publish_year",
-                      label: "Published in ",
-                      variant: "body2",
-                    },
-                    {
-                      key: "number_of_pages",
-                      label: "Pages: ",
-                      variant: "body2",
-                    },
-                    {
-                      key: "isbn",
-                      label: "ISBN: ",
-                      variant: "subtitle2",
-                    },
-                  ]}
-                  actionArea={true}
-                  apiFunctions={indexedDBBooksInterface}
-                />
-              </Paper>
-            </AccordionDetails>
-          </Accordion>
-        </Slide>
-      ))}
-    </Stack>
+    <Box>
+      <CollapsibleFab />
+      <Stack>
+        {[
+          {
+            status: "Reading",
+            label: "Reading",
+            labelIcon: <PlayArrowIcon />,
+            defaultExpanded: true,
+          },
+          {
+            status: "Paused",
+            label: "Paused",
+            labelIcon: <PauseIcon />,
+            defaultExpanded: true,
+          },
+          {
+            status: "Planning",
+            label: "Planning to Read",
+            labelIcon: <PlaylistAddIcon />,
+            defaultExpanded: true,
+          },
+          {
+            status: "Dropped",
+            label: "Dropped",
+            labelIcon: <StopIcon />,
+            defaultExpanded: false,
+          },
+          {
+            status: "Finished",
+            label: "Finished",
+            labelIcon: <DoneIcon />,
+            defaultExpanded: true,
+          },
+        ].map((obj, index) => (
+          <Slide key={obj.status} timeout={300 * index + 500} in={true}>
+            <Accordion defaultExpanded={obj.defaultExpanded}>
+              <AccordionSummary
+                aria-controls={obj.label}
+                expandIcon={<ExpandMoreIcon />}
+              >
+                <Stack direction="row" spacing={2} alignItems={"center"}>
+                  {obj.labelIcon}
+                  <Typography variant="h5">{obj.label}</Typography>
+                </Stack>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Paper elevation={0} sx={{ p: 2 }}>
+                  <Tiles
+                    objectArray={{
+                      items: library?.items?.filter(
+                        (bookObj) => bookObj.status === obj.status
+                      ),
+                      total_items: library?.items?.filter(
+                        (bookObj) => bookObj.status === obj.status
+                      ).length,
+                    }}
+                    keysData={[
+                      { key: "title", label: "", variant: "h4" },
+                      { key: "authors", label: "by ", variant: "h6" },
+                      {
+                        key: "publisher",
+                        label: "Published by ",
+                        variant: "body",
+                      },
+                      {
+                        key: "publish_year",
+                        label: "Published in ",
+                        variant: "body2",
+                      },
+                      {
+                        key: "number_of_pages",
+                        label: "Pages: ",
+                        variant: "body2",
+                      },
+                      {
+                        key: "isbn",
+                        label: "ISBN: ",
+                        variant: "subtitle2",
+                      },
+                    ]}
+                    actionArea={true}
+                    apiFunctions={indexedDBBooksInterface}
+                  />
+                </Paper>
+              </AccordionDetails>
+            </Accordion>
+          </Slide>
+        ))}
+      </Stack>
+    </Box>
   );
 };
