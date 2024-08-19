@@ -35,7 +35,8 @@ export const MediaStatus = ({ mediaObj, apiFunctions }) => {
     if (value === null) {
       setOpenDeleteAlert(true);
     } else {
-      apiFunctions.setBookStatus({ status: value, ...mediaObj });
+      mediaObj.status = value;
+      apiFunctions.setBookStatus(mediaObj);
       setStatus(value);
     }
   };
