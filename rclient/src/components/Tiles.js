@@ -25,7 +25,7 @@ export const Tiles = ({ objectArray, keysData, actionArea, apiFunctions }) => {
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   // console.log("test") runs 3 times for some reason? should be fine cause external api only calls once
 
-  return objectArray.items?.map((dataObject, index) => (
+  return objectArray?.items?.map((dataObject, index) => (
     <Grow
       key={dataObject.key}
       in={objectArray.total_items > 0}
