@@ -99,13 +99,13 @@ export const setBookStatus = (obj) => {
   });
 };
 
-export const getBookStatus = async (obj, setStatus) => {
+export const getBookStatus = (obj, setStatus) => {
   const db = userDataDB.result;
   const transaction = db.transaction("books", "readwrite");
   const objectStore = transaction.objectStore("books");
   const index = objectStore.index("isbn");
   if (obj.isbn !== undefined) {
-    obj.isbn.forEach(async (isbn) => {
+    obj.isbn.forEach((isbn) => {
       const request = index.get(isbn);
       request.onsuccess = (event) => {
         const data = event.target.result;
@@ -115,6 +115,27 @@ export const getBookStatus = async (obj, setStatus) => {
       };
     });
   } else {
+    // isbn not found
+  }
+};
+
+export const deleteBook = (obj) => {
+  const db = userDataDB.result;
+  const transaction = db.transaction("books", "readwrite");
+  const objectStore = transaction.objectStore("books");
+  const index = objectStore.index("isbn");
+  if (obj.isbn !== undefined) {
+    obj.isbn.forEach((isbn) => {
+      const request = index.get(isbn);
+      request.onsuccess = (event) => {
+        const data = event.target.result;
+        if (data !== undefined) {
+          objectStore.delete(data.id);
+        }
+      };
+    });
+  } else {
+    // isbn not found
   }
 };
 
@@ -123,6 +144,7 @@ export const indexedDBBooksInterface = {
   getAllBooks,
   setBookStatus,
   getBookStatus,
+  deleteBook,
 };
 
 export const getBook = (id) => {
