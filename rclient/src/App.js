@@ -39,7 +39,8 @@ function App() {
     () =>
       createTheme({
         palette: {
-          mode: "dark",
+          mode,
+          ...(mode === "light" ? {} : { mode: "dark" }),
         },
       }),
     []
