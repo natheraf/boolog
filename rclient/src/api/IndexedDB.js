@@ -1,4 +1,4 @@
-const userDataDB = indexedDB.open("userData", 8);
+const userDataDB = indexedDB.open("userData", 1);
 
 userDataDB.onerror = function () {
   console.error("Error", userDataDB.error);
@@ -29,11 +29,9 @@ userDataDB.onupgradeneeded = function (event) {
       userBooks.createIndex("author", "author");
       userBooks.createIndex("publisher", "publisher");
       userBooks.createIndex("year", "year");
-      userBooks.createIndex("isbn", "isbn");
+      userBooks.createIndex("isbn", "isbn", { unique: true, multiEntry: true });
       userBooks.createIndex("deleted", "deleted");
-    case 7:
-      var userBooks = db.objectStore("books");
-      userBooks.createIndex("test", "test");
+      userBooks.createIndex("status", "status");
   }
 };
 
@@ -57,17 +55,74 @@ const test = () => {
 export const addBook = (obj) => {
   const db = userDataDB.result;
   const transaction = db.transaction("books", "readwrite");
-  transaction.oncomplete = (event) => {
-    console.log("book added successfully");
-  };
-  transaction.onerror = (event) => {
-    console.error("Transaction Error", event);
-  };
   const objectStore = transaction.objectStore("books");
   const request = objectStore.add(obj);
   request.onsuccess = () =>
     console.log("book add request completed successfully");
   request.onerror = () => console.log("Request Error", request.error);
+};
+
+export const getAllBooks = (obj) => {
+  const db = userDataDB.result;
+  const transaction = db.transaction("books", "readonly");
+  transaction.oncomplete = (event) => {
+    console.log("got all books successfully");
+  };
+  transaction.onerror = (event) => {
+    console.error("Transaction Error", event);
+  };
+  const objectStore = transaction.objectStore("books");
+  objectStore.getAll().onsuccess = (event) => {
+    return event.target.result;
+  };
+};
+
+export const setBookStatus = (obj) => {
+  const db = userDataDB.result;
+  const transaction = db.transaction("books", "readwrite");
+  const objectStore = transaction.objectStore("books");
+  const index = objectStore.index("isbn");
+  obj.isbn.forEach((isbn) => {
+    const request = index.get(isbn);
+    request.onsuccess = (event) => {
+      const data = event.target.result;
+      if (data !== undefined) {
+        data.status = obj.status;
+        const requestUpdate = objectStore.put(data);
+        requestUpdate.onsuccess = () => console.log("updated book status");
+        requestUpdate.onerror = () =>
+          console.log("update book status error", requestUpdate.error);
+      } else {
+        addBook(obj);
+      }
+    };
+  });
+};
+
+export const getBookStatus = async (obj, setStatus) => {
+  const db = userDataDB.result;
+  const transaction = db.transaction("books", "readwrite");
+  const objectStore = transaction.objectStore("books");
+  const index = objectStore.index("isbn");
+  if (obj.isbn !== undefined) {
+    obj.isbn.forEach(async (isbn) => {
+      const request = index.get(isbn);
+      request.onsuccess = (event) => {
+        const data = event.target.result;
+        if (data !== undefined) {
+          setStatus(data.status);
+        }
+      };
+    });
+  } else {
+  }
+};
+
+export const indexedDBBooksInterface = {
+  addBook,
+  getAllBooks,
+  setBookStatus,
+  getBookStatus,
 };
 
 export const getBook = (id) => {
