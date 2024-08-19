@@ -55,7 +55,7 @@ export const Tiles = ({
             }}
             timeout={600 * index + 1000}
           >
-            <Paper elevation={5} sx={{ maxWidth: sizeProfiles.maxWidth }}>
+            <Paper sx={{ maxWidth: sizeProfiles.maxWidth }}>
               <Grid
                 container
                 direction={"row"}
