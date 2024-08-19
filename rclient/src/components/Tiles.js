@@ -8,6 +8,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import { MediaStatus } from "./MediaStatus";
 
 const printArray = (arr) => {
   return (
@@ -19,7 +20,7 @@ const printArray = (arr) => {
   );
 };
 
-export const Tiles = ({ objectArray, keysData, actionArea }) => {
+export const Tiles = ({ objectArray, keysData, actionArea, apiFunctions }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -78,7 +79,9 @@ export const Tiles = ({ objectArray, keysData, actionArea }) => {
               ))}
             </Stack>
           </Grid>
-          {actionArea ? actionArea() : null}
+          {actionArea ? (
+            <MediaStatus mediaObj={dataObject} apiFunctions={apiFunctions} />
+          ) : null}
         </Grid>
       </Paper>
     </Grow>
