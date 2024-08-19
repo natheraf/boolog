@@ -7,6 +7,7 @@ import { SearchBook } from "./views/SearchBook";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { Header } from "./components/Header";
 import { Home } from "./views/Home";
+import { BookLog } from "./views/BookLog";
 
 export const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
@@ -55,6 +56,7 @@ function App() {
           <Container maxWidth="xl" sx={{ mt: "88px" }}>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/books" element={<BookLog />} />
               <Route path="login" element={<Login />} />
               <Route path="loggedIn" element={<h1>Logged In</h1>} />
               <Route path="searchBook" element={<SearchBook />} />
