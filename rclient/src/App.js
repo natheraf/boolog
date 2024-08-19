@@ -56,7 +56,7 @@ function App() {
           <Container maxWidth="xl" sx={{ mt: "88px" }}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/books" element={<BookLog />} />
+              <Route path="books" element={<BookLog />} />
               <Route path="login" element={<Login />} />
               <Route path="loggedIn" element={<h1>Logged In</h1>} />
               <Route path="searchBook" element={<SearchBook />} />
