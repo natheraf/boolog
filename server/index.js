@@ -20,9 +20,9 @@ require("./startDB")(process.argv.includes("drop"));
  * Define all our routes into express app.
  */
 require("./routes/auth.routes")(app);
-app.use("/jsdoc-front", express.static("../client/jsdoc/out"));
+app.use("/jsdoc-front", express.static("../rclient/jsdoc/out"));
 app.use("/jsdoc-back", express.static("../server/jsdoc/out"));
-app.use(express.static("../client/build"));
+app.use(express.static("../rclient/build"));
 
 const port = process.env.PORT || 8080;
 
@@ -35,7 +35,7 @@ if (process.argv.includes("dev")) {
   app.listen(port, () => console.log(`Express Server on port ${port}`));
 } else {
   app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../client/build/index.html"));
+    res.sendFile(path.join(__dirname, "../rclient/build/index.html"));
   });
   const fs = require("fs");
   const https = require("https");
