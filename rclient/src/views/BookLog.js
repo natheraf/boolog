@@ -19,10 +19,12 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
+import { CreateBook } from "./CreateBook";
 
 export const BookLog = () => {
   const theme = useTheme();
   const [library, setLibrary] = React.useState();
+  const [openEditor, setOpenEditor] = React.useState(false);
 
   React.useEffect(() => {
     getAllBooks((res) => {
@@ -32,7 +34,8 @@ export const BookLog = () => {
 
   return (
     <Box>
-      <CollapsibleFab />
+      <CollapsibleFab setOpenEditor={setOpenEditor} />
+      <CreateBook open={openEditor} setOpen={setOpenEditor} />
       <Stack>
         {[
           {

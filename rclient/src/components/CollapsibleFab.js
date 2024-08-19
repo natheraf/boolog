@@ -6,7 +6,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 
-export const CollapsibleFab = () => {
+export const CollapsibleFab = ({ setOpenEditor }) => {
   const [openButtons, setOpenButtons] = React.useState(false);
   const containerRef = React.useRef(null);
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export const CollapsibleFab = () => {
       label: "edit",
       color: "secondary",
       icon: <EditIcon />,
-      onClick: () => navigate("#"),
+      onClick: () => setOpenEditor(true),
     },
     {
       label: "search",
