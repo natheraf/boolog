@@ -23,6 +23,7 @@ const printArray = (arr) => {
 export const Tiles = ({ objectArray, keysData, actionArea, apiFunctions }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
+  // console.log("test") runs 3 times for some reason? should be fine cause external api only calls once
 
   return objectArray.items?.map((dataObject, index) => (
     <Grow
