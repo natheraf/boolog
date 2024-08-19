@@ -1,3 +1,4 @@
+import * as React from "react";
 import {
   ToggleButton,
   ToggleButtonGroup,
@@ -10,23 +11,42 @@ import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
+import PropTypes from "prop-types";
 
-export const MediaStatus = () => {
+export const MediaStatus = ({ mediaObj, apiFunctions }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
+  const [status, setStatus] = React.useState();
+  apiFunctions.getBookStatus(mediaObj, setStatus);
+
+  React.useEffect(() => {
+    setStatus(null);
+  }, [mediaObj]);
+
+  const handleStatusOnChange = (event, value) => {
+    if (value === null) {
+      // delete
+    } else {
+      // add
+      apiFunctions.setBookStatus({ status: value, ...mediaObj });
+      setStatus(value);
+    }
+  };
 
   return (
     <ToggleButtonGroup
       orientation={greaterThanMid ? "vertical" : "horizontal"}
       size={greaterThanMid ? "small" : "medium"}
+      value={status}
+      onChange={handleStatusOnChange}
       exclusive
     >
       {[
-        { title: "Read", value: "read", icon: PlayArrowIcon },
-        { title: "Pause", value: "pause", icon: PauseIcon },
-        { title: "Drop", value: "drop", icon: StopIcon },
-        { title: "Plan to Read", value: "plan", icon: PlaylistAddIcon },
-        { title: "Finish", value: "finish", icon: DoneIcon },
+        { title: "Read", value: "Reading", icon: PlayArrowIcon },
+        { title: "Pause", value: "Paused", icon: PauseIcon },
+        { title: "Drop", value: "Dropped", icon: StopIcon },
+        { title: "Plan to Read", value: "Planning", icon: PlaylistAddIcon },
+        { title: "Finish", value: "Finished", icon: DoneIcon },
       ].map((obj) => (
         <Tooltip
           key={obj.value}
@@ -40,4 +60,9 @@ export const MediaStatus = () => {
       ))}
     </ToggleButtonGroup>
   );
+};
+
+MediaStatus.propTypes = {
+  mediaObj: PropTypes.object.isRequired,
+  apiFunctions: PropTypes.object.isRequired,
 };
