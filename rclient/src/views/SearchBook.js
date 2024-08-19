@@ -463,6 +463,7 @@ export const SearchBook = () => {
               ]}
               actionArea={true}
               apiFunctions={indexedDBBooksInterface}
+              size="large"
             />
           )}
           <Grid
