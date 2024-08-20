@@ -118,7 +118,7 @@ export const Tiles = ({
 
 Tiles.propTypes = {
   objectArray: PropTypes.object.isRequired,
-  keysData: PropTypes.object.isRequired,
+  keysData: PropTypes.array.isRequired,
   actionArea: PropTypes.bool.isRequired,
   apiFunctions: PropTypes.object,
   size: PropTypes.bool,
