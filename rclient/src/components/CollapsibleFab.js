@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Fab, Slide, Stack } from "@mui/material";
+import { Fab, Slide, Stack, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
@@ -13,13 +13,13 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
 
   const icons = [
     {
-      label: "edit",
+      label: "Create New",
       color: "secondary",
       icon: <EditIcon />,
       onClick: () => setOpenEditor(true),
     },
     {
-      label: "search",
+      label: "Search",
       color: "secondary",
       icon: <SearchIcon />,
       onClick: () => navigate("/books/search"),
@@ -46,24 +46,31 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
               timeout={200 * (icons.length - index)}
               container={containerRef.current}
             >
-              <Fab
-                color={obj.color}
-                aria-label={obj.label}
-                onClick={obj.onClick}
-              >
-                {obj.icon}
-              </Fab>
+              <Tooltip title={obj.label} placement={"left"}>
+                <Fab
+                  color={obj.color}
+                  aria-label={obj.label}
+                  onClick={obj.onClick}
+                >
+                  {obj.icon}
+                </Fab>
+              </Tooltip>
             </Slide>
           ))}
         </Stack>
-        <Fab
-          color="primary"
-          aria-label="add"
-          onClick={() => setOpenButtons((prev) => !prev)}
-          ref={containerRef}
+        <Tooltip
+          title={openButtons ? "Click to Close" : "Add an Entry"}
+          placement={"left"}
         >
-          {openButtons ? <ExpandMoreIcon /> : <AddIcon />}
-        </Fab>
+          <Fab
+            color="primary"
+            aria-label="add"
+            onClick={() => setOpenButtons((prev) => !prev)}
+            ref={containerRef}
+          >
+            {openButtons ? <ExpandMoreIcon /> : <AddIcon />}
+          </Fab>
+        </Tooltip>
       </Stack>
     </Slide>
   );
