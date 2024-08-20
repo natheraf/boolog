@@ -47,6 +47,10 @@ export const Textarea = styled(TextareaAutosize)(
     box-shadow: 0 0 0 2px ${theme.palette.primary.main};
   }
 
+  &:hover:focus {
+    border-color: #3c3c3c;
+  }
+
   // firefox
   &:focus-visible {
     outline: 0;
