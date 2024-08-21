@@ -30,9 +30,9 @@ export const Textarea = styled(TextareaAutosize)(
   font-weight: 500;
   line-height: 1.5;
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 4px;
   color: ${theme.palette.mode === "dark" ? "white" : grey[900]};
-  background: ${theme.palette.mode === "dark" ? "#3c3c3c" : "#fff"};
+  background: ${theme.palette.mode === "dark" ? "#3a3a3a" : "#fff"};
   resize: vertical;
   ::placeholder {
     color: ${grey[300]};
@@ -48,7 +48,7 @@ export const Textarea = styled(TextareaAutosize)(
   }
 
   &:hover:focus {
-    border-color: #3c3c3c;
+    border-color: #3a3a3a;
   }
 
   // firefox
