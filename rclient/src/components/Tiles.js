@@ -121,5 +121,5 @@ Tiles.propTypes = {
   keysData: PropTypes.array.isRequired,
   actionArea: PropTypes.bool.isRequired,
   apiFunctions: PropTypes.object,
-  size: PropTypes.bool,
+  size: PropTypes.string,
 };
