@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { MediaStatus } from "./MediaStatus";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
+import LinkIcon from "@mui/icons-material/Link";
 
 const printArray = (arr) => {
   return (
@@ -70,6 +72,8 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
                       objectFit: "cover",
                       width: "100%",
                       height: "100%",
+                      wordWrap: "break-word",
+                      display: "block",
                     }}
                   />
                 </Grid>
@@ -81,20 +85,40 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
                   }}
                 >
                   <Stack spacing={1}>
-                    {keysData.map((obj) => (
-                      <Typography
-                        key={obj.key}
-                        variant={obj.variant}
-                        sx={{
-                          wordBreak: "break-word",
-                          textWrap: "pretty",
-                        }}
-                      >{`${obj.label} ${
-                        Array.isArray(dataObject[obj.key])
-                          ? printArray(dataObject[obj.key])
-                          : dataObject[obj.key] ?? "N/A"
-                      }`}</Typography>
-                    ))}
+                    {keysData.map((obj) =>
+                      obj.key === "title" &&
+                      dataObject.read_link !== undefined ? (
+                        <Typography
+                          key={obj.key}
+                          variant={obj.variant}
+                          sx={{
+                            wordBreak: "break-word",
+                            textWrap: "pretty",
+                            textDecoration: "none",
+                            color: theme.palette.text.primary,
+                          }}
+                          component={Link}
+                          to={dataObject.read_link}
+                          target="_blank"
+                        >
+                          <LinkIcon />
+                          {`${obj.label} ${dataObject[obj.key]}`}
+                        </Typography>
+                      ) : (
+                        <Typography
+                          key={obj.key}
+                          variant={obj.variant}
+                          sx={{
+                            wordBreak: "break-word",
+                            textWrap: "pretty",
+                          }}
+                        >{`${obj.label} ${
+                          Array.isArray(dataObject[obj.key])
+                            ? printArray(dataObject[obj.key])
+                            : dataObject[obj.key] ?? "N/A"
+                        }`}</Typography>
+                      )
+                    )}
                   </Stack>
                 </Grid>
                 {actionArea ? (
