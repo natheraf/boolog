@@ -49,11 +49,11 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
             }}
             timeout={600 * index + 1000}
           >
-            <Paper sx={{ maxWidth: sizeProfiles.maxWidth }}>
+            <Paper sx={sizeProfiles}>
               <Grid
                 container
                 direction={"row"}
-                justifyContent={"center"}
+                justifyContent={"space-evenly"}
                 alignItems={"center"}
                 p={1}
                 gap={2}
