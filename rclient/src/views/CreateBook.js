@@ -45,7 +45,10 @@ export const CreateBook = ({ open, setOpen }) => {
     type: null,
   });
 
-  const handleClose = () => {
+  const handleClose = (event, reason) => {
+    if (reason && reason === "backdropClick") {
+      return;
+    }
     setOpen(false);
     setBookObject((prev) => ({ ...prev, status: null, type: null }));
   };
