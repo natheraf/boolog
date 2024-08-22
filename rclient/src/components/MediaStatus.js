@@ -76,7 +76,7 @@ export const MediaStatus = ({
             onClick={() => {
               setOpenDeleteAlert(false);
               setStatus(null);
-              apiFunctions.deleteBook(mediaObj);
+              apiFunctions.deleteBook(mediaObj, mediaUniqueIdentifier);
             }}
             autoFocus
           >
