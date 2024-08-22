@@ -40,7 +40,10 @@ export const CreateBook = ({ open, setOpen }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
-  const [bookObject, setBookObject] = React.useState({});
+  const [bookObject, setBookObject] = React.useState({
+    status: null,
+    type: null,
+  });
 
   const handleClose = () => {
     setOpen(false);
@@ -240,7 +243,10 @@ export const CreateBook = ({ open, setOpen }) => {
             </ToggleButtonGroup>
           </Stack>
         </Stack>
-        <Fade in={bookObject.type && bookObject.status} mountOnEnter>
+        <Fade
+          in={bookObject.type !== null && bookObject.status !== null}
+          mountOnEnter
+        >
           <Stack direction={"column"} spacing={2}>
             <Divider>Shared Properties</Divider>
             <Grid
