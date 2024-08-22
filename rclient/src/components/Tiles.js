@@ -47,7 +47,7 @@ export const Tiles = ({
   return (
     <Grid container direction={"row"} justifyContent={"center"} gap={2}>
       {objectArray?.items?.map((dataObject, index) => (
-        <Grid item key={dataObject.key}>
+        <Grid item key={dataObject.id}>
           <Grow
             in={objectArray.total_items > 0}
             style={{
