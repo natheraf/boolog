@@ -243,103 +243,107 @@ export const CreateBook = ({ open, setOpen }) => {
             </ToggleButtonGroup>
           </Stack>
         </Stack>
-        <Fade
-          in={bookObject.type !== null && bookObject.status !== null}
-          mountOnEnter
+        <Stack
+          direction={"column"}
+          spacing={2}
+          sx={{
+            display:
+              bookObject.type !== null && bookObject.status !== null
+                ? "inherit"
+                : "none",
+          }}
         >
-          <Stack direction={"column"} spacing={2}>
-            <Divider>Shared Properties</Divider>
-            <Grid
-              gap={2}
-              container
-              direction={"row"}
-              sx={{
-                justifyContent: { xs: "center", sm: "flex-start" },
-              }}
-            >
-              {bookKeys().common.map((obj) => (
-                <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
-                  {obj.key === "description" ? (
-                    <Textarea
-                      theme={theme}
-                      maxRows={5}
-                      minRows={2}
-                      aria-label={obj.label}
-                      placeholder={obj.label}
-                      sx={{ width: "100%" }}
-                      value={bookObject[obj.key] ?? ""}
-                      onChange={handleOnChangeProperty(obj.key)}
-                    />
-                  ) : (
-                    <TextField
-                      label={obj.label}
-                      fullWidth
-                      required={obj.key === "title"}
-                      id={`tf-${obj.key}`}
-                      value={bookObject[obj.key] ?? ""}
-                      onChange={handleOnChangeProperty(obj.key)}
-                      placeholder={obj.placeholder}
-                    />
-                  )}
-                </Grid>
-              ))}
-            </Grid>
-            <Divider>Unique Type Properties</Divider>
-            <Grid
-              gap={2}
-              container
-              direction={"row"}
-              sx={{
-                justifyContent: { xs: "center", sm: "flex-start" },
-              }}
-            >
-              {bookKeys().unique.map((obj) => (
-                <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
+          <Divider>Shared Properties</Divider>
+          <Grid
+            gap={2}
+            container
+            direction={"row"}
+            sx={{
+              justifyContent: { xs: "center", sm: "flex-start" },
+            }}
+          >
+            {bookKeys().common.map((obj) => (
+              <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
+                {obj.key === "description" ? (
+                  <Textarea
+                    theme={theme}
+                    maxRows={5}
+                    minRows={2}
+                    aria-label={obj.label}
+                    placeholder={obj.label}
+                    sx={{ width: "100%" }}
+                    value={bookObject[obj.key] ?? ""}
+                    onChange={handleOnChangeProperty(obj.key)}
+                  />
+                ) : (
                   <TextField
                     label={obj.label}
                     fullWidth
+                    required={obj.key === "title"}
                     id={`tf-${obj.key}`}
                     value={bookObject[obj.key] ?? ""}
                     onChange={handleOnChangeProperty(obj.key)}
                     placeholder={obj.placeholder}
                   />
-                </Grid>
-              ))}
-            </Grid>
-            <Divider>Links</Divider>
-            <Grid
-              gap={2}
-              container
-              direction={"row"}
-              sx={{
-                justifyContent: { xs: "center", sm: "flex-start" },
-              }}
-            >
-              {[
-                {
-                  label: "Cover URL",
-                  key: "cover_url",
-                  width: "30%",
-                },
-                {
-                  label: "Link to Read",
-                  key: "read_link",
-                  width: "30%",
-                },
-                {
-                  label: "Links to Purchase",
-                  key: "purchase_links",
-                  width: "30%",
-                  priority: 14,
-                },
-              ].map((obj) => (
-                <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
-                  <TextField label={obj.label} fullWidth />
-                </Grid>
-              ))}
-            </Grid>
-          </Stack>
-        </Fade>
+                )}
+              </Grid>
+            ))}
+          </Grid>
+          <Divider>Unique Type Properties</Divider>
+          <Grid
+            gap={2}
+            container
+            direction={"row"}
+            sx={{
+              justifyContent: { xs: "center", sm: "flex-start" },
+            }}
+          >
+            {bookKeys().unique.map((obj) => (
+              <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
+                <TextField
+                  label={obj.label}
+                  fullWidth
+                  id={`tf-${obj.key}`}
+                  value={bookObject[obj.key] ?? ""}
+                  onChange={handleOnChangeProperty(obj.key)}
+                  placeholder={obj.placeholder}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Divider>Links</Divider>
+          <Grid
+            gap={2}
+            container
+            direction={"row"}
+            sx={{
+              justifyContent: { xs: "center", sm: "flex-start" },
+            }}
+          >
+            {[
+              {
+                label: "Cover URL",
+                key: "cover_url",
+                width: "30%",
+              },
+              {
+                label: "Link to Read",
+                key: "read_link",
+                width: "30%",
+              },
+              {
+                label: "Links to Purchase",
+                key: "purchase_links",
+                width: "30%",
+                priority: 14,
+              },
+            ].map((obj) => (
+              <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
+                <TextField label={obj.label} fullWidth />
+              </Grid>
+            ))}
+          </Grid>
+        </Stack>
       </Stack>
     </Dialog>
   );
