@@ -46,9 +46,6 @@ export const CreateBook = ({ open, setOpen }) => {
   });
 
   const handleClose = (event, reason) => {
-    if (reason && reason === "backdropClick") {
-      return;
-    }
     setOpen(false);
     setBookObject((prev) => ({ ...prev, status: null, type: null }));
   };
