@@ -339,7 +339,12 @@ export const CreateBook = ({ open, setOpen }) => {
               },
             ].map((obj) => (
               <Grid item key={obj.key} sx={{ minWidth: obj.width }}>
-                <TextField label={obj.label} fullWidth />
+                <TextField
+                  label={obj.label}
+                  fullWidth
+                  value={bookObject[obj.key] ?? ""}
+                  onChange={handleOnChangeProperty(obj.key)}
+                />
               </Grid>
             ))}
           </Grid>
