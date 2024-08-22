@@ -24,7 +24,10 @@ export const MediaStatus = ({ mediaObj, apiFunctions }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   const [status, setStatus] = React.useState();
-  apiFunctions.getBookStatus(mediaObj, setStatus);
+  apiFunctions
+    .getBookStatus(mediaObj)
+    .then((res) => setStatus(res))
+    .catch((error) => console.log(error));
   const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
 
   React.useEffect(() => {

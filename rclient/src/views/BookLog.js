@@ -27,9 +27,9 @@ export const BookLog = () => {
   const [openEditor, setOpenEditor] = React.useState(false);
 
   React.useEffect(() => {
-    getAllBooks((res) => {
-      setLibrary({ items: res, total_items: res.length });
-    });
+    getAllBooks()
+      .then((res) => setLibrary({ items: res, total_items: res.length }))
+      .catch((error) => console.log(error));
   }, []);
 
   return (
