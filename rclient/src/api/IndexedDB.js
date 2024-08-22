@@ -168,30 +168,30 @@ const getBookStatusHelper = (db, obj) =>
     }
   });
 
-export const deleteBook = (obj) => {
+export const deleteBook = (obj, uid) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    deleteBookHelper(db, obj)
+    deleteBookHelper(db, obj, uid)
   );
 };
 
-const deleteBookHelper = (db, obj) =>
+const deleteBookHelper = (db, obj, uid) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     const objectStore = transaction.objectStore("books");
-    const index = objectStore.index("isbn");
-    if (obj.isbn !== undefined) {
-      obj.isbn.forEach((isbn) => {
-        const request = index.get(isbn);
-        request.onsuccess = (event) => {
-          const data = event.target.result;
-          if (data !== undefined) {
-            objectStore.delete(data.id);
-          }
-        };
-      });
+    let request;
+    if (uid === "isbn") {
+      const index = objectStore.index("isbn");
+      const isbn = obj.isbn[0];
+      request = index.get(isbn);
     } else {
-      // isbn not found
+      request = objectStore.get(obj.id);
     }
+    request.onsuccess = (event) => {
+      const data = event.target.result;
+      if (data !== undefined) {
+        objectStore.delete(data.id);
+      }
+    };
   });
 
 export const indexedDBBooksInterface = {
