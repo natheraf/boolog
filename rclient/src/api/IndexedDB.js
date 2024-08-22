@@ -24,7 +24,7 @@ const userDataDBOnupgradeneeded = function (event) {
       userBooks.createIndex("author", "author");
       userBooks.createIndex("publisher", "publisher");
       userBooks.createIndex("year", "year");
-      userBooks.createIndex("isbn", "isbn", { unique: true, multiEntry: true });
+      userBooks.createIndex("isbn", "isbn", { multiEntry: true });
       userBooks.createIndex("deleted", "deleted");
       userBooks.createIndex("status", "status");
   }
@@ -51,7 +51,7 @@ export const openDatabase = async (name, version, crudFn) => {
   let db;
   try {
     db = await connect(name, version);
-    await crudFn(db);
+    return await crudFn(db);
   } finally {
     if (db) {
       db.close();
@@ -60,7 +60,9 @@ export const openDatabase = async (name, version, crudFn) => {
 };
 
 export const addBook = (obj) => {
-  openDatabase(userDataDB, userDataDBVersion, (db) => addBookHelper(db, obj));
+  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+    addBookHelper(db, obj)
+  );
 };
 
 const addBookHelper = (db, obj) =>
@@ -68,18 +70,23 @@ const addBookHelper = (db, obj) =>
     const transaction = db.transaction("books", "readwrite");
     const objectStore = transaction.objectStore("books");
     const request = objectStore.add(obj);
-    request.onsuccess = () =>
+    request.onsuccess = () => {
       console.log("book add request completed successfully");
-    request.onerror = () => console.log("Request Error", request.error);
+      resolve(request.result);
+    };
+    request.onerror = () => {
+      console.log("Request Error", request.error);
+      reject(new Error(`Request Error: ${request.error}`));
+    };
   });
 
-export const getAllBooks = (callback) => {
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getAllBooksHelper(db, callback)
+export const getAllBooks = () => {
+  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+    getAllBooksHelper(db)
   );
 };
 
-const getAllBooksHelper = (db, callback) =>
+const getAllBooksHelper = (db) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readonly");
     transaction.oncomplete = (event) => {
@@ -87,15 +94,16 @@ const getAllBooksHelper = (db, callback) =>
     };
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
+      reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
     objectStore.getAll().onsuccess = (event) => {
-      callback(event.target.result);
+      resolve(event.target.result);
     };
   });
 
 export const setBookStatus = (obj) => {
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
+  return openDatabase(userDataDB, userDataDBVersion, (db) =>
     setBookStatusHelper(db, obj)
   );
 };
@@ -103,34 +111,41 @@ export const setBookStatus = (obj) => {
 const setBookStatusHelper = (db, obj) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
+    transaction.onerror = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
     const objectStore = transaction.objectStore("books");
     const index = objectStore.index("isbn");
-    obj.isbn.forEach((isbn) => {
-      const request = index.get(isbn);
-      request.onsuccess = (event) => {
-        const data = event.target.result;
-        if (data !== undefined) {
-          data.status = obj.status;
-          const requestUpdate = objectStore.put(data);
-          requestUpdate.onsuccess = () => console.log("updated book status");
-          requestUpdate.onerror = () =>
-            console.log("update book status error", requestUpdate.error);
-        } else {
-          addBook(obj);
-        }
-      };
-    });
+    const isbn = obj.isbn[0];
+    const request = index.get(isbn);
+    request.onsuccess = (event) => {
+      const data = event.target.result;
+      if (data !== undefined) {
+        data.status = obj.status;
+        const requestUpdate = objectStore.put(data);
+        requestUpdate.onsuccess = () => console.log("updated book status");
+        requestUpdate.onerror = () =>
+          console.log("update book status error", requestUpdate.error);
+      } else {
+        addBook(obj);
+      }
+    };
   });
 
-export const getBookStatus = (obj, setStatus) => {
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getBookStatusHelper(db, obj, setStatus)
+export const getBookStatus = (obj) => {
+  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+    getBookStatusHelper(db, obj)
   );
 };
 
-const getBookStatusHelper = (db, obj, setStatus) =>
+const getBookStatusHelper = (db, obj) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
+    transaction.onerror = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
     const objectStore = transaction.objectStore("books");
     const index = objectStore.index("isbn");
     if (obj.isbn !== undefined) {
@@ -139,7 +154,7 @@ const getBookStatusHelper = (db, obj, setStatus) =>
         request.onsuccess = (event) => {
           const data = event.target.result;
           if (data !== undefined) {
-            setStatus(data.status);
+            resolve(data.status);
           }
         };
       });
@@ -149,7 +164,7 @@ const getBookStatusHelper = (db, obj, setStatus) =>
   });
 
 export const deleteBook = (obj) => {
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
+  return openDatabase(userDataDB, userDataDBVersion, (db) =>
     deleteBookHelper(db, obj)
   );
 };
