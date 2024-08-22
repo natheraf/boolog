@@ -102,13 +102,13 @@ const getAllBooksHelper = (db) =>
     };
   });
 
-export const setBookStatus = (obj) => {
+export const setBookStatus = (obj, uid) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    setBookStatusHelper(db, obj)
+    setBookStatusHelper(db, obj, uid)
   );
 };
 
-const setBookStatusHelper = (db, obj) =>
+const setBookStatusHelper = (db, obj, uid) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
@@ -116,9 +116,14 @@ const setBookStatusHelper = (db, obj) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    const index = objectStore.index("isbn");
-    const isbn = obj.isbn[0];
-    const request = index.get(isbn);
+    let request;
+    if (uid === "isbn") {
+      const index = objectStore.index("isbn");
+      const isbn = obj.isbn[0];
+      request = index.get(isbn);
+    } else {
+      request = objectStore.get(obj.id);
+    }
     request.onsuccess = (event) => {
       const data = event.target.result;
       if (data !== undefined) {

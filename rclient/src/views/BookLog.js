@@ -115,8 +115,10 @@ export const BookLog = () => {
                         variant: "subtitle2",
                       },
                     ]}
-                    actionArea={true}
-                    apiFunctions={indexedDBBooksInterface}
+                    actionArea={{
+                      api: indexedDBBooksInterface,
+                      mediaUniqueIdentifier: "id",
+                    }}
                   />
                 </Paper>
               </AccordionDetails>

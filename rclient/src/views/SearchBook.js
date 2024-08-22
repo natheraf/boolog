@@ -461,8 +461,10 @@ export const SearchBook = () => {
                   variant: "subtitle2",
                 },
               ]}
-              actionArea={true}
-              apiFunctions={indexedDBBooksInterface}
+              actionArea={{
+                api: indexedDBBooksInterface,
+                mediaUniqueIdentifier: "isbn",
+              }}
               size="large"
             />
           )}

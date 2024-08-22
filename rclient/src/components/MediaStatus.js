@@ -20,26 +20,33 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import PropTypes from "prop-types";
 
-export const MediaStatus = ({ mediaObj, apiFunctions }) => {
+export const MediaStatus = ({
+  mediaObj,
+  apiFunctions,
+  mediaUniqueIdentifier,
+}) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
-  const [status, setStatus] = React.useState();
-  apiFunctions
-    .getBookStatus(mediaObj)
-    .then((res) => setStatus(res))
-    .catch((error) => console.log(error));
+  const [status, setStatus] = React.useState(mediaObj.status);
   const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
 
   React.useEffect(() => {
-    setStatus(null);
-  }, [mediaObj]);
+    if (mediaUniqueIdentifier === "isbn") {
+      apiFunctions
+        .getBookStatus(mediaObj, mediaUniqueIdentifier)
+        .then((res) => setStatus(res))
+        .catch((error) => console.log(error));
+    } else {
+      setStatus(mediaObj.status);
+    }
+  }, [apiFunctions, mediaObj, mediaUniqueIdentifier]);
 
   const handleStatusOnChange = (event, value) => {
     if (value === null) {
       setOpenDeleteAlert(true);
     } else {
       mediaObj.status = value;
-      apiFunctions.setBookStatus(mediaObj);
+      apiFunctions.setBookStatus(mediaObj, mediaUniqueIdentifier);
       setStatus(value);
     }
   };
@@ -108,4 +115,5 @@ export const MediaStatus = ({ mediaObj, apiFunctions }) => {
 MediaStatus.propTypes = {
   mediaObj: PropTypes.object.isRequired,
   apiFunctions: PropTypes.object.isRequired,
+  mediaUniqueIdentifier: PropTypes.string.isRequired,
 };

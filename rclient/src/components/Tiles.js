@@ -22,13 +22,7 @@ const printArray = (arr) => {
   );
 };
 
-export const Tiles = ({
-  objectArray,
-  keysData,
-  actionArea,
-  apiFunctions,
-  size,
-}) => {
+export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   const [sizeProfiles, setSizeProfiles] = React.useState(() => {
@@ -104,7 +98,8 @@ export const Tiles = ({
                 {actionArea ? (
                   <MediaStatus
                     mediaObj={dataObject}
-                    apiFunctions={apiFunctions}
+                    apiFunctions={actionArea.api}
+                    mediaUniqueIdentifier={actionArea.mediaUniqueIdentifier}
                   />
                 ) : null}
               </Grid>
@@ -119,7 +114,6 @@ export const Tiles = ({
 Tiles.propTypes = {
   objectArray: PropTypes.object.isRequired,
   keysData: PropTypes.array.isRequired,
-  actionArea: PropTypes.bool.isRequired,
-  apiFunctions: PropTypes.object,
+  actionArea: PropTypes.object,
   size: PropTypes.string,
 };
