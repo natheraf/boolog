@@ -464,6 +464,7 @@ export const SearchBook = () => {
               actionArea={{
                 api: indexedDBBooksInterface,
                 mediaUniqueIdentifier: "isbn",
+                position: "right",
               }}
               size="large"
             />

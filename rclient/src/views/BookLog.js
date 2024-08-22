@@ -124,6 +124,8 @@ export const BookLog = () => {
                     actionArea={{
                       api: indexedDBBooksInterface,
                       mediaUniqueIdentifier: "id",
+                      position: "bottom",
+                      inLibrary: true,
                     }}
                   />
                 </Paper>
