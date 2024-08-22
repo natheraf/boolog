@@ -27,6 +27,7 @@ import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { addBook } from "../api/IndexedDB";
+import PropTypes from "prop-types";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -336,4 +337,9 @@ export const CreateBook = ({ open, setOpen }) => {
       </Stack>
     </Dialog>
   );
+};
+
+CreateBook.propTypes = {
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
 };
