@@ -174,14 +174,16 @@ export const CreateBook = ({ open, setOpen }) => {
           alignItems={"center"}
           justifyContent={"space-between"}
         >
-          <IconButton
-            edge="start"
-            color="inherit"
-            onClick={handleClose}
-            aria-label="close"
-          >
-            <CloseIcon />
-          </IconButton>
+          <Tooltip title="esc">
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
           <Typography variant="h6">Create Entry</Typography>
           <Button
             color="inherit"
