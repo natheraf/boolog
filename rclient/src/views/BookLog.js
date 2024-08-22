@@ -9,6 +9,7 @@ import {
   Paper,
   Slide,
   Stack,
+  Switch,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -25,6 +26,15 @@ export const BookLog = () => {
   const theme = useTheme();
   const [library, setLibrary] = React.useState();
   const [openEditor, setOpenEditor] = React.useState(false);
+  const [defaultExpanded, setDefaultExpanded] = React.useState(
+    localStorage.getItem("BookLogDefaultExpanded") ?? {
+      Reading: true,
+      Paused: true,
+      Planning: true,
+      Dropped: false,
+      Finished: true,
+    }
+  );
 
   React.useEffect(() => {
     getAllBooks()
@@ -42,42 +52,48 @@ export const BookLog = () => {
             status: "Reading",
             label: "Reading",
             labelIcon: <PlayArrowIcon />,
-            defaultExpanded: true,
           },
           {
             status: "Paused",
             label: "Paused",
             labelIcon: <PauseIcon />,
-            defaultExpanded: true,
           },
           {
             status: "Planning",
             label: "Planning to Read",
             labelIcon: <PlaylistAddIcon />,
-            defaultExpanded: true,
           },
           {
             status: "Dropped",
             label: "Dropped",
             labelIcon: <StopIcon />,
-            defaultExpanded: false,
           },
           {
             status: "Finished",
             label: "Finished",
             labelIcon: <DoneIcon />,
-            defaultExpanded: true,
           },
         ].map((obj, index) => (
           <Slide key={obj.status} timeout={300 * index + 500} in={true}>
-            <Accordion defaultExpanded={obj.defaultExpanded}>
+            <Accordion defaultExpanded={defaultExpanded[obj.status]}>
               <AccordionSummary
                 aria-controls={obj.label}
                 expandIcon={<ExpandMoreIcon />}
               >
-                <Stack direction="row" spacing={2} alignItems={"center"}>
-                  {obj.labelIcon}
-                  <Typography variant="h5">{obj.label}</Typography>
+                <Stack
+                  direction="row"
+                  justifyContent={"space-between"}
+                  sx={{ display: "flex" }}
+                >
+                  <Stack direction="row" spacing={2} alignItems={"center"}>
+                    {obj.labelIcon}
+                    <Typography variant="h5">{obj.label}</Typography>
+                  </Stack>
+                  <Switch
+                    defaultChecked={defaultExpanded[obj.status]}
+                    onClick={(event) => event.stopPropagation()}
+                    size="small"
+                  />
                 </Stack>
               </AccordionSummary>
               <AccordionDetails>
