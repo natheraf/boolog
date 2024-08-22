@@ -92,12 +92,12 @@ export const BookLog = () => {
                       ).length,
                     }}
                     keysData={[
-                      { key: "title", label: "", variant: "h4" },
+                      { key: "title", label: "", variant: "h5" },
                       { key: "authors", label: "by ", variant: "h6" },
                       {
                         key: "publisher",
                         label: "Published by ",
-                        variant: "body",
+                        variant: "subtitle1",
                       },
                       {
                         key: "publish_year",
@@ -112,7 +112,7 @@ export const BookLog = () => {
                       {
                         key: "isbn",
                         label: "ISBN: ",
-                        variant: "subtitle2",
+                        variant: "body2",
                       },
                     ]}
                     actionArea={{
