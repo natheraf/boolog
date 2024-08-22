@@ -8,7 +8,6 @@ import {
   DialogContentText,
   DialogTitle,
   ToggleButton,
-  ToggleButtonGroup,
   Tooltip,
   useMediaQuery,
 } from "@mui/material";
@@ -19,11 +18,14 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import PropTypes from "prop-types";
+import { StyledToggleButtonGroup } from "./StyledToggleButtonGroup";
+import { DeleteMediaDialog } from "./DeleteMediaDialog";
 
 export const MediaStatus = ({
   mediaObj,
   apiFunctions,
   mediaUniqueIdentifier,
+  orientation,
 }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
@@ -54,61 +56,44 @@ export const MediaStatus = ({
 
   return (
     <Box>
-      <Dialog
-        open={openDeleteAlert}
-        onClose={() => setOpenDeleteAlert(false)}
-        aria-labelledby="delete-entry"
-        aria-describedby="delete-this-media-from-library"
-      >
-        <DialogTitle>Delete this from library?</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Deleting this from your library will delete all data relating to
-            this entry. Please reconsider to drop instead.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="outlined" onClick={() => setOpenDeleteAlert(false)}>
-            Cancel
-          </Button>
-          <Button
-            color="error"
-            onClick={() => {
-              setOpenDeleteAlert(false);
-              setStatus(null);
-              apiFunctions.deleteBook(mediaObj, mediaUniqueIdentifier);
-            }}
-            autoFocus
-          >
-            Confirm
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <ToggleButtonGroup
-        orientation={greaterThanMid ? "vertical" : "horizontal"}
+      <DeleteMediaDialog
+        openDeleteAlert={openDeleteAlert}
+        setOpenDeleteAlert={setOpenDeleteAlert}
+        setStatus={setStatus}
+        apiFunctions={apiFunctions}
+        mediaObj={mediaObj}
+        mediaUniqueIdentifier={mediaUniqueIdentifier}
+      />
+      <StyledToggleButtonGroup
+        orientation={orientation}
         size={greaterThanMid ? "small" : "medium"}
         value={status}
         onChange={handleStatusOnChange}
         exclusive
+        spacing={greaterThanMid ? 0.5 : 0}
       >
         {[
           { title: "Read", value: "Reading", icon: PlayArrowIcon },
           { title: "Pause", value: "Paused", icon: PauseIcon },
           { title: "Drop", value: "Dropped", icon: StopIcon },
-          { title: "Plan to Read", value: "Planning", icon: PlaylistAddIcon },
+          {
+            title: "Plan to Read",
+            value: "Planning",
+            icon: PlaylistAddIcon,
+          },
           { title: "Finish", value: "Finished", icon: DoneIcon },
         ].map((obj) => (
           <Tooltip
             key={obj.value}
             title={obj.title}
-            placement={greaterThanMid ? "left" : "bottom"}
+            placement={orientation === "vertical" ? "left" : "bottom"}
           >
             <ToggleButton value={obj.value} aria-label={obj.value}>
               <obj.icon />
             </ToggleButton>
           </Tooltip>
         ))}
-      </ToggleButtonGroup>
+      </StyledToggleButtonGroup>
     </Box>
   );
 };
@@ -117,4 +102,5 @@ MediaStatus.propTypes = {
   mediaObj: PropTypes.object.isRequired,
   apiFunctions: PropTypes.object.isRequired,
   mediaUniqueIdentifier: PropTypes.string.isRequired,
+  orientation: PropTypes.string.isRequired,
 };
