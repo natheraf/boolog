@@ -32,6 +32,7 @@ export const MediaStatus = ({
 
   React.useEffect(() => {
     if (mediaUniqueIdentifier === "isbn") {
+      setStatus(null);
       apiFunctions
         .getBookStatus(mediaObj, mediaUniqueIdentifier)
         .then((res) => setStatus(res))
