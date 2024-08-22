@@ -50,7 +50,7 @@ const test = () => {
 export const openDatabase = async (name, version, crudFn) => {
   let db;
   try {
-    db = await connect(userDataDB, userDataDBVersion);
+    db = await connect(name, version);
     await crudFn(db);
   } finally {
     if (db) {
