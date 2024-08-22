@@ -29,10 +29,12 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
     if (size === "large") {
       return {
         maxWidth: "800px",
+        minWidth: { md: "800px" },
       };
     } else {
       return {
         maxWidth: "600px",
+        minWidth: { md: "600px" },
       };
     }
   });
