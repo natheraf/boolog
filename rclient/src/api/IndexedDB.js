@@ -30,23 +30,6 @@ const userDataDBOnupgradeneeded = function (event) {
   }
 };
 
-const test = () => {
-  addBook({
-    title: "testTitle15",
-    author: "testAuthor15",
-    publisher: "testPublisher15",
-    year: "testYear15",
-    isbn: "testISBN15",
-    cover_url: "testCover_url15",
-    createdAt: "testCreatedAt15",
-    updatedAt: "testUpdatedAt15",
-    deleted: "testDeleted15",
-    apiSource: "testApiSource15",
-    apiEntry: { test: "testApiEntry15" },
-    interesting: true,
-  });
-};
-
 export const openDatabase = async (name, version, crudFn) => {
   let db;
   try {
