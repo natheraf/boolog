@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import PropTypes from "prop-types";
 
 export const DeleteMediaDialog = ({
   openDeleteAlert,
@@ -50,4 +51,12 @@ export const DeleteMediaDialog = ({
       </DialogActions>
     </Dialog>
   );
+};
+
+DeleteMediaDialog.propTypes = {
+  mediaObj: PropTypes.object.isRequired,
+  apiFunctions: PropTypes.object.isRequired,
+  mediaUniqueIdentifier: PropTypes.string.isRequired,
+  openDeleteAlert: PropTypes.bool.isRequired,
+  setOpenDeleteAlert: PropTypes.func.isRequired,
 };
