@@ -2,10 +2,8 @@ import * as React from "react";
 import { useTheme } from "@emotion/react";
 import {
   Box,
-  Divider,
   Grid,
   Grow,
-  IconButton,
   Paper,
   Stack,
   Typography,
@@ -15,8 +13,6 @@ import { MediaStatus } from "./MediaStatus";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import LinkIcon from "@mui/icons-material/Link";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { MediaEdit } from "./MediaEdit";
 
 const printArray = (arr) => {
@@ -46,14 +42,13 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
       };
     }
   });
-  // console.log("test") runs 3 times for some reason? should be fine cause external api only calls once
 
   return (
     <Grid container direction={"row"} justifyContent={"center"} gap={2}>
       {objectArray?.items?.map((dataObject, index) => (
-        <Grid item key={dataObject.id}>
+        <Grid item key={dataObject.id ?? dataObject.isbn}>
           <Grow
-            in={objectArray.total_items > 0}
+            in={objectArray.items.length > 0}
             // style={{
             //   transformOrigin: "0 0 0",
             // }}
