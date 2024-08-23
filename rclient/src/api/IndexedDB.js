@@ -121,6 +121,7 @@ const setBookStatusHelper = (db, obj, uid) =>
     };
   });
 
+// Gets book status from search book result
 export const getBookStatus = (obj) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
     getBookStatusHelper(db, obj)
