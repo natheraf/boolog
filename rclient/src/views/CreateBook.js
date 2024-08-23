@@ -28,6 +28,9 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import { addBook } from "../api/IndexedDB";
 import PropTypes from "prop-types";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import { DynamicButton } from "../components/DynamicButton";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -40,15 +43,30 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
-  const [bookObject, setBookObject] = React.useState(
-    editBookObject ?? {
+  const [bookObject, setBookObject] = React.useState({
+    status: undefined,
+    type: undefined,
+  });
+  const [restorableBookObject, setRestorableBookObject] = React.useState(null);
+
+  const handleClearAll = () => {
+    setBookObject({
       status: undefined,
       type: undefined,
-    }
-  );
+    });
+    setRestorableBookObject(bookObject);
+  };
+
+  const handleUndoClear = () => {
+    setBookObject(restorableBookObject);
+    setRestorableBookObject(null);
+  };
 
   const handleClose = (event, reason) => {
     setOpen(false);
+    if (editBookObject === undefined) {
+      handleClearAll();
+    }
   };
 
   const handleSave = () => {
@@ -70,6 +88,7 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
   };
 
   const handleOnChangeProperty = (key) => (event, value) => {
+    setRestorableBookObject(null);
     if (value !== null) {
       setBookObject((prev) => ({
         ...prev,
@@ -158,6 +177,12 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
     return keys;
   };
 
+  React.useEffect(() => {
+    if (editBookObject) {
+      setBookObject(editBookObject);
+    }
+  }, [editBookObject]);
+
   return (
     <Dialog
       maxWidth={"xl"}
@@ -182,32 +207,56 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
               <CloseIcon />
             </IconButton>
           </Tooltip>
-          <Typography variant="h6">Create Entry</Typography>
-          <Tooltip
-            title={
-              !bookObject.type ||
-              !bookObject.status ||
-              !bookObject.title?.length > 0
-                ? "Required: Type, Status, and Title"
-                : ""
-            }
-          >
-            <Box>
-              <Button
+          <Typography variant="h6">
+            {editBookObject === undefined ? "Create Entry" : "Edit Entry"}
+          </Typography>
+          <Stack direction={"row"} spacing={2}>
+            {restorableBookObject === null ? (
+              <DynamicButton
                 color="inherit"
-                onClick={handleSave}
-                endIcon={<SaveIcon />}
+                onClick={handleClearAll}
+                endIcon={<DeleteIcon />}
                 sx={{ alignItems: "center" }}
-                disabled={
-                  !bookObject.type ||
-                  !bookObject.status ||
-                  !bookObject.title?.length > 0
-                }
-              >
-                save
-              </Button>
-            </Box>
-          </Tooltip>
+                icon={<DeleteIcon />}
+                text={"Clear All"}
+              />
+            ) : (
+              <DynamicButton
+                color="inherit"
+                onClick={handleUndoClear}
+                endIcon={<RestoreFromTrashIcon />}
+                sx={{ alignItems: "center" }}
+                icon={<RestoreFromTrashIcon />}
+                text={"Restore"}
+              />
+            )}
+            <Divider orientation="vertical" flexItem />
+            <Tooltip
+              title={
+                !bookObject.type ||
+                !bookObject.status ||
+                !bookObject.title?.length > 0
+                  ? "Required: Type, Status, and Title"
+                  : ""
+              }
+            >
+              <Box>
+                <DynamicButton
+                  color="inherit"
+                  onClick={handleSave}
+                  endIcon={<SaveIcon />}
+                  sx={{ alignItems: "center" }}
+                  disabled={
+                    !bookObject.type ||
+                    !bookObject.status ||
+                    !bookObject.title?.length > 0
+                  }
+                  icon={<SaveIcon />}
+                  text={"save"}
+                />
+              </Box>
+            </Tooltip>
+          </Stack>
         </Toolbar>
       </AppBar>
       <Stack alignItems={"center"} spacing={2} p={2}>
@@ -258,16 +307,7 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
             </ToggleButtonGroup>
           </Stack>
         </Stack>
-        <Stack
-          direction={"column"}
-          spacing={2}
-          sx={{
-            display:
-              bookObject.type !== undefined && bookObject.status !== undefined
-                ? "inherit"
-                : "none",
-          }}
-        >
+        <Stack direction={"column"} spacing={2}>
           <Divider>Shared Properties</Divider>
           <Grid
             gap={2}
