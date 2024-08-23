@@ -62,11 +62,6 @@ export const BookLog = () => {
       label: "Pages: ",
       variant: "body2",
     },
-    {
-      key: "isbn",
-      label: "ISBN: ",
-      variant: "body2",
-    },
   ];
 
   const actionArea = {
