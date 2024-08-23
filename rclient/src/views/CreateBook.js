@@ -1,10 +1,10 @@
 import * as React from "react";
 import {
   AppBar,
+  Box,
   Button,
   Dialog,
   Divider,
-  Fade,
   Grid,
   IconButton,
   Slide,
@@ -36,18 +36,19 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const CreateBook = ({ open, setOpen }) => {
+export const CreateBook = ({ open, setOpen, editBookObject }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
-  const [bookObject, setBookObject] = React.useState({
-    status: null,
-    type: null,
-  });
+  const [bookObject, setBookObject] = React.useState(
+    editBookObject ?? {
+      status: undefined,
+      type: undefined,
+    }
+  );
 
   const handleClose = (event, reason) => {
     setOpen(false);
-    setBookObject((prev) => ({ ...prev, status: null, type: null }));
   };
 
   const handleSave = () => {
@@ -182,19 +183,31 @@ export const CreateBook = ({ open, setOpen }) => {
             </IconButton>
           </Tooltip>
           <Typography variant="h6">Create Entry</Typography>
-          <Button
-            color="inherit"
-            onClick={handleSave}
-            endIcon={<SaveIcon />}
-            sx={{ alignItems: "center" }}
-            disabled={
+          <Tooltip
+            title={
               !bookObject.type ||
               !bookObject.status ||
               !bookObject.title?.length > 0
+                ? "Required: Type, Status, and Title"
+                : ""
             }
           >
-            save
-          </Button>
+            <Box>
+              <Button
+                color="inherit"
+                onClick={handleSave}
+                endIcon={<SaveIcon />}
+                sx={{ alignItems: "center" }}
+                disabled={
+                  !bookObject.type ||
+                  !bookObject.status ||
+                  !bookObject.title?.length > 0
+                }
+              >
+                save
+              </Button>
+            </Box>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Stack alignItems={"center"} spacing={2} p={2}>
@@ -250,7 +263,7 @@ export const CreateBook = ({ open, setOpen }) => {
           spacing={2}
           sx={{
             display:
-              bookObject.type !== null && bookObject.status !== null
+              bookObject.type !== undefined && bookObject.status !== undefined
                 ? "inherit"
                 : "none",
           }}
@@ -359,4 +372,5 @@ export const CreateBook = ({ open, setOpen }) => {
 CreateBook.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
+  editBookObject: PropTypes.object,
 };
