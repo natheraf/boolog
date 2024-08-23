@@ -33,7 +33,7 @@ export const MediaEdit = ({
       <CreateBook
         open={openEditor}
         setOpen={setOpenEditor}
-        editBookObject={mediaObj}
+        editBookObject={JSON.parse(JSON.stringify(mediaObj))}
       />
       {greaterThanSmall ? <Divider orientation="vertical" flexItem /> : null}
       <IconButton onClick={handleOpenEditor}>
