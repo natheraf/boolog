@@ -5,6 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useTheme } from "@emotion/react";
 import PropTypes from "prop-types";
 import { DeleteMediaDialog } from "./DeleteMediaDialog";
+import { CreateBook } from "../views/CreateBook";
 
 export const MediaEdit = ({
   mediaObj,
@@ -14,6 +15,11 @@ export const MediaEdit = ({
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
+  const [openEditor, setOpenEditor] = React.useState(false);
+
+  const handleOpenEditor = () => {
+    setOpenEditor(true);
+  };
 
   return (
     <Stack direction="row" gap={1}>
@@ -24,8 +30,13 @@ export const MediaEdit = ({
         mediaObj={mediaObj}
         mediaUniqueIdentifier={mediaUniqueIdentifier}
       />
+      <CreateBook
+        open={openEditor}
+        setOpen={setOpenEditor}
+        editBookObject={mediaObj}
+      />
       {greaterThanSmall ? <Divider orientation="vertical" flexItem /> : null}
-      <IconButton>
+      <IconButton onClick={handleOpenEditor}>
         <EditIcon />
       </IconButton>
       <IconButton onClick={() => setOpenDeleteAlert(true)}>
