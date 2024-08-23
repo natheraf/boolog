@@ -23,7 +23,13 @@ import { CreateBook } from "./CreateBook";
 
 export const BookLog = () => {
   const theme = useTheme();
-  const [library, setLibrary] = React.useState();
+  const [library, setLibrary] = React.useState({
+    Reading: { items: [], total_items: 0 },
+    Paused: { items: [], total_items: 0 },
+    Planning: { items: [], total_items: 0 },
+    Dropped: { items: [], total_items: 0 },
+    Finished: { items: [], total_items: 0 },
+  });
   const [openEditor, setOpenEditor] = React.useState(false);
   const [accordionSettings, setAccordionSettings] = React.useState(
     localStorage.getItem("BookLogAccordionSettings") !== null
@@ -36,45 +42,97 @@ export const BookLog = () => {
           Finished: { defaultExpanded: true },
         }
   );
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  const keysData = [
+    { key: "title", label: "", variant: "h5" },
+    { key: "authors", label: "by ", variant: "h6" },
+    {
+      key: "publisher",
+      label: "Published by ",
+      variant: "subtitle1",
+    },
+    {
+      key: "publish_year",
+      label: "Published in ",
+      variant: "body2",
+    },
+    {
+      key: "number_of_pages",
+      label: "Pages: ",
+      variant: "body2",
+    },
+    {
+      key: "isbn",
+      label: "ISBN: ",
+      variant: "body2",
+    },
+  ];
+
+  const actionArea = {
+    api: indexedDBBooksInterface,
+    mediaUniqueIdentifier: "id",
+    position: "bottom",
+    inLibrary: true,
+  };
+
+  const statuses = [
+    {
+      status: "Reading",
+      label: "Reading",
+      labelIcon: <PlayArrowIcon />,
+    },
+    {
+      status: "Paused",
+      label: "Paused",
+      labelIcon: <PauseIcon />,
+    },
+    {
+      status: "Planning",
+      label: "Planning to Read",
+      labelIcon: <PlaylistAddIcon />,
+    },
+    {
+      status: "Dropped",
+      label: "Dropped",
+      labelIcon: <StopIcon />,
+    },
+    {
+      status: "Finished",
+      label: "Finished",
+      labelIcon: <DoneIcon />,
+    },
+  ];
 
   React.useEffect(() => {
     getAllBooks()
-      .then((res) => setLibrary({ items: res, total_items: res.length }))
+      .then((res) => {
+        const obj = {
+          Reading: { items: [], total_items: 0 },
+          Paused: { items: [], total_items: 0 },
+          Planning: { items: [], total_items: 0 },
+          Dropped: { items: [], total_items: 0 },
+          Finished: { items: [], total_items: 0 },
+        };
+        for (const item of res) {
+          obj[item.status].items.push(item);
+        }
+        setLibrary(obj);
+        setIsLoading(false);
+      })
       .catch((error) => console.log(error));
   }, []);
+
+  if (isLoading) {
+    return <Box />;
+  }
 
   return (
     <Box>
       <CollapsibleFab setOpenEditor={setOpenEditor} />
       <CreateBook open={openEditor} setOpen={setOpenEditor} />
       <Stack>
-        {[
-          {
-            status: "Reading",
-            label: "Reading",
-            labelIcon: <PlayArrowIcon />,
-          },
-          {
-            status: "Paused",
-            label: "Paused",
-            labelIcon: <PauseIcon />,
-          },
-          {
-            status: "Planning",
-            label: "Planning to Read",
-            labelIcon: <PlaylistAddIcon />,
-          },
-          {
-            status: "Dropped",
-            label: "Dropped",
-            labelIcon: <StopIcon />,
-          },
-          {
-            status: "Finished",
-            label: "Finished",
-            labelIcon: <DoneIcon />,
-          },
-        ].map((obj, index) => (
+        {statuses.map((obj, index) => (
           <Slide key={obj.status} timeout={300 * index + 500} in={true}>
             <Accordion defaultExpanded={true}>
               <AccordionSummary
@@ -89,44 +147,9 @@ export const BookLog = () => {
               <AccordionDetails>
                 <Paper elevation={0} sx={{ p: 2 }}>
                   <Tiles
-                    objectArray={{
-                      items: library?.items?.filter(
-                        (bookObj) => bookObj.status === obj.status
-                      ),
-                      total_items: library?.items?.filter(
-                        (bookObj) => bookObj.status === obj.status
-                      ).length,
-                    }}
-                    keysData={[
-                      { key: "title", label: "", variant: "h5" },
-                      { key: "authors", label: "by ", variant: "h6" },
-                      {
-                        key: "publisher",
-                        label: "Published by ",
-                        variant: "subtitle1",
-                      },
-                      {
-                        key: "publish_year",
-                        label: "Published in ",
-                        variant: "body2",
-                      },
-                      {
-                        key: "number_of_pages",
-                        label: "Pages: ",
-                        variant: "body2",
-                      },
-                      {
-                        key: "isbn",
-                        label: "ISBN: ",
-                        variant: "body2",
-                      },
-                    ]}
-                    actionArea={{
-                      api: indexedDBBooksInterface,
-                      mediaUniqueIdentifier: "id",
-                      position: "bottom",
-                      inLibrary: true,
-                    }}
+                    objectArray={library[obj.status]}
+                    keysData={keysData}
+                    actionArea={actionArea}
                   />
                 </Paper>
               </AccordionDetails>
