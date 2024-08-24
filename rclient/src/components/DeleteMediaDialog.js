@@ -12,6 +12,7 @@ export const DeleteMediaDialog = ({
   openDeleteAlert,
   setOpenDeleteAlert,
   apiFunctions,
+  setStatus,
   mediaObj,
   mediaUniqueIdentifier,
 }) => {
@@ -43,6 +44,7 @@ export const DeleteMediaDialog = ({
           onClick={() => {
             setOpenDeleteAlert(false);
             apiFunctions.deleteBook(mediaObj, mediaUniqueIdentifier);
+            setStatus(null);
           }}
           autoFocus
         >
@@ -56,6 +58,7 @@ export const DeleteMediaDialog = ({
 DeleteMediaDialog.propTypes = {
   mediaObj: PropTypes.object.isRequired,
   apiFunctions: PropTypes.object.isRequired,
+  setStatus: PropTypes.object.isRequired,
   mediaUniqueIdentifier: PropTypes.string.isRequired,
   openDeleteAlert: PropTypes.bool.isRequired,
   setOpenDeleteAlert: PropTypes.func.isRequired,
