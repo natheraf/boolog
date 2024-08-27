@@ -112,6 +112,7 @@ const setBookHelper = (db, uid, data) =>
     const objectStore = transaction.objectStore("books");
     let request;
     if (uid === "id") {
+      data.id = data.id ?? -1;
       request = objectStore.get(data.id);
     } else if (uid === "isbn") {
       request = objectStore.index("isbn").get(data.isbn[0]);
@@ -128,6 +129,7 @@ const setBookHelper = (db, uid, data) =>
         console.log("no book found to update, adding book...");
         addBook(data);
       }
+      resolve();
     };
   });
 
