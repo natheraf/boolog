@@ -63,13 +63,19 @@ const addBookHelper = (db, obj) =>
     };
   });
 
-export const getAllBooks = () => {
+/**
+ * Get all books that match key value pairs
+ * @param {String} [key] leave blank to get all books
+ * @param {String} [value]
+ * @returns {Promise<Array>}
+ */
+export const getAllBooks = (key, value) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getAllBooksHelper(db)
+    getAllBooksHelper(db, key, value)
   );
 };
 
-const getAllBooksHelper = (db) =>
+const getAllBooksHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readonly");
     transaction.oncomplete = (event) => {
@@ -80,18 +86,23 @@ const getAllBooksHelper = (db) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    objectStore.getAll().onsuccess = (event) => {
-      resolve(event.target.result);
-    };
+    if (key === undefined) {
+      objectStore.getAll().onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+    } else if (value === undefined) {
+      reject(new Error("if key is defined, value cannot be undefined"));
+    } else {
+      objectStore.index(key).getAll(value).onsuccess = (res) => resolve(res);
+    }
   });
 
-export const setBookStatus = (obj, uid) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    setBookStatusHelper(db, obj, uid)
+export const setBook = (uid, data) =>
+  openDatabase(userDataDB, userDataDBVersion, (db) =>
+    setBookHelper(db, uid, data)
   );
-};
 
-const setBookStatusHelper = (db, obj, uid) =>
+const setBookHelper = (db, uid, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
@@ -100,35 +111,38 @@ const setBookStatusHelper = (db, obj, uid) =>
     };
     const objectStore = transaction.objectStore("books");
     let request;
-    if (uid === "isbn") {
-      const index = objectStore.index("isbn");
-      const isbn = obj.isbn[0];
-      request = index.get(isbn);
+    if (uid === "id") {
+      request = objectStore.get(data.id);
+    } else if (uid === "isbn") {
+      request = objectStore.index("isbn").get(data.isbn[0]);
     } else {
-      request = objectStore.get(obj.id);
+      request = objectStore.index(uid).get(data[uid]);
     }
     request.onsuccess = (event) => {
-      const data = event.target.result;
-      if (data !== undefined) {
-        data.status = obj.status;
+      const result = event.target.result;
+      if (result !== undefined) {
+        data.id = result.id;
         const requestUpdate = objectStore.put(data);
-        requestUpdate.onsuccess = () => console.log("updated book status");
-        requestUpdate.onerror = () =>
-          console.log("update book status error", requestUpdate.error);
+        requestUpdate.onsuccess = () => console.log("updated book");
       } else {
-        addBook(obj);
+        console.log("no book found to update, adding book...");
+        addBook(data);
       }
     };
   });
 
-// Gets book status from search book result
-export const getBookStatus = (obj) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getBookStatusHelper(db, obj)
+/**
+ * Get a single book that have the key and value given
+ * @param {String} key Do not pass in id
+ * @param {String} value
+ * @returns {Promise<object>} Array of books
+ */
+export const getBook = (key, value) =>
+  openDatabase(userDataDB, userDataDBVersion, (db) =>
+    getBookHelper(db, key, value)
   );
-};
 
-const getBookStatusHelper = (db, obj) =>
+const getBookHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
@@ -136,19 +150,17 @@ const getBookStatusHelper = (db, obj) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    const index = objectStore.index("isbn");
-    if (obj.isbn !== undefined) {
-      obj.isbn.forEach((isbn) => {
-        const request = index.get(isbn);
-        request.onsuccess = (event) => {
-          const data = event.target.result;
-          if (data !== undefined) {
-            resolve(data.status);
-          }
-        };
-      });
+    if (value === undefined) {
+      reject(new Error("value cannot be empty or undefined if key isn't"));
     } else {
-      // isbn not found
+      const index = objectStore.index(key);
+      const request = index.get(value);
+      request.onsuccess = (event) => {
+        const data = event.target.result;
+        if (data !== undefined) {
+          resolve(data);
+        }
+      };
     }
   });
 
@@ -180,8 +192,8 @@ const deleteBookHelper = (db, obj, uid) =>
 
 export const indexedDBBooksInterface = {
   addBook,
+  getBook,
   getAllBooks,
-  setBookStatus,
-  getBookStatus,
+  setBook,
   deleteBook,
 };

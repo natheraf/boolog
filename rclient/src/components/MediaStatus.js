@@ -36,8 +36,8 @@ export const MediaStatus = ({
     if (mediaUniqueIdentifier === "isbn") {
       setStatus(null);
       apiFunctions
-        .getBookStatus(mediaObj, mediaUniqueIdentifier)
-        .then((res) => setStatus(res))
+        .getBook("isbn", mediaObj.isbn[0])
+        .then((res) => setStatus(res.status))
         .catch((error) => console.log(error));
     } else {
       setStatus(mediaObj.status);
@@ -49,7 +49,7 @@ export const MediaStatus = ({
       setOpenDeleteAlert(true);
     } else {
       mediaObj.status = value;
-      apiFunctions.setBookStatus(mediaObj, mediaUniqueIdentifier);
+      apiFunctions.setBook(mediaUniqueIdentifier, mediaObj);
       setStatus(value);
     }
   };
