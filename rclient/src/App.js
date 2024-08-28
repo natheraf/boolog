@@ -15,21 +15,16 @@ export const ColorModeContext = React.createContext({
 
 function App() {
   const [mode, setMode] = React.useState(
-    localStorage.getItem("darkMode") === undefined ||
-      localStorage.getItem("darkMode") === "light"
-      ? "light"
-      : "dark"
+    localStorage.getItem("darkMode") === "dark" ? "dark" : "light"
   );
 
   const colorMode = React.useMemo(
     () => ({
       toggleColorMode: () => {
         setMode((prevMode) => {
-          localStorage.setItem(
-            "darkMode",
-            prevMode === "light" ? "dark" : "light"
-          );
-          return prevMode === "light" ? "dark" : "light";
+          const newMode = prevMode === 'light' ? 'dark' : 'light';
+          localStorage.setItem("darkMode", newMode);
+          return newMode;
         });
       },
     }),
@@ -41,10 +36,9 @@ function App() {
       createTheme({
         palette: {
           mode,
-          ...(mode === "light" ? {} : { mode: "dark" }),
         },
       }),
-    []
+    [mode]
   );
 
   return (

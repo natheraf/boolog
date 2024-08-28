@@ -1,14 +1,23 @@
-import { AppBar, Box, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import React from 'react';
+import { AppBar, Box, Grid, Stack, Toolbar, Typography, IconButton } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
+
+import { useTheme } from "@mui/material/styles";
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { ColorModeContext } from "../App";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const { toggleColorMode } = React.useContext(ColorModeContext);
+  const theme = useTheme();
 
   return (
     <AppBar
       sx={{
         position: "fixed",
         top: 0,
+        width: "100%",
       }}
     >
       <Toolbar>
@@ -51,6 +60,9 @@ export const Header = () => {
             >
               <Typography variant="h6">Login</Typography>
             </Link>
+            <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
+              {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
           </Stack>
         </Grid>
       </Toolbar>
