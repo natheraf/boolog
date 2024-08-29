@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  Box,
   Button,
   Collapse,
   FormControl,
@@ -44,6 +45,7 @@ export const SearchBook = () => {
     React.useState(defaultSearchApi);
   const [performNewSearch, setPerformNewSearch] = React.useState(true);
   const defaultSearch = "The Empty Box and Zeroth Maria";
+  const topResultRef = React.useRef(null);
 
   const handleSearch = React.useCallback(() => {
     if (performNewSearch === false) {
@@ -114,9 +116,9 @@ export const SearchBook = () => {
       setRenderSearchResultsApi(selApi);
       setIsSearching(false);
       setPerformNewSearch(false);
-      window.scrollTo({
-        top: 0,
+      topResultRef.current.scrollIntoView({
         behavior: "smooth",
+        block: "start",
       });
     });
   }, [performNewSearch, selApi, searchPage, searchSortType, searchRowsPerPage]);
@@ -228,7 +230,7 @@ export const SearchBook = () => {
 
   return (
     <Grid container justifyContent="center" alignItems="flex-start" spacing={2}>
-      <Paper sx={{ position: "sticky", top: "88px", zIndex: 2 }}>
+      <Paper>
         <Grid item sx={{ maxWidth: "40rem" }} m={2}>
           <Stack spacing={2}>
             <Typography variant="h3">Search Books</Typography>
@@ -343,6 +345,13 @@ export const SearchBook = () => {
         </Grid>
       </Paper>
       <Grid item sx={{ width: "50rem" }}>
+        <Box
+          ref={topResultRef}
+          sx={{
+            position: "relative",
+            top: -70,
+          }}
+        />
         <Stack spacing={2} p={2}>
           <FormControl>
             <InputLabel id="selSortLabel">Sort By</InputLabel>
