@@ -1,16 +1,5 @@
 import * as React from "react";
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  ToggleButton,
-  Tooltip,
-  useMediaQuery,
-} from "@mui/material";
+import { Box, ToggleButton, Tooltip, useMediaQuery } from "@mui/material";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
@@ -29,18 +18,19 @@ export const MediaStatus = ({
 }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
-  const [status, setStatus] = React.useState(mediaObj.status);
+  const [libraryEquivalentMediaObj, setLibraryEquivalentMediaObj] =
+    React.useState({ status: null });
   const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
 
   React.useEffect(() => {
     if (mediaUniqueIdentifier === "isbn") {
-      setStatus(null);
+      setLibraryEquivalentMediaObj({ status: null });
       apiFunctions
         .getBook("isbn", mediaObj.isbn[0])
-        .then((res) => setStatus(res.status))
+        .then((res) => setLibraryEquivalentMediaObj(res))
         .catch((error) => console.log(error));
     } else {
-      setStatus(mediaObj.status);
+      setLibraryEquivalentMediaObj(mediaObj);
     }
   }, [apiFunctions, mediaObj, mediaUniqueIdentifier]);
 
@@ -48,9 +38,9 @@ export const MediaStatus = ({
     if (value === null) {
       setOpenDeleteAlert(true);
     } else {
-      mediaObj.status = value;
-      apiFunctions.setBook(mediaUniqueIdentifier, mediaObj);
-      setStatus(value);
+      libraryEquivalentMediaObj.status = value;
+      apiFunctions.setBook(libraryEquivalentMediaObj);
+      setLibraryEquivalentMediaObj((prev) => ({ ...prev, status: value }));
     }
   };
 
@@ -59,15 +49,14 @@ export const MediaStatus = ({
       <DeleteMediaDialog
         openDeleteAlert={openDeleteAlert}
         setOpenDeleteAlert={setOpenDeleteAlert}
-        setStatus={setStatus}
         apiFunctions={apiFunctions}
-        mediaObj={mediaObj}
+        mediaObj={libraryEquivalentMediaObj}
         mediaUniqueIdentifier={mediaUniqueIdentifier}
       />
       <StyledToggleButtonGroup
         orientation={orientation}
         size={greaterThanMid ? "small" : "medium"}
-        value={status}
+        value={libraryEquivalentMediaObj.status}
         onChange={handleStatusOnChange}
         exclusive
         spacing={greaterThanMid ? 0.5 : 0}
