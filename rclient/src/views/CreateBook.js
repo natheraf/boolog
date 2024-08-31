@@ -26,7 +26,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
-import { setBook } from "../api/IndexedDB";
+import { isISBNDuplicate, setBook } from "../api/IndexedDB";
 import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
@@ -82,8 +82,8 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
           ? bookObject[key]
           : bookObject[key]?.split(",").map((isbn) => isbn.trim()))
     );
-    setBook("id", bookObject)
-      .then((res) => handleClose())
+    setBook(bookObject)
+      .then(() => handleClose())
       .catch((error) => console.log(error));
   };
 
