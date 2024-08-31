@@ -42,7 +42,7 @@ export const openDatabase = async (name, version, crudFn) => {
   }
 };
 
-export const addBook = (obj) => {
+const addBook = (obj) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
     addBookHelper(db, obj)
   );
@@ -97,12 +97,31 @@ const getAllBooksHelper = (db, key, value) =>
     }
   });
 
-export const setBook = (uid, data) =>
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
-    setBookHelper(db, uid, data)
-  );
+export const setBook = (data) =>
+  new Promise((resolve, reject) => {
+    if (data.isbn !== undefined) {
+      Promise.all(data.isbn.map((isbn) => isISBNDuplicate(data.id, isbn))).then(
+        (arrayOfResults) => {
+          const duplicateISBNs = data.isbn.filter(
+            (isbn, index) => arrayOfResults[index]
+          );
+          if (duplicateISBNs.length > 0) {
+            console.log(`Duplicate ISBNs found: ${duplicateISBNs}`);
+          } else {
+            openDatabase(userDataDB, userDataDBVersion, (db) =>
+              setBookHelper(db, data)
+            ).then(resolve);
+          }
+        }
+      );
+    } else {
+      openDatabase(userDataDB, userDataDBVersion, (db) =>
+        setBookHelper(db, data)
+      ).then(resolve);
+    }
+  });
 
-const setBookHelper = (db, uid, data) =>
+const setBookHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
@@ -111,14 +130,8 @@ const setBookHelper = (db, uid, data) =>
     };
     const objectStore = transaction.objectStore("books");
     let request;
-    if (uid === "id") {
-      data.id = data.id ?? -1;
-      request = objectStore.get(data.id);
-    } else if (uid === "isbn") {
-      request = objectStore.index("isbn").get(data.isbn[0]);
-    } else {
-      request = objectStore.index(uid).get(data[uid]);
-    }
+    data.id = data.id ?? -1;
+    request = objectStore.get(data.id);
     request.onsuccess = (event) => {
       const result = event.target.result;
       if (result !== undefined) {
@@ -192,8 +205,33 @@ const deleteBookHelper = (db, obj, uid) =>
     };
   });
 
+/**
+ *
+ * @param {String} id
+ * @param {String} ISBN
+ * @returns {Boolean} Is duplicate?
+ */
+const isISBNDuplicate = (id, ISBN) =>
+  openDatabase(userDataDB, userDataDBVersion, (db) =>
+    isISBNDuplicateHelper(db, id, ISBN)
+  );
+
+const isISBNDuplicateHelper = (db, id, ISBN) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("books", "readwrite");
+    transaction.onerror = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
+    const objectStore = transaction.objectStore("books");
+    const index = objectStore.index("isbn");
+    index.get(ISBN).onsuccess = (event) => {
+      const data = event.target.result;
+      resolve(data === undefined ? false : data.id !== id);
+    };
+  });
+
 export const indexedDBBooksInterface = {
-  addBook,
   getBook,
   getAllBooks,
   setBook,
