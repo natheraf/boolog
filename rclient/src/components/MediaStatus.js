@@ -27,7 +27,7 @@ export const MediaStatus = ({
       setLibraryEquivalentMediaObj({ status: null });
       apiFunctions
         .getBook("isbn", mediaObj.isbn[0])
-        .then((res) => setLibraryEquivalentMediaObj(res))
+        .then((res) => setLibraryEquivalentMediaObj(res ?? mediaObj))
         .catch((error) => console.log(error));
     } else {
       setLibraryEquivalentMediaObj(mediaObj);
