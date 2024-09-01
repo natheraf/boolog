@@ -129,9 +129,8 @@ const setBookHelper = (db, data) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    let request;
     data.id = data.id ?? -1;
-    request = objectStore.get(data.id);
+    const request = objectStore.get(data.id);
     request.onsuccess = (event) => {
       const result = event.target.result;
       if (result !== undefined) {
@@ -140,6 +139,7 @@ const setBookHelper = (db, data) =>
         requestUpdate.onsuccess = () => console.log("updated book");
       } else {
         console.log("no book found to update, adding book...");
+        delete data.id;
         addBook(data);
       }
       resolve();
@@ -172,9 +172,7 @@ const getBookHelper = (db, key, value) =>
       const request = index.get(value);
       request.onsuccess = (event) => {
         const data = event.target.result;
-        if (data !== undefined) {
-          resolve(data);
-        }
+        resolve(data);
       };
     }
   });
