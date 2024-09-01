@@ -52,6 +52,7 @@ export const MediaStatus = ({
         apiFunctions={apiFunctions}
         mediaObj={libraryEquivalentMediaObj}
         mediaUniqueIdentifier={mediaUniqueIdentifier}
+        setMediaObj={setLibraryEquivalentMediaObj}
       />
       <StyledToggleButtonGroup
         orientation={orientation}
