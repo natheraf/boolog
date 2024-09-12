@@ -15,6 +15,7 @@ export const DeleteMediaDialog = ({
   setStatus,
   mediaObj,
   mediaUniqueIdentifier,
+  setMediaObj,
 }) => {
   return (
     <Dialog
@@ -62,4 +63,5 @@ DeleteMediaDialog.propTypes = {
   mediaUniqueIdentifier: PropTypes.string.isRequired,
   openDeleteAlert: PropTypes.bool.isRequired,
   setOpenDeleteAlert: PropTypes.func.isRequired,
+  setMediaObj: PropTypes.func.isRequired,
 };

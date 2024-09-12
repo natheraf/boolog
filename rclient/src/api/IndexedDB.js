@@ -42,7 +42,7 @@ export const openDatabase = async (name, version, crudFn) => {
   }
 };
 
-export const addBook = (obj) => {
+const addBook = (obj) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
     addBookHelper(db, obj)
   );
@@ -63,13 +63,19 @@ const addBookHelper = (db, obj) =>
     };
   });
 
-export const getAllBooks = () => {
+/**
+ * Get all books that match key value pairs
+ * @param {String} [key] leave blank to get all books
+ * @param {String} [value]
+ * @returns {Promise<Array>}
+ */
+export const getAllBooks = (key, value) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getAllBooksHelper(db)
+    getAllBooksHelper(db, key, value)
   );
 };
 
-const getAllBooksHelper = (db) =>
+const getAllBooksHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readonly");
     transaction.oncomplete = (event) => {
@@ -80,55 +86,42 @@ const getAllBooksHelper = (db) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    objectStore.getAll().onsuccess = (event) => {
-      resolve(event.target.result);
-    };
-  });
-
-export const setBookStatus = (obj, uid) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    setBookStatusHelper(db, obj, uid)
-  );
-};
-
-const setBookStatusHelper = (db, obj, uid) =>
-  new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
-    transaction.onerror = (event) => {
-      console.error("Transaction Error", event);
-      reject(new Error(event));
-    };
-    const objectStore = transaction.objectStore("books");
-    let request;
-    if (uid === "isbn") {
-      const index = objectStore.index("isbn");
-      const isbn = obj.isbn[0];
-      request = index.get(isbn);
+    if (key === undefined) {
+      objectStore.getAll().onsuccess = (event) => {
+        resolve(event.target.result);
+      };
+    } else if (value === undefined) {
+      reject(new Error("if key is defined, value cannot be undefined"));
     } else {
-      request = objectStore.get(obj.id);
+      objectStore.index(key).getAll(value).onsuccess = (res) => resolve(res);
     }
-    request.onsuccess = (event) => {
-      const data = event.target.result;
-      if (data !== undefined) {
-        data.status = obj.status;
-        const requestUpdate = objectStore.put(data);
-        requestUpdate.onsuccess = () => console.log("updated book status");
-        requestUpdate.onerror = () =>
-          console.log("update book status error", requestUpdate.error);
-      } else {
-        addBook(obj);
-      }
-    };
   });
 
-// Gets book status from search book result
-export const getBookStatus = (obj) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
-    getBookStatusHelper(db, obj)
-  );
-};
+export const setBook = (data) =>
+  new Promise((resolve, reject) => {
+    if (data.isbn !== undefined) {
+      Promise.all(data.isbn.map((isbn) => isISBNDuplicate(data.id, isbn))).then(
+        (arrayOfResults) => {
+          const duplicateISBNs = data.isbn.filter(
+            (isbn, index) => arrayOfResults[index]
+          );
+          if (duplicateISBNs.length > 0) {
+            console.log(`Duplicate ISBNs found: ${duplicateISBNs}`);
+          } else {
+            openDatabase(userDataDB, userDataDBVersion, (db) =>
+              setBookHelper(db, data)
+            ).then(resolve);
+          }
+        }
+      );
+    } else {
+      openDatabase(userDataDB, userDataDBVersion, (db) =>
+        setBookHelper(db, data)
+      ).then(resolve);
+    }
+  });
 
-const getBookStatusHelper = (db, obj) =>
+const setBookHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
@@ -136,19 +129,51 @@ const getBookStatusHelper = (db, obj) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("books");
-    const index = objectStore.index("isbn");
-    if (obj.isbn !== undefined) {
-      obj.isbn.forEach((isbn) => {
-        const request = index.get(isbn);
-        request.onsuccess = (event) => {
-          const data = event.target.result;
-          if (data !== undefined) {
-            resolve(data.status);
-          }
-        };
-      });
+    data.id = data.id ?? -1;
+    const request = objectStore.get(data.id);
+    request.onsuccess = (event) => {
+      const result = event.target.result;
+      if (result !== undefined) {
+        data.id = result.id;
+        const requestUpdate = objectStore.put(data);
+        requestUpdate.onsuccess = () => console.log("updated book");
+      } else {
+        console.log("no book found to update, adding book...");
+        delete data.id;
+        addBook(data);
+      }
+      resolve();
+    };
+  });
+
+/**
+ * Get a single book that have the key and value given
+ * @param {String} key Do not pass in id
+ * @param {String} value
+ * @returns {Promise<object>} Array of books
+ */
+export const getBook = (key, value) =>
+  openDatabase(userDataDB, userDataDBVersion, (db) =>
+    getBookHelper(db, key, value)
+  );
+
+const getBookHelper = (db, key, value) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("books", "readwrite");
+    transaction.onerror = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
+    const objectStore = transaction.objectStore("books");
+    if (value === undefined) {
+      reject(new Error("value cannot be empty or undefined if key isn't"));
     } else {
-      // isbn not found
+      const index = objectStore.index(key);
+      const request = index.get(value);
+      request.onsuccess = (event) => {
+        const data = event.target.result;
+        resolve(data);
+      };
     }
   });
 
@@ -178,10 +203,35 @@ const deleteBookHelper = (db, obj, uid) =>
     };
   });
 
+/**
+ *
+ * @param {String} id
+ * @param {String} ISBN
+ * @returns {Boolean} Is duplicate?
+ */
+const isISBNDuplicate = (id, ISBN) =>
+  openDatabase(userDataDB, userDataDBVersion, (db) =>
+    isISBNDuplicateHelper(db, id, ISBN)
+  );
+
+const isISBNDuplicateHelper = (db, id, ISBN) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("books", "readwrite");
+    transaction.onerror = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
+    const objectStore = transaction.objectStore("books");
+    const index = objectStore.index("isbn");
+    index.get(ISBN).onsuccess = (event) => {
+      const data = event.target.result;
+      resolve(data === undefined ? false : data.id !== id);
+    };
+  });
+
 export const indexedDBBooksInterface = {
-  addBook,
+  getBook,
   getAllBooks,
-  setBookStatus,
-  getBookStatus,
+  setBook,
   deleteBook,
 };
