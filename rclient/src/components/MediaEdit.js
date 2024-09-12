@@ -29,7 +29,6 @@ export const MediaEdit = ({
         apiFunctions={apiFunctions}
         mediaObj={mediaObj}
         mediaUniqueIdentifier={mediaUniqueIdentifier}
-        setMediaObj={}
       />
       <CreateBook
         open={openEditor}
