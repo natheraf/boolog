@@ -121,7 +121,7 @@ export const SearchBook = () => {
       setIsSearching(false);
       setPerformNewSearch(false);
       topResultRef.current.scrollIntoView({
-        behavior: "smooth",
+        behavior: theme.transitions.reduceMotion ? "smooth" : "instant",
         block: "start",
       });
     });
@@ -310,7 +310,11 @@ export const SearchBook = () => {
                       in={useDetailedSearch}
                       style={{ transformOrigin: "0 0 0" }}
                       {...(useDetailedSearch
-                        ? { timeout: 400 * index + 800 }
+                        ? {
+                            timeout:
+                              (400 * index + 800) *
+                              theme.transitions.reduceMotion,
+                          }
                         : {})}
                     >
                       <TextField

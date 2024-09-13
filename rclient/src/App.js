@@ -9,23 +9,31 @@ import { Header } from "./components/Header";
 import { Home } from "./views/Home";
 import { BookLog } from "./views/BookLog";
 
-export const ColorModeContext = React.createContext({
+export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
+  toggleReduceMotion: () => {},
 });
 
 function App() {
   const [mode, setMode] = React.useState(
     localStorage.getItem("darkMode") === "dark" ? "dark" : "light"
   );
+  const [reduceMotion, setReduceMotion] = React.useState(
+    localStorage.getItem("reduceMotion") === "false" ? false : true
+  );
 
-  const colorMode = React.useMemo(
+  const themeModes = React.useMemo(
     () => ({
       toggleColorMode: () => {
         setMode((prevMode) => {
-          const newMode = prevMode === 'light' ? 'dark' : 'light';
+          const newMode = prevMode === "light" ? "dark" : "light";
           localStorage.setItem("darkMode", newMode);
           return newMode;
         });
+      },
+      toggleReduceMotion: () => {
+        setReduceMotion((prev) => !prev);
+        localStorage.setItem("reduceMotion", !reduceMotion);
       },
     }),
     []
@@ -37,12 +45,15 @@ function App() {
         palette: {
           mode,
         },
+        transitions: {
+          reduceMotion: reduceMotion,
+        },
       }),
-    [mode]
+    [mode, reduceMotion]
   );
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
+    <ThemeContext.Provider value={themeModes}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
@@ -61,7 +72,7 @@ function App() {
           </Container>
         </Router>
       </ThemeProvider>
-    </ColorModeContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 

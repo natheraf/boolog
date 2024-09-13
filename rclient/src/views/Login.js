@@ -11,8 +11,10 @@ import {
 } from "@mui/material";
 import bgImage from "../assets/authentication_bg_med.jpg";
 import { handleSimpleRequest } from "../api/Axios";
+import { useTheme } from "@emotion/react";
 
 export const Login = () => {
+  const theme = useTheme();
   const [showLogin, setShowLogin] = React.useState(true);
   const handleLogin = () => {
     handleSimpleRequest(
@@ -90,19 +92,23 @@ export const Login = () => {
             >
               <Fade
                 in={showLogin}
-                timeout={2000}
+                timeout={2000 * theme.transitions.reduceMotion}
                 sx={!showLogin ? { display: "none" } : {}}
               >
                 <Typography variant="h4">Sign in</Typography>
               </Fade>
               <Fade
                 in={!showLogin}
-                timeout={2000}
+                timeout={2000 * theme.transitions.reduceMotion}
                 sx={showLogin ? { display: "none" } : {}}
               >
                 <Typography variant="h4">Sign up</Typography>
               </Fade>
-              <Collapse timeout={500} in={!showLogin} sx={{ width: "100%" }}>
+              <Collapse
+                timeout={500 * theme.transitions.reduceMotion}
+                in={!showLogin}
+                sx={{ width: "100%" }}
+              >
                 <TextField id="signupName" label="Username" fullWidth />
               </Collapse>
               <TextField id="loginEmail" label="Email" type="email" fullWidth />
@@ -112,7 +118,11 @@ export const Login = () => {
                 type="password"
                 fullWidth
               />
-              <Collapse timeout={500} in={!showLogin} sx={{ width: "100%" }}>
+              <Collapse
+                timeout={500 * theme.transitions.reduceMotion}
+                in={!showLogin}
+                sx={{ width: "100%" }}
+              >
                 <TextField
                   id="signupConfirmPassword"
                   label="Confirm Password"
@@ -122,7 +132,7 @@ export const Login = () => {
               </Collapse>
               <Fade
                 in={showLogin}
-                timeout={2000}
+                timeout={2000 * theme.transitions.reduceMotion}
                 sx={!showLogin ? { display: "none" } : { width: "100%" }}
               >
                 <Stack spacing={2}>
@@ -136,7 +146,7 @@ export const Login = () => {
               </Fade>
               <Fade
                 in={!showLogin}
-                timeout={2000}
+                timeout={2000 * theme.transitions.reduceMotion}
                 sx={showLogin ? { display: "none" } : { width: "100%" }}
               >
                 <Stack spacing={2}>

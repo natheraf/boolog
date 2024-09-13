@@ -1,15 +1,26 @@
-import React from 'react';
-import { AppBar, Box, Grid, Stack, Toolbar, Typography, IconButton } from "@mui/material";
+import React from "react";
+import {
+  AppBar,
+  Box,
+  Grid,
+  Stack,
+  Toolbar,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useTheme } from "@mui/material/styles";
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import { ColorModeContext } from "../App";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import { ThemeContext } from "../App";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const { toggleColorMode } = React.useContext(ColorModeContext);
+  const { toggleColorMode, toggleReduceMotion } =
+    React.useContext(ThemeContext);
   const theme = useTheme();
 
   return (
@@ -60,8 +71,27 @@ export const Header = () => {
             >
               <Typography variant="h6">Login</Typography>
             </Link>
-            <IconButton sx={{ ml: 1 }} onClick={toggleColorMode} color="inherit">
-              {theme.palette.mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            <IconButton
+              sx={{ ml: 1 }}
+              onClick={toggleColorMode}
+              color="inherit"
+            >
+              {theme.palette.mode === "dark" ? (
+                <Brightness7Icon />
+              ) : (
+                <Brightness4Icon />
+              )}
+            </IconButton>
+            <IconButton
+              sx={{ ml: 1 }}
+              onClick={toggleReduceMotion}
+              color="inherit"
+            >
+              {theme.transitions.reduceMotion ? (
+                <VisibilityOffIcon />
+              ) : (
+                <VisibilityIcon />
+              )}
             </IconButton>
           </Stack>
         </Grid>

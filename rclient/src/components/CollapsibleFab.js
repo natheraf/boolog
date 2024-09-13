@@ -5,8 +5,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "@emotion/react";
 
 export const CollapsibleFab = ({ setOpenEditor }) => {
+  const theme = useTheme();
   const [openButtons, setOpenButtons] = React.useState(false);
   const containerRef = React.useRef(null);
   const navigate = useNavigate();
@@ -43,7 +45,9 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
               in={openButtons}
               direction="up"
               key={obj.label}
-              timeout={200 * (icons.length - index)}
+              timeout={
+                200 * (icons.length - index) * theme.transitions.reduceMotion
+              }
               container={containerRef.current}
             >
               <Tooltip title={obj.label} placement={"left"}>

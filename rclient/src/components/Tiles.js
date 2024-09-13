@@ -50,7 +50,7 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
             // style={{
             //   transformOrigin: "0 0 0",
             // }}
-            timeout={600 * index + 1000}
+            timeout={(600 * index + 1000) * theme.transitions.reduceMotion}
           >
             <Paper sx={{ ...sizeProfiles, p: 1 }}>
               <Stack spacing={1}>

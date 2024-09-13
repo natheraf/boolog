@@ -128,7 +128,11 @@ export const BookLog = () => {
       <CreateBook open={openEditor} setOpen={setOpenEditor} />
       <Stack>
         {statuses.map((obj, index) => (
-          <Slide key={obj.status} timeout={300 * index + 500} in={true}>
+          <Slide
+            key={obj.status}
+            timeout={(300 * index + 500) * theme.transitions.reduceMotion}
+            in={true}
+          >
             <Accordion defaultExpanded={true}>
               <AccordionSummary
                 aria-controls={obj.label}
