@@ -11,11 +11,10 @@ import PropTypes from "prop-types";
 export const DeleteMediaDialog = ({
   openDeleteAlert,
   setOpenDeleteAlert,
-  apiFunctions,
-  setStatus,
-  mediaObj,
-  mediaUniqueIdentifier,
-  setMediaObj,
+  actionArea,
+  mediaObject,
+  syncMediaObject,
+  dataObject,
 }) => {
   return (
     <Dialog
@@ -44,8 +43,14 @@ export const DeleteMediaDialog = ({
           color="error"
           onClick={() => {
             setOpenDeleteAlert(false);
-            apiFunctions.deleteBook(mediaObj, mediaUniqueIdentifier);
-            setStatus(null);
+            actionArea.api
+              .deleteBook(mediaObject, actionArea.mediaUniqueIdentifier)
+              .then(() => {
+                syncMediaObject();
+                delete dataObject.id;
+                delete dataObject.status;
+                actionArea.mediaUniqueIdentifier = "isbn";
+              });
           }}
           autoFocus
         >
@@ -57,11 +62,10 @@ export const DeleteMediaDialog = ({
 };
 
 DeleteMediaDialog.propTypes = {
-  mediaObj: PropTypes.object.isRequired,
-  apiFunctions: PropTypes.object.isRequired,
-  setStatus: PropTypes.object.isRequired,
-  mediaUniqueIdentifier: PropTypes.string.isRequired,
+  mediaObject: PropTypes.object.isRequired,
+  actionArea: PropTypes.object.isRequired,
   openDeleteAlert: PropTypes.bool.isRequired,
   setOpenDeleteAlert: PropTypes.func.isRequired,
-  setMediaObj: PropTypes.func.isRequired,
+  syncMediaObject: PropTypes.func.isRequired,
+  dataObject: PropTypes.object.isRequired,
 };

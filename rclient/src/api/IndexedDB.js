@@ -110,14 +110,14 @@ export const setBook = (data) =>
           } else {
             openDatabase(userDataDB, userDataDBVersion, (db) =>
               setBookHelper(db, data)
-            ).then(resolve);
+            ).then((res) => resolve(res));
           }
         }
       );
     } else {
       openDatabase(userDataDB, userDataDBVersion, (db) =>
         setBookHelper(db, data)
-      ).then(resolve);
+      ).then((res) => resolve(res));
     }
   });
 
@@ -142,7 +142,7 @@ const setBookHelper = (db, data) =>
         delete data.id;
         addBook(data);
       }
-      resolve();
+      resolve(data);
     };
   });
 
@@ -167,6 +167,11 @@ const getBookHelper = (db, key, value) =>
     const objectStore = transaction.objectStore("books");
     if (value === undefined) {
       reject(new Error("value cannot be empty or undefined if key isn't"));
+    } else if (key === "id") {
+      objectStore.get(value).onsuccess = (event) => {
+        const data = event.target.result;
+        resolve(data);
+      };
     } else {
       const index = objectStore.index(key);
       const request = index.get(value);
@@ -201,6 +206,7 @@ const deleteBookHelper = (db, obj, uid) =>
         objectStore.delete(data.id);
       }
     };
+    resolve();
   });
 
 /**

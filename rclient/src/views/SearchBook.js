@@ -17,6 +17,7 @@ import {
   Switch,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { searchOpenLib } from "../api/OpenLibrary";
 import { searchGoogleBooks } from "../api/GoogleAPI";
@@ -24,8 +25,11 @@ import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Tiles } from "../components/Tiles";
 import { indexedDBBooksInterface } from "../api/IndexedDB";
+import { useTheme } from "@emotion/react";
 
 export const SearchBook = () => {
+  const theme = useTheme();
+  const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
   const [searchResults, setSearchResults] = React.useState({
@@ -473,7 +477,7 @@ export const SearchBook = () => {
               actionArea={{
                 api: indexedDBBooksInterface,
                 mediaUniqueIdentifier: "isbn",
-                position: "right",
+                orientation: greaterThanMid ? "vertical" : "horizontal",
               }}
               size="large"
             />

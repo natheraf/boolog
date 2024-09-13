@@ -9,11 +9,10 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { MediaStatus } from "./MediaStatus";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import LinkIcon from "@mui/icons-material/Link";
-import { MediaEdit } from "./MediaEdit";
+import { MediaController } from "./MediaController";
 
 const printArray = (arr) => {
   return (
@@ -28,7 +27,6 @@ const printArray = (arr) => {
 export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
-  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [sizeProfiles, setSizeProfiles] = React.useState(() => {
     if (size === "large") {
       return {
@@ -122,48 +120,22 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
                       )}
                     </Stack>
                   </Grid>
-                  {actionArea &&
-                  actionArea.position === "right" &&
-                  greaterThanMid ? (
-                    <Paper elevation={0}>
-                      <MediaStatus
-                        mediaObj={dataObject}
-                        apiFunctions={actionArea.api}
-                        mediaUniqueIdentifier={actionArea.mediaUniqueIdentifier}
-                        orientation={"vertical"}
+                  {actionArea ? (
+                    <Paper
+                      elevation={0}
+                      sx={
+                        actionArea.orientation === "horizontal"
+                          ? { width: "100%" }
+                          : {}
+                      }
+                    >
+                      <MediaController
+                        dataObject={dataObject}
+                        actionArea={actionArea}
                       />
                     </Paper>
                   ) : null}
                 </Grid>
-                {actionArea &&
-                (actionArea.position === "bottom" || !greaterThanMid) ? (
-                  <Paper elevation={0}>
-                    <Grid
-                      container
-                      direction={greaterThanSmall ? "row" : "column"}
-                      justifyContent={"center"}
-                      alignItems={"center"}
-                      p={1}
-                      gap={1}
-                    >
-                      <MediaStatus
-                        mediaObj={dataObject}
-                        apiFunctions={actionArea.api}
-                        mediaUniqueIdentifier={actionArea.mediaUniqueIdentifier}
-                        orientation={"horizontal"}
-                      />
-                      {actionArea.inLibrary ? (
-                        <MediaEdit
-                          mediaObj={dataObject}
-                          apiFunctions={actionArea.api}
-                          mediaUniqueIdentifier={
-                            actionArea.mediaUniqueIdentifier
-                          }
-                        />
-                      ) : null}
-                    </Grid>
-                  </Paper>
-                ) : null}
               </Stack>
             </Paper>
           </Grow>

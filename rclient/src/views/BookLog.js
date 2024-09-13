@@ -67,7 +67,7 @@ export const BookLog = () => {
   const actionArea = {
     api: indexedDBBooksInterface,
     mediaUniqueIdentifier: "id",
-    position: "bottom",
+    orientation: "horizontal",
     inLibrary: true,
   };
 

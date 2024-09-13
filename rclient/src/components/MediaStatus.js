@@ -8,56 +8,21 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import PropTypes from "prop-types";
 import { StyledToggleButtonGroup } from "./StyledToggleButtonGroup";
-import { DeleteMediaDialog } from "./DeleteMediaDialog";
 
 export const MediaStatus = ({
-  mediaObj,
-  apiFunctions,
-  mediaUniqueIdentifier,
+  mediaObject,
   orientation,
+  handleStatusOnChange,
 }) => {
   const theme = useTheme();
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
-  const [libraryEquivalentMediaObj, setLibraryEquivalentMediaObj] =
-    React.useState({ status: null });
-  const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
-
-  React.useEffect(() => {
-    if (mediaUniqueIdentifier === "isbn") {
-      setLibraryEquivalentMediaObj({ status: null });
-      apiFunctions
-        .getBook("isbn", mediaObj.isbn[0])
-        .then((res) => setLibraryEquivalentMediaObj(res ?? mediaObj))
-        .catch((error) => console.log(error));
-    } else {
-      setLibraryEquivalentMediaObj(mediaObj);
-    }
-  }, [apiFunctions, mediaObj, mediaUniqueIdentifier]);
-
-  const handleStatusOnChange = (event, value) => {
-    if (value === null) {
-      setOpenDeleteAlert(true);
-    } else {
-      libraryEquivalentMediaObj.status = value;
-      apiFunctions.setBook(libraryEquivalentMediaObj);
-      setLibraryEquivalentMediaObj((prev) => ({ ...prev, status: value }));
-    }
-  };
 
   return (
     <Box>
-      <DeleteMediaDialog
-        openDeleteAlert={openDeleteAlert}
-        setOpenDeleteAlert={setOpenDeleteAlert}
-        apiFunctions={apiFunctions}
-        mediaObj={libraryEquivalentMediaObj}
-        mediaUniqueIdentifier={mediaUniqueIdentifier}
-        setMediaObj={setLibraryEquivalentMediaObj}
-      />
       <StyledToggleButtonGroup
         orientation={orientation}
         size={greaterThanMid ? "small" : "medium"}
-        value={libraryEquivalentMediaObj.status}
+        value={mediaObject.status}
         onChange={handleStatusOnChange}
         exclusive
         spacing={greaterThanMid ? 0.5 : 0}
@@ -89,8 +54,6 @@ export const MediaStatus = ({
 };
 
 MediaStatus.propTypes = {
-  mediaObj: PropTypes.object.isRequired,
-  apiFunctions: PropTypes.object.isRequired,
-  mediaUniqueIdentifier: PropTypes.string.isRequired,
+  mediaObject: PropTypes.object.isRequired,
   orientation: PropTypes.string.isRequired,
 };
