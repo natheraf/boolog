@@ -6,6 +6,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
+  Collapse,
   Paper,
   Slide,
   Stack,
@@ -99,6 +100,14 @@ export const BookLog = () => {
     },
   ];
 
+  const [expanded, setExpanded] = React.useState(() => {
+    const res = {};
+    for (const obj of statuses) {
+      res[obj.status] = true;
+    }
+    return res;
+  });
+
   React.useEffect(() => {
     getAllBooks()
       .then((res) => {
@@ -133,7 +142,19 @@ export const BookLog = () => {
             timeout={(300 * index + 500) * theme.transitions.reduceMotion}
             in={true}
           >
-            <Accordion defaultExpanded={true}>
+            <Accordion
+              expanded={expanded[obj.status]}
+              slots={{ transition: Collapse }}
+              slotProps={{
+                transition: { timeout: 400 * theme.transitions.reduceMotion },
+              }}
+              onChange={() => {
+                setExpanded((prev) => ({
+                  ...prev,
+                  [obj.status]: !prev[obj.status],
+                }));
+              }}
+            >
               <AccordionSummary
                 aria-controls={obj.label}
                 expandIcon={<ExpandMoreIcon />}
