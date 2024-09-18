@@ -120,7 +120,7 @@ export const SearchBook = () => {
       setRenderSearchResultsApi(selApi);
       setIsSearching(false);
       setPerformNewSearch(false);
-      topResultRef.current.scrollIntoView({
+      topResultRef?.current?.scrollIntoView({
         behavior: theme.transitions.reduceMotion ? "smooth" : "instant",
         block: "start",
       });
