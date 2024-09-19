@@ -77,7 +77,7 @@ export const Login = () => {
         justifyContent={"center"}
         height="100%"
       >
-        <Grow in={true}>
+        <Grow in={true} timeout={theme.transitions.reduceMotion ? "auto" : 0}>
           <Paper>
             <Stack
               spacing={2}
