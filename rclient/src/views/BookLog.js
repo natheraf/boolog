@@ -21,8 +21,11 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
+import { AlertContext } from "../components/AlertWrapper";
 
 export const BookLog = () => {
+  const alertContext = React.useContext(AlertContext);
+  const addAlert = alertContext.addAlert;
   const theme = useTheme();
   const [library, setLibrary] = React.useState({
     Reading: { items: [], total_items: 0 },
@@ -124,7 +127,13 @@ export const BookLog = () => {
         setLibrary(obj);
         setIsLoading(false);
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error);
+        addAlert(
+          "Unable to get library data. Please contact support@ericma.net",
+          "error"
+        );
+      });
   }, []);
 
   if (isLoading) {

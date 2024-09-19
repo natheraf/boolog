@@ -106,7 +106,7 @@ export const setBook = (data) =>
             (isbn, index) => arrayOfResults[index]
           );
           if (duplicateISBNs.length > 0) {
-            console.log(`Duplicate ISBNs found: ${duplicateISBNs}`);
+            reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
           } else {
             openDatabase(userDataDB, userDataDBVersion, (db) =>
               setBookHelper(db, data)

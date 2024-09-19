@@ -2,7 +2,6 @@ import * as React from "react";
 import {
   AppBar,
   Box,
-  Button,
   Dialog,
   Divider,
   Grid,
@@ -26,11 +25,12 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
-import { isISBNDuplicate, setBook } from "../api/IndexedDB";
+import { setBook } from "../api/IndexedDB";
 import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "../components/DynamicButton";
+import { AlertContext } from "../components/AlertWrapper";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -40,6 +40,8 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
 });
 
 export const CreateBook = ({ open, setOpen, editBookObject }) => {
+  const alertContext = React.useContext(AlertContext);
+  const addAlert = alertContext.addAlert;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
@@ -84,7 +86,7 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
     );
     setBook(bookObject)
       .then(() => handleClose())
-      .catch((error) => console.log(error));
+      .catch((error) => addAlert(error.toString(), "error"));
   };
 
   const handleOnChangeProperty = (key) => (event, value) => {
