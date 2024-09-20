@@ -14,12 +14,12 @@ app.use(express.urlencoded({ extended: true }));
 /**
  * Connecting to database. The `drop` argument drops and resync all tables.
  */
-require("./startDB")(process.argv.includes("drop"));
+require("./postgres/startDB")(process.argv.includes("drop"));
 
 /**
  * Define all our routes into express app.
  */
-require("./routes/auth.routes")(app);
+require("./postgres/routes/auth.routes")(app);
 app.use("/jsdoc-front", express.static("../rclient/jsdoc/out"));
 app.use("/jsdoc-back", express.static("../server/jsdoc/out"));
 app.use(express.static("../rclient/build"));
