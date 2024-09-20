@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 /**
  * Connecting to database. The `drop` argument drops and resync all tables.
  */
-require("./postgres/startDB")(process.argv.includes("drop"));
+require("./mongo/startDB")(process.argv.includes("drop"));
 
 /**
  * Define all our routes into express app.
