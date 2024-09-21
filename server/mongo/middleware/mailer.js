@@ -5,7 +5,7 @@ const config = require("../config/email.config.js");
 const generateRandomCode = (numOfBytes) =>
   require("crypto").randomBytes(numOfBytes).toString("base64url");
 
-const emailAuthenticationCheck = (subject, receiverEmail, receiverName) =>
+const emailAuthenticationCheck = (receiverEmail, receiverName) =>
   new Promise((resolve, reject) => {
     const code = generateRandomCode(4);
     const transporter = nodemailer.createTransport({
@@ -21,7 +21,7 @@ const emailAuthenticationCheck = (subject, receiverEmail, receiverName) =>
       .sendMail({
         from: `"No-Reply Boolog 📖" <${config.outgoing_email}>`, // sender address
         to: `${receiverEmail}`, // list of receivers
-        subject: subject, // Subject line
+        subject: "Verify Your Identity", // Subject line
         text: `Hi ${
           receiverName ?? receiverEmail
         }. This is your verification code: ${code}`, // plain text body
@@ -33,4 +33,26 @@ const emailAuthenticationCheck = (subject, receiverEmail, receiverName) =>
       .catch((error) => reject(error));
   });
 
-module.exports = { emailAuthenticationCheck };
+const sendEmailAuthentication = (db, receiverEmail, receiverName) =>
+  new Promise((resolve, reject) => {
+    emailAuthenticationCheck(receiverEmail, receiverName).then(
+      ({ code, info }) =>
+        db
+          .collection("loginEmailCodes")
+          .insertOne({ email: receiverEmail, code, info })
+          .then((insertRes) => {
+            setTimeout(
+              () =>
+                db.collection("loginEmailCodes").deleteOne({
+                  _id: insertRes.insertedId,
+                  email: receiverEmail,
+                }),
+              // 1000 * 60 * 5 // 5 minutes
+              1000 * 60 // 1 minute
+            );
+            resolve("Sent verification code");
+          })
+    );
+  });
+
+module.exports = { sendEmailAuthentication };
