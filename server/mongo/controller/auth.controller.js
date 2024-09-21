@@ -233,7 +233,13 @@ exports.checkPasswordlessCode = (req, res, next) => {
             .status(401)
             .send({ message: "Wrong email and verification code" });
         }
-        next();
+        db.collection("loginEmailCodes")
+          .deleteOne({
+            _id: insertRes.insertedId,
+            email: req.body.email,
+          })
+          .then(() => next())
+          .catch((error) => console.log(error));
       });
   });
 };
