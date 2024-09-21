@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
 const { isDuplicateEmail } = require("../middleware/verifySignUp");
-const { emailAuthenticationCheck } = require("../middleware/mailer");
+const { sendEmailAuthentication } = require("../middleware/mailer");
 const { bodyMissingRequiredFields } = require("../middleware/utils");
 
 exports.createSuperAdmin = () => {
@@ -124,25 +124,8 @@ exports.checkPasswordless = (req, res, next) => {
                 .status(401)
                 .send({ message: "Email and Password are not found" });
             }
-            emailAuthenticationCheck(
-              "Verify Your Identity",
-              req.body.email,
-              user.name
-            ).then(({ code, info }) =>
-              db
-                .collection("loginEmailCodes")
-                .insertOne({ email: req.body.email, code, info })
-                .then((insertRes) => {
-                  setTimeout(
-                    () =>
-                      db.collection("loginEmailCodes").deleteOne({
-                        _id: insertRes.insertedId,
-                        email: req.body.email,
-                      }),
-                    1000 * 60 * 5 // 5 minutes
-                  );
-                  res.status.send("Sent verification code");
-                })
+            sendEmailAuthentication(db, req.body.email, user.name).then(
+              (message) => res.status.send({ message })
             );
           });
       });
@@ -169,7 +152,9 @@ exports.signUpPasswordless = (req, res) => {
     .then((db) => {
       db.collection("loginInfo")
         .insertOne(user)
-        .then(() => next());
+        .then(() =>
+          sendEmailAuthentication(db, req.body.email, req.body.email)
+        );
     })
     .catch((error) => {
       console.log(error);
