@@ -11,15 +11,33 @@ module.exports = (drop) => {
     if (drop) {
       const db = client.db("authentication");
       const collections = ["loginEmailCodes", "loginInfo"];
-      collections.forEach((collection) => db.collection(collection).drop());
-      console.log("Dropped authentication db collections");
-      db.collection("loginEmailCodes").createIndex(
-        { email: 1 },
-        { unique: true }
+      collections.forEach((collection) =>
+        db
+          .collection(collection)
+          .drop()
+          .then(() => {
+            db.collection(collection).createIndex(
+              { email: 1 },
+              { unique: true }
+            );
+          })
       );
-      db.collection("loginInfo").createIndex({ email: 1 }, { unique: true });
       console.log("successfully dropped all collections in authentication");
     }
+  }
+
+  async function dropLoginEmailCodes() {
+    const db = client.db("authentication");
+    const collections = ["loginEmailCodes"];
+    collections.forEach((collection) =>
+      db
+        .collection(collection)
+        .drop()
+        .then(() => {
+          db.collection(collection).createIndex({ email: 1 }, { unique: true });
+        })
+    );
+    console.log("Dropped login email codes");
   }
 
   const initialize = () => {
@@ -29,5 +47,7 @@ module.exports = (drop) => {
 
   if (drop) {
     initialize();
+  } else {
+    dropLoginEmailCodes();
   }
 };
