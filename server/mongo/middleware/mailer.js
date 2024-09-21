@@ -21,7 +21,7 @@ const emailAuthenticationCheck = (req) =>
     });
     transporter
       .sendMail({
-        from: `"No-Reply Boolog 📖" <${config.outgoing_email}>`, // sender address
+        from: `"Boolog No-Reply 📖" <${config.outgoing_email}>`, // sender address
         to: `${req.body.email}`, // list of receivers
         subject: "Verify Your Identity", // Subject line
         text: `Hi ${
