@@ -2,13 +2,15 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Container from "@mui/material/Container";
 import * as React from "react";
 
-import { Login } from "./views/Login";
+import { Login } from "./views/login/Login";
 import { SearchBook } from "./views/SearchBook";
 import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { Header } from "./components/Header";
 import { Home } from "./views/Home";
 import { BookLog } from "./views/BookLog";
 import { AlertWrapper as GlobalAlertWrapper } from "./components/AlertWrapper";
+import { PasswordlessDirections } from "./views/login/PasswordlessDirections";
+import { Passwordless } from "./views/login/Passwordless";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -63,8 +65,14 @@ function App() {
             <Container maxWidth="xl" sx={{ mt: "88px" }}>
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="login" element={<Login />} />
-                <Route path="loggedIn" element={<h1>Logged In</h1>} />
+                <Route path="login">
+                  <Route path="" element={<Login />} />
+                  <Route
+                    path="passwordless-directions"
+                    element={<PasswordlessDirections />}
+                  />
+                  <Route path="passwordless" element={<Passwordless />} />
+                </Route>
                 <Route path="books">
                   <Route path="" element={<BookLog />} />
                   <Route path="search" element={<SearchBook />} />
