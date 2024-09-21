@@ -120,12 +120,10 @@ exports.checkPasswordless = (req, res, next) => {
           .findOne({ email: req.body.email })
           .then((user) => {
             if (!user) {
-              return res
-                .status(401)
-                .send({ message: "Email and Password are not found" });
+              return res.status(401).send({ message: "Email not found" });
             }
-            sendEmailAuthentication(db, req.body.email, user.name).then(
-              (message) => res.status.send({ message })
+            sendEmailAuthentication(db, req).then((message) =>
+              res.send({ message })
             );
           });
       });
@@ -153,7 +151,9 @@ exports.signUpPasswordless = (req, res) => {
       db.collection("loginInfo")
         .insertOne(user)
         .then(() =>
-          sendEmailAuthentication(db, req.body.email, req.body.email)
+          sendEmailAuthentication(db, req).then((message) =>
+            res.send({ message })
+          )
         );
     })
     .catch((error) => {
@@ -210,17 +210,18 @@ exports.checkPasswordlessCode = (req, res, next) => {
     db.collection("loginEmailCodes")
       .findOne({
         email: req.body.email,
-        code: req.body.verificationCode,
       })
-      .then((obj) => {
-        if (!obj) {
+      .then((data) => {
+        const codeIsValid = () =>
+          bcrypt.compareSync(req.body.verificationCode, data.code);
+        if (!data || !codeIsValid()) {
           return res
             .status(401)
-            .send({ message: "Wrong email and verification code" });
+            .send({ message: "Wrong email or verification code" });
         }
         db.collection("loginEmailCodes")
           .deleteOne({
-            _id: insertRes.insertedId,
+            _id: data._id,
             email: req.body.email,
           })
           .then(() => next())
