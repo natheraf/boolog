@@ -25,4 +25,22 @@ module.exports = function (app) {
   app.post("/api/auth/signin", controller.signIn);
 
   app.post("/api/auth/signout", controller.signOut);
+
+  app.post(
+    "/api/auth/passwordless/sendcode",
+    [
+      controller.checkPasswordless,
+      authJwt.creatingAccountVerifyToken,
+      verifySignUp.checkRolesExist,
+      authJwt.authorizedToCreateUser,
+      verifySignUp.checkDuplicateEmail,
+    ],
+    controller.signUpPasswordless
+  );
+
+  app.post(
+    "/api/auth/passwordless/checkcode",
+    [controller.checkPasswordlessCode],
+    controller.signInPasswordless
+  );
 };
