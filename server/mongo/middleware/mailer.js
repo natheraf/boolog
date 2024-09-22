@@ -42,21 +42,28 @@ const sendEmailAuthentication = (db, req) =>
     emailAuthenticationCheck(req).then(({ code, info }) =>
       db
         .collection("loginEmailCodes")
-        .insertOne({
-          email: req.body.email,
-          code: bcrypt.hashSync(code, 10),
-          info,
-        })
-        .then((insertRes) => {
-          setTimeout(
-            () =>
-              db.collection("loginEmailCodes").deleteOne({
-                _id: insertRes.insertedId,
-                email: req.body.email,
-              }),
-            1000 * 60 * 5 // 5 minutes
-          );
-          resolve("Sent verification code");
+        .findOne({ email: req.body.email })
+        .then(async (foundDuplicate) => {
+          if (foundDuplicate) {
+            await db.collection("loginEmailCodes").deleteOne(foundDuplicate);
+          }
+          db.collection("loginEmailCodes")
+            .insertOne({
+              email: req.body.email,
+              code: bcrypt.hashSync(code, 10),
+              info,
+            })
+            .then((insertRes) => {
+              setTimeout(
+                () =>
+                  db.collection("loginEmailCodes").deleteOne({
+                    _id: insertRes.insertedId,
+                    email: req.body.email,
+                  }),
+                1000 * 60 * 5 // 5 minutes
+              );
+              resolve("Sent verification code");
+            });
         })
     );
   });
