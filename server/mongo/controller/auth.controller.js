@@ -149,12 +149,15 @@ exports.signUpPasswordless = (req, res) => {
   getDatabase("authentication")
     .then((db) => {
       db.collection("loginInfo")
-        .insertOne(user)
-        .then(() =>
+        .findOne({ email: req.body.email })
+        .then((foundUser) => {
+          if (!foundUser) {
+            db.collection("loginInfo").insertOne(user);
+          }
           sendEmailAuthentication(db, req).then((message) =>
             res.send({ message })
-          )
-        );
+          );
+        });
     })
     .catch((error) => {
       console.log(error);
