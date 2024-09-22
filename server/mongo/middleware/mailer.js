@@ -29,7 +29,7 @@ const emailAuthenticationCheck = (req) =>
         }. This is your verification link: ${link}?code=${code}`, // plain text body
         html: `<p>Hi ${
           req.body.name ?? req.body.email
-        }<br/><p><b>One-time verification link</b></p><p>Here is your one-time verification link to verify its you. This link is valid for <b>5 minutes</b> only: </p><a href="${link}?code=${code}&email=${
+        }<br/><p>Here is your one-time verification link to verify its you. This link is valid for <b>5 minutes</b> only: </p><a href="${link}?code=${code}&email=${
           req.body.email
         }"><h2>Click here to Login</h2></a><p>Thanks, Boolog.</p>`, // html body
       })
