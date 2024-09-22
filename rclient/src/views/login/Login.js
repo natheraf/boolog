@@ -5,10 +5,13 @@ import {
   Divider,
   Fade,
   Grow,
+  IconButton,
+  InputAdornment,
   Paper,
   Stack,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import bgImage from "../../assets/authentication_bg_med.jpg";
 import { handleSimpleRequest } from "../../api/Axios";
@@ -16,6 +19,11 @@ import { useTheme } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AlertContext } from "../../components/AlertWrapper";
+import EmailIcon from "@mui/icons-material/Email";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import PersonIcon from "@mui/icons-material/Person";
+import ShuffleIcon from "@mui/icons-material/Shuffle";
 
 export const Login = () => {
   const theme = useTheme();
@@ -24,6 +32,38 @@ export const Login = () => {
   const addAlert = alertContext.addAlert;
   const [showLogin, setShowLogin] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
+  const [controlled, setControlled] = React.useState({});
+  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
+
+  const handleControlledOnChange = (key) => (event, value) => {
+    if (key === "showPassword") {
+      setControlled((prev) => ({ ...prev, [key]: !prev[key] }));
+    } else {
+      setControlled((prev) => ({
+        ...prev,
+        [key]: event?.target?.value ?? value,
+      }));
+    }
+  };
+
+  const generateRandomPassword = (length) => {
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*_-";
+    const res = [];
+    while (res.length < length) {
+      res.push(characters[Math.floor(Math.random() * characters.length)]);
+    }
+    setControlled((prev) => ({
+      ...prev,
+      loginPassword: res.join(""),
+      signupConfirmPassword: res.join(""),
+      showPassword: true,
+    }));
+  };
+
+  const handleMouseChange = (event) => {
+    event.preventDefault();
+  };
 
   const handlePasswordlessLogin = () => {
     setLoading(true);
@@ -141,19 +181,78 @@ export const Login = () => {
                   in={!showLogin}
                   sx={{ width: "100%" }}
                 >
-                  <TextField id="signupName" label="Username" fullWidth />
+                  <TextField
+                    id="signupName"
+                    label="Username"
+                    fullWidth
+                    InputProps={
+                      greaterThanSmall
+                        ? {
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <PersonIcon sx={{ color: "gray" }} />
+                              </InputAdornment>
+                            ),
+                          }
+                        : {}
+                    }
+                  />
                 </Collapse>
                 <TextField
                   id="loginEmail"
                   label="Email"
                   type="email"
                   fullWidth
+                  value={controlled.email || ""}
+                  onChange={handleControlledOnChange("email")}
+                  InputProps={
+                    greaterThanSmall
+                      ? {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <EmailIcon sx={{ color: "gray" }} />
+                            </InputAdornment>
+                          ),
+                        }
+                      : {}
+                  }
                 />
                 <TextField
                   id="loginPassword"
                   label="Password"
-                  type="password"
+                  type={controlled.showPassword ? "text" : "password"}
                   fullWidth
+                  value={controlled.loginPassword || ""}
+                  onChange={handleControlledOnChange("loginPassword")}
+                  InputProps={{
+                    endAdornment: showLogin ? (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleControlledOnChange("showPassword")}
+                          // onMouseDown={handleMouseChange}
+                          // onMouseUp={handleMouseChange}
+                          sx={{ mr: -1 }}
+                        >
+                          {controlled.showPassword ? (
+                            <VisibilityOff sx={{ color: "lightgray" }} />
+                          ) : (
+                            <VisibilityIcon sx={{ color: "lightgray" }} />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    ) : (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="generate random password"
+                          onClick={() => generateRandomPassword(16)}
+                          sx={{ mr: -1 }}
+                        >
+                          <ShuffleIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <Collapse
                   timeout={500 * theme.transitions.reduceMotion}
@@ -163,8 +262,27 @@ export const Login = () => {
                   <TextField
                     id="signupConfirmPassword"
                     label="Confirm Password"
-                    type="password"
+                    type={controlled.showPassword ? "text" : "password"}
                     fullWidth
+                    value={controlled.signupConfirmPassword || ""}
+                    onChange={handleControlledOnChange("signupConfirmPassword")}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleControlledOnChange("showPassword")}
+                            sx={{ mr: -1 }}
+                          >
+                            {controlled.showPassword ? (
+                              <VisibilityOff sx={{ color: "lightgray" }} />
+                            ) : (
+                              <VisibilityIcon sx={{ color: "lightgray" }} />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                 </Collapse>
                 <Fade
@@ -224,6 +342,19 @@ export const Login = () => {
                       label="Email"
                       type="email"
                       fullWidth
+                      value={controlled.email || ""}
+                      onChange={handleControlledOnChange("email")}
+                      InputProps={
+                        greaterThanSmall
+                          ? {
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <EmailIcon sx={{ color: "gray" }} />
+                                </InputAdornment>
+                              ),
+                            }
+                          : {}
+                      }
                     />
                     <Button
                       variant="contained"
