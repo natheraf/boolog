@@ -51,7 +51,7 @@ export const AlertWrapper = ({ children }) => {
                   ? "lightblue"
                   : "gold"
               }
-              duration={timeout.str}
+              duration={timeout.ms}
             />
           </Box>
         ))}
