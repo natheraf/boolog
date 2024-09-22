@@ -48,8 +48,8 @@ export const AlertWrapper = ({ children }) => {
                   : alert.severity === "error"
                   ? "red"
                   : alert.severity === "info"
-                  ? "blue"
-                  : "yellow"
+                  ? "lightblue"
+                  : "gold"
               }
               duration={timeout.str}
             />
