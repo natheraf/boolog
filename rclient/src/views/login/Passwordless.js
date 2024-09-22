@@ -19,11 +19,9 @@ export const Passwordless = () => {
       },
       "auth/passwordless/checkcode"
     )
-      .then((res) => {
-        console.log(res);
-        navigate("/");
-      })
-      .catch((error) => addAlert(error.toString(), "error"));
+      .then((res) => addAlert(res.data.message, "info"))
+      .catch((error) => addAlert(error.toString(), "error"))
+      .finally(() => navigate("/"));
   };
 
   handlePasswordlessLogin();

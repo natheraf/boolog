@@ -15,10 +15,13 @@ import { handleSimpleRequest } from "../../api/Axios";
 import { useTheme } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
+import { AlertContext } from "../../components/AlertWrapper";
 
 export const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const alertContext = React.useContext(AlertContext);
+  const addAlert = alertContext.addAlert;
   const [showLogin, setShowLogin] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
 
@@ -50,9 +53,10 @@ export const Login = () => {
       "auth/signin"
     )
       .then((res) => {
+        addAlert(res.data.message, "info");
         navigate("/");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => addAlert(error.toString(), "error"));
   };
 
   const handleSignup = () => {
@@ -74,9 +78,11 @@ export const Login = () => {
       "auth/signup"
     )
       .then((res) => {
+        addAlert("Successfully created account", "info");
+        addAlert(res.data.message, "info");
         navigate("/");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => addAlert(error.toString(), "error"));
   };
 
   return (
