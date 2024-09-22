@@ -86,9 +86,22 @@ exports.signIn = (req, res) => {
             httpOnly: true,
             secure: true,
             signed: true,
-            expiresIn: 60 * 60,
+            expiresIn: 60 * 60 * 24 * 7, // 1 week
             sameSite: "Strict",
-          } // expires: 60 * 60 * 24 * 7 // 1 week
+          }
+        );
+        res.cookie(
+          "userInfo",
+          {
+            userName: user.name,
+            userEmail: user.email,
+          },
+          {
+            secure: true,
+            signed: true,
+            expiresIn: 60 * 60 * 24 * 7, // 1 week
+            sameSite: "Strict",
+          }
         );
         res.status(200).send({
           userName: user.name,
@@ -190,13 +203,24 @@ exports.signInPasswordless = (req, res) => {
             httpOnly: true,
             secure: true,
             signed: true,
-            expiresIn: 60 * 60,
+            expiresIn: 60 * 60 * 24 * 7, // 1 week
             sameSite: "Strict",
-          } // expires: 60 * 60 * 24 * 7 // 1 week
+          }
+        );
+        res.cookie(
+          "userInfo",
+          {
+            userName: user.name,
+            userEmail: user.email,
+          },
+          {
+            secure: true,
+            signed: true,
+            expiresIn: 60 * 60 * 24 * 7, // 1 week
+            sameSite: "Strict",
+          }
         );
         res.status(200).send({
-          userName: user.name,
-          userEmail: user.email,
           message: `Successfully Signed In. Expires in ${expiresIn}.`,
         });
       });
