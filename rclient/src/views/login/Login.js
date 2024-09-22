@@ -190,7 +190,12 @@ export const Login = () => {
                         ? {
                             endAdornment: (
                               <InputAdornment position="end">
-                                <PersonIcon sx={{ color: "gray" }} />
+                                <PersonIcon
+                                  sx={{
+                                    color:
+                                      theme.palette.inputAdornment.disabled,
+                                  }}
+                                />
                               </InputAdornment>
                             ),
                           }
@@ -210,7 +215,11 @@ export const Login = () => {
                       ? {
                           endAdornment: (
                             <InputAdornment position="end">
-                              <EmailIcon sx={{ color: "gray" }} />
+                              <EmailIcon
+                                sx={{
+                                  color: theme.palette.inputAdornment.disabled,
+                                }}
+                              />
                             </InputAdornment>
                           ),
                         }
@@ -232,12 +241,15 @@ export const Login = () => {
                           onClick={handleControlledOnChange("showPassword")}
                           // onMouseDown={handleMouseChange}
                           // onMouseUp={handleMouseChange}
-                          sx={{ mr: -1 }}
+                          sx={{
+                            mr: -1,
+                            color: theme.palette.inputAdornment.enabled,
+                          }}
                         >
                           {controlled.showPassword ? (
-                            <VisibilityOff sx={{ color: "lightgray" }} />
+                            <VisibilityOff />
                           ) : (
-                            <VisibilityIcon sx={{ color: "lightgray" }} />
+                            <VisibilityIcon />
                           )}
                         </IconButton>
                       </InputAdornment>
@@ -246,7 +258,10 @@ export const Login = () => {
                         <IconButton
                           aria-label="generate random password"
                           onClick={() => generateRandomPassword(16)}
-                          sx={{ mr: -1 }}
+                          sx={{
+                            mr: -1,
+                            color: theme.palette.inputAdornment.enabled,
+                          }}
                         >
                           <ShuffleIcon />
                         </IconButton>
@@ -272,12 +287,15 @@ export const Login = () => {
                           <IconButton
                             aria-label="toggle password visibility"
                             onClick={handleControlledOnChange("showPassword")}
-                            sx={{ mr: -1 }}
+                            sx={{
+                              mr: -1,
+                              color: theme.palette.inputAdornment.enabled,
+                            }}
                           >
                             {controlled.showPassword ? (
-                              <VisibilityOff sx={{ color: "lightgray" }} />
+                              <VisibilityOff />
                             ) : (
-                              <VisibilityIcon sx={{ color: "lightgray" }} />
+                              <VisibilityIcon />
                             )}
                           </IconButton>
                         </InputAdornment>
@@ -349,7 +367,12 @@ export const Login = () => {
                           ? {
                               endAdornment: (
                                 <InputAdornment position="end">
-                                  <EmailIcon sx={{ color: "gray" }} />
+                                  <EmailIcon
+                                    sx={{
+                                      color:
+                                        theme.palette.inputAdornment.disabled,
+                                    }}
+                                  />
                                 </InputAdornment>
                               ),
                             }

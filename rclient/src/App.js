@@ -47,6 +47,10 @@ function App() {
       createTheme({
         palette: {
           mode,
+          inputAdornment: {
+            disabled: mode === "light" ? "lightgray" : "gray",
+            enabled: mode === "light" ? "gray" : "lightgray",
+          },
         },
         transitions: {
           reduceMotion: reduceMotion,
