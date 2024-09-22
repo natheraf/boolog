@@ -220,7 +220,7 @@ exports.checkPasswordlessCode = (req, res, next) => {
         if (!data || !codeIsValid()) {
           return res
             .status(401)
-            .send({ message: "Wrong email or verification code" });
+            .send({ message: "Wrong verification code or possibly expired" });
         }
         db.collection("loginEmailCodes")
           .deleteOne({
