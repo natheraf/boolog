@@ -115,6 +115,7 @@ exports.signIn = (req, res) => {
 exports.signOut = (req, res) => {
   // Set token to null and expire after 5 seconds
   res.clearCookie("accessToken");
+  res.clearCookie("userInfo");
   res.status(200).send({
     message: "User logged out successfully",
   });
