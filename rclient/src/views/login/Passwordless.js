@@ -24,5 +24,5 @@ export const Passwordless = () => {
       .finally(() => navigate("/"));
   };
 
-  handlePasswordlessLogin();
+  React.useEffect(() => handlePasswordlessLogin(), []);
 };
