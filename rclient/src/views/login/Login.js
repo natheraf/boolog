@@ -14,13 +14,16 @@ import bgImage from "../../assets/authentication_bg_med.jpg";
 import { handleSimpleRequest } from "../../api/Axios";
 import { useTheme } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
 
   const handlePasswordlessLogin = () => {
+    setLoading(true);
     handleSimpleRequest(
       "post",
       {
@@ -30,10 +33,11 @@ export const Login = () => {
       "auth/passwordless/sendcode"
     )
       .then((res) => {
-        console.log(res);
+        console.log(res.data.message);
         navigate("passwordless-directions");
       })
-      .catch((error) => console.log(error));
+      .catch((error) => console.log(error))
+      .finally(() => setLoading(false));
   };
 
   const handleLogin = () => {
@@ -216,11 +220,17 @@ export const Login = () => {
                       fullWidth
                     />
                     <Button
-                      onClick={handlePasswordlessLogin}
                       variant="contained"
+                      onClick={handlePasswordlessLogin}
+                      endIcon={
+                        loading ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : null
+                      }
+                      disabled={loading}
                       fullWidth
                     >
-                      Send Link
+                      {loading ? "Loading..." : "Send Link"}
                     </Button>
                   </Stack>
                 </Fade>
