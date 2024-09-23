@@ -17,12 +17,12 @@ import { ThemeContext } from "../App";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { handleSimpleRequest } from "../api/Axios";
-import { AlertContext } from "../context/Alerts";
+import { AlertsContext } from "../context/Alerts";
 import { CookiesContext } from "../context/Cookies";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const addAlert = React.useContext(AlertContext).addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const getCookies = React.useContext(CookiesContext).getCookies;
   const { toggleColorMode, toggleReduceMotion } =
     React.useContext(ThemeContext);
