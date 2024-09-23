@@ -1,10 +1,10 @@
 import * as React from "react";
 import { Alert, Box, Stack } from "@mui/material";
-import { TimedLoadingBar } from "./TimedLoadingBar";
+import { TimedLoadingBar } from "../components/TimedLoadingBar";
 
 export const AlertContext = React.createContext({});
 
-export const AlertWrapper = ({ children }) => {
+export const Alerts = ({ children }) => {
   const [alerts, setAlerts] = new React.useState([]);
   const timeout = { ms: 5000, str: "5s" };
 
