@@ -69,11 +69,13 @@ export const Login = () => {
     while (res.length < length) {
       res.push(characters[Math.floor(Math.random() * characters.length)]);
     }
+    const joinedResult = res.join("");
+    navigator.clipboard.writeText(joinedResult);
+    addAlert("Generated password copied to clipboard", "info");
     setControlled((prev) => ({
       ...prev,
-      loginPassword: res.join(""),
-      signupConfirmPassword: res.join(""),
-      showPassword: true,
+      loginPassword: joinedResult,
+      signupConfirmPassword: joinedResult,
     }));
   };
 
