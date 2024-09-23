@@ -2,7 +2,7 @@ import * as React from "react";
 import { Alert, Box, Stack } from "@mui/material";
 import { TimedLoadingBar } from "../components/TimedLoadingBar";
 
-export const AlertContext = React.createContext({});
+export const AlertsContext = React.createContext({});
 
 export const Alerts = ({ children }) => {
   const [alerts, setAlerts] = new React.useState([]);
@@ -28,7 +28,7 @@ export const Alerts = ({ children }) => {
   );
 
   return (
-    <AlertContext.Provider value={alertMemo}>
+    <AlertsContext.Provider value={alertMemo}>
       <Stack
         spacing={1}
         sx={{
@@ -57,6 +57,6 @@ export const Alerts = ({ children }) => {
         ))}
       </Stack>
       {children}
-    </AlertContext.Provider>
+    </AlertsContext.Provider>
   );
 };

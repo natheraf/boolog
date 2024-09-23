@@ -1,12 +1,11 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { handleSimpleRequest } from "../../api/Axios";
-import { AlertContext } from "../../components/AlertWrapper";
+import { AlertsContext } from "../../context/Alerts";
 import * as React from "react";
 
 export const Passwordless = () => {
   const navigate = useNavigate();
-  const alertContext = React.useContext(AlertContext);
-  const addAlert = alertContext.addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get("code");
   const email = searchParams.get("email");

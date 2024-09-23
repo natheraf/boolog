@@ -21,11 +21,10 @@ import DoneIcon from "@mui/icons-material/Done";
 import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
-import { AlertContext } from "../components/AlertWrapper";
+import { AlertsContext } from "../context/Alerts";
 
 export const BookLog = () => {
-  const alertContext = React.useContext(AlertContext);
-  const addAlert = alertContext.addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const theme = useTheme();
   const [library, setLibrary] = React.useState({
     Reading: { items: [], total_items: 0 },

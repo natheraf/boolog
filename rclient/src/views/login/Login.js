@@ -18,7 +18,7 @@ import { handleSimpleRequest } from "../../api/Axios";
 import { useTheme } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
-import { AlertContext } from "../../components/AlertWrapper";
+import { AlertsContext } from "../../context/Alerts";
 import EmailIcon from "@mui/icons-material/Email";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -28,8 +28,7 @@ import ShuffleIcon from "@mui/icons-material/Shuffle";
 export const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-  const alertContext = React.useContext(AlertContext);
-  const addAlert = alertContext.addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const [showLogin, setShowLogin] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [controlled, setControlled] = React.useState({});

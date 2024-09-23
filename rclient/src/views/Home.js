@@ -1,10 +1,9 @@
 import * as React from "react";
-import { AlertContext } from "../components/AlertWrapper";
+import { AlertsContext } from "../context/Alerts";
 import { Button } from "@mui/material";
 
 export const Home = () => {
-  const alertContext = React.useContext(AlertContext);
-  const addAlert = alertContext.addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
 
   return (
     <div>

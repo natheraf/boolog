@@ -30,7 +30,7 @@ import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "../components/DynamicButton";
-import { AlertContext } from "../components/AlertWrapper";
+import { AlertsContext } from "../context/Alerts";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -40,8 +40,7 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
 });
 
 export const CreateBook = ({ open, setOpen, editBookObject }) => {
-  const alertContext = React.useContext(AlertContext);
-  const addAlert = alertContext.addAlert;
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
