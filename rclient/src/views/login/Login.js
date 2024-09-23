@@ -36,6 +36,18 @@ export const Login = () => {
   const [controlled, setControlled] = React.useState({});
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
 
+  const keyPress = (event) => {
+    const enterKey = 13;
+    if (event.keyCode === enterKey) {
+      if (event.target.id === "passwordlessEmail") {
+        handlePasswordlessLogin();
+      }
+      if (event.target.id === "loginPassword" && showLogin) {
+        handleLogin();
+      }
+    }
+  };
+
   const handleControlledOnChange = (key) => (event, value) => {
     if (key === "showPassword") {
       setControlled((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -95,7 +107,7 @@ export const Login = () => {
     )
       .then((res) => {
         addAlert(res.data.message, "info");
-        userInfoContext.setLoggedIn(true);
+        userInfoContext.refreshAndIsLoggedIn();
         navigate("/");
       })
       .catch((error) => addAlert(error.toString(), "error"));
@@ -122,7 +134,7 @@ export const Login = () => {
       .then((res) => {
         addAlert("Successfully created account", "info");
         addAlert(res.data.message, "info");
-        userInfoContext.setLoggedIn(true);
+        userInfoContext.refreshAndIsLoggedIn();
         navigate("/");
       })
       .catch((error) => addAlert(error.toString(), "error"));
@@ -242,6 +254,7 @@ export const Login = () => {
                   fullWidth
                   value={controlled.loginPassword || ""}
                   onChange={handleControlledOnChange("loginPassword")}
+                  onKeyDown={keyPress}
                   InputProps={{
                     endAdornment: showLogin ? (
                       <InputAdornment position="end">
@@ -387,6 +400,7 @@ export const Login = () => {
                             }
                           : {}
                       }
+                      onKeyDown={keyPress}
                     />
                     <Button
                       variant="contained"
