@@ -1,6 +1,32 @@
 import { Box, Paper, Stack, Typography } from "@mui/material";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { UserInfoContext } from "../../context/UserInfo";
+import { AlertsContext } from "../../context/Alerts";
 
 export const PasswordlessDirections = () => {
+  const navigate = useNavigate();
+  const addAlert = React.useContext(AlertsContext).addAlert;
+  const userInfoContext = React.useContext(UserInfoContext);
+
+  React.useEffect(() => {
+    if (userInfoContext.isLoggedIn()) {
+      navigate("/");
+      return;
+    }
+    let intervalId = null;
+    const checkIfLoggedIn = () => {
+      if (intervalId !== null && userInfoContext.refreshAndIsLoggedIn()) {
+        clearInterval(intervalId);
+        addAlert("Login successful on another tab", "info");
+        navigate("/");
+      }
+    };
+    intervalId = setInterval(checkIfLoggedIn, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <Stack spacing={2}>
       <Typography variant="h4">Passwordless Directions</Typography>
@@ -15,6 +41,7 @@ export const PasswordlessDirections = () => {
               </li>
               <li>Once found, open our email.</li>
               <li>Click on "Click here to Login".</li>
+              <li>Once logged in, please close or refresh this page.</li>
             </ol>
           </Typography>
           <Box
