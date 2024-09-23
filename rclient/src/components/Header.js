@@ -34,7 +34,8 @@ export const Header = () => {
     handleSimpleRequest("post", getCookies("userInfo").email, "auth/signout")
       .then((res) => {
         addAlert(res.data.message, "info");
-        userInfoContext.setLoggedIn(false);
+        userInfoContext.refreshAndIsLoggedIn();
+        navigate("/");
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };
