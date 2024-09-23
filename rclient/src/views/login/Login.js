@@ -25,6 +25,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
 import { UserInfoContext } from "../../context/UserInfo";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 export const Login = () => {
   const theme = useTheme();
@@ -34,16 +35,18 @@ export const Login = () => {
   const [showLogin, setShowLogin] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [controlled, setControlled] = React.useState({});
+  const [canSubmitTop, setCanSubmitTop] = React.useState(false);
+  const [canSubmitBottom, setCanSubmitBottom] = React.useState(false);
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
 
   const keyPress = (event) => {
     const enterKey = 13;
     if (event.keyCode === enterKey) {
-      if (event.target.id === "passwordlessEmail") {
+      if (canSubmitBottom) {
         handlePasswordlessLogin();
       }
-      if (event.target.id === "loginPassword" && showLogin) {
-        handleLogin();
+      if (canSubmitTop) {
+        showLogin ? handleLogin() : handleSignup();
       }
     }
   };
@@ -206,6 +209,9 @@ export const Login = () => {
                     id="signupName"
                     label="Username"
                     fullWidth
+                    onFocus={() => setCanSubmitTop(true)}
+                    onBlur={() => setCanSubmitTop(false)}
+                    onKeyDown={keyPress}
                     InputProps={
                       greaterThanSmall
                         ? {
@@ -229,6 +235,9 @@ export const Login = () => {
                   label="Email"
                   type="email"
                   fullWidth
+                  onFocus={() => setCanSubmitTop(true)}
+                  onBlur={() => setCanSubmitTop(false)}
+                  onKeyDown={keyPress}
                   value={controlled.email || ""}
                   onChange={handleControlledOnChange("email")}
                   InputProps={
@@ -252,9 +261,11 @@ export const Login = () => {
                   label="Password"
                   type={controlled.showPassword ? "text" : "password"}
                   fullWidth
+                  onFocus={() => setCanSubmitTop(true)}
+                  onBlur={() => setCanSubmitTop(false)}
+                  onKeyDown={keyPress}
                   value={controlled.loginPassword || ""}
                   onChange={handleControlledOnChange("loginPassword")}
-                  onKeyDown={keyPress}
                   InputProps={{
                     endAdornment: showLogin ? (
                       <InputAdornment position="end">
@@ -301,6 +312,9 @@ export const Login = () => {
                     label="Confirm Password"
                     type={controlled.showPassword ? "text" : "password"}
                     fullWidth
+                    onFocus={() => setCanSubmitTop(true)}
+                    onBlur={() => setCanSubmitTop(false)}
+                    onKeyDown={keyPress}
                     value={controlled.signupConfirmPassword || ""}
                     onChange={handleControlledOnChange("signupConfirmPassword")}
                     InputProps={{
@@ -331,7 +345,12 @@ export const Login = () => {
                   sx={!showLogin ? { display: "none" } : { width: "100%" }}
                 >
                   <Stack spacing={2}>
-                    <Button onClick={handleLogin} variant="contained" fullWidth>
+                    <Button
+                      onClick={handleLogin}
+                      variant="contained"
+                      fullWidth
+                      endIcon={canSubmitTop ? <KeyboardReturnIcon /> : null}
+                    >
                       Sign In
                     </Button>
                     <Button onClick={() => setShowLogin((prev) => !prev)}>
@@ -345,7 +364,11 @@ export const Login = () => {
                   sx={showLogin ? { display: "none" } : { width: "100%" }}
                 >
                   <Stack spacing={2}>
-                    <Button onClick={handleSignup} variant="contained">
+                    <Button
+                      onClick={handleSignup}
+                      variant="contained"
+                      endIcon={canSubmitTop ? <KeyboardReturnIcon /> : null}
+                    >
                       Sign Up
                     </Button>
                     <Button onClick={() => setShowLogin((prev) => !prev)}>
@@ -382,6 +405,9 @@ export const Login = () => {
                       label="Email"
                       type="email"
                       fullWidth
+                      onFocus={() => setCanSubmitBottom(true)}
+                      onBlur={() => setCanSubmitBottom(false)}
+                      onKeyDown={keyPress}
                       value={controlled.email || ""}
                       onChange={handleControlledOnChange("email")}
                       InputProps={
@@ -400,7 +426,6 @@ export const Login = () => {
                             }
                           : {}
                       }
-                      onKeyDown={keyPress}
                     />
                     <Button
                       variant="contained"
@@ -408,6 +433,8 @@ export const Login = () => {
                       endIcon={
                         loading ? (
                           <CircularProgress color="inherit" size={16} />
+                        ) : canSubmitBottom ? (
+                          <KeyboardReturnIcon />
                         ) : null
                       }
                       disabled={loading}
