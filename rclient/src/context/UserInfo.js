@@ -3,7 +3,7 @@ import { CookiesContext } from "./Cookies";
 
 export const UserInfoContext = React.createContext({
   isLoggedIn: () => {},
-  setLoggedIn: () => {},
+  refreshAndIsLoggedIn: () => {},
 });
 
 export const UserInfo = ({ children }) => {
@@ -15,7 +15,11 @@ export const UserInfo = ({ children }) => {
   const userInfoMemo = React.useMemo(
     () => ({
       isLoggedIn: () => loggedIn,
-      setLoggedIn,
+      refreshAndIsLoggedIn: () => {
+        const isLoggedIn = getCookies("userInfo") !== undefined;
+        setLoggedIn(isLoggedIn);
+        return isLoggedIn;
+      },
     }),
     [loggedIn]
   );

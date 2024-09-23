@@ -22,7 +22,7 @@ export const Passwordless = () => {
     )
       .then((res) => {
         addAlert(res.data.message, "info");
-        userInfoContext.setLoggedIn(true);
+        userInfoContext.refreshAndIsLoggedIn();
       })
       .catch((error) => addAlert(error.toString(), "error"))
       .finally(() => navigate("/"));
