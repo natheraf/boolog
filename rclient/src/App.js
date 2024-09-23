@@ -8,9 +8,9 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { Header } from "./components/Header";
 import { Home } from "./views/Home";
 import { BookLog } from "./views/BookLog";
-import { AlertWrapper as GlobalAlertWrapper } from "./components/AlertWrapper";
 import { PasswordlessDirections } from "./views/login/PasswordlessDirections";
 import { Passwordless } from "./views/login/Passwordless";
+import { Wrappers } from "./context/Wrappers";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -64,7 +64,7 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <GlobalAlertWrapper>
+          <Wrappers>
             <Header />
             <Container maxWidth="xl" sx={{ mt: "88px" }}>
               <Routes>
@@ -84,7 +84,7 @@ function App() {
                 <Route path="*" element={<h1>Wrong path</h1>} />
               </Routes>
             </Container>
-          </GlobalAlertWrapper>
+          </Wrappers>
         </Router>
       </ThemeProvider>
     </ThemeContext.Provider>
