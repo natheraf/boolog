@@ -16,12 +16,27 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { ThemeContext } from "../App";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import { handleSimpleRequest } from "../api/Axios";
+import { AlertContext } from "../context/Alerts";
+import { CookiesContext } from "../context/Cookies";
 
 export const Header = () => {
   const navigate = useNavigate();
+  const addAlert = React.useContext(AlertContext).addAlert;
+  const getCookies = React.useContext(CookiesContext).getCookies;
   const { toggleColorMode, toggleReduceMotion } =
     React.useContext(ThemeContext);
   const theme = useTheme();
+  const [loggedIn, setLoggedIn] = React.useState(getCookies("userInfo"));
+
+  const handleLogout = () => {
+    handleSimpleRequest("post", getCookies("userInfo").email, "auth/signout")
+      .then((res) => {
+        addAlert(res.data.message, "info");
+        setLoggedIn(false);
+      })
+      .catch((error) => addAlert(error.toString(), "error"));
+  };
 
   return (
     <AppBar
@@ -65,12 +80,26 @@ export const Header = () => {
             </Link>
           </Stack>
           <Stack direction="row" alignItems={"center"}>
-            <Link
-              to={"/login"}
-              style={{ textDecoration: "none", color: "white" }}
-            >
-              <Typography variant="h6">Login</Typography>
-            </Link>
+            {loggedIn ? (
+              <Link style={{ textDecoration: "none", color: "white" }}>
+                <Typography
+                  onClick={() => {
+                    handleLogout();
+                    window.location.href = "#";
+                  }}
+                  variant="h6"
+                >
+                  Logout
+                </Typography>
+              </Link>
+            ) : (
+              <Link
+                to={"/login"}
+                style={{ textDecoration: "none", color: "white" }}
+              >
+                <Typography variant="h6">Login</Typography>
+              </Link>
+            )}
             <IconButton
               sx={{ ml: 1 }}
               onClick={toggleColorMode}
