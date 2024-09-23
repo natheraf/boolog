@@ -24,11 +24,13 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import PersonIcon from "@mui/icons-material/Person";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
+import { UserInfoContext } from "../../context/UserInfo";
 
 export const Login = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const addAlert = React.useContext(AlertsContext).addAlert;
+  const userInfoContext = React.useContext(UserInfoContext);
   const [showLogin, setShowLogin] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
   const [controlled, setControlled] = React.useState({});
@@ -93,6 +95,7 @@ export const Login = () => {
     )
       .then((res) => {
         addAlert(res.data.message, "info");
+        userInfoContext.setLoggedIn(true);
         navigate("/");
       })
       .catch((error) => addAlert(error.toString(), "error"));
@@ -119,10 +122,17 @@ export const Login = () => {
       .then((res) => {
         addAlert("Successfully created account", "info");
         addAlert(res.data.message, "info");
+        userInfoContext.setLoggedIn(true);
         navigate("/");
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };
+
+  React.useEffect(() => {
+    if (userInfoContext.isLoggedIn()) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <Stack

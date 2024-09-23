@@ -19,6 +19,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { handleSimpleRequest } from "../api/Axios";
 import { AlertsContext } from "../context/Alerts";
 import { CookiesContext } from "../context/Cookies";
+import { UserInfoContext } from "../context/UserInfo";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -27,13 +28,13 @@ export const Header = () => {
   const { toggleColorMode, toggleReduceMotion } =
     React.useContext(ThemeContext);
   const theme = useTheme();
-  const [loggedIn, setLoggedIn] = React.useState(getCookies("userInfo"));
+  const userInfoContext = React.useContext(UserInfoContext);
 
   const handleLogout = () => {
     handleSimpleRequest("post", getCookies("userInfo").email, "auth/signout")
       .then((res) => {
         addAlert(res.data.message, "info");
-        setLoggedIn(false);
+        userInfoContext.setLoggedIn(false);
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };
@@ -80,7 +81,7 @@ export const Header = () => {
             </Link>
           </Stack>
           <Stack direction="row" alignItems={"center"}>
-            {loggedIn ? (
+            {userInfoContext.isLoggedIn() ? (
               <Link style={{ textDecoration: "none", color: "white" }}>
                 <Typography
                   onClick={() => {
