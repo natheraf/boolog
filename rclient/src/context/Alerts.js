@@ -2,7 +2,9 @@ import * as React from "react";
 import { Alert, Box, Stack } from "@mui/material";
 import { TimedLoadingBar } from "../components/TimedLoadingBar";
 
-export const AlertsContext = React.createContext({});
+export const AlertsContext = React.createContext({
+  addAlert: () => {},
+});
 
 export const Alerts = ({ children }) => {
   const [alerts, setAlerts] = new React.useState([]);
