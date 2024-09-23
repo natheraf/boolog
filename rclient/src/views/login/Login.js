@@ -77,10 +77,10 @@ export const Login = () => {
       "auth/passwordless/sendcode"
     )
       .then((res) => {
-        console.log(res.data.message);
+        addAlert(res.data.message, "success");
         navigate("passwordless-directions");
       })
-      .catch((error) => console.log(error))
+      .catch((error) => addAlert(error.toString(), "error"))
       .finally(() => setLoading(false));
   };
 
