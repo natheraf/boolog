@@ -26,4 +26,16 @@ export const handleSimpleRequest = (httpMethod, object, route) => {
   );
 };
 
-export const handleSignOut = () => {};
+export const getRandomWord = (amount, minLength, maxLength) =>
+  new Promise((resolve, reject) =>
+    fetch(
+      `https://random-word-api.herokuapp.com/word?number=${amount}&length=${
+        Math.floor(Math.random() * maxLength) + minLength
+      }`,
+      {
+        method: "GET",
+      }
+    )
+      .then((response) => resolve(response.json()))
+      .catch((error) => reject(Error(error)))
+  );

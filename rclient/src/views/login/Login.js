@@ -14,7 +14,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import bgImage from "../../assets/authentication_bg_med.jpg";
-import { handleSimpleRequest } from "../../api/Axios";
+import { getRandomWord, handleSimpleRequest } from "../../api/Axios";
 import { useTheme } from "@emotion/react";
 import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -62,21 +62,26 @@ export const Login = () => {
     }
   };
 
-  const generateRandomPassword = (length) => {
-    const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*_-";
-    const res = [];
-    while (res.length < length) {
-      res.push(characters[Math.floor(Math.random() * characters.length)]);
-    }
-    const joinedResult = res.join("");
-    navigator.clipboard.writeText(joinedResult);
-    addAlert("Generated password copied to clipboard", "info");
-    setControlled((prev) => ({
-      ...prev,
-      loginPassword: joinedResult,
-      signupConfirmPassword: joinedResult,
-    }));
+  const generateRandomPassword = () => {
+    const numberOfWords = 3;
+    const minLength = 4;
+    const maxLength = 6;
+    const specialCharacters = "!@#$%^&*";
+    getRandomWord(numberOfWords, minLength, maxLength).then((words) => {
+      words = words.map((word) => word[0].toUpperCase() + word.substring(1));
+      const randomNumberPosition = Math.floor(Math.random() * numberOfWords);
+      words[randomNumberPosition] += Math.floor(Math.random() * 10);
+      const joinedResult =
+        words.join("-") +
+        specialCharacters[Math.floor(Math.random() * specialCharacters.length)];
+      navigator.clipboard.writeText(joinedResult);
+      addAlert("Generated password copied to clipboard", "info");
+      setControlled((prev) => ({
+        ...prev,
+        loginPassword: joinedResult,
+        signupConfirmPassword: joinedResult,
+      }));
+    });
   };
 
   const handleMouseChange = (event) => {
