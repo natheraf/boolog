@@ -1,14 +1,18 @@
 import * as React from "react";
 import { Alert, Box, Stack } from "@mui/material";
 import { TimedLoadingBar } from "../components/TimedLoadingBar";
+import { FadingBox } from "../components/FadingBox";
+import { useTheme } from "@emotion/react";
 
 export const AlertsContext = React.createContext({
   addAlert: () => {},
 });
 
 export const Alerts = ({ children }) => {
+  const theme = useTheme();
   const [alerts, setAlerts] = new React.useState([]);
   const timeout = { ms: 5000, str: "5s" };
+  const alertSeverities = ["info", "success", "warning", "error"];
 
   const alertMemo = React.useMemo(
     () => ({
@@ -41,7 +45,18 @@ export const Alerts = ({ children }) => {
         }}
       >
         {alerts.map((alert) => (
-          <Box key={alert.timeOutId}>
+          <FadingBox
+            key={alert.timeOutId}
+            duration={500}
+            timeout={
+              Math.floor(timeout.ms / 2) +
+              alertSeverities.indexOf(alert.severity) * 500
+            }
+            blurDuration={theme.transitions.reduceMotion ? 500 : 0}
+            blurTimeout={
+              theme.transitions.reduceMotion ? timeout.ms : timeout.ms
+            }
+          >
             <Alert severity={alert.severity}>{alert.children}</Alert>
             <TimedLoadingBar
               color={
@@ -55,7 +70,7 @@ export const Alerts = ({ children }) => {
               }
               duration={timeout.ms}
             />
-          </Box>
+          </FadingBox>
         ))}
       </Stack>
       {children}
