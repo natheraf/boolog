@@ -6,24 +6,42 @@ module.exports = (drop) => {
   const url = "mongodb://localhost:27017";
   const client = new MongoClient(url);
 
-  async function dropAuthenticationCollections() {
-    await client.connect();
-    if (drop) {
-      const db = client.db("authentication");
-      const collections = ["loginEmailCodes", "loginInfo"];
-      collections.forEach((collection) =>
-        db
-          .collection(collection)
-          .drop()
-          .then(() => {
-            db.collection(collection).createIndex(
-              { email: 1 },
-              { unique: true }
+  async function canConnect() {
+    client
+      .connect()
+      .then(() => console.log("Successfully connected to MongoDB"))
+      .catch((error) => console.log(`Unable to connect to MongoDB: ${error}`));
+  }
+
+  canConnect();
+
+  async function dropAllCollectionsInDatabases(arrayOfDatabases) {
+    return new Promise(async (resolve, reject) => {
+      await client.connect();
+      arrayOfDatabases.forEach((databasesName) => {
+        const db = client.db(databasesName);
+        db.listCollections()
+          .toArray()
+          .then((collections) => {
+            collections.forEach((obj) =>
+              db
+                .collection(obj.name)
+                .drop()
+                .then(() =>
+                  db
+                    .collection(obj.name)
+                    .createIndex({ email: 1 }, { unique: true })
+                    .then(() => {
+                      console.log(
+                        `Successfully dropped all collections in ${obj.name}`
+                      );
+                      if (obj.name === "loginInfo") createSuperAdmin();
+                    })
+                )
             );
-          })
-      );
-      console.log("successfully dropped all collections in authentication");
-    }
+          });
+      });
+    });
   }
 
   async function dropLoginEmailCodes() {
@@ -41,8 +59,7 @@ module.exports = (drop) => {
   }
 
   const initialize = () => {
-    dropAuthenticationCollections().catch(console.error);
-    createSuperAdmin();
+    dropAllCollectionsInDatabases(["userLists", "authentication"]);
   };
 
   if (drop) {
