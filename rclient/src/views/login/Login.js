@@ -10,6 +10,7 @@ import {
   Paper,
   Stack,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -276,35 +277,45 @@ export const Login = () => {
                   InputProps={{
                     endAdornment: showLogin ? (
                       <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={handleControlledOnChange("showPassword")}
-                          // onMouseDown={handleMouseChange}
-                          // onMouseUp={handleMouseChange}
-                          sx={{
-                            mr: -1,
-                            color: theme.palette.inputAdornment.enabled,
-                          }}
+                        <Tooltip
+                          title={
+                            controlled.showPassword
+                              ? "Hide Password"
+                              : "Show Password"
+                          }
                         >
-                          {controlled.showPassword ? (
-                            <VisibilityOff />
-                          ) : (
-                            <VisibilityIcon />
-                          )}
-                        </IconButton>
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={handleControlledOnChange("showPassword")}
+                            // onMouseDown={handleMouseChange}
+                            // onMouseUp={handleMouseChange}
+                            sx={{
+                              mr: -1,
+                              color: theme.palette.inputAdornment.enabled,
+                            }}
+                          >
+                            {controlled.showPassword ? (
+                              <VisibilityOff />
+                            ) : (
+                              <VisibilityIcon />
+                            )}
+                          </IconButton>
+                        </Tooltip>
                       </InputAdornment>
                     ) : (
                       <InputAdornment position="end">
-                        <IconButton
-                          aria-label="generate random password"
-                          onClick={() => generateRandomPassword(16)}
-                          sx={{
-                            mr: -1,
-                            color: theme.palette.inputAdornment.enabled,
-                          }}
-                        >
-                          <ShuffleIcon />
-                        </IconButton>
+                        <Tooltip title="Random Password">
+                          <IconButton
+                            aria-label="generate random password"
+                            onClick={() => generateRandomPassword(16)}
+                            sx={{
+                              mr: -1,
+                              color: theme.palette.inputAdornment.enabled,
+                            }}
+                          >
+                            <ShuffleIcon />
+                          </IconButton>
+                        </Tooltip>
                       </InputAdornment>
                     ),
                   }}
@@ -327,20 +338,28 @@ export const Login = () => {
                     InputProps={{
                       endAdornment: (
                         <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleControlledOnChange("showPassword")}
-                            sx={{
-                              mr: -1,
-                              color: theme.palette.inputAdornment.enabled,
-                            }}
+                          <Tooltip
+                            title={
+                              controlled.showPassword
+                                ? "Hide Password"
+                                : "Show Password"
+                            }
                           >
-                            {controlled.showPassword ? (
-                              <VisibilityOff />
-                            ) : (
-                              <VisibilityIcon />
-                            )}
-                          </IconButton>
+                            <IconButton
+                              aria-label="toggle password visibility"
+                              onClick={handleControlledOnChange("showPassword")}
+                              sx={{
+                                mr: -1,
+                                color: theme.palette.inputAdornment.enabled,
+                              }}
+                            >
+                              {controlled.showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <VisibilityIcon />
+                              )}
+                            </IconButton>
+                          </Tooltip>
                         </InputAdornment>
                       ),
                     }}
