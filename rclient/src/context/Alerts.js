@@ -52,8 +52,8 @@ export const Alerts = ({ children }) => {
               Math.floor(timeout.ms / 2) +
               alertSeverities.indexOf(alert.severity) * 500
             }
-            blurDuration={theme.transitions.reduceMotion ? 500 : 0}
-            blurTimeout={
+            blurduration={theme.transitions.reduceMotion ? 500 : 0}
+            blurtimeout={
               theme.transitions.reduceMotion ? timeout.ms : timeout.ms
             }
           >
