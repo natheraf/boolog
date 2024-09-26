@@ -11,22 +11,43 @@ export const Passwordless = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get("code");
   const email = searchParams.get("email");
+  const purpose = searchParams.get("purpose");
   const handlePasswordlessLogin = () => {
-    handleSimpleRequest(
-      "post",
-      {
-        email,
-        verificationCode: code,
-      },
-      "auth/passwordless/checkcode"
-    )
-      .then((res) => {
-        addAlert(res.data.message, "info");
-        userInfoContext.refreshAndIsLoggedIn();
-      })
-      .catch((error) => addAlert(error.toString(), "error"))
-      .finally(() => navigate("/"));
+    if (purpose === "login") {
+      handleSimpleRequest(
+        "post",
+        {
+          email,
+          verificationCode: code,
+        },
+        "auth/passwordless/checkcode"
+      )
+        .then((res) => {
+          addAlert(res.data.message, "info");
+          userInfoContext.refreshAndIsLoggedIn();
+        })
+        .catch((error) => addAlert(error.toString(), "error"))
+        .finally(() => navigate("/"));
+    } else if (purpose === "signup") {
+      handleSimpleRequest(
+        "post",
+        {
+          email,
+          verificationCode: code,
+        },
+        "auth/signup/checkcode"
+      )
+        .then((res) => {
+          addAlert(res.data.message, "info");
+          userInfoContext.refreshAndIsLoggedIn();
+        })
+        .catch((error) => addAlert(error.toString(), "error"))
+        .finally(() => navigate("/"));
+    }
   };
 
-  React.useEffect(() => handlePasswordlessLogin(), []);
+  React.useEffect(() => {
+    const timeoutId = setTimeout(handlePasswordlessLogin, 100);
+    return () => clearTimeout(timeoutId);
+  }, []);
 };
