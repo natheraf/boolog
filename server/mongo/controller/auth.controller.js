@@ -28,20 +28,32 @@ exports.createSuperAdmin = () => {
 };
 
 exports.signUp = (req, res, next) => {
-  const userRequiredBody = ["name", "email", "password", "role", "active"];
+  if (req.passwordlessFoundUser === true) {
+    return next();
+  }
+  const userRequiredBody = ["email", "password", "role", "active"];
   const missing = bodyMissingRequiredFields(req, userRequiredBody);
   if (missing) {
     return res?.status(400).send(missing);
   }
 
   const user = {};
+  if (req.body.name === undefined) {
+    req.body.name = req.body.email;
+  }
   userRequiredBody.forEach((key) => (user[key] = req.body[key]));
-  user.password = bcrypt.hashSync(req.body.password, 10);
+  if (req.body.password !== null) {
+    user.password = bcrypt.hashSync(req.body.password, 10);
+  }
   getDatabase("authentication")
     .then((db) => {
       db.collection("loginInfo")
         .insertOne(user)
-        .then(() => next());
+        .then(() => next())
+        .catch((error) => {
+          console.log(error);
+          res.status(500).send(error);
+        });
     })
     .catch((error) => {
       console.log(error);
@@ -49,8 +61,59 @@ exports.signUp = (req, res, next) => {
     });
 };
 
+exports.sendSignUpCode = (req, res) => {
+  const missing = bodyMissingRequiredFields(req, [
+    "name",
+    "email",
+    "password",
+    "role",
+    "active",
+  ]);
+  if (missing) {
+    return res?.status(400).send(missing);
+  }
+
+  req.body.purpose = "signup";
+  getDatabase("authentication").then((db) =>
+    sendEmailAuthentication(db, req)
+      .then((message) => res.send({ message }))
+      .catch((error) => res.status(400).send(error))
+  );
+};
+
+exports.checkSignUpCode = (req, res, next) => {
+  const missing = bodyMissingRequiredFields(req, ["email", "verificationCode"]);
+  if (missing) {
+    return res?.status(400).send(missing);
+  }
+
+  getDatabase("authentication").then((db) => {
+    db.collection("loginEmailCodes")
+      .findOne({
+        email: req.body.email,
+        purpose: "signup",
+      })
+      .then((data) => {
+        const codeIsValid = () =>
+          bcrypt.compareSync(req.body.verificationCode, data.code);
+        if (!data || !codeIsValid()) {
+          return res
+            .status(401)
+            .send({ message: "Wrong verification code or possibly expired" });
+        }
+        req.body = data.body;
+        db.collection("loginEmailCodes")
+          .deleteOne({
+            _id: data._id,
+          })
+          .then(() => next())
+          .catch((error) => console.log(error));
+      });
+  });
+};
+
 exports.signIn = (req, res) => {
-  const missing = bodyMissingRequiredFields(req, ["email"]);
+  const missing = bodyMissingRequiredFields(req, ["email", "password"]);
   if (missing) {
     return res?.status(400).send(missing);
   }
@@ -59,7 +122,7 @@ exports.signIn = (req, res) => {
     db.collection("loginInfo")
       .findOne({ email: req.body.email })
       .then((user) => {
-        if (!user) {
+        if (!user || user.password === null) {
           return res
             .status(401)
             .send({ message: "Email and Password are not found" });
@@ -136,9 +199,10 @@ exports.checkPasswordless = (req, res, next) => {
             if (!user) {
               return res.status(401).send({ message: "Email not found" });
             }
-            sendEmailAuthentication(db, req).then((message) =>
-              res.send({ message })
-            );
+            req.body.purpose = "login";
+            sendEmailAuthentication(db, req)
+              .then((message) => res.send({ message }))
+              .catch((error) => res.status(400).send(error));
           });
       });
     } else {
@@ -153,25 +217,13 @@ exports.signUpPasswordless = (req, res) => {
     return res?.status(400).send(missing);
   }
 
-  const user = {
-    email: req.body.email,
-    name: req.body.email,
-    password: null,
-    role: req.body.role,
-    active: req.body.active,
-  };
   getDatabase("authentication")
     .then((db) => {
-      db.collection("loginInfo")
-        .findOne({ email: req.body.email })
-        .then((foundUser) => {
-          if (!foundUser) {
-            db.collection("loginInfo").insertOne(user);
-          }
-          sendEmailAuthentication(db, req).then((message) =>
-            res.send({ message })
-          );
-        });
+      req.body.password = null;
+      req.body.purpose = "login";
+      sendEmailAuthentication(db, req)
+        .then((message) => res.send({ message }))
+        .catch((error) => res.status(400).send(error));
     })
     .catch((error) => {
       console.log(error);
@@ -238,6 +290,7 @@ exports.checkPasswordlessCode = (req, res, next) => {
     db.collection("loginEmailCodes")
       .findOne({
         email: req.body.email,
+        purpose: "login",
       })
       .then((data) => {
         const codeIsValid = () =>
@@ -247,13 +300,21 @@ exports.checkPasswordlessCode = (req, res, next) => {
             .status(401)
             .send({ message: "Wrong verification code or possibly expired" });
         }
-        db.collection("loginEmailCodes")
-          .deleteOne({
-            _id: data._id,
-            email: req.body.email,
-          })
-          .then(() => next())
-          .catch((error) => console.log(error));
+        db.collection("loginInfo")
+          .findOne({ email: req.body.email })
+          .then((user) => {
+            if (!user) {
+              req.body = data.body;
+            } else {
+              req.passwordlessFoundUser = true;
+            }
+            db.collection("loginEmailCodes")
+              .deleteOne({
+                _id: data._id,
+              })
+              .then(() => next())
+              .catch((error) => console.log(error));
+          });
       });
   });
 };

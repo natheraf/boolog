@@ -17,8 +17,13 @@ module.exports = function (app) {
       verifySignUp.checkRolesExist,
       authJwt.authorizedToCreateUser,
       verifySignUp.checkDuplicateEmail,
-      controller.signUp,
     ],
+    controller.sendSignUpCode
+  );
+
+  app.post(
+    "/api/auth/signup/checkcode",
+    [controller.checkSignUpCode, controller.signUp],
     controller.signIn
   );
 
@@ -40,7 +45,7 @@ module.exports = function (app) {
 
   app.post(
     "/api/auth/passwordless/checkcode",
-    [controller.checkPasswordlessCode],
+    [controller.checkPasswordlessCode, controller.signUp],
     controller.signInPasswordless
   );
 };
