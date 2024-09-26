@@ -111,6 +111,7 @@ export const Login = () => {
   };
 
   const handleLogin = () => {
+    setLoading(true);
     handleSimpleRequest(
       "post",
       {
@@ -124,7 +125,8 @@ export const Login = () => {
         userInfoContext.refreshAndIsLoggedIn();
         navigate("/");
       })
-      .catch((error) => addAlert(error.toString(), "error"));
+      .catch((error) => addAlert(error.toString(), "error"))
+      .finally(() => setLoading(false));
   };
 
   const handleSignup = () => {
@@ -135,6 +137,7 @@ export const Login = () => {
       window.alert("Passwords do not match");
       return;
     }
+    setLoading(true);
     handleSimpleRequest(
       "post",
       {
@@ -149,7 +152,8 @@ export const Login = () => {
         addAlert(res.data.message, "info");
         navigate("verify-email-directions");
       })
-      .catch((error) => addAlert(error.toString(), "error"));
+      .catch((error) => addAlert(error.toString(), "error"))
+      .finally(() => setLoading(false));
   };
 
   React.useEffect(() => {
@@ -376,11 +380,21 @@ export const Login = () => {
                       onClick={handleLogin}
                       variant="contained"
                       fullWidth
-                      endIcon={canSubmitTop ? <KeyboardReturnIcon /> : null}
+                      endIcon={
+                        loading ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : canSubmitTop ? (
+                          <KeyboardReturnIcon />
+                        ) : null
+                      }
+                      disabled={loading}
                     >
                       Sign In
                     </Button>
-                    <Button onClick={() => setShowLogin((prev) => !prev)}>
+                    <Button
+                      onClick={() => setShowLogin((prev) => !prev)}
+                      disabled={loading}
+                    >
                       Sign Up
                     </Button>
                   </Stack>
@@ -394,11 +408,21 @@ export const Login = () => {
                     <Button
                       onClick={handleSignup}
                       variant="contained"
-                      endIcon={canSubmitTop ? <KeyboardReturnIcon /> : null}
+                      endIcon={
+                        loading ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : canSubmitTop ? (
+                          <KeyboardReturnIcon />
+                        ) : null
+                      }
+                      disabled={loading}
                     >
                       Sign Up
                     </Button>
-                    <Button onClick={() => setShowLogin((prev) => !prev)}>
+                    <Button
+                      onClick={() => setShowLogin((prev) => !prev)}
+                      disabled={loading}
+                    >
                       Sign In
                     </Button>
                   </Stack>
