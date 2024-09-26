@@ -1,7 +1,11 @@
 const bodyMissingRequiredFields = (req, requiredBody) => {
   const missing = [];
   requiredBody.forEach((key) => {
-    if (req.body[key] === undefined) missing.push(key);
+    if (
+      req.body[key] === undefined ||
+      (typeof req.body[key] === "string" && req.body[key].length === 0)
+    )
+      missing.push(key);
   });
   if (missing.length > 0) {
     return {
