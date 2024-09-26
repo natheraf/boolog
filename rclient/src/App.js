@@ -8,9 +8,9 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import { Header } from "./components/Header";
 import { Home } from "./views/Home";
 import { BookLog } from "./views/BookLog";
-import { PasswordlessDirections } from "./views/login/PasswordlessDirections";
 import { Passwordless } from "./views/login/Passwordless";
 import { Wrappers } from "./context/Wrappers";
+import { VerifyEmailDirections } from "./views/login/VerifyEmailDirections";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -72,8 +72,8 @@ function App() {
                 <Route path="login">
                   <Route path="" element={<Login />} />
                   <Route
-                    path="passwordless-directions"
-                    element={<PasswordlessDirections />}
+                    path="verify-email-directions"
+                    element={<VerifyEmailDirections />}
                   />
                   <Route path="passwordless" element={<Passwordless />} />
                 </Route>

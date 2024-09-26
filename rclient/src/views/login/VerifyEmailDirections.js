@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { UserInfoContext } from "../../context/UserInfo";
 import { AlertsContext } from "../../context/Alerts";
 
-export const PasswordlessDirections = () => {
+export const VerifyEmailDirections = () => {
   const navigate = useNavigate();
   const addAlert = React.useContext(AlertsContext).addAlert;
   const userInfoContext = React.useContext(UserInfoContext);
@@ -29,7 +29,7 @@ export const PasswordlessDirections = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="h4">Passwordless Directions</Typography>
+      <Typography variant="h4">Verify Email Directions</Typography>
       <Paper sx={{ p: "2rem" }}>
         <Stack>
           <Typography variant="h6">

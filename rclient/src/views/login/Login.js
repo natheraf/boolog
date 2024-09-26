@@ -101,9 +101,12 @@ export const Login = () => {
     )
       .then((res) => {
         addAlert(res.data.message, "success");
-        navigate("passwordless-directions");
+        navigate("verify-email-directions");
       })
-      .catch((error) => addAlert(error.toString(), "error"))
+      .catch((error) => {
+        console.log(error);
+        addAlert(error.toString(), "error");
+      })
       .finally(() => setLoading(false));
   };
 
@@ -143,10 +146,8 @@ export const Login = () => {
       "auth/signup"
     )
       .then((res) => {
-        addAlert("Successfully created account", "info");
         addAlert(res.data.message, "info");
-        userInfoContext.refreshAndIsLoggedIn();
-        navigate("/");
+        navigate("verify-email-directions");
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };
