@@ -72,7 +72,7 @@ const sendEmailAuthentication = (db, req) =>
                     }),
                   1000 * 60 * 5 // 5 minutes
                 );
-                resolve("Sent login link");
+                resolve("Sent email verification link");
               });
           })
       )
