@@ -31,41 +31,52 @@ const emailAuthenticationCheck = (req) =>
           req.body.name ?? req.body.email
         }<br/><p>Here is your one-time verification link to verify its you. This link is valid for <b>5 minutes</b> only: </p><a href="${link}?code=${code}&email=${
           req.body.email
-        }"><h2>Click here to Login</h2></a><p>Thanks, Boolog.</p>`, // html body
+        }&purpose=${
+          req.body.purpose
+        }"><h2>Click here to Verify</h2></a><p>Thanks, Boolog.</p>`, // html body
       })
       .then((info) => resolve({ code, info }))
-      .catch((error) => reject(error));
+      .catch((error) => {
+        if (error.message === "No recipients defined") {
+          reject({ message: "Error with sending Email" });
+        }
+        reject(error);
+      });
   });
 
 const sendEmailAuthentication = (db, req) =>
   new Promise((resolve, reject) => {
-    emailAuthenticationCheck(req).then(({ code, info }) =>
-      db
-        .collection("loginEmailCodes")
-        .findOne({ email: req.body.email })
-        .then(async (foundDuplicate) => {
-          if (foundDuplicate) {
-            await db.collection("loginEmailCodes").deleteOne(foundDuplicate);
-          }
-          db.collection("loginEmailCodes")
-            .insertOne({
-              email: req.body.email,
-              code: bcrypt.hashSync(code, 10),
-              info,
-            })
-            .then((insertRes) => {
-              setTimeout(
-                () =>
-                  db.collection("loginEmailCodes").deleteOne({
-                    _id: insertRes.insertedId,
-                    email: req.body.email,
-                  }),
-                1000 * 60 * 5 // 5 minutes
-              );
-              resolve("Sent login link");
-            });
-        })
-    );
+    emailAuthenticationCheck(req)
+      .then(({ code, info }) =>
+        db
+          .collection("loginEmailCodes")
+          .findOne({ email: req.body.email })
+          .then(async (foundDuplicate) => {
+            if (foundDuplicate) {
+              await db.collection("loginEmailCodes").deleteOne(foundDuplicate);
+            }
+            db.collection("loginEmailCodes")
+              .insertOne({
+                email: req.body.email,
+                code: bcrypt.hashSync(code, 10),
+                body: req.body,
+                purpose: req.body.purpose,
+                info,
+              })
+              .then((insertRes) => {
+                setTimeout(
+                  () =>
+                    db.collection("loginEmailCodes").deleteOne({
+                      _id: insertRes.insertedId,
+                      email: req.body.email,
+                    }),
+                  1000 * 60 * 5 // 5 minutes
+                );
+                resolve("Sent login link");
+              });
+          })
+      )
+      .catch(reject);
   });
 
 module.exports = { sendEmailAuthentication };
