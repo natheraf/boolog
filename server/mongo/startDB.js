@@ -23,9 +23,11 @@ module.exports = (drop) => {
         db.listCollections()
           .toArray()
           .then((collections) => {
-            collections.forEach((obj) =>
-              db
-                .collection(obj.name)
+            collections.forEach((obj) => {
+              if (obj.name === "loginEmailCodes") {
+                return;
+              }
+              db.collection(obj.name)
                 .drop()
                 .then(() =>
                   db
@@ -37,8 +39,8 @@ module.exports = (drop) => {
                       );
                       if (obj.name === "loginInfo") createSuperAdmin();
                     })
-                )
-            );
+                );
+            });
           });
       });
     });
@@ -53,6 +55,7 @@ module.exports = (drop) => {
         .drop()
         .then(() => {
           db.collection(collection).createIndex({ email: 1 }, { unique: true });
+          db.collection(collection).createIndex({ codeId: 1 });
         })
     );
     console.log("Dropped login email codes");
@@ -64,7 +67,6 @@ module.exports = (drop) => {
 
   if (drop) {
     initialize();
-  } else {
-    dropLoginEmailCodes();
   }
+  dropLoginEmailCodes();
 };

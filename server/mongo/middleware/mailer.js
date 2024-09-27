@@ -10,6 +10,7 @@ const emailAuthenticationCheck = (req) =>
   new Promise((resolve, reject) => {
     const link = `${req.header("Origin")}/login/passwordless`;
     const code = generateRandomCode(64);
+    const codeId = generateRandomCode(64);
     const transporter = nodemailer.createTransport({
       host: `${config.outgoing_email_host}`,
       port: 587,
@@ -29,13 +30,11 @@ const emailAuthenticationCheck = (req) =>
         }. This is your verification link: ${link}?code=${code}`, // plain text body
         html: `<p>Hi ${
           req.body.name ?? req.body.email
-        }<br/><p>Here is your one-time verification link to verify its you. This link is valid for <b>5 minutes</b> only: </p><a href="${link}?code=${code}&email=${
-          req.body.email
-        }&purpose=${
+        }<br/><p>Here is your one-time verification link to verify its you. This link is valid for <b>5 minutes</b> only: </p><a href="${link}?code=${code}&codeId=${codeId}&purpose=${
           req.body.purpose
         }"><h2>Click here to Verify</h2></a><p>Thanks, Boolog.</p>`, // html body
       })
-      .then((info) => resolve({ code, info }))
+      .then((info) => resolve({ codeId, code, info }))
       .catch((error) => {
         if (error.message === "No recipients defined") {
           reject({ message: "Error with sending Email" });
@@ -47,7 +46,7 @@ const emailAuthenticationCheck = (req) =>
 const sendEmailAuthentication = (db, req) =>
   new Promise((resolve, reject) => {
     emailAuthenticationCheck(req)
-      .then(({ code, info }) =>
+      .then(({ codeId, code, info }) =>
         db
           .collection("loginEmailCodes")
           .findOne({ email: req.body.email })
@@ -58,6 +57,7 @@ const sendEmailAuthentication = (db, req) =>
             db.collection("loginEmailCodes")
               .insertOne({
                 email: req.body.email,
+                codeId,
                 code: bcrypt.hashSync(code, 10),
                 body: req.body,
                 purpose: req.body.purpose,
@@ -68,7 +68,6 @@ const sendEmailAuthentication = (db, req) =>
                   () =>
                     db.collection("loginEmailCodes").deleteOne({
                       _id: insertRes.insertedId,
-                      email: req.body.email,
                     }),
                   1000 * 60 * 5 // 5 minutes
                 );

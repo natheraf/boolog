@@ -10,14 +10,14 @@ export const Passwordless = () => {
   const userInfoContext = React.useContext(UserInfoContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const code = searchParams.get("code");
-  const email = searchParams.get("email");
+  const codeId = searchParams.get("codeId");
   const purpose = searchParams.get("purpose");
   const handlePasswordlessLogin = () => {
     if (purpose === "login") {
       handleSimpleRequest(
         "post",
         {
-          email,
+          verificationId: codeId,
           verificationCode: code,
         },
         "auth/passwordless/checkcode"
@@ -32,7 +32,7 @@ export const Passwordless = () => {
       handleSimpleRequest(
         "post",
         {
-          email,
+          verificationId: codeId,
           verificationCode: code,
         },
         "auth/signup/checkcode"

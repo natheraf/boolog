@@ -82,7 +82,10 @@ exports.sendSignUpCode = (req, res) => {
 };
 
 exports.checkSignUpCode = (req, res, next) => {
-  const missing = bodyMissingRequiredFields(req, ["email", "verificationCode"]);
+  const missing = bodyMissingRequiredFields(req, [
+    "verificationId",
+    "verificationCode",
+  ]);
   if (missing) {
     return res?.status(400).send(missing);
   }
@@ -90,7 +93,7 @@ exports.checkSignUpCode = (req, res, next) => {
   getDatabase("authentication").then((db) => {
     db.collection("loginEmailCodes")
       .findOne({
-        email: req.body.email,
+        codeId: req.body.verificationId,
         purpose: "signup",
       })
       .then((data) => {
@@ -281,7 +284,10 @@ exports.signInPasswordless = (req, res) => {
 };
 
 exports.checkPasswordlessCode = (req, res, next) => {
-  const missing = bodyMissingRequiredFields(req, ["email", "verificationCode"]);
+  const missing = bodyMissingRequiredFields(req, [
+    "verificationId",
+    "verificationCode",
+  ]);
   if (missing) {
     return res?.status(400).send(missing);
   }
@@ -289,7 +295,7 @@ exports.checkPasswordlessCode = (req, res, next) => {
   getDatabase("authentication").then((db) => {
     db.collection("loginEmailCodes")
       .findOne({
-        email: req.body.email,
+        codeId: req.body.verificationId,
         purpose: "login",
       })
       .then((data) => {
@@ -300,6 +306,7 @@ exports.checkPasswordlessCode = (req, res, next) => {
             .status(401)
             .send({ message: "Wrong verification code or possibly expired" });
         }
+        req.body.email = data.email;
         db.collection("loginInfo")
           .findOne({ email: req.body.email })
           .then((user) => {
