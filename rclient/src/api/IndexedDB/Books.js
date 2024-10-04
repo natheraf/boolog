@@ -1,5 +1,7 @@
-const userDataDB = "userData";
-const userDataDBVersion = 1;
+import config from "./config";
+
+const userDataDB = config.userDataDB;
+const userDataDBVersion = config.userDataDBVersion;
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
