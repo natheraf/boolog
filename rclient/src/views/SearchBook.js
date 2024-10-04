@@ -24,7 +24,7 @@ import { searchGoogleBooks } from "../api/GoogleAPI";
 import SearchIcon from "@mui/icons-material/Search";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Tiles } from "../components/Tiles";
-import { indexedDBBooksInterface } from "../api/IndexedDB";
+import { indexedDBBooksInterface } from "../api/IndexedDB/Books";
 import { useTheme } from "@emotion/react";
 
 export const SearchBook = () => {

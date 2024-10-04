@@ -25,7 +25,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
-import { setBook } from "../api/IndexedDB";
+import { setBook } from "../api/IndexedDB/Books";
 import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";

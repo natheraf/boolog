@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getAllBooks, indexedDBBooksInterface } from "../api/IndexedDB";
+import { getAllBooks, indexedDBBooksInterface } from "../api/IndexedDB/Books";
 import { Tiles } from "../components/Tiles";
 import {
   Accordion,
