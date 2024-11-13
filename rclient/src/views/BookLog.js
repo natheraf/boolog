@@ -135,6 +135,7 @@ export const BookLog = () => {
           "error"
         );
       });
+    document.body.scrollTop = document.documentElement.scrollTop = 0;
   }, []);
 
   if (isLoading) {

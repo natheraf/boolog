@@ -357,7 +357,7 @@ export const SearchBook = () => {
           ref={topResultRef}
           sx={{
             position: "relative",
-            top: -70,
+            top: -100,
           }}
         />
         <Stack spacing={2} p={2}>
