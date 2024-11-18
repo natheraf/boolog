@@ -44,6 +44,7 @@ export const CreateBook = ({
   setOpen,
   editBookObject,
   setDataObject,
+  syncMediaObject,
 }) => {
   const addAlert = React.useContext(AlertsContext).addAlert;
   const theme = useTheme();
@@ -92,6 +93,7 @@ export const CreateBook = ({
       .then(() => {
         handleClose();
         setDataObject(bookObject);
+        syncMediaObject();
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };
@@ -423,4 +425,5 @@ CreateBook.propTypes = {
   setOpen: PropTypes.func.isRequired,
   editBookObject: PropTypes.object,
   setDataObject: PropTypes.func,
+  syncMediaObject: PropTypes.func,
 };

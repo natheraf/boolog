@@ -71,6 +71,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
             setOpenDeleteAlert={setOpenDeleteAlert}
             openEditor={openEditor}
             setDataObject={setDataObject}
+            syncMediaObject={syncMediaObject}
           />
         ) : null}
       </Grid>
