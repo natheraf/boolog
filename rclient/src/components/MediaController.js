@@ -66,7 +66,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
         />
         {actionArea.inLibrary ? (
           <MediaEdit
-            mediaObject={mediaObject}
+            mediaObject={dataObject}
             setOpenEditor={setOpenEditor}
             setOpenDeleteAlert={setOpenDeleteAlert}
             openEditor={openEditor}
