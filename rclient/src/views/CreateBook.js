@@ -39,7 +39,12 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const CreateBook = ({ open, setOpen, editBookObject }) => {
+export const CreateBook = ({
+  open,
+  setOpen,
+  editBookObject,
+  setDataObject,
+}) => {
   const addAlert = React.useContext(AlertsContext).addAlert;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -84,7 +89,10 @@ export const CreateBook = ({ open, setOpen, editBookObject }) => {
           : bookObject[key]?.split(",").map((isbn) => isbn.trim()))
     );
     setBook(bookObject)
-      .then(() => handleClose())
+      .then(() => {
+        handleClose();
+        setDataObject(bookObject);
+      })
       .catch((error) => addAlert(error.toString(), "error"));
   };
 
@@ -414,4 +422,5 @@ CreateBook.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   editBookObject: PropTypes.object,
+  setDataObject: PropTypes.func,
 };

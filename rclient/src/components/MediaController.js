@@ -5,7 +5,7 @@ import { useTheme } from "@emotion/react";
 import { MediaStatus } from "./MediaStatus";
 import { MediaEdit } from "./MediaEdit";
 
-export const MediaController = ({ dataObject, actionArea }) => {
+export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
   const theme = useTheme();
   const [mediaObject, setMediaObject] = React.useState({ status: null });
   const [openDeleteAlert, setOpenDeleteAlert] = React.useState(false);
@@ -29,7 +29,10 @@ export const MediaController = ({ dataObject, actionArea }) => {
           dataObject[actionArea.mediaUniqueIdentifier]
       )
       .then((res) => {
-        setMediaObject(() => res ?? { ...dataObject });
+        setMediaObject(() => {
+          console.log(res ?? dataObject);
+          return res ?? { ...dataObject };
+        });
       })
       .catch((error) => console.log(error));
   };
@@ -67,6 +70,7 @@ export const MediaController = ({ dataObject, actionArea }) => {
             setOpenEditor={setOpenEditor}
             setOpenDeleteAlert={setOpenDeleteAlert}
             openEditor={openEditor}
+            setDataObject={setDataObject}
           />
         ) : null}
       </Grid>

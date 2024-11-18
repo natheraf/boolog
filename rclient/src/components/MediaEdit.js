@@ -11,6 +11,7 @@ export const MediaEdit = ({
   setOpenEditor,
   setOpenDeleteAlert,
   openEditor,
+  setDataObject,
 }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -25,6 +26,7 @@ export const MediaEdit = ({
         open={openEditor}
         setOpen={setOpenEditor}
         editBookObject={JSON.parse(JSON.stringify(mediaObject))}
+        setDataObject={setDataObject}
       />
       {greaterThanSmall ? <Divider orientation="vertical" flexItem /> : null}
       <IconButton onClick={handleOpenEditor}>
@@ -41,4 +43,6 @@ MediaEdit.propTypes = {
   mediaObject: PropTypes.object.isRequired,
   setOpenEditor: PropTypes.func.isRequired,
   setOpenDeleteAlert: PropTypes.func.isRequired,
+  openEditor: PropTypes.bool.isRequired,
+  setDataObject: PropTypes.func.isRequired,
 };
