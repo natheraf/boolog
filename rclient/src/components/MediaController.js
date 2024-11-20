@@ -30,7 +30,6 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
       )
       .then((res) => {
         setMediaObject(() => {
-          console.log(res ?? dataObject);
           return res ?? { ...dataObject };
         });
       })
