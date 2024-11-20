@@ -226,7 +226,10 @@ exports.signUpPasswordless = (req, res) => {
       req.body.purpose = "login";
       sendEmailAuthentication(db, req)
         .then((message) => res.send({ message }))
-        .catch((error) => res.status(400).send(error));
+        .catch((error) => {
+          res.status(400).send(error);
+          console.log(error);
+        });
     })
     .catch((error) => {
       console.log(error);
