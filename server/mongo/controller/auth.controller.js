@@ -228,7 +228,6 @@ exports.signUpPasswordless = (req, res) => {
         .then((message) => res.send({ message }))
         .catch((error) => {
           res.status(400).send(error);
-          console.log(error);
         });
     })
     .catch((error) => {

@@ -39,6 +39,7 @@ const emailAuthenticationCheck = (req) =>
         if (error.message === "No recipients defined") {
           reject({ message: "Error with sending Email" });
         }
+        console.log(error);
         reject(error);
       });
   });
