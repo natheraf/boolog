@@ -31,16 +31,16 @@ exports.signUp = (req, res, next) => {
   if (req.passwordlessFoundUser === true) {
     return next();
   }
-  const userRequiredBody = ["email", "password", "role", "active"];
+  if (req.body.name === undefined) {
+    req.body.name = req.body.email;
+  }
+  const userRequiredBody = ["email", "password", "role", "active", "name"];
   const missing = bodyMissingRequiredFields(req, userRequiredBody);
   if (missing) {
     return res?.status(400).send(missing);
   }
 
   const user = {};
-  if (req.body.name === undefined) {
-    req.body.name = req.body.email;
-  }
   userRequiredBody.forEach((key) => (user[key] = req.body[key]));
   if (req.body.password !== null) {
     user.password = bcrypt.hashSync(req.body.password, 10);
