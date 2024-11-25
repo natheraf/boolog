@@ -16,6 +16,14 @@ app.use(express.urlencoded({ extended: true }));
  */
 require("./mongo/startDB")(process.argv.includes("drop"));
 
+app.use(function (req, res, next) {
+  res.header(
+    "Access-Control-Allow-Headers",
+    "x-access-token, Origin, Content-Type, Accept"
+  );
+  next();
+});
+
 /**
  * Define all our routes into express app.
  */
