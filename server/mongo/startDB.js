@@ -24,22 +24,22 @@ module.exports = (drop) => {
           .toArray()
           .then((collections) => {
             collections.forEach((obj) => {
-              if (obj.name === "loginEmailCodes") {
-                return;
-              }
               db.collection(obj.name)
                 .drop()
-                .then(() =>
-                  db
-                    .collection(obj.name)
-                    .createIndex({ email: 1 }, { unique: true })
-                    .then(() => {
-                      console.log(
-                        `Successfully dropped all collections in ${obj.name}`
-                      );
-                      if (obj.name === "loginInfo") createSuperAdmin();
-                    })
-                );
+                .then(() => {
+                  if (obj.name === "loginEmailCodes") {
+                    // handled in dropLoginEmailCodes
+                    return;
+                  } else if (obj.name === "loginInfo") {
+                    db.collection(obj.name).createIndex({ email: 1 });
+                  } else {
+                    db.collection(obj.name).createIndex({ userId: 1 });
+                  }
+                  console.log(
+                    `Successfully dropped all collections in ${obj.name}`
+                  );
+                  if (obj.name === "loginInfo") createSuperAdmin();
+                });
             });
           });
       });
@@ -61,12 +61,35 @@ module.exports = (drop) => {
     console.log("Dropped login email codes");
   }
 
+  const databasesToCollections = [
+    {
+      database: "authentication",
+      collections: ["loginEmailCodes", "loginInfo"],
+    },
+    { database: "userLists", collections: ["books"] },
+  ];
+
+  const createMissingCollections = () =>
+    new Promise((resolve, reject) =>
+      Promise.all(
+        databasesToCollections.map((obj) =>
+          Promise.all(
+            obj.collections.map((collection) =>
+              client.db(obj.database).createCollection(collection)
+            )
+          ).then(resolve)
+        )
+      ).then(resolve)
+    );
+
   const initialize = () => {
     dropAllCollectionsInDatabases(["userLists", "authentication"]);
   };
 
-  if (drop) {
-    initialize();
-  }
-  dropLoginEmailCodes();
+  createMissingCollections().then(() => {
+    if (drop) {
+      initialize();
+    }
+    dropLoginEmailCodes();
+  });
 };
