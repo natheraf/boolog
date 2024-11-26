@@ -8,6 +8,19 @@ const { isDuplicateEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
 const { bodyMissingRequiredFields } = require("../middleware/utils");
 
+exports.checkUserIdExists = (req, res, next) => {
+  getDatabase("authentication").then((db) => {
+    db.collection("loginInfo")
+      .findOne(ObjectId(req.userId))
+      .then((user) => {
+        if (user === null) {
+          return res.status(404).send({ message: "User not found" });
+        }
+        next();
+      });
+  });
+};
+
 exports.createSuperAdmin = () => {
   getDatabase("authentication")
     .then((db) => {
