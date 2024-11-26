@@ -66,7 +66,7 @@ module.exports = (drop) => {
       database: "authentication",
       collections: ["loginEmailCodes", "loginInfo"],
     },
-    { database: "userLists", collections: ["books"] },
+    { database: "userLists", collections: ["books", "custom"] },
   ];
 
   const createMissingCollections = () =>
@@ -83,7 +83,9 @@ module.exports = (drop) => {
     );
 
   const initialize = () => {
-    dropAllCollectionsInDatabases(["userLists", "authentication"]);
+    dropAllCollectionsInDatabases(
+      databasesToCollections.map((obj) => obj.database)
+    );
   };
 
   createMissingCollections().then(() => {
