@@ -28,6 +28,7 @@ app.use(function (req, res, next) {
  * Define all our routes into express app.
  */
 require("./mongo/routes/auth.routes")(app);
+require("./mongo/routes/lists.routes")(app);
 app.use("/jsdoc-front", express.static("../rclient/jsdoc/out"));
 app.use("/jsdoc-back", express.static("../server/jsdoc/out"));
 app.use(express.static("../rclient/build"));
