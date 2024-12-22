@@ -98,13 +98,15 @@ const setBookHelper = (db, data) =>
       if (result !== undefined) {
         data.id = result.id;
         const requestUpdate = objectStore.put(data);
-        requestUpdate.onsuccess = () => console.log("updated book");
+        requestUpdate.onsuccess = () => {
+          console.log("updated book");
+          resolve(result.id); // returns id of book
+        };
       } else {
         console.log("no book found to update, adding book...");
         delete data.id;
-        addBook(data);
+        addBook(data).then((data) => resolve(data)); // returns id of book
       }
-      resolve(data);
     };
   });
 

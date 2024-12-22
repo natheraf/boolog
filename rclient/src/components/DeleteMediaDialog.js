@@ -49,7 +49,6 @@ export const DeleteMediaDialog = ({
                 syncMediaObject();
                 delete dataObject.id;
                 delete dataObject.status;
-                actionArea.mediaUniqueIdentifier = "isbn";
               });
           }}
           autoFocus
