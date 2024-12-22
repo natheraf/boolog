@@ -197,7 +197,12 @@ export const BookLog = () => {
   return (
     <Box>
       <CollapsibleFab setOpenEditor={setOpenEditor} />
-      <CreateBook open={openEditor} setOpen={setOpenEditor} />
+      <CreateBook
+        open={openEditor}
+        setOpen={setOpenEditor}
+        setDataObject={() => {}}
+        syncMediaObject={() => window.location.reload()}
+      />
       <Stack>
         {statuses.map((obj, index) => (
           <Slide

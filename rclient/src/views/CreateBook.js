@@ -424,6 +424,6 @@ CreateBook.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   editBookObject: PropTypes.object,
-  setDataObject: PropTypes.func,
-  syncMediaObject: PropTypes.func,
+  setDataObject: PropTypes.func.isRequired,
+  syncMediaObject: PropTypes.func.isRequired,
 };
