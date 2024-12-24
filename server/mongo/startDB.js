@@ -33,6 +33,9 @@ module.exports = (drop) => {
                   } else if (obj.name === "loginInfo") {
                     db.collection(obj.name).createIndex({ email: 1 });
                   } else {
+                    if (obj.name === "custom") {
+                      db.collection(obj.name).createIndex({ shelf: 1 });
+                    }
                     db.collection(obj.name).createIndex({ userId: 1 });
                   }
                   console.log(
