@@ -7,11 +7,12 @@ const { getDatabase } = require("../database");
 const { isDuplicateEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
 const { bodyMissingRequiredFields } = require("../middleware/utils");
+const { ObjectId } = require("mongodb");
 
 exports.checkUserIdExists = (req, res, next) => {
   getDatabase("authentication").then((db) => {
     db.collection("loginInfo")
-      .findOne(ObjectId(req.userId))
+      .findOne(ObjectId.createFromHexString(req.userId))
       .then((user) => {
         if (user === null) {
           return res.status(404).send({ message: "User not found" });
