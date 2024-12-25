@@ -112,7 +112,7 @@ const setBookHelper = (db, data) =>
 
 /**
  * Get a single book that have the key and value given
- * @param {String} key Do not pass in id
+ * @param {String} key id or isbn
  * @param {String} value
  * @returns {Promise<object>} Array of books
  */
