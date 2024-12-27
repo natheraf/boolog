@@ -1,6 +1,8 @@
 import * as React from "react";
 import { AlertsContext } from "../context/Alerts";
 import { Button } from "@mui/material";
+import { handleSimpleRequest } from "../api/Axios";
+import { getAllBooks } from "../api/IndexedDB/Books";
 
 export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -12,6 +14,44 @@ export const Home = () => {
       <Button onClick={() => addAlert("warning", "warning")}>warning</Button>
       <Button onClick={() => addAlert("error", "error")}>error</Button>
       <h1>Home</h1>
+      <Button
+        onClick={() => {
+          getAllBooks()
+            .then((res) => {
+              handleSimpleRequest(
+                "POST",
+                {
+                  data: res.map((entry) => {
+                    entry.shelf = "books";
+                    return entry;
+                  }),
+                },
+                "lists/add/multiple"
+              ).then((res) => console.log(res.data));
+            })
+            .catch((error) => addAlert(error.message, "error"));
+        }}
+      >
+        Update all entries
+      </Button>
+      <Button
+        onClick={() => {
+          handleSimpleRequest("GET", {}, "lists/get/allShelves").then((res) =>
+            console.log(res.data)
+          );
+        }}
+      >
+        Get all entries
+      </Button>
+      <Button
+        onClick={() => {
+          handleSimpleRequest("GET", {}, "lists/get/oneShelf/books").then(
+            (res) => console.log(res.data)
+          );
+        }}
+      >
+        Get books
+      </Button>
     </div>
   );
 };
