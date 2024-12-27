@@ -1,6 +1,9 @@
 const { ObjectId } = require("mongodb");
 const { getDatabase } = require("../database");
-const { bodyMissingRequiredFields } = require("../middleware/utils");
+const {
+  bodyMissingRequiredFields,
+  urlParamsMissingRequiredFields,
+} = require("../middleware/utils");
 
 /**
  * Creates, updates, or deletes entries
@@ -41,66 +44,19 @@ exports.updateMultiple = (req, res) => {
     const data = entry;
     getDatabase("userLists").then((db) => {
       if (entry.hasOwnProperty("cloudId") && entry.deleted === true) {
-        db.listCollections({ name: entry.shelf }).next((error, collInfo) => {
-          if (collInfo) {
-            db.collection(entry.shelf).deleteOne(
-              ObjectId.createFromHexString(entry.cloudId)
-            );
-          }
-        });
+        db.collection("v1")
+          .deleteOne(ObjectId.createFromHexString(entry.cloudId))
+          .catch((error) =>
+            entryErrors.push({
+              entryId: entry.id,
+              error: "cloudId is missing",
+              log: error,
+            })
+          );
         clientActions.push({ entryId: entry.id, action: "delete" });
         resolves[index]();
-      } else if (entry.shelf === "books") {
-        db.collection("books")
-          .findOne(
-            ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
-          )
-          .then((databaseEntry) => {
-            const localId = entry.id;
-            delete entry.id;
-            const lastSynced = Date.now();
-            if (databaseEntry === null) {
-              db.collection("books")
-                .insertOne({
-                  userId: req.userId,
-                  lastSynced,
-                  shelf: entry.shelf,
-                  data,
-                })
-                .then((insertRes) => {
-                  clientActions.push({
-                    entryId: localId,
-                    lastSynced,
-                    cloudId: insertRes.insertedId,
-                  });
-                  resolves[index]();
-                });
-              entryErrors.push({
-                entryId: localId,
-                error: "Missing cloud entry. Created one.",
-              });
-            } else {
-              db.collection("books")
-                .replaceOne(
-                  { _id: entry._id },
-                  {
-                    userId: req.userId,
-                    lastSynced,
-                    data,
-                  }
-                )
-                .then((insertRes) => {
-                  clientActions.push({
-                    entryId: localId,
-                    lastSynced,
-                    cloudId: insertRes.insertedId,
-                  });
-                  resolves[index]();
-                });
-            }
-          });
       } else {
-        db.collection("custom")
+        db.collection("v1")
           .findOne(
             ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
           )
@@ -109,7 +65,7 @@ exports.updateMultiple = (req, res) => {
             delete entry.id;
             const lastSynced = Date.now();
             if (databaseEntry === null) {
-              db.collection("custom")
+              db.collection("v1")
                 .insertOne({
                   userId: req.userId,
                   lastSynced,
@@ -129,7 +85,7 @@ exports.updateMultiple = (req, res) => {
                 error: "Missing cloud entry. Created one.",
               });
             } else {
-              db.collection("custom")
+              db.collection("v1")
                 .replaceOne(
                   { _id: entry._id },
                   {
@@ -164,12 +120,7 @@ exports.getAllShelves = (req, res) => {
   const response = { shelves: {} };
 
   getDatabase("userLists").then(async (db) => {
-    response.shelves.books = db
-      .collection("books")
-      .find({ userId: req.userId, shelf: "books" })
-      .toArray()
-      .map((entry) => delete entry.userId);
-    const entryCursor = db.collection("custom").find({ userId: req.userId });
+    const entryCursor = db.collection("v1").find({ userId: req.userId });
     for await (const entry of entryCursor) {
       delete entry.userId;
       if (response.shelves.hasOwnProperty(entry.shelf) === false) {
@@ -177,34 +128,27 @@ exports.getAllShelves = (req, res) => {
       }
       response.shelves[entry.shelf].push(entry);
     }
+    response.message = "Successfully retrieved all entries";
+    res.status(200).send({ response });
   });
-  response.message = "Successfully retrieved all entries";
-  req.status(200).send({ response });
 };
 
 exports.getOneShelf = (req, res) => {
   const userRequiredBody = ["shelf"];
-  const missing = bodyMissingRequiredFields(req, userRequiredBody);
+  const missing = urlParamsMissingRequiredFields(req, userRequiredBody);
   if (missing) {
     return res?.status(400).send(missing);
   }
+  const shelf = req.params.shelf;
 
   const response = { shelves: {} };
-  getDatabase("userLists").then((db) => {
-    if (req.body.shelf === "books") {
-      response.shelves.books = db
-        .collection("books")
-        .find({ userId: req.userId, shelf: "books" })
-        .toArray()
-        .map((entry) => delete entry.userId);
-    } else {
-      response.shelves.books = db
-        .collection("custom")
-        .find({ userId: req.userId, shelf: req.body.shelf })
-        .toArray()
-        .map((entry) => delete entry.userId);
-    }
+  getDatabase("userLists").then(async (db) => {
+    response.shelves[shelf] = await db
+      .collection("v1")
+      .find({ userId: req.userId, shelf: shelf })
+      .toArray();
+    response.shelves[shelf].map((entry) => delete entry.userId);
+    response.message = `Successfully retrieved entries from ${req.body.shelf}`;
+    res.status(200).send(response);
   });
-  response.message = `Successfully retrieved entries from ${req.body.shelf}`;
-  res.status(200).send(response);
 };
