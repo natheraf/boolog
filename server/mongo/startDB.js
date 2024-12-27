@@ -16,8 +16,8 @@ module.exports = (drop) => {
   canConnect();
 
   async function dropAllCollectionsInDatabases(arrayOfDatabases) {
-    return new Promise(async (resolve, reject) => {
-      await client.connect();
+    return new Promise((resolve, reject) => {
+      client.connect();
       arrayOfDatabases.forEach((databasesName) => {
         const db = client.db(databasesName);
         db.listCollections()
@@ -32,10 +32,8 @@ module.exports = (drop) => {
                     return;
                   } else if (obj.name === "loginInfo") {
                     db.collection(obj.name).createIndex({ email: 1 });
-                  } else {
-                    if (obj.name === "custom") {
-                      db.collection(obj.name).createIndex({ shelf: 1 });
-                    }
+                  } else if (databasesName === "userLists") {
+                    db.collection(obj.name).createIndex({ shelf: 1 });
                     db.collection(obj.name).createIndex({ userId: 1 });
                   }
                   console.log(
@@ -69,7 +67,7 @@ module.exports = (drop) => {
       database: "authentication",
       collections: ["loginEmailCodes", "loginInfo"],
     },
-    { database: "userLists", collections: ["books", "custom"] },
+    { database: "userLists", collections: ["v1"] },
   ];
 
   const createMissingCollections = () =>
