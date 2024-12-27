@@ -20,6 +20,29 @@ const bodyMissingRequiredFields = (req, requiredBody) => {
   return false;
 };
 
+const urlParamsMissingRequiredFields = (req, requiredBody) => {
+  const missing = [];
+  requiredBody.forEach((key) => {
+    if (
+      req.params[key] === undefined ||
+      (typeof req.params[key] === "string" && req.params[key].length === 0)
+    )
+      missing.push(key);
+  });
+  if (missing.length > 0) {
+    return {
+      message:
+        (missing.length <= 2
+          ? missing.join(" and ")
+          : missing.slice(0, missing.length - 1).join(", ") +
+            ", and " +
+            missing[missing.length - 1]) + " cannot be empty",
+    };
+  }
+  return false;
+};
+
 module.exports = {
   bodyMissingRequiredFields,
+  urlParamsMissingRequiredFields,
 };
