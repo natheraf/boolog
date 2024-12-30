@@ -1,3 +1,11 @@
+const arrayToComplexListString = (array) => {
+  return array.length <= 2
+    ? array.join(" and ")
+    : array.slice(0, array.length - 1).join(", ") +
+        ", and " +
+        array[array.length - 1];
+};
+
 const bodyMissingRequiredFields = (req, requiredBody) => {
   const missing = [];
   requiredBody.forEach((key) => {
@@ -9,12 +17,7 @@ const bodyMissingRequiredFields = (req, requiredBody) => {
   });
   if (missing.length > 0) {
     return {
-      message:
-        (missing.length <= 2
-          ? missing.join(" and ")
-          : missing.slice(0, missing.length - 1).join(", ") +
-            ", and " +
-            missing[missing.length - 1]) + " cannot be empty",
+      message: arrayToComplexListString(missing) + " cannot be empty",
     };
   }
   return false;
@@ -31,18 +34,14 @@ const urlParamsMissingRequiredFields = (req, requiredBody) => {
   });
   if (missing.length > 0) {
     return {
-      message:
-        (missing.length <= 2
-          ? missing.join(" and ")
-          : missing.slice(0, missing.length - 1).join(", ") +
-            ", and " +
-            missing[missing.length - 1]) + " cannot be empty",
+      message: arrayToComplexListString(missing) + " cannot be empty",
     };
   }
   return false;
 };
 
 module.exports = {
+  arrayToComplexListString,
   bodyMissingRequiredFields,
   urlParamsMissingRequiredFields,
 };
