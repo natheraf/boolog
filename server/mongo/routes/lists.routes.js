@@ -16,8 +16,8 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/api/lists/get/oneShelf/:shelf",
+    "/api/lists/get/shelves/:shelves",
     [authJwt.verifyToken, authController.checkUserIdExists],
-    controller.getOneShelf
+    controller.getShelves
   );
 };

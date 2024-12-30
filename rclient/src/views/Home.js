@@ -45,12 +45,14 @@ export const Home = () => {
       </Button>
       <Button
         onClick={() => {
-          handleSimpleRequest("GET", {}, "lists/get/oneShelf/books").then(
-            (res) => console.log(res.data)
-          );
+          handleSimpleRequest(
+            "GET",
+            {},
+            'lists/get/shelves/["books","movies"]'
+          ).then((res) => console.log(res.data));
         }}
       >
-        Get books
+        Get books and movies
       </Button>
     </div>
   );

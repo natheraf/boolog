@@ -3,6 +3,7 @@ const { getDatabase } = require("../database");
 const {
   bodyMissingRequiredFields,
   urlParamsMissingRequiredFields,
+  arrayToComplexListString,
 } = require("../middleware/utils");
 
 /**
@@ -84,7 +85,7 @@ exports.updateMultiple = (req, res) => {
                 entryId: localId,
                 error: "Missing cloud entry. Created one.",
               });
-            } else {
+            } else if (databaseEntry.lastSynced !== entry.lastSynced) {
               db.collection("v1")
                 .replaceOne(
                   { _id: entry._id },
@@ -102,6 +103,8 @@ exports.updateMultiple = (req, res) => {
                   });
                   resolves[index]();
                 });
+            } else {
+              resolves[index]();
             }
           });
       }
@@ -133,22 +136,26 @@ exports.getAllShelves = (req, res) => {
   });
 };
 
-exports.getOneShelf = (req, res) => {
-  const userRequiredBody = ["shelf"];
+exports.getShelves = (req, res) => {
+  const userRequiredBody = ["shelves"];
   const missing = urlParamsMissingRequiredFields(req, userRequiredBody);
   if (missing) {
     return res?.status(400).send(missing);
   }
-  const shelf = req.params.shelf;
+  const shelves = JSON.parse(req.params.shelves);
 
   const response = { shelves: {} };
   getDatabase("userLists").then(async (db) => {
-    response.shelves[shelf] = await db
-      .collection("v1")
-      .find({ userId: req.userId, shelf: shelf })
-      .toArray();
-    response.shelves[shelf].map((entry) => delete entry.userId);
-    response.message = `Successfully retrieved entries from ${req.body.shelf}`;
+    for (const shelf of shelves) {
+      response.shelves[shelf] = await db
+        .collection("v1")
+        .find({ userId: req.userId, shelf: shelf })
+        .toArray();
+      response.shelves[shelf].map((entry) => delete entry.userId);
+    }
+    response.message = `Successfully retrieved entries from ${arrayToComplexListString(
+      shelves
+    )}`;
     res.status(200).send(response);
   });
 };
