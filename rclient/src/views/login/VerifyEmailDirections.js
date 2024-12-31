@@ -18,8 +18,14 @@ export const VerifyEmailDirections = () => {
     const checkIfLoggedIn = () => {
       if (intervalId !== null && userInfoContext.refreshAndIsLoggedIn()) {
         clearInterval(intervalId);
-        addAlert("Login successful on another tab", "info");
-        navigate("/");
+        addAlert(
+          "Login successful on another tab. Closing this one in 5 seconds.",
+          "info"
+        );
+        setTimeout(() => {
+          window.open("about:blank", "_self");
+          window.close();
+        }, 5000);
       }
     };
     intervalId = setInterval(checkIfLoggedIn, 1000);
