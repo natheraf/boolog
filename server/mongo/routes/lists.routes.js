@@ -10,14 +10,14 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/api/lists/get/allShelves",
+    "/api/lists/get/all",
     [authJwt.verifyToken, authController.checkUserIdExists],
-    controller.getAllShelves
+    controller.getAll
   );
 
   app.get(
-    "/api/lists/get/shelves/:shelves",
+    "/api/lists/get/multiple/:shelves",
     [authJwt.verifyToken, authController.checkUserIdExists],
-    controller.getShelves
+    controller.getMultiple
   );
 };

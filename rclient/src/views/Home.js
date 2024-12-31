@@ -36,7 +36,7 @@ export const Home = () => {
       </Button>
       <Button
         onClick={() => {
-          handleSimpleRequest("GET", {}, "lists/get/allShelves").then((res) =>
+          handleSimpleRequest("GET", {}, "lists/get/all").then((res) =>
             console.log(res.data)
           );
         }}
@@ -48,7 +48,7 @@ export const Home = () => {
           handleSimpleRequest(
             "GET",
             {},
-            'lists/get/shelves/["books","movies"]'
+            'lists/get/multiple/["books","movies"]'
           ).then((res) => console.log(res.data));
         }}
       >
