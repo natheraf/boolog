@@ -19,7 +19,7 @@ export const ThemeContext = React.createContext({
 
 function App() {
   const [mode, setMode] = React.useState(
-    localStorage.getItem("darkMode") === "dark" ? "dark" : "light"
+    localStorage.getItem("theme") === "dark" ? "dark" : "light"
   );
   const [reduceMotion, setReduceMotion] = React.useState(
     localStorage.getItem("reduceMotion") === "false" ? false : true
@@ -30,7 +30,7 @@ function App() {
       toggleColorMode: () => {
         setMode((prevMode) => {
           const newMode = prevMode === "light" ? "dark" : "light";
-          localStorage.setItem("darkMode", newMode);
+          localStorage.setItem("theme", newMode);
           return newMode;
         });
       },
