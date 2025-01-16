@@ -21,7 +21,7 @@ exports.updateMultiple = (req, res) => {
   if (Array.isArray(entries) === false) {
     return res?.status(400).send({ message: "data is not array" });
   }
-  const entryLog = [];
+  const log = [];
   const clientActions = [];
   const resolves = [...Array(entries.length)];
   const promises = [...Array(entries.length)].map(
@@ -36,7 +36,7 @@ exports.updateMultiple = (req, res) => {
       entry.hasOwnProperty("shelf") === false ||
       typeof entry.shelf !== "string"
     ) {
-      entryLog.push({
+      log.push({
         entryId: entry.id,
         message: "missing shelf property or is not a string",
       });
@@ -48,7 +48,7 @@ exports.updateMultiple = (req, res) => {
         db.collection("v1")
           .deleteOne(ObjectId.createFromHexString(entry.cloudId))
           .catch((error) =>
-            entryLog.push({
+            log.push({
               entryId: entry.id,
               message: "cloudId is missing",
               log: error,
@@ -81,7 +81,7 @@ exports.updateMultiple = (req, res) => {
                   });
                   resolves[index]();
                 });
-              entryLog.push({
+              log.push({
                 entryId: localId,
                 message: "Missing cloud entry. Created one.",
               });
@@ -112,7 +112,7 @@ exports.updateMultiple = (req, res) => {
   }
   Promise.all(promises).then(() => {
     res.status(201).send({
-      entryLog: entryLog,
+      log: log,
       clientActions,
       message: `Successfully updated multiple`,
     });
