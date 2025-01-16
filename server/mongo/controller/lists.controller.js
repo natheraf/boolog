@@ -119,7 +119,7 @@ exports.updateMultiple = (req, res) => {
   });
 };
 
-exports.getAllShelves = (req, res) => {
+exports.getAll = (req, res) => {
   const response = { shelves: {} };
 
   getDatabase("userLists").then(async (db) => {
@@ -136,7 +136,7 @@ exports.getAllShelves = (req, res) => {
   });
 };
 
-exports.getShelves = (req, res) => {
+exports.getMultiple = (req, res) => {
   const userRequiredBody = ["shelves"];
   const missing = urlParamsMissingRequiredFields(req, userRequiredBody);
   if (missing) {
