@@ -21,7 +21,7 @@ exports.updateMultiple = (req, res) => {
   if (Array.isArray(entries) === false) {
     return res?.status(400).send({ message: "data is not array" });
   }
-  const entryErrors = [];
+  const entryLog = [];
   const clientActions = [];
   const resolves = [...Array(entries.length)];
   const promises = [...Array(entries.length)].map(
@@ -36,9 +36,9 @@ exports.updateMultiple = (req, res) => {
       entry.hasOwnProperty("shelf") === false ||
       typeof entry.shelf !== "string"
     ) {
-      entryErrors.push({
+      entryLog.push({
         entryId: entry.id,
-        error: "missing shelf property or is not a string",
+        message: "missing shelf property or is not a string",
       });
       continue;
     }
@@ -48,9 +48,9 @@ exports.updateMultiple = (req, res) => {
         db.collection("v1")
           .deleteOne(ObjectId.createFromHexString(entry.cloudId))
           .catch((error) =>
-            entryErrors.push({
+            entryLog.push({
               entryId: entry.id,
-              error: "cloudId is missing",
+              message: "cloudId is missing",
               log: error,
             })
           );
@@ -81,9 +81,9 @@ exports.updateMultiple = (req, res) => {
                   });
                   resolves[index]();
                 });
-              entryErrors.push({
+              entryLog.push({
                 entryId: localId,
-                error: "Missing cloud entry. Created one.",
+                message: "Missing cloud entry. Created one.",
               });
             } else if (databaseEntry.lastSynced !== entry.lastSynced) {
               db.collection("v1")
@@ -112,9 +112,9 @@ exports.updateMultiple = (req, res) => {
   }
   Promise.all(promises).then(() => {
     res.status(201).send({
-      entryErrors,
+      entryLog: entryLog,
       clientActions,
-      message: `Successfully updated multiple with ${entryErrors.length} errors`,
+      message: `Successfully updated multiple`,
     });
   });
 };
