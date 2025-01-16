@@ -21,8 +21,8 @@ exports.updateMultiple = (req, res) => {
   if (Array.isArray(entries) === false) {
     return res?.status(400).send({ message: "data is not array" });
   }
-  const log = {};
-  const clientActions = {};
+  const log = [];
+  const clientActions = [];
   const resolves = [...Array(entries.length)];
   const promises = [...Array(entries.length)].map(
     (_, index) =>
@@ -36,10 +36,11 @@ exports.updateMultiple = (req, res) => {
       entry.hasOwnProperty("shelf") === false ||
       typeof entry.shelf !== "string"
     ) {
-      log[entry.id] = {
+      log.push({
+        entryId: entry.id,
         type: "error",
         message: "missing shelf property or is not a string",
-      };
+      });
       continue;
     }
     const data = entry;
@@ -47,15 +48,15 @@ exports.updateMultiple = (req, res) => {
       if (entry.hasOwnProperty("cloudId") && entry.deleted === true) {
         db.collection("v1")
           .deleteOne(ObjectId.createFromHexString(entry.cloudId))
-          .catch(
-            (error) =>
-              (log[entry.id] = {
-                type: "error",
-                message: "unable to delete cloud entry, cloudId is missing",
-                errorObject: error,
-              })
+          .catch((error) =>
+            log.push({
+              entryId: entry.id,
+              type: "error",
+              message: "unable to delete cloud entry, cloudId is missing",
+              errorObject: error,
+            })
           );
-        clientActions[entry.id] = { entryId: entry.id, action: "delete" };
+        clientActions.push({ entryId: entry.id, action: "delete" });
         resolves[index]();
       } else {
         db.collection("v1")
@@ -75,17 +76,19 @@ exports.updateMultiple = (req, res) => {
                   data,
                 })
                 .then((insertRes) => {
-                  clientActions[localId] = {
+                  clientActions.push({
+                    entryId: localId,
                     action: "update",
                     lastSynced,
                     cloudId: insertRes.insertedId,
-                  };
+                  });
                   resolves[index]();
                 });
-              log[localId] = {
+              log.push({
+                entryId: localId,
                 type: "warning",
                 message: "Missing cloud entry. Created one.",
-              };
+              });
             } else if (databaseEntry.lastSynced !== entry.lastSynced) {
               db.collection("v1")
                 .replaceOne(
@@ -97,11 +100,12 @@ exports.updateMultiple = (req, res) => {
                   }
                 )
                 .then((insertRes) => {
-                  clientActions[localId] = {
+                  clientActions.push({
+                    entryId: localId,
                     action: "update",
                     lastSynced,
                     cloudId: insertRes.insertedId,
-                  };
+                  });
                   resolves[index]();
                 });
             } else {
@@ -113,12 +117,12 @@ exports.updateMultiple = (req, res) => {
   }
   Promise.all(promises).then(() => {
     res.status(201).send({
-      log: log,
+      log,
       clientActions,
       message: `Successfully updated multiple with ${
-        Object.keys(log).filter((key) => log[key].type === "error").length
+        log.filter((obj) => obj.type === "error").length
       } errors and ${
-        Object.keys(log).filter((key) => log[key].type === "warning").length
+        log.filter((obj) => obj.type === "warning").length
       } warnings`,
     });
   });
