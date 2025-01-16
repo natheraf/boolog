@@ -54,6 +54,38 @@ export const Home = () => {
       >
         Get books and movies
       </Button>
+
+      <br />
+
+      <Button
+        onClick={() => {
+          handleSimpleRequest(
+            "POST",
+            {
+              data: {
+                key0: "value0",
+                key1: "value1",
+                key2: "value2",
+                key3: "value3",
+              },
+            },
+            "settings/set/multiple"
+          )
+            .then((res) => console.log(res.data))
+            .catch((error) => console.log(error));
+        }}
+      >
+        set settings
+      </Button>
+      <Button
+        onClick={() => {
+          handleSimpleRequest("GET", {}, "settings/get/all")
+            .then((res) => console.log(res.data))
+            .catch((error) => console.log(error));
+        }}
+      >
+        get all settings
+      </Button>
     </div>
   );
 };
