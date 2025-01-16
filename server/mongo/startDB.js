@@ -15,34 +15,33 @@ module.exports = (drop) => {
 
   canConnect();
 
-  async function dropAllCollectionsInDatabases(arrayOfDatabases) {
+  async function dropAllCollectionsInDatabases(databasesToCollections) {
     return new Promise((resolve, reject) => {
       client.connect();
-      arrayOfDatabases.forEach((databasesName) => {
+      databasesToCollections.forEach((obj) => {
+        const databasesName = obj.database;
         const db = client.db(databasesName);
-        db.listCollections()
-          .toArray()
-          .then((collections) => {
-            collections.forEach((obj) => {
-              db.collection(obj.name)
-                .drop()
-                .then(() => {
-                  if (obj.name === "loginEmailCodes") {
-                    // handled in dropLoginEmailCodes
-                    return;
-                  } else if (obj.name === "loginInfo") {
-                    db.collection(obj.name).createIndex({ email: 1 });
-                  } else if (databasesName === "userLists") {
-                    db.collection(obj.name).createIndex({ shelf: 1 });
-                    db.collection(obj.name).createIndex({ userId: 1 });
-                  }
-                  console.log(
-                    `Successfully dropped all collections in ${obj.name}`
-                  );
-                  if (obj.name === "loginInfo") createSuperAdmin();
-                });
+        obj.collections.forEach((collectionName) => {
+          db.collection(collectionName)
+            .drop()
+            .then(() => {
+              if (collectionName === "loginEmailCodes") {
+                // handled in dropLoginEmailCodes
+                return;
+              } else if (collectionName === "loginInfo") {
+                db.collection(collectionName).createIndex({ email: 1 });
+              } else if (databasesName === "userLists") {
+                db.collection(collectionName).createIndex({ shelf: 1 });
+                db.collection(collectionName).createIndex({ userId: 1 });
+              } else if (databasesName === "userAppData") {
+                db.collection(collectionName).createIndex({ userId: 1 });
+              }
+              console.log(
+                `Successfully dropped all collections in ${collectionName}`
+              );
+              if (collectionName === "loginInfo") createSuperAdmin();
             });
-          });
+        });
       });
     });
   }
@@ -68,6 +67,7 @@ module.exports = (drop) => {
       collections: ["loginEmailCodes", "loginInfo"],
     },
     { database: "userLists", collections: ["v1"] },
+    { database: "userAppData", collections: ["settings"] },
   ];
 
   const createMissingCollections = () =>
@@ -84,9 +84,7 @@ module.exports = (drop) => {
     );
 
   const initialize = () => {
-    dropAllCollectionsInDatabases(
-      databasesToCollections.map((obj) => obj.database)
-    );
+    dropAllCollectionsInDatabases(databasesToCollections);
   };
 
   createMissingCollections().then(() => {
