@@ -9,13 +9,24 @@ const { sendEmailAuthentication } = require("../middleware/mailer");
 const { bodyMissingRequiredFields } = require("../middleware/utils");
 const { ObjectId } = require("mongodb");
 
+const signOut = (req, res) => {
+  // Set token to null and expire after 5 seconds
+  res.clearCookie("accessToken");
+  res.clearCookie("userInfo");
+  res.status(401).send({
+    message: "User logged out successfully",
+  });
+};
+
+exports.signOut = signOut;
+
 exports.checkUserIdExists = (req, res, next) => {
   getDatabase("authentication").then((db) => {
     db.collection("loginInfo")
       .findOne(ObjectId.createFromHexString(req.userId))
       .then((user) => {
         if (user === null) {
-          return res.status(404).send({ message: "User not found" });
+          return signOut(req, res);
         }
         next();
       });
@@ -189,15 +200,6 @@ exports.signIn = (req, res) => {
           message: `Successfully Signed In. Expires in ${expiresIn}.`,
         });
       });
-  });
-};
-
-exports.signOut = (req, res) => {
-  // Set token to null and expire after 5 seconds
-  res.clearCookie("accessToken");
-  res.clearCookie("userInfo");
-  res.status(200).send({
-    message: "User logged out successfully",
   });
 };
 
