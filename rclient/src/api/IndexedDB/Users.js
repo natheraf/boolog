@@ -20,7 +20,7 @@ const getAllUsersHelper = (db) =>
     };
   });
 
-const getUser = (id) =>
+export const getUser = (id) =>
   openDatabase("appData", appDataDBVersion, (db) => getUserHelper(db, id));
 
 const getUserHelper = (db, id) =>
@@ -55,7 +55,7 @@ const getCurrentUserHelper = (db) =>
     const objectStore = transaction.objectStore("state");
     const indexKey = objectStore.index("key");
     indexKey.get("userId").onsuccess = (event) =>
-      getUserHelper(db, event.target.result.id).then((result) =>
+      getUserHelper(db, event.target.result.userId).then((result) =>
         resolve(result)
       );
   });
