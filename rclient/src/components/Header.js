@@ -24,14 +24,13 @@ import { UserInfoContext } from "../context/UserInfo";
 export const Header = () => {
   const navigate = useNavigate();
   const addAlert = React.useContext(AlertsContext).addAlert;
-  const getCookies = React.useContext(CookiesContext).getCookies;
   const { toggleColorMode, toggleReduceMotion } =
     React.useContext(ThemeContext);
   const theme = useTheme();
   const userInfoContext = React.useContext(UserInfoContext);
 
   const handleLogout = () => {
-    handleSimpleRequest("post", getCookies("userInfo").email, "auth/signout")
+    handleSimpleRequest("post", {}, "auth/signout")
       .then((res) => {
         addAlert(res.data.message, "info");
         userInfoContext.refreshAndIsLoggedIn();
