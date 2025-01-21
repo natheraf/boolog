@@ -157,7 +157,7 @@ exports.signIn = (req, res) => {
 
         const expiresIn = "7d"; // 7 days
         res.cookie(
-          "accessToken",
+          req.body.localUserId,
           jwt.sign({ userId: user._id, userRole: user.role }, config.secret, {
             algorithm: "HS256",
             expiresIn: expiresIn,
@@ -171,7 +171,7 @@ exports.signIn = (req, res) => {
           }
         );
         res.cookie(
-          "userInfo",
+          `userInfo_${req.body.localUserId}`,
           {
             userName: user.name,
             userEmail: user.email,
@@ -194,8 +194,8 @@ exports.signIn = (req, res) => {
 
 exports.signOut = (req, res) => {
   // Set token to null and expire after 5 seconds
-  res.clearCookie("accessToken");
-  res.clearCookie("userInfo");
+  res.clearCookie(req.body.localUserId);
+  res.clearCookie(`userInfo_${req.body.localUserId}`);
   res.status(200).send({
     message: "User logged out successfully",
   });
@@ -265,7 +265,7 @@ exports.signInPasswordless = (req, res) => {
 
         const expiresIn = "7d"; // 7 days
         res.cookie(
-          "accessToken",
+          req.body.localUserId,
           jwt.sign({ userId: user._id, userRole: user.role }, config.secret, {
             algorithm: "HS256",
             expiresIn: expiresIn,
@@ -279,7 +279,7 @@ exports.signInPasswordless = (req, res) => {
           }
         );
         res.cookie(
-          "userInfo",
+          `userInfo_${req.body.localUserId}`,
           {
             userName: user.name,
             userEmail: user.email,
