@@ -39,27 +39,6 @@ const getUserHelper = (db, id) =>
     };
   });
 
-export const getCurrentUser = () =>
-  openDatabase("appData", appDataDBVersion, (db) => getCurrentUserHelper(db));
-
-const getCurrentUserHelper = (db) =>
-  new Promise((resolve, reject) => {
-    const transaction = db.transaction("state", "readonly");
-    transaction.oncomplete = (event) => {
-      console.log("got user successfully");
-    };
-    transaction.onerror = (event) => {
-      console.error("Transaction Error", event);
-      reject(new Error(event));
-    };
-    const objectStore = transaction.objectStore("state");
-    const indexKey = objectStore.index("key");
-    indexKey.get("userId").onsuccess = (event) =>
-      getUserHelper(db, event.target.result.userId).then((result) =>
-        resolve(result)
-      );
-  });
-
 export const renameUser = (userId, newName) =>
   openDatabase("appData", appDataDBVersion, (db) =>
     renameUserHelper(db, userId, newName)
