@@ -62,6 +62,11 @@ const getCurrentUserHelper = (db) =>
     indexKey.get("userId").onerror = request;
   });
 
+export const getCurrentUserId = () =>
+  new Promise((resolve, reject) =>
+    getCurrentUser().then((user) => resolve(user.id))
+  );
+
 export const changeUser = (id) =>
   openDatabase("appData", appDataDBVersion, (db) => changeUserHelper(db, id));
 

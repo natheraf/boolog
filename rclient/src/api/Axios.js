@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getCurrentUserId } from "./IndexedDB/State";
 
 axios.defaults.withCredentials = true;
 const api = `${window.location.protocol}//${window.location.hostname}:4002/api`;
@@ -15,7 +16,8 @@ const httpMethodFunctions = new Map([
  * @param {String} route api route appended to root url
  * @returns {Promise} http request promise
  */
-export const handleSimpleRequest = (httpMethod, object, route) => {
+export const handleSimpleRequest = async (httpMethod, object, route) => {
+  object.localUserId = await getCurrentUserId();
   return new Promise((resolve, reject) =>
     httpMethodFunctions
       .get(httpMethod.toUpperCase())(`${api}/${route}`, object)

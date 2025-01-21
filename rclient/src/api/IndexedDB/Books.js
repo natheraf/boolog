@@ -1,7 +1,8 @@
 import config from "./config";
 import { openDatabase } from "./common";
+import { getCurrentUserId } from "../IndexedDB/State";
 
-const userId = (await config.user).id;
+const userId = await getCurrentUserId();
 const userDataDB = `user${userId}`;
 const userDataDBVersion = config.userDBVersion;
 

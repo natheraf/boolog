@@ -1,5 +1,6 @@
 import * as React from "react";
 import { CookiesContext } from "./Cookies";
+import { getCurrentUserId } from "../api/IndexedDB/State";
 
 export const UserInfoContext = React.createContext({
   isLoggedIn: () => {},
@@ -15,8 +16,9 @@ export const UserInfo = ({ children }) => {
   const userInfoMemo = React.useMemo(
     () => ({
       isLoggedIn: () => loggedIn,
-      refreshAndIsLoggedIn: () => {
-        const isLoggedIn = getCookies("userInfo") !== undefined;
+      refreshAndIsLoggedIn: async () => {
+        const isLoggedIn =
+          getCookies(`userInfo_${await getCurrentUserId()}`) !== undefined;
         setLoggedIn(isLoggedIn);
         return isLoggedIn;
       },
