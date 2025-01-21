@@ -1,4 +1,7 @@
+const { getCurrentUser } = require("./Users");
+
 module.exports = {
-  userDataDB: "userData",
-  userDataDBVersion: 1,
+  userDB: getCurrentUser(),
+  userDBVersion: 1,
+  appDataDBVersion: 1,
 };
