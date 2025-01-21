@@ -96,7 +96,6 @@ const changeUserHelper = (db, id) =>
           if (event.target.result) {
             resolve(event.target.result);
           }
-          window.location.reload();
         };
       };
     });
