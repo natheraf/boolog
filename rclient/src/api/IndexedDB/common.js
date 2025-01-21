@@ -1,7 +1,12 @@
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, version);
-    request.onupgradeneeded = userDataDBOnupgradeneeded;
+    if (name === "appData") {
+      request.onupgradeneeded = appDataDBOnUpgradeNeeded;
+    } else {
+      // some user's data
+      request.onupgradeneeded = userDataDBOnupgradeNeeded;
+    }
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
     request.onblocked = () =>
@@ -9,11 +14,11 @@ const connect = (name, version) => {
   });
 };
 
-const userDataDBOnupgradeneeded = function (event) {
+const userDataDBOnupgradeNeeded = function (event) {
   const db = event.target.result;
   switch (event.oldVersion) {
     case 0:
-      var userBooks = db.createObjectStore("books", {
+      const userBooks = db.createObjectStore("books", {
         keyPath: "id",
         autoIncrement: true,
       });
@@ -24,6 +29,24 @@ const userDataDBOnupgradeneeded = function (event) {
       userBooks.createIndex("isbn", "isbn", { multiEntry: true });
       userBooks.createIndex("deleted", "deleted");
       userBooks.createIndex("status", "status");
+  }
+};
+
+const appDataDBOnUpgradeNeeded = function (event) {
+  const db = event.target.result;
+  switch (event.oldVersion) {
+    case 0:
+      const users = db.createObjectStore("users", {
+        keyPath: "id",
+        autoIncrement: true,
+      });
+      users.put({ name: "user1" });
+      const state = db.createObjectStore("state", {
+        keyPath: "id",
+        autoIncrement: true,
+      });
+      state.createIndex("key", "key");
+      state.put({ key: "userId", userId: 1 });
   }
 };
 
