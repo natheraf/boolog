@@ -1,8 +1,9 @@
 import config from "./config";
 import { openDatabase } from "./common";
 
-const userDataDB = config.userDataDB;
-const userDataDBVersion = config.userDataDBVersion;
+const userId = (await config.userDB).id;
+const userDataDB = `user${userId}`;
+const userDataDBVersion = config.userDBVersion;
 
 const addBook = (obj) => {
   return openDatabase(userDataDB, userDataDBVersion, (db) =>
