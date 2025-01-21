@@ -19,12 +19,15 @@ const getCurrentUserHelper = (db) =>
     const indexKey = objectStore.index("key");
     const request = async (event) => {
       let userIdState = event?.target?.result ?? {
+        // if state in appdata is cleared
         key: "userId",
         userId: 1,
       };
       getUser(userIdState.userId).then((result) => {
+        // if no user found with state userId
         if (result === undefined) {
           getAllUsers().then((result) => {
+            // if there are no users, create our own
             if (result.length === 0) {
               addUser("user1").then((result) => {
                 userIdState.userId = result;
@@ -38,6 +41,7 @@ const getCurrentUserHelper = (db) =>
                 };
               });
             } else {
+              // if there is a user, fallback on the first one
               userIdState.userId = result[0].id;
               const updateRequest = db
                 .transaction("state", "readwrite")
