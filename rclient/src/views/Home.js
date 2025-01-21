@@ -1,15 +1,15 @@
 import * as React from "react";
 import { AlertsContext } from "../context/Alerts";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 import { handleSimpleRequest } from "../api/Axios";
 import { getAllBooks } from "../api/IndexedDB/Books";
 import {
   addUser,
   deleteUser,
   getAllUsers,
-  getCurrentUser,
   renameUser,
 } from "../api/IndexedDB/Users";
+import { changeUser, getCurrentUser } from "../api/IndexedDB/State";
 
 export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -113,16 +113,35 @@ export const Home = () => {
       >
         rename user to foo
       </Button>
-      <Button
-        onClick={() => addUser("foo").then((result) => console.log(result))}
-      >
-        add user foo
-      </Button>
-      <Button
-        onClick={() => deleteUser(5).then((result) => console.log(result))}
-      >
-        delete user
-      </Button>
+      <TextField
+        onKeyDown={(event) =>
+          event.key === "Enter"
+            ? addUser(event.target.value).then((result) => console.log(result))
+            : null
+        }
+        label="add user with name"
+      />
+      <TextField
+        onKeyDown={(event) =>
+          event.key === "Enter"
+            ? deleteUser(parseInt(event.target.value)).then((result) =>
+                console.log(result)
+              )
+            : null
+        }
+        label="delete user from userId"
+      />
+      <br />
+      <TextField
+        onKeyDown={(event) =>
+          event.key === "Enter"
+            ? changeUser(parseInt(event.target.value)).then((result) =>
+                console.log(result)
+              )
+            : null
+        }
+        label="change current userId"
+      />
     </div>
   );
 };
