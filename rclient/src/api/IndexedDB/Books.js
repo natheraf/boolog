@@ -1,7 +1,7 @@
 import config from "./config";
 import { openDatabase } from "./common";
 
-const userId = (await config.userDB).id;
+const userId = (await config.user).id;
 const userDataDB = `user${userId}`;
 const userDataDBVersion = config.userDBVersion;
 
