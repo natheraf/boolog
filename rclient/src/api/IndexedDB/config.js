@@ -1,4 +1,4 @@
-const { getCurrentUser } = require("./Users");
+const { getCurrentUser } = require("./State");
 
 module.exports = {
   user: getCurrentUser(),
