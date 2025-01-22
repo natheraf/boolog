@@ -1,13 +1,11 @@
 import config from "./config";
 import { openDatabase } from "./common";
-import { getCurrentUserId } from "../IndexedDB/State";
 
-const userId = await getCurrentUserId();
-const userDataDB = `user${userId}`;
+const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = config.userDBVersion;
 
 const addBook = (obj) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+  return openDatabase(getUserDB(), userDataDBVersion, (db) =>
     addBookHelper(db, obj)
   );
 };
@@ -34,7 +32,7 @@ const addBookHelper = (db, obj) =>
  * @returns {Promise<Array>}
  */
 export const getAllBooks = (key, value) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+  return openDatabase(getUserDB(), userDataDBVersion, (db) =>
     getAllBooksHelper(db, key, value)
   );
 };
@@ -72,14 +70,14 @@ export const setBook = (data) =>
           if (duplicateISBNs.length > 0) {
             reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
           } else {
-            openDatabase(userDataDB, userDataDBVersion, (db) =>
+            openDatabase(getUserDB(), userDataDBVersion, (db) =>
               setBookHelper(db, data)
             ).then((res) => resolve(res));
           }
         }
       );
     } else {
-      openDatabase(userDataDB, userDataDBVersion, (db) =>
+      openDatabase(getUserDB(), userDataDBVersion, (db) =>
         setBookHelper(db, data)
       ).then((res) => resolve(res));
     }
@@ -119,7 +117,7 @@ const setBookHelper = (db, data) =>
  * @returns {Promise<object>} Array of books
  */
 export const getBook = (key, value) =>
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
+  openDatabase(getUserDB(), userDataDBVersion, (db) =>
     getBookHelper(db, key, value)
   );
 
@@ -149,7 +147,7 @@ const getBookHelper = (db, key, value) =>
   });
 
 export const deleteBook = (obj, uid) => {
-  return openDatabase(userDataDB, userDataDBVersion, (db) =>
+  return openDatabase(getUserDB(), userDataDBVersion, (db) =>
     deleteBookHelper(db, obj, uid)
   );
 };
@@ -182,7 +180,7 @@ const deleteBookHelper = (db, obj, uid) =>
  * @returns {Boolean} Is duplicate?
  */
 const isISBNDuplicate = (id, ISBN) =>
-  openDatabase(userDataDB, userDataDBVersion, (db) =>
+  openDatabase(getUserDB(), userDataDBVersion, (db) =>
     isISBNDuplicateHelper(db, id, ISBN)
   );
 
