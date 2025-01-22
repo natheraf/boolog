@@ -79,7 +79,7 @@ const changeUserHelper = (db, id) =>
       }
       const transaction = db.transaction("state", "readwrite");
       transaction.oncomplete = (event) => {
-        console.log("got all users successfully");
+        console.log("changed user successfully");
       };
       transaction.onerror = (event) => {
         console.error("Transaction Error", event);
@@ -93,9 +93,7 @@ const changeUserHelper = (db, id) =>
         data.userId = result.id;
         const updateRequest = objectStore.put(data);
         updateRequest.onsuccess = (event) => {
-          if (event.target.result) {
-            resolve(event.target.result);
-          }
+          resolve(result.id);
         };
       };
     });
