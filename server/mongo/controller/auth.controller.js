@@ -6,7 +6,10 @@ const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
 const { isDuplicateEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
-const { bodyMissingRequiredFields } = require("../middleware/utils");
+const {
+  bodyMissingRequiredFields,
+  generateRandomCode,
+} = require("../middleware/utils");
 const { ObjectId } = require("mongodb");
 
 exports.checkUserIdExists = (req, res, next) => {
@@ -26,6 +29,7 @@ exports.createSuperAdmin = () => {
   getDatabase("authentication")
     .then((db) => {
       db.collection("loginInfo").insertOne({
+        publicId: generateRandomCode(64),
         name: "super_admin",
         email: superAdminConfig.email,
         password: bcrypt.hashSync(superAdminConfig.password, 10),
@@ -54,7 +58,7 @@ exports.signUp = (req, res, next) => {
     return res?.status(400).send(missing);
   }
 
-  const user = {};
+  const user = { publicId: generateRandomCode(64) };
   userRequiredBody.forEach((key) => (user[key] = req.body[key]));
   if (req.body.password !== null) {
     user.password = bcrypt.hashSync(req.body.password, 10);
@@ -175,6 +179,7 @@ exports.signIn = (req, res) => {
           {
             userName: user.name,
             userEmail: user.email,
+            publicId: user.publicId,
           },
           {
             secure: true,
@@ -283,6 +288,7 @@ exports.signInPasswordless = (req, res) => {
           {
             userName: user.name,
             userEmail: user.email,
+            publicId: user.publicId,
           },
           {
             secure: true,
