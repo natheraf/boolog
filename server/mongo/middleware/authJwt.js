@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const { ROLES } = require("../database.js");
+const { getUserFromEmail } = require("../middleware/verifySignUp");
 
 const verifyToken = (req, res, next) => {
   const token =
@@ -66,10 +67,36 @@ const creatingAccountVerifyToken = (req, res, next) => {
   });
 };
 
+/**
+ * checks if another profile already has this account signed in
+ * @param {*} req
+ * @param {*} res
+ * @param {*} next
+ */
+const checkIfAlreadySignedIn = (req, res, next) => {
+  const userInfos = Object.entries(req.signedCookies)
+    .filter(([key, value]) => key.startsWith("userInfo_"))
+    .map(([cookieName, object]) => object);
+  getUserFromEmail(req.body.email).then((user) => {
+    if (user !== null) {
+      req.user = user;
+      for (const userInfo of userInfos) {
+        if (userInfo.publicId === user.publicId) {
+          return res.status(409).send({
+            message: `User already signed in as ${userInfo.userName}`,
+          });
+        }
+      }
+    }
+    next();
+  });
+};
+
 const authJwt = {
   verifyToken,
   authorizedToCreateUser,
   creatingAccountVerifyToken,
+  checkIfAlreadySignedIn,
 };
 
 module.exports = authJwt;

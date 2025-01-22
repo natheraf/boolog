@@ -19,13 +19,18 @@ module.exports = function (app) {
     controller.signIn
   );
 
-  app.post("/api/auth/signin", controller.signIn);
+  app.post(
+    "/api/auth/signin",
+    [authJwt.checkIfAlreadySignedIn],
+    controller.signIn
+  );
 
   app.post("/api/auth/signout", controller.signOut);
 
   app.post(
     "/api/auth/passwordless/sendcode",
     [
+      authJwt.checkIfAlreadySignedIn,
       controller.checkPasswordless,
       authJwt.creatingAccountVerifyToken,
       verifySignUp.checkRolesExist,
