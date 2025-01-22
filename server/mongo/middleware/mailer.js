@@ -2,9 +2,7 @@ require("dotenv").config({ path: __dirname + "/../../.env" });
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const config = require("../config/email.config.js");
-
-const generateRandomCode = (numOfBytes) =>
-  require("crypto").randomBytes(numOfBytes).toString("base64url");
+const { generateRandomCode } = require("./utils.js");
 
 const emailAuthenticationCheck = (req) =>
   new Promise((resolve, reject) => {

@@ -40,8 +40,30 @@ const urlParamsMissingRequiredFields = (req, requiredBody) => {
   return false;
 };
 
+const urlQueryMissingRequiredFields = (req, requiredBody) => {
+  const missing = [];
+  requiredBody.forEach((key) => {
+    if (
+      req.query[key] === undefined ||
+      (typeof req.query[key] === "string" && req.query[key].length === 0)
+    )
+      missing.push(key);
+  });
+  if (missing.length > 0) {
+    return {
+      message: arrayToComplexListString(missing) + " cannot be empty",
+    };
+  }
+  return false;
+};
+
+const generateRandomCode = (numOfBytes) =>
+  require("crypto").randomBytes(numOfBytes).toString("base64url");
+
 module.exports = {
   arrayToComplexListString,
   bodyMissingRequiredFields,
   urlParamsMissingRequiredFields,
+  urlQueryMissingRequiredFields,
+  generateRandomCode,
 };
