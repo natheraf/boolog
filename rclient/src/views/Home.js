@@ -54,11 +54,9 @@ export const Home = () => {
       </Button>
       <Button
         onClick={() => {
-          handleSimpleRequest(
-            "GET",
-            {},
-            'lists/get/multiple/["books","movies"]'
-          ).then((res) => console.log(res.data));
+          handleSimpleRequest("GET", {}, "lists/get/multiple", {
+            shelves: ["books", "movies"],
+          }).then((res) => console.log(res.data));
         }}
       >
         Get books and movies
