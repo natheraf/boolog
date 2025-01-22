@@ -18,7 +18,6 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { handleSimpleRequest } from "../api/Axios";
 import { AlertsContext } from "../context/Alerts";
-import { CookiesContext } from "../context/Cookies";
 import { UserInfoContext } from "../context/UserInfo";
 
 export const Header = () => {
@@ -33,8 +32,7 @@ export const Header = () => {
     handleSimpleRequest("post", {}, "auth/signout")
       .then((res) => {
         addAlert(res.data.message, "info");
-        userInfoContext.refreshAndIsLoggedIn();
-        navigate("/");
+        userInfoContext.refreshAndIsLoggedIn().then(() => navigate("/"));
       })
       .catch((error) => addAlert(error.toString(), "error"));
   };

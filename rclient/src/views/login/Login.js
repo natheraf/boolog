@@ -122,8 +122,7 @@ export const Login = () => {
     )
       .then((res) => {
         addAlert(res.data.message, "info");
-        userInfoContext.refreshAndIsLoggedIn();
-        navigate("/");
+        userInfoContext.refreshAndIsLoggedIn().then(() => navigate("/"));
       })
       .catch((error) => addAlert(error.toString(), "error"))
       .finally(() => setLoading(false));
@@ -157,9 +156,9 @@ export const Login = () => {
   };
 
   React.useEffect(() => {
-    if (userInfoContext.isLoggedIn()) {
-      navigate("/");
-    }
+    userInfoContext.refreshAndIsLoggedIn().then((isLoggedIn) => {
+      if (isLoggedIn) navigate("/");
+    });
   }, []);
 
   return (

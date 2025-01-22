@@ -16,17 +16,20 @@ export const VerifyEmailDirections = () => {
     }
     let intervalId = null;
     const checkIfLoggedIn = () => {
-      if (intervalId !== null && userInfoContext.refreshAndIsLoggedIn()) {
-        clearInterval(intervalId);
-        addAlert(
-          "Login successful on another tab. Closing this one in 5 seconds.",
-          "info"
-        );
-        setTimeout(() => {
-          window.open("about:blank", "_self");
-          window.close();
-        }, 5000);
-      }
+      userInfoContext.refreshAndIsLoggedIn().then((isLoggedIn) => {
+        if (intervalId !== null && isLoggedIn) {
+          clearInterval(intervalId);
+          addAlert(
+            "Login successful on another tab. Closing this one in 5 seconds.",
+            "info"
+          );
+          setTimeout(() => {
+            clearInterval(intervalId);
+            window.open("about:blank", "_self");
+            window.close();
+          }, 5000);
+        }
+      });
     };
     intervalId = setInterval(checkIfLoggedIn, 1000);
 

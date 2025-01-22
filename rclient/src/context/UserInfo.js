@@ -13,15 +13,20 @@ export const UserInfo = ({ children }) => {
     getCookies("userInfo") !== undefined
   );
 
+  const refreshAndIsLoggedIn = () =>
+    new Promise((resolve, reject) => {
+      getCurrentUserId().then((id) => {
+        const isLoggedIn = getCookies(`userInfo_${id}`) !== undefined;
+        setLoggedIn(isLoggedIn);
+        resolve(isLoggedIn);
+      });
+    });
+  refreshAndIsLoggedIn();
+
   const userInfoMemo = React.useMemo(
     () => ({
       isLoggedIn: () => loggedIn,
-      refreshAndIsLoggedIn: async () => {
-        const isLoggedIn =
-          getCookies(`userInfo_${await getCurrentUserId()}`) !== undefined;
-        setLoggedIn(isLoggedIn);
-        return isLoggedIn;
-      },
+      refreshAndIsLoggedIn,
     }),
     [loggedIn]
   );

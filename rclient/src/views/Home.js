@@ -10,8 +10,10 @@ import {
   renameUser,
 } from "../api/IndexedDB/Users";
 import { changeUser, getCurrentUser } from "../api/IndexedDB/State";
+import { UserInfoContext } from "../context/UserInfo";
 
 export const Home = () => {
+  const userInfoContext = React.useContext(UserInfoContext);
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   return (
@@ -135,9 +137,10 @@ export const Home = () => {
       <TextField
         onKeyDown={(event) =>
           event.key === "Enter"
-            ? changeUser(parseInt(event.target.value)).then((result) =>
-                console.log(result)
-              )
+            ? changeUser(parseInt(event.target.value)).then((result) => {
+                userInfoContext.refreshAndIsLoggedIn();
+                localStorage.setItem("userId", result);
+              })
             : null
         }
         label="change current userId"
