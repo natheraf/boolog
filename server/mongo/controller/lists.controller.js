@@ -4,6 +4,7 @@ const {
   bodyMissingRequiredFields,
   urlParamsMissingRequiredFields,
   arrayToComplexListString,
+  urlQueryMissingRequiredFields,
 } = require("../middleware/utils");
 
 /**
@@ -147,11 +148,11 @@ exports.getAll = (req, res) => {
 
 exports.getMultiple = (req, res) => {
   const userRequiredBody = ["shelves"];
-  const missing = urlParamsMissingRequiredFields(req, userRequiredBody);
+  const missing = urlQueryMissingRequiredFields(req, userRequiredBody);
   if (missing) {
     return res?.status(400).send(missing);
   }
-  const shelves = JSON.parse(req.params.shelves);
+  const shelves = JSON.parse(req.query.shelves);
 
   const response = { shelves: {} };
   getDatabase("userLists").then(async (db) => {

@@ -3,7 +3,8 @@ const config = require("../config/auth.config.js");
 const { ROLES } = require("../database.js");
 
 const verifyToken = (req, res, next) => {
-  const token = req.signedCookies[req.body.localUserId];
+  const token =
+    req.signedCookies[req.body.localUserId ?? req.query.localUserId];
 
   if (!token) {
     return res.status(403).send({

@@ -16,7 +16,7 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/api/lists/get/multiple/:shelves",
+    "/api/lists/get/multiple",
     [authJwt.verifyToken, authController.checkUserIdExists],
     controller.getMultiple
   );
