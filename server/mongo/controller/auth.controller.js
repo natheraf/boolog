@@ -4,7 +4,7 @@ const superAdminConfig = require("../config/superAdmin.config");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
-const { isDuplicateEmail } = require("../middleware/verifySignUp");
+const { getUserFromEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
 const {
   bodyMissingRequiredFields,
@@ -206,31 +206,30 @@ exports.signOut = (req, res) => {
   });
 };
 
-exports.checkPasswordless = (req, res, next) => {
+exports.checkPasswordless = async (req, res, next) => {
   const missing = bodyMissingRequiredFields(req, ["email"]);
   if (missing) {
     return res?.status(400).send(missing);
   }
 
-  isDuplicateEmail(req.body.email).then((isDuplicate) => {
-    if (isDuplicate) {
-      getDatabase("authentication").then((db) => {
-        db.collection("loginInfo")
-          .findOne({ email: req.body.email })
-          .then((user) => {
-            if (!user) {
-              return res.status(401).send({ message: "Email not found" });
-            }
-            req.body.purpose = "login";
-            sendEmailAuthentication(db, req)
-              .then((message) => res.send({ message }))
-              .catch((error) => res.status(400).send(error));
-          });
-      });
-    } else {
-      next();
-    }
-  });
+  const user = req.user ?? (await getUserFromEmail(req.body.email));
+  if (user !== null) {
+    getDatabase("authentication").then((db) => {
+      db.collection("loginInfo")
+        .findOne({ email: req.body.email })
+        .then((user) => {
+          if (!user) {
+            return res.status(401).send({ message: "Email not found" });
+          }
+          req.body.purpose = "login";
+          sendEmailAuthentication(db, req)
+            .then((message) => res.send({ message }))
+            .catch((error) => res.status(400).send(error));
+        });
+    });
+  } else {
+    next();
+  }
 };
 
 exports.signUpPasswordless = (req, res) => {

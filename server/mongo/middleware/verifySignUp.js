@@ -1,13 +1,13 @@
 const { getDatabase, ROLES } = require("../database");
 const { bodyMissingRequiredFields } = require("./utils");
 
-const isDuplicateEmail = (email) =>
+const getUserFromEmail = (email) =>
   new Promise((resolve, reject) =>
     getDatabase("authentication")
       .then((db) => {
         const collection = db.collection("loginInfo");
-        collection.findOne({ email }).then((email) => {
-          resolve(email !== null);
+        collection.findOne({ email }).then((user) => {
+          resolve(user);
         });
       })
       .catch(reject)
@@ -19,8 +19,8 @@ const checkDuplicateEmail = (req, res, next) => {
     return res?.status(400).send(missing);
   }
 
-  isDuplicateEmail(req.body.email).then((isDuplicate) => {
-    if (isDuplicate) {
+  getUserFromEmail(req.body.email).then((user) => {
+    if (user !== null) {
       res.status(400).send({
         message: "Email is already in use!",
       });
@@ -41,7 +41,7 @@ const checkRolesExist = (req, res, next) => {
 };
 
 const verifySignUp = {
-  isDuplicateEmail,
+  getUserFromEmail,
   checkDuplicateEmail,
   checkRolesExist,
 };
