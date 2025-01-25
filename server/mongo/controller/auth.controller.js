@@ -176,8 +176,9 @@ exports.signIn = (req, res) => {
         res.cookie(
           `userInfo_${req.body.localUserId}`,
           {
-            userName: user.name,
-            userEmail: user.email,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture,
           },
           {
             secure: true,
@@ -187,8 +188,8 @@ exports.signIn = (req, res) => {
           }
         );
         res.status(200).send({
-          userName: user.name,
-          userEmail: user.email,
+          name: user.name,
+          email: user.email,
           message: `Successfully Signed In. Expires in ${expiresIn}.`,
         });
       });
@@ -283,8 +284,9 @@ exports.signInPasswordless = (req, res) => {
         res.cookie(
           `userInfo_${req.body.localUserId}`,
           {
-            userName: user.name,
-            userEmail: user.email,
+            name: user.name,
+            email: user.email,
+            profilePicture: user.profilePicture,
           },
           {
             secure: true,
