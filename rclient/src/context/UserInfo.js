@@ -9,27 +9,31 @@ export const UserInfoContext = React.createContext({
 
 export const UserInfo = ({ children }) => {
   const getCookies = React.useContext(CookiesContext).getCookies;
-  const [loggedIn, setLoggedIn] = React.useState(
-    getCookies("userInfo") !== undefined
-  );
-
-  const refreshAndIsLoggedIn = () =>
-    new Promise((resolve, reject) => {
-      getCurrentUserId().then((id) => {
-        const isLoggedIn = getCookies(`userInfo_${id}`) !== undefined;
-        setLoggedIn(isLoggedIn);
-        resolve(isLoggedIn);
-      });
-    });
-  refreshAndIsLoggedIn();
+  const [loggedIn, setLoggedIn] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const userInfoMemo = React.useMemo(
     () => ({
       isLoggedIn: () => loggedIn,
-      refreshAndIsLoggedIn,
+      refreshAndIsLoggedIn: () =>
+        new Promise((resolve, reject) => {
+          getCurrentUserId().then((id) => {
+            const isLoggedIn = getCookies(`userInfo_${id}`) !== undefined;
+            setLoggedIn(isLoggedIn);
+            resolve(isLoggedIn);
+          });
+        }),
     }),
     [loggedIn]
   );
 
-  return <UserInfoContext.Provider value={userInfoMemo} children={children} />;
+  userInfoMemo.refreshAndIsLoggedIn().then(() => {
+    setIsLoading(false);
+  });
+
+  if (isLoading === false) {
+    return (
+      <UserInfoContext.Provider value={userInfoMemo} children={children} />
+    );
+  }
 };
