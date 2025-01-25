@@ -74,16 +74,28 @@ const creatingAccountVerifyToken = (req, res, next) => {
  * @param {*} next
  */
 const checkIfAlreadySignedIn = (req, res, next) => {
-  const userInfos = Object.entries(req.signedCookies)
-    .filter(([key, value]) => key.startsWith("userInfo_"))
-    .map(([cookieName, object]) => object);
+  const loggedInUserIds = Object.entries(req.signedCookies)
+    .filter(([key, value]) => isNaN(key) === false)
+    .map(([cookieName, object]) =>
+      jwt.verify(object, config.secret, (error, decoded) => {
+        if (error) {
+          return res.status(401).send({
+            message: "Unauthorized",
+          });
+        }
+        return decoded.userId.toString();
+      })
+    );
+  if (loggedInUserIds.some((element) => typeof element !== "string")) {
+    return;
+  }
   getUserFromEmail(req.body.email).then((user) => {
     if (user !== null) {
       req.user = user;
-      for (const userInfo of userInfos) {
-        if (userInfo.publicId === user.publicId) {
+      for (const userId of loggedInUserIds) {
+        if (userId === user._id.toString()) {
           return res.status(409).send({
-            message: `User already signed in as ${userInfo.userName}`,
+            message: `User already signed in as ${user.name}`,
           });
         }
       }
