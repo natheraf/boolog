@@ -29,19 +29,36 @@ export const Users = () => {
   const openUsers = Boolean(anchorEl);
   const [users, setUsers] = React.useState([]);
   const [openEditor, setOpenEditor] = React.useState(false);
+  const [editObject, setEditObject] = React.useState(undefined);
 
-  const handleOpenEditor = () => {
+  const handleOpenEditor = (editCurrentUser) => {
+    if (editCurrentUser === true) {
+      setEditObject(
+        users.find(
+          (user) => user.id === parseInt(localStorage.getItem("userId"))
+        )
+      );
+    }
     handleClose();
     setOpenEditor(true);
   };
 
+  const handleCloseEditor = () => {
+    setEditObject(undefined);
+    setOpenEditor(false);
+  };
+
   React.useEffect(() => {
     getAllUsers().then((users) => setUsers(users));
-  }, []);
+  }, [openEditor]);
 
   return (
     <Box>
-      <UserEdit open={openEditor} setOpen={setOpenEditor} />
+      <UserEdit
+        open={openEditor}
+        handleClose={handleCloseEditor}
+        editObject={editObject}
+      />
       <Avatar
         onClick={handleClick}
         alt="user icon"
@@ -68,7 +85,9 @@ export const Users = () => {
             >
               {localStorage.getItem("userName")?.[0].toUpperCase()}
             </Avatar>
-            <Button variant="outlined">Edit User</Button>
+            <Button onClick={() => handleOpenEditor(true)} variant="outlined">
+              Edit User
+            </Button>
           </Stack>
           <Divider>
             <Typography color="gray">More Users</Typography>
@@ -81,7 +100,9 @@ export const Users = () => {
               .map((user) => (
                 <ListItemButton onClick={handleClose} key={user.id}>
                   <ListItemIcon>
-                    <Avatar>{user.profilePicture}</Avatar>
+                    <Avatar alt="user icon" src={user.profilePicture}>
+                      {user.name?.[0].toUpperCase()}
+                    </Avatar>
                   </ListItemIcon>
                   <ListItemText>{user.name}</ListItemText>
                 </ListItemButton>
