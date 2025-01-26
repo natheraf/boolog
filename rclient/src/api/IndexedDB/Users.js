@@ -39,16 +39,22 @@ const getUserHelper = (db, id) =>
     };
   });
 
-export const renameUser = (userId, newName) =>
+/**
+ * update a local user
+ * @param {Number} userId
+ * @param {Object} data user's new data to be written
+ * @returns {Promise<Number>} updated user's id, -1 if no user found
+ */
+export const updateUser = (userId, data) =>
   openDatabase("appData", appDataDBVersion, (db) =>
-    renameUserHelper(db, userId, newName)
+    updateUserHelper(db, userId, data)
   );
 
-const renameUserHelper = (db, userId, newName) =>
+const updateUserHelper = (db, userId, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("users", "readwrite");
     transaction.oncomplete = (event) => {
-      console.log("renamed user successfully");
+      console.log("updated user successfully");
     };
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
@@ -60,10 +66,9 @@ const renameUserHelper = (db, userId, newName) =>
       const result = event.target.result;
       if (result === undefined) {
         console.log("No user found, missing id");
-        return;
+        resolve(-1);
       }
-      result.name = newName;
-      const requestUpdate = objectStore.put(result);
+      const requestUpdate = objectStore.put(data);
       requestUpdate.onsuccess = () => {
         console.log("updated name");
         resolve(result.id); // returns id of user
@@ -71,10 +76,15 @@ const renameUserHelper = (db, userId, newName) =>
     };
   });
 
-export const addUser = (name) =>
-  openDatabase("appData", appDataDBVersion, (db) => addUserHelper(db, name));
+/**
+ * adds a local user
+ * @param {Object} data user data object for writing to db
+ * @returns {Promise<Number>} the created user's id
+ */
+export const addUser = (data) =>
+  openDatabase("appData", appDataDBVersion, (db) => addUserHelper(db, data));
 
-const addUserHelper = (db, name) =>
+const addUserHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("users", "readwrite");
     transaction.oncomplete = (event) => {
@@ -85,9 +95,7 @@ const addUserHelper = (db, name) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("users");
-    const requestUpdate = objectStore.put({
-      name,
-    });
+    const requestUpdate = objectStore.put(data);
     requestUpdate.onsuccess = (event) => resolve(event.target.result);
   });
 

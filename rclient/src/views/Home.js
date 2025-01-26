@@ -3,12 +3,7 @@ import { AlertsContext } from "../context/Alerts";
 import { Button, TextField } from "@mui/material";
 import { handleSimpleRequest } from "../api/Axios";
 import { getAllBooks } from "../api/IndexedDB/Books";
-import {
-  addUser,
-  deleteUser,
-  getAllUsers,
-  renameUser,
-} from "../api/IndexedDB/Users";
+import { addUser, deleteUser, getAllUsers } from "../api/IndexedDB/Users";
 import { changeUser, getCurrentUser } from "../api/IndexedDB/State";
 import { UserInfoContext } from "../context/UserInfo";
 
@@ -106,17 +101,12 @@ export const Home = () => {
       >
         get cur user
       </Button>
-      <Button
-        onClick={() =>
-          renameUser(1, "foo").then((result) => console.log(result))
-        }
-      >
-        rename user to foo
-      </Button>
       <TextField
         onKeyDown={(event) =>
           event.key === "Enter"
-            ? addUser(event.target.value).then((result) => console.log(result))
+            ? addUser({ name: event.target.value }).then((result) =>
+                console.log(result)
+              )
             : null
         }
         label="add user with name"
