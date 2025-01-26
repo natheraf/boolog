@@ -16,6 +16,7 @@ import { getAllUsers } from "../api/IndexedDB/Users";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useTheme } from "@emotion/react";
 import { UserEdit } from "./UserEdit";
+import { changeUser } from "../api/IndexedDB/State";
 
 export const Users = () => {
   const theme = useTheme();
@@ -46,6 +47,12 @@ export const Users = () => {
   const handleCloseEditor = () => {
     setEditObject(undefined);
     setOpenEditor(false);
+  };
+
+  const handleSwitchUser = (userId) => {
+    changeUser(userId).then(() => {
+      window.location.reload();
+    });
   };
 
   React.useEffect(() => {
@@ -98,7 +105,10 @@ export const Users = () => {
                 (user) => user.id !== parseInt(localStorage.getItem("userId"))
               )
               .map((user) => (
-                <ListItemButton onClick={handleClose} key={user.id}>
+                <ListItemButton
+                  onClick={() => handleSwitchUser(user.id)}
+                  key={user.id}
+                >
                   <ListItemIcon>
                     <Avatar alt="user icon" src={user.profilePicture}>
                       {user.name?.[0].toUpperCase()}
