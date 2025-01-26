@@ -19,6 +19,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { handleSimpleRequest } from "../api/Axios";
 import { AlertsContext } from "../context/Alerts";
 import { UserInfoContext } from "../context/UserInfo";
+import { Users } from "./Users";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -79,6 +80,7 @@ export const Header = () => {
             </Link>
           </Stack>
           <Stack direction="row" alignItems={"center"}>
+            <Users />
             {userInfoContext.isLoggedIn() ? (
               <Link style={{ textDecoration: "none", color: "white" }}>
                 <Typography
