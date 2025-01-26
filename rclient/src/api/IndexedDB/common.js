@@ -1,3 +1,5 @@
+import { userTemplates } from "../Local";
+
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(name, version);
@@ -40,7 +42,7 @@ const appDataDBOnUpgradeNeeded = function (event) {
         keyPath: "id",
         autoIncrement: true,
       });
-      users.put({ name: "user1" });
+      users.put(userTemplates[0]);
       const state = db.createObjectStore("state", {
         keyPath: "id",
         autoIncrement: true,
