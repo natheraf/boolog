@@ -70,13 +70,15 @@ export const UserEdit = ({ open, setOpen, editObject }) => {
 
   React.useEffect(() => {
     if (open && editObject === undefined) {
-      console.log(editObject);
       getAllUsers().then((users) => {
         const names = new Set(users.map((user) => user?.name));
+        const filteredUserTemplates = userTemplates.filter(
+          (userTemplate) => names.has(userTemplate.name) === false
+        );
         setUser(
-          userTemplates.filter(
-            (userTemplate) => names.has(userTemplate.name) === false
-          )[Math.floor(Math.random() * userTemplates.length)]
+          filteredUserTemplates[
+            Math.floor(Math.random() * filteredUserTemplates.length)
+          ]
         );
       });
     }
