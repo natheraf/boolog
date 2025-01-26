@@ -1,6 +1,6 @@
 import * as React from "react";
 import { CookiesContext } from "./Cookies";
-import { getCurrentUserId } from "../api/IndexedDB/State";
+import { getCurrentUser } from "../api/IndexedDB/State";
 
 export const UserInfoContext = React.createContext({
   isLoggedIn: () => {},
@@ -17,8 +17,12 @@ export const UserInfo = ({ children }) => {
       isLoggedIn: () => loggedIn,
       refreshAndIsLoggedIn: () =>
         new Promise((resolve, reject) => {
-          getCurrentUserId().then((id) => {
-            const isLoggedIn = getCookies(`userInfo_${id}`) !== undefined;
+          getCurrentUser().then((user) => {
+            const isLoggedIn =
+              getCookies(`userInfo_${user.userId}`) !== undefined;
+            localStorage.setItem("userId", user.id);
+            localStorage.setItem("userName", user.name);
+            localStorage.setItem("profilePicture", user.profilePicture);
             setLoggedIn(isLoggedIn);
             resolve(isLoggedIn);
           });
