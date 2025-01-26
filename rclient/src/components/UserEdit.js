@@ -18,10 +18,10 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
-import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "./DynamicButton";
 import { userTemplates } from "../api/Local";
-import { getAllUsers } from "../api/IndexedDB/Users";
+import { addUser, getAllUsers, updateUser } from "../api/IndexedDB/Users";
+import { UserInfoContext } from "../context/UserInfo";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -31,35 +31,37 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-export const UserEdit = ({ open, setOpen, editObject }) => {
+export const UserEdit = ({ open, handleClose, editObject }) => {
   const theme = useTheme();
-  const [restorableObject, setRestorableObject] = React.useState(null);
+  const userInfoContext = React.useContext(UserInfoContext);
   const [user, setUser] = React.useState({});
 
   const handleClearAll = () => {
-    setRestorableObject(user);
-    setUser({
-      status: undefined,
-      type: undefined,
-    });
+    setUser({});
   };
 
-  const handleUndoClear = () => {
-    setUser(restorableObject);
-    setRestorableObject(null);
+  const handleSavedSuccessful = () => {
+    userInfoContext.refreshAndIsLoggedIn();
+    handleClearAll();
+    handleClose();
   };
 
-  const handleClose = (event, reason) => {
-    setOpen(false);
+  const handleSave = () => {
     if (editObject === undefined) {
-      handleClearAll();
+      addUser(user).then(() => {
+        handleSavedSuccessful();
+      });
+    } else {
+      updateUser(editObject.id, user).then((userId) => {
+        if (userId === -1) {
+          return;
+        }
+        handleSavedSuccessful();
+      });
     }
   };
 
-  const handleSave = () => {};
-
   const handleOnChangeProperty = (key) => (event, value) => {
-    setRestorableObject(null);
     if (value !== null) {
       setUser((prev) => ({
         ...prev,
@@ -81,6 +83,8 @@ export const UserEdit = ({ open, setOpen, editObject }) => {
           ]
         );
       });
+    } else {
+      setUser(editObject);
     }
   }, [editObject, open]);
 
@@ -89,6 +93,7 @@ export const UserEdit = ({ open, setOpen, editObject }) => {
       maxWidth={"xl"}
       open={open}
       onClose={handleClose}
+      unmountOnExit
       TransitionComponent={DialogSlideUpTransition}
       transitionDuration={200 * theme.transitions.reduceMotion}
     >
@@ -114,25 +119,14 @@ export const UserEdit = ({ open, setOpen, editObject }) => {
             {editObject === undefined ? "Create User" : "Edit User"}
           </Typography>
           <Stack direction={"row"} spacing={2}>
-            {restorableObject === null ? (
-              <DynamicButton
-                color="inherit"
-                onClick={handleClearAll}
-                endIcon={<DeleteIcon />}
-                sx={{ alignItems: "center" }}
-                icon={<DeleteIcon />}
-                text={"Clear All"}
-              />
-            ) : (
-              <DynamicButton
-                color="inherit"
-                onClick={handleUndoClear}
-                endIcon={<RestoreFromTrashIcon />}
-                sx={{ alignItems: "center" }}
-                icon={<RestoreFromTrashIcon />}
-                text={"Restore"}
-              />
-            )}
+            <DynamicButton
+              color="inherit"
+              onClick={handleClearAll}
+              endIcon={<DeleteIcon />}
+              sx={{ alignItems: "center" }}
+              icon={<DeleteIcon />}
+              text={"Clear All"}
+            />
             <Divider orientation="vertical" flexItem />
             <Tooltip
               title={!user?.name?.length > 0 ? "Required: Username" : ""}
@@ -184,6 +178,6 @@ export const UserEdit = ({ open, setOpen, editObject }) => {
 
 UserEdit.propTypes = {
   open: PropTypes.bool.isRequired,
-  setOpen: PropTypes.func.isRequired,
+  handleClose: PropTypes.func.isRequired,
   editObject: PropTypes.object,
 };
