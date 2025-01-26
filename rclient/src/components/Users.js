@@ -96,7 +96,7 @@ export const Users = () => {
               Edit User
             </Button>
           </Stack>
-          <Divider>
+          <Divider flexItem>
             <Typography color="gray">More Users</Typography>
           </Divider>
           <List sx={{ width: "100%" }} disablePadding>
