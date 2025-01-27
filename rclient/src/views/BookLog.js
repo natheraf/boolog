@@ -7,6 +7,7 @@ import {
   AccordionSummary,
   Box,
   Collapse,
+  Fade,
   Grid,
   Paper,
   Skeleton,
@@ -140,57 +141,59 @@ export const BookLog = () => {
 
   if (isLoading) {
     return (
-      <Stack spacing={2}>
-        {[4, 0, 3].map((numOfItems) => (
-          <Paper key={numOfItems.toString()}>
-            <Stack spacing={2} p={2}>
-              <Skeleton variant="rounded" width={"100%"} height={60} />
-              <Paper elevation={0}>
-                <Stack spacing={2} p={2}>
-                  <Grid
-                    container
-                    direction={"row"}
-                    justifyContent={"space-evenly"}
-                    alignItems={"center"}
-                    gap={2}
-                  >
-                    {[...Array(numOfItems).keys()].map((e) => (
-                      <Grid item width={"600px"} key={e.toString()}>
-                        <Paper>
-                          <Stack direction="row" spacing={2} p={2}>
-                            <Skeleton
-                              variant="rounded"
-                              width={"200px"}
-                              height={"200px"}
-                            />
-                            <Stack
-                              spacing={2}
-                              justifyContent={"center"}
-                              width={"100%"}
-                            >
-                              {[50, 30, 15, 10].map((heights) => (
-                                <Skeleton
-                                  variant="rounded"
-                                  width={"100%"}
-                                  height={heights}
-                                  key={heights.toString()}
-                                />
-                              ))}
+      <Fade in={true} timeout={1000}>
+        <Stack spacing={2}>
+          {[4, 0, 3].map((numOfItems) => (
+            <Paper key={numOfItems.toString()}>
+              <Stack spacing={2} p={2}>
+                <Skeleton variant="rounded" width={"100%"} height={60} />
+                <Paper elevation={0}>
+                  <Stack spacing={2} p={2}>
+                    <Grid
+                      container
+                      direction={"row"}
+                      justifyContent={"space-evenly"}
+                      alignItems={"center"}
+                      gap={2}
+                    >
+                      {[...Array(numOfItems).keys()].map((e) => (
+                        <Grid item width={"600px"} key={e.toString()}>
+                          <Paper>
+                            <Stack direction="row" spacing={2} p={2}>
+                              <Skeleton
+                                variant="rounded"
+                                width={"200px"}
+                                height={"200px"}
+                              />
+                              <Stack
+                                spacing={2}
+                                justifyContent={"center"}
+                                width={"100%"}
+                              >
+                                {[50, 30, 15, 10].map((heights) => (
+                                  <Skeleton
+                                    variant="rounded"
+                                    width={"100%"}
+                                    height={heights}
+                                    key={heights.toString()}
+                                  />
+                                ))}
+                              </Stack>
                             </Stack>
-                          </Stack>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </Stack>
-              </Paper>
-            </Stack>
-          </Paper>
-        ))}
-        <Skeleton variant="rounded" width={"100%"} height={60} />
-        <Skeleton variant="rounded" width={"100%"} height={60} />
-        <Skeleton variant="rounded" width={"100%"} height={60} />
-      </Stack>
+                          </Paper>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Stack>
+                </Paper>
+              </Stack>
+            </Paper>
+          ))}
+          <Skeleton variant="rounded" width={"100%"} height={60} />
+          <Skeleton variant="rounded" width={"100%"} height={60} />
+          <Skeleton variant="rounded" width={"100%"} height={60} />
+        </Stack>
+      </Fade>
     );
   }
 
