@@ -1,7 +1,6 @@
 import {
   Avatar,
   Box,
-  Button,
   Divider,
   List,
   ListItemButton,
@@ -9,17 +8,35 @@ import {
   ListItemText,
   Menu,
   Stack,
+  ToggleButton,
+  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import * as React from "react";
 import { getAllUsers } from "../api/IndexedDB/Users";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { useTheme } from "@emotion/react";
 import { UserEdit } from "./UserEdit";
 import { changeUser } from "../api/IndexedDB/State";
+import { UserInfoContext } from "../context/UserInfo";
+import { useNavigate } from "react-router-dom";
+import { handleSimpleRequest } from "../api/Axios";
+import { AlertsContext } from "../context/Alerts";
+import { ThemeContext } from "../App";
+
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import AnimationIcon from "@mui/icons-material/Animation";
 
 export const Users = () => {
   const theme = useTheme();
+  const { toggleColorMode, toggleReduceMotion } =
+    React.useContext(ThemeContext);
+  const navigate = useNavigate();
+  const userInfoContext = React.useContext(UserInfoContext);
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -31,6 +48,20 @@ export const Users = () => {
   const [users, setUsers] = React.useState([]);
   const [openEditor, setOpenEditor] = React.useState(false);
   const [editObject, setEditObject] = React.useState(undefined);
+  const [quickSettings, setQuickSettings] = React.useState(() => {
+    const res = [];
+    if (theme.palette.mode === "dark") {
+      res.push("dark");
+    }
+    if (theme.transitions.reduceMotion) {
+      res.push("reduceMotionOff");
+    }
+    return res;
+  });
+
+  const handleQuickSettingsChange = (event, newQuickSettings) => {
+    setQuickSettings(newQuickSettings);
+  };
 
   const handleOpenEditor = (editCurrentUser) => {
     if (editCurrentUser === true) {
@@ -53,6 +84,17 @@ export const Users = () => {
     changeUser(userId).then(() => {
       window.location.reload();
     });
+  };
+
+  const handleLogout = () => {
+    handleSimpleRequest("post", {}, "auth/signout")
+      .then((res) => {
+        addAlert(res.data.message, "info");
+        userInfoContext
+          .refreshAndIsLoggedIn()
+          .then(() => window.location.reload());
+      })
+      .catch((error) => addAlert(error.toString(), "error"));
   };
 
   React.useEffect(() => {
@@ -79,8 +121,12 @@ export const Users = () => {
         onClose={handleClose}
         transitionDuration={200 * theme.transitions.reduceMotion}
       >
-        <Stack spacing={1} alignItems={"center"} sx={{ minWidth: "200px" }}>
-          <Stack spacing={1} padding={2} alignItems={"center"}>
+        <Stack
+          spacing={1}
+          alignItems={"center"}
+          sx={{ minWidth: "200px", marginTop: 1 }}
+        >
+          <Stack spacing={1} alignItems={"center"}>
             <Typography variant="h5">
               Hello, {localStorage.getItem("userName")}!👋
             </Typography>
@@ -92,12 +138,55 @@ export const Users = () => {
             >
               {localStorage.getItem("userName")?.[0].toUpperCase()}
             </Avatar>
-            <Button onClick={() => handleOpenEditor(true)} variant="outlined">
-              Edit User
-            </Button>
           </Stack>
+          <List sx={{ width: "100%" }} disablePadding>
+            <ListItemButton onClick={() => handleOpenEditor(true)}>
+              <ListItemIcon>
+                <EditIcon />
+              </ListItemIcon>
+              <ListItemText>Edit User</ListItemText>
+            </ListItemButton>
+            {userInfoContext.isLoggedIn() ? (
+              <ListItemButton onClick={handleLogout}>
+                <ListItemIcon>
+                  <LogoutIcon />
+                </ListItemIcon>
+                <ListItemText>Logout</ListItemText>
+              </ListItemButton>
+            ) : (
+              <ListItemButton
+                onClick={() => {
+                  navigate("/login");
+                  handleClose();
+                }}
+              >
+                <ListItemIcon>
+                  <LoginIcon />
+                </ListItemIcon>
+                <ListItemText>Login</ListItemText>
+              </ListItemButton>
+            )}
+          </List>
           <Divider flexItem>
-            <Typography color="gray">More Users</Typography>
+            <Typography color="gray">
+              <ListItemText>Quick Settings</ListItemText>
+            </Typography>
+          </Divider>
+          <ToggleButtonGroup
+            value={quickSettings}
+            onChange={handleQuickSettingsChange}
+          >
+            <ToggleButton onClick={toggleColorMode} value="dark">
+              <DarkModeIcon />
+            </ToggleButton>
+            <ToggleButton onClick={toggleReduceMotion} value="reduceMotionOff">
+              <AnimationIcon />
+            </ToggleButton>
+          </ToggleButtonGroup>
+          <Divider flexItem>
+            <Typography color="gray">
+              <ListItemText>More Users</ListItemText>
+            </Typography>
           </Divider>
           <List sx={{ width: "100%" }} disablePadding>
             {users

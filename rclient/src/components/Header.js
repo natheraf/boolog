@@ -1,21 +1,9 @@
 import React from "react";
-import {
-  AppBar,
-  Box,
-  Grid,
-  Stack,
-  Toolbar,
-  Typography,
-  IconButton,
-} from "@mui/material";
+import { AppBar, Box, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useTheme } from "@mui/material/styles";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { ThemeContext } from "../App";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { handleSimpleRequest } from "../api/Axios";
 import { AlertsContext } from "../context/Alerts";
 import { UserInfoContext } from "../context/UserInfo";
@@ -81,48 +69,6 @@ export const Header = () => {
           </Stack>
           <Stack direction="row" alignItems={"center"}>
             <Users />
-            {userInfoContext.isLoggedIn() ? (
-              <Link style={{ textDecoration: "none", color: "white" }}>
-                <Typography
-                  onClick={() => {
-                    handleLogout();
-                    window.location.href = "#";
-                  }}
-                  variant="h6"
-                >
-                  Logout
-                </Typography>
-              </Link>
-            ) : (
-              <Link
-                to={"/login"}
-                style={{ textDecoration: "none", color: "white" }}
-              >
-                <Typography variant="h6">Login</Typography>
-              </Link>
-            )}
-            <IconButton
-              sx={{ ml: 1 }}
-              onClick={toggleColorMode}
-              color="inherit"
-            >
-              {theme.palette.mode === "dark" ? (
-                <Brightness7Icon />
-              ) : (
-                <Brightness4Icon />
-              )}
-            </IconButton>
-            <IconButton
-              sx={{ ml: 1 }}
-              onClick={toggleReduceMotion}
-              color="inherit"
-            >
-              {theme.transitions.reduceMotion ? (
-                <VisibilityOffIcon />
-              ) : (
-                <VisibilityIcon />
-              )}
-            </IconButton>
           </Stack>
         </Grid>
       </Toolbar>
