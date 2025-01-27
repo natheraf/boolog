@@ -22,7 +22,7 @@ function App() {
     localStorage.getItem("theme") === "dark" ? "dark" : "light"
   );
   const [reduceMotion, setReduceMotion] = React.useState(
-    localStorage.getItem("reduceMotion") === "false" ? false : true
+    localStorage.getItem("reduceMotion") !== "false"
   );
 
   const themeModes = React.useMemo(
@@ -35,8 +35,10 @@ function App() {
         });
       },
       toggleReduceMotion: () => {
-        setReduceMotion((prev) => !prev);
-        localStorage.setItem("reduceMotion", !reduceMotion);
+        setReduceMotion((prev) => {
+          localStorage.setItem("reduceMotion", !prev);
+          return !prev;
+        });
       },
     }),
     []
@@ -53,7 +55,7 @@ function App() {
           },
         },
         transitions: {
-          reduceMotion: reduceMotion,
+          reduceMotion: !reduceMotion,
         },
       }),
     [mode, reduceMotion]
