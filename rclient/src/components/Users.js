@@ -10,6 +10,7 @@ import {
   Stack,
   ToggleButton,
   ToggleButtonGroup,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import * as React from "react";
@@ -169,22 +170,6 @@ export const Users = () => {
           </List>
           <Divider flexItem>
             <Typography color="gray">
-              <ListItemText>Quick Settings</ListItemText>
-            </Typography>
-          </Divider>
-          <ToggleButtonGroup
-            value={quickSettings}
-            onChange={handleQuickSettingsChange}
-          >
-            <ToggleButton onClick={toggleColorMode} value="dark">
-              <DarkModeIcon />
-            </ToggleButton>
-            <ToggleButton onClick={toggleReduceMotion} value="reduceMotionOff">
-              <AnimationIcon />
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <Divider flexItem>
-            <Typography color="gray">
               <ListItemText>More Users</ListItemText>
             </Typography>
           </Divider>
@@ -213,6 +198,35 @@ export const Users = () => {
               <ListItemText>Add a User</ListItemText>
             </ListItemButton>
           </List>
+          <Divider flexItem>
+            <Typography color="gray">
+              <ListItemText>Quick Settings</ListItemText>
+            </Typography>
+          </Divider>
+          <ToggleButtonGroup
+            value={quickSettings}
+            onChange={handleQuickSettingsChange}
+          >
+            <Tooltip
+              title={theme.palette.mode === "dark" ? "Light Mode" : "Dark Mode"}
+            >
+              <ToggleButton onClick={toggleColorMode} value="dark">
+                <DarkModeIcon />
+              </ToggleButton>
+            </Tooltip>
+            <Tooltip
+              title={
+                theme.transitions.reduceMotion ? "Reduce Motion" : "Animations"
+              }
+            >
+              <ToggleButton
+                onClick={toggleReduceMotion}
+                value="reduceMotionOff"
+              >
+                <AnimationIcon />
+              </ToggleButton>
+            </Tooltip>
+          </ToggleButtonGroup>
         </Stack>
       </Menu>
     </Box>
