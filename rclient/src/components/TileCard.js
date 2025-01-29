@@ -52,7 +52,9 @@ export const TileCard = ({ data, keysData, actionArea }) => {
       >
         <Stack spacing={1}>
           {keysData.map((obj) =>
-            obj.key === "title" && dataObject.read_link !== undefined ? (
+            obj.key === "title" &&
+            dataObject.read_link !== undefined &&
+            dataObject.read_link.length > 0 ? (
               <Typography
                 key={obj.key}
                 variant={obj.variant}
