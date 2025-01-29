@@ -95,7 +95,7 @@ const checkIfAlreadySignedIn = (req, res, next) => {
       for (const userId of loggedInUserIds) {
         if (userId === user._id.toString()) {
           return res.status(409).send({
-            message: `User already signed in as ${user.name}`,
+            message: `A user is already signed in as ${user.name}`,
           });
         }
       }
