@@ -12,7 +12,7 @@ const {
  * @param {Object} req
  * @param {Object} res
  */
-exports.updateMultiple = (req, res) => {
+exports.putMultiple = (req, res) => {
   const userRequiredBody = ["data"];
   const missing = bodyMissingRequiredFields(req, userRequiredBody);
   if (missing) {

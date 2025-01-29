@@ -30,7 +30,7 @@ export const Home = () => {
                     return entry;
                   }),
                 },
-                "lists/add/multiple"
+                "lists/put/multiple"
               ).then((res) => console.log(res.data));
             })
             .catch((error) => addAlert(error.message, "error"));
