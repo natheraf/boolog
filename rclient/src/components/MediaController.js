@@ -24,19 +24,46 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
     }
   };
 
+  /**
+   * @todo refactor so fallback from id to alternative identifications is not unreadable
+   */
   const syncMediaObject = () => {
+    const firstId = actionArea.mediaUniqueIdentifier[0];
     actionArea.api
       .getBook(
-        actionArea.mediaUniqueIdentifier,
-        dataObject[actionArea.mediaUniqueIdentifier]?.[0] ??
-          dataObject[actionArea.mediaUniqueIdentifier]
+        firstId,
+        Array.isArray(dataObject[firstId])
+          ? dataObject[firstId]?.[0]
+          : dataObject[firstId]
       )
       .then((res) => {
         setMediaObject(() => {
           return res ?? { ...dataObject };
         });
       })
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        if (
+          error.message !== "value cannot be empty or undefined if key isn't"
+        ) {
+          return console.log(error);
+        }
+        const secondId = actionArea.mediaUniqueIdentifier[1];
+        actionArea.api
+          .getBook(
+            secondId,
+            Array.isArray(dataObject[secondId])
+              ? dataObject[secondId]?.[0]
+              : dataObject[secondId]
+          )
+          .then((res) => {
+            setMediaObject(() => {
+              return res ?? { ...dataObject };
+            });
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      });
   };
 
   React.useEffect(() => {

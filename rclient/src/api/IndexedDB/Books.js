@@ -83,6 +83,13 @@ export const setBook = (data) =>
     }
   });
 
+/**
+ *
+ * @todo refactor so fallback from id to alternative identifications is not unreadable
+ * @param {IDBDatabase} db
+ * @param {Object} data
+ * @returns {Number} id of book
+ */
 const setBookHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
@@ -103,9 +110,23 @@ const setBookHelper = (db, data) =>
           resolve(result.id); // returns id of book
         };
       } else {
-        console.log("no book found to update, adding book...");
-        delete data.id;
-        addBook(data).then((data) => resolve(data)); // returns id of book
+        const index = objectStore.index("xId");
+        const request = index.get(IDBKeyRange.only(data.xId ?? "-1"));
+        request.onsuccess = (event) => {
+          const result = event.target.result;
+          if (result !== undefined) {
+            data.id = result.id;
+            const requestUpdate = objectStore.put(data);
+            requestUpdate.onsuccess = () => {
+              console.log("updated book");
+              resolve(result.id); // returns id of book
+            };
+          } else {
+            console.log("no book found to update, adding book...");
+            delete data.id;
+            addBook(data).then((data) => resolve(data)); // returns id of book
+          }
+        };
       }
     };
   });
@@ -121,6 +142,14 @@ export const getBook = (key, value) =>
     getBookHelper(db, key, value)
   );
 
+/**
+ *
+ * @todo refactor so fallback from id to alternative identifications is not unreadable
+ * @param {IDBDatabase} db
+ * @param {string} key
+ * @param {string} value
+ * @returns {Number} id of book
+ */
 const getBookHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
@@ -138,7 +167,7 @@ const getBookHelper = (db, key, value) =>
       };
     } else {
       const index = objectStore.index(key);
-      const request = index.get(value);
+      const request = index.get(IDBKeyRange.only(value));
       request.onsuccess = (event) => {
         const data = event.target.result;
         resolve(data);

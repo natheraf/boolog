@@ -29,6 +29,7 @@ const userDataDBOnupgradeNeeded = function (event) {
       userBooks.createIndex("publisher", "publisher");
       userBooks.createIndex("year", "year");
       userBooks.createIndex("isbn", "isbn", { multiEntry: true });
+      userBooks.createIndex("xId", "xId");
       userBooks.createIndex("deleted", "deleted");
       userBooks.createIndex("status", "status");
   }

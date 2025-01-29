@@ -141,6 +141,7 @@ export const SearchBook = () => {
         publish_year: searchApiInterface(item, "publish_year"),
         number_of_pages: searchApiInterface(item, "number_of_pages"),
         isbn: searchApiInterface(item, "isbn"),
+        xId: searchApiInterface(item, "xId"),
         api_source: selApi,
         cover_url:
           selApi === "Open Library"
@@ -210,6 +211,7 @@ export const SearchBook = () => {
         publish_year: obj?.first_publish_year,
         number_of_pages: obj?.number_of_pages_median,
         isbn: obj?.isbn,
+        xId: obj?.key,
       },
       "Google Books": {
         total_items: obj?.totalItems,
@@ -223,6 +225,7 @@ export const SearchBook = () => {
         isbn: obj?.volumeInfo?.industryIdentifiers
           ?.filter((obj) => obj?.type?.indexOf("ISBN") === 0)
           ?.map((obj) => obj?.identifier),
+        xId: obj?.id,
       },
     };
     return apiMap[selApi]?.[key];
@@ -480,7 +483,7 @@ export const SearchBook = () => {
               ]}
               actionArea={{
                 api: indexedDBBooksInterface,
-                mediaUniqueIdentifier: "isbn",
+                mediaUniqueIdentifier: ["isbn", "xId"],
                 orientation: greaterThanMid ? "vertical" : "horizontal",
               }}
               size="large"
