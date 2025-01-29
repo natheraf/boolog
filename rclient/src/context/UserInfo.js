@@ -18,8 +18,7 @@ export const UserInfo = ({ children }) => {
       refreshAndIsLoggedIn: () =>
         new Promise((resolve, reject) => {
           getCurrentUser().then((user) => {
-            const isLoggedIn =
-              getCookies(`userInfo_${user.userId}`) !== undefined;
+            const isLoggedIn = getCookies(`userInfo_${user.id}`) !== undefined;
             localStorage.setItem("userId", user.id);
             localStorage.setItem("userName", user.name);
             localStorage.setItem("profilePicture", user.profilePicture);
