@@ -2,7 +2,6 @@ const { ObjectId } = require("mongodb");
 const { getDatabase } = require("../database");
 const {
   bodyMissingRequiredFields,
-  urlParamsMissingRequiredFields,
   arrayToComplexListString,
   urlQueryMissingRequiredFields,
 } = require("../middleware/utils");
@@ -46,11 +45,18 @@ exports.putMultiple = (req, res) => {
       continue;
     }
     getDatabase("userLists").then((db) => {
-      if (entry.cloud.delete === true) {
+      if (entry.deleted === true) {
         db.collection("v1")
-          .deleteOne(
-            ObjectId.createFromHexString(entry.cloud?.id ?? "0".repeat(24))
-          )
+          .deleteOne({
+            _id: ObjectId.createFromHexString(
+              entry.cloud?.id ?? "0".repeat(24)
+            ),
+          })
+          .then((res) => {
+            if (res.deleteCount === 1) {
+              clientActions.push({ entryId: entry.id, action: "delete" });
+            }
+          })
           .catch((error) =>
             log.push({
               entryId: entry.id,
@@ -59,7 +65,6 @@ exports.putMultiple = (req, res) => {
               errorObject: error,
             })
           );
-        clientActions.push({ entryId: entry.id, action: "delete" });
         resolves[index]();
       } else {
         db.collection("v1")
