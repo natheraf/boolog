@@ -5,6 +5,8 @@ import { handleSimpleRequest } from "../Axios";
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = config.userDBVersion;
 
+const clientActions = () => {};
+
 const putMultipleToCloud = (data) =>
   new Promise((resolve, reject) => {
     if (localStorage.getItem("isLoggedIn") !== "true") {
@@ -38,11 +40,12 @@ const addBookHelper = (db, obj) =>
     const transaction = db.transaction("books", "readwrite");
     const objectStore = transaction.objectStore("books");
     const request = objectStore.add(obj);
-    request.onsuccess = () => {
+    request.onsuccess = (event) => {
+      obj.id = event.target.result;
       putMultipleToCloud([obj])
         .then(() => {
           console.log("book add request completed successfully");
-          resolve(request.result);
+          resolve(event.target.result);
         })
         .catch((error) => console.log(error));
     };
