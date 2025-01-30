@@ -1,8 +1,31 @@
 import config from "./config";
 import { openDatabase } from "./common";
+import { handleSimpleRequest } from "../Axios";
 
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = config.userDBVersion;
+
+const putMultipleToCloud = (data) =>
+  new Promise((resolve, reject) => {
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      return resolve();
+    }
+    handleSimpleRequest(
+      "POST",
+      {
+        data: data.map((entry) => {
+          entry.shelf = "books";
+          return entry;
+        }),
+      },
+      "lists/put/multiple"
+    )
+      .then((res) => {
+        console.log(res.data);
+        resolve();
+      })
+      .catch((error) => reject(new Error(error)));
+  });
 
 const addBook = (obj) => {
   return openDatabase(getUserDB(), userDataDBVersion, (db) =>
@@ -16,8 +39,12 @@ const addBookHelper = (db, obj) =>
     const objectStore = transaction.objectStore("books");
     const request = objectStore.add(obj);
     request.onsuccess = () => {
-      console.log("book add request completed successfully");
-      resolve(request.result);
+      putMultipleToCloud([obj])
+        .then(() => {
+          console.log("book add request completed successfully");
+          resolve(request.result);
+        })
+        .catch((error) => console.log(error));
     };
     request.onerror = () => {
       console.log("Request Error", request.error);

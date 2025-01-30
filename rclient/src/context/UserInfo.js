@@ -22,6 +22,7 @@ export const UserInfo = ({ children }) => {
             localStorage.setItem("userId", user.id);
             localStorage.setItem("userName", user.name);
             localStorage.setItem("profilePicture", user.profilePicture);
+            localStorage.setItem("isLoggedIn", isLoggedIn);
             setLoggedIn(isLoggedIn);
             resolve(isLoggedIn);
           });
