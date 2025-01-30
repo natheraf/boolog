@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const { getDatabase } = require("../database");
 const { bodyMissingRequiredFields } = require("../middleware/utils");
 
@@ -23,7 +24,10 @@ exports.updateMultiple = (req, res) => {
       }
       await db
         .collection("settings")
-        .replaceOne({ _id: settings._id }, settings);
+        .replaceOne(
+          { _id: ObjectId.createFromHexString(settings._id) },
+          settings
+        );
       delete settings._id;
       delete settings.userId;
     }
