@@ -16,9 +16,9 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
     if (value === null) {
       setOpenDeleteAlert(true);
     } else {
-      dataObject.status = value;
-      actionArea.api.setBook(dataObject).then((id) => {
-        dataObject.id = id;
+      mediaObject.status = value;
+      actionArea.api.setBook(mediaObject).then((id) => {
+        mediaObject.id = id;
         syncMediaObject();
       });
     }
@@ -38,7 +38,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
       )
       .then((res) => {
         setMediaObject(() => {
-          return res ?? { ...dataObject };
+          return res ?? structuredClone(dataObject);
         });
       })
       .catch((error) => {
@@ -57,7 +57,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
           )
           .then((res) => {
             setMediaObject(() => {
-              return res ?? { ...dataObject };
+              return res ?? structuredClone(dataObject);
             });
           })
           .catch((error) => {
@@ -95,7 +95,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
         />
         {actionArea.inLibrary ? (
           <MediaEdit
-            mediaObject={dataObject}
+            mediaObject={mediaObject}
             setOpenEditor={setOpenEditor}
             setOpenDeleteAlert={setOpenDeleteAlert}
             openEditor={openEditor}
