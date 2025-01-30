@@ -145,14 +145,14 @@ export const Users = () => {
               <ListItemIcon>
                 <EditIcon />
               </ListItemIcon>
-              <ListItemText>Edit User</ListItemText>
+              <ListItemText primary={"Edit User"} />
             </ListItemButton>
             {userInfoContext.isLoggedIn() ? (
               <ListItemButton onClick={handleLogout}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>
-                <ListItemText>Logout</ListItemText>
+                <ListItemText primary={"Logout"} />
               </ListItemButton>
             ) : (
               <ListItemButton
@@ -164,14 +164,12 @@ export const Users = () => {
                 <ListItemIcon>
                   <LoginIcon />
                 </ListItemIcon>
-                <ListItemText>Login</ListItemText>
+                <ListItemText primary={"Login"} />
               </ListItemButton>
             )}
           </List>
           <Divider flexItem>
-            <Typography color="gray">
-              <ListItemText>More Users</ListItemText>
-            </Typography>
+            <Typography color="gray">More Users</Typography>
           </Divider>
           <List sx={{ width: "100%" }} disablePadding>
             {users
@@ -188,20 +186,18 @@ export const Users = () => {
                       {user.name?.[0].toUpperCase()}
                     </Avatar>
                   </ListItemIcon>
-                  <ListItemText>{user.name}</ListItemText>
+                  <ListItemText primary={user.name} />
                 </ListItemButton>
               ))}
             <ListItemButton onClick={handleOpenEditor}>
               <ListItemIcon sx={{ paddingLeft: 1 }}>
                 <AddCircleIcon />
               </ListItemIcon>
-              <ListItemText>Add a User</ListItemText>
+              <ListItemText primary={"Add a User"} />
             </ListItemButton>
           </List>
           <Divider flexItem>
-            <Typography color="gray">
-              <ListItemText>Quick Settings</ListItemText>
-            </Typography>
+            <Typography color="gray">Quick Settings</Typography>
           </Divider>
           <ToggleButtonGroup
             value={quickSettings}
