@@ -5,13 +5,39 @@ import { handleSimpleRequest } from "../Axios";
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = config.userDBVersion;
 
-const clientActions = () => {};
+/**
+ *
+ * @param {Array<Object>} actions
+ */
+const clientActions = (actions) =>
+  new Promise((resolve, reject) =>
+    Promise.all(
+      actions.map(
+        (obj) =>
+          new Promise((resolve, reject) => {
+            if (obj.action === "delete") {
+              deleteBook({ id: obj.entryId }, "id").then(resolve);
+            } else if (obj.action === "update") {
+              getBook("id", obj.entryId).then((res) => {
+                res.lastSynced = obj.lastSynced;
+                res.cloudId = obj.cloudId;
+                setBook(res, true).then(resolve);
+              });
+            }
+          })
+      )
+    ).then(() => {
+      console.log("gone through all client actions");
+      resolve();
+    })
+  );
 
-const putMultipleToCloud = (data) =>
+const syncMultipleToCloud = (data) =>
   new Promise((resolve, reject) => {
     if (localStorage.getItem("isLoggedIn") !== "true") {
       return resolve();
     }
+    console.log(data);
     handleSimpleRequest(
       "POST",
       {
@@ -24,7 +50,7 @@ const putMultipleToCloud = (data) =>
     )
       .then((res) => {
         console.log(res.data);
-        resolve();
+        clientActions(res.data.clientActions).then(resolve);
       })
       .catch((error) => reject(new Error(error)));
   });
@@ -42,7 +68,7 @@ const addBookHelper = (db, obj) =>
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
       obj.id = event.target.result;
-      putMultipleToCloud([obj])
+      syncMultipleToCloud([obj])
         .then(() => {
           console.log("book add request completed successfully");
           resolve(event.target.result);
@@ -89,7 +115,7 @@ const getAllBooksHelper = (db, key, value) =>
     }
   });
 
-export const setBook = (data) =>
+export const setBook = (data, localOnly) =>
   new Promise((resolve, reject) => {
     if (data.isbn !== undefined) {
       Promise.all(data.isbn.map((isbn) => isISBNDuplicate(data.id, isbn))).then(
@@ -101,14 +127,14 @@ export const setBook = (data) =>
             reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
           } else {
             openDatabase(getUserDB(), userDataDBVersion, (db) =>
-              setBookHelper(db, data)
+              setBookHelper(db, data, localOnly)
             ).then((res) => resolve(res));
           }
         }
       );
     } else {
       openDatabase(getUserDB(), userDataDBVersion, (db) =>
-        setBookHelper(db, data)
+        setBookHelper(db, data, localOnly)
       ).then((res) => resolve(res));
     }
   });
@@ -118,14 +144,22 @@ export const setBook = (data) =>
  * @todo refactor so fallback from id to alternative identifications is not unreadable
  * @param {IDBDatabase} db
  * @param {Object} data
+ * @param {boolean=} localOnly if true,
  * @returns {Number} id of book
  */
-const setBookHelper = (db, data) =>
+const setBookHelper = (db, data, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("books", "readwrite");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
+    };
+    const updatedBook = (event) => {
+      console.log("updated book");
+      if (localOnly !== true) {
+        syncMultipleToCloud([data]);
+      }
+      resolve(event.target.result); // returns id of book
     };
     const objectStore = transaction.objectStore("books");
     data.id = data.id ?? -1;
@@ -135,10 +169,7 @@ const setBookHelper = (db, data) =>
       if (result !== undefined) {
         data.id = result.id;
         const requestUpdate = objectStore.put(data);
-        requestUpdate.onsuccess = () => {
-          console.log("updated book");
-          resolve(result.id); // returns id of book
-        };
+        requestUpdate.onsuccess = updatedBook;
       } else {
         const index = objectStore.index("xId");
         const request = index.get(IDBKeyRange.only(data.xId ?? "-1"));
@@ -147,10 +178,7 @@ const setBookHelper = (db, data) =>
           if (result !== undefined) {
             data.id = result.id;
             const requestUpdate = objectStore.put(data);
-            requestUpdate.onsuccess = () => {
-              console.log("updated book");
-              resolve(result.id); // returns id of book
-            };
+            requestUpdate.onsuccess = updatedBook;
           } else {
             console.log("no book found to update, adding book...");
             delete data.id;
@@ -165,7 +193,7 @@ const setBookHelper = (db, data) =>
  * Get a single book that have the key and value given
  * @param {String} key id or isbn
  * @param {String} value
- * @returns {Promise<object>} Array of books
+ * @returns {Object}
  */
 export const getBook = (key, value) =>
   openDatabase(getUserDB(), userDataDBVersion, (db) =>

@@ -44,7 +44,6 @@ exports.putMultiple = (req, res) => {
       });
       continue;
     }
-    const data = entry;
     getDatabase("userLists").then((db) => {
       if (entry.hasOwnProperty("cloudId") && entry.deleted === true) {
         db.collection("v1")
@@ -65,16 +64,23 @@ exports.putMultiple = (req, res) => {
             ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
           )
           .then((databaseEntry) => {
+            console.log(entry);
             const localId = entry.id;
             delete entry.id;
+            const shelf = entry.shelf;
+            delete entry.shelf;
+            const cloudId = entry.cloudId;
+            delete entry.cloudId;
+            const objectLastSynced = entry.lastSynced;
+            delete entry.lastSynced;
             const lastSynced = Date.now();
             if (databaseEntry === null) {
               db.collection("v1")
                 .insertOne({
                   userId: req.userId,
                   lastSynced,
-                  shelf: entry.shelf,
-                  data,
+                  shelf: shelf,
+                  entry,
                 })
                 .then((insertRes) => {
                   clientActions.push({
@@ -90,22 +96,24 @@ exports.putMultiple = (req, res) => {
                 type: "warning",
                 message: "Missing cloud entry. Created one.",
               });
-            } else if (databaseEntry.lastSynced !== entry.lastSynced) {
+            } else if (true) {
+              console.log(cloudId);
               db.collection("v1")
                 .replaceOne(
-                  { _id: entry._id },
+                  { _id: ObjectId.createFromHexString(cloudId) },
                   {
                     userId: req.userId,
                     lastSynced,
-                    data,
+                    shelf: shelf,
+                    entry,
                   }
                 )
-                .then((insertRes) => {
+                .then(() => {
                   clientActions.push({
                     entryId: localId,
                     action: "update",
                     lastSynced,
-                    cloudId: insertRes.insertedId,
+                    cloudId: cloudId,
                   });
                   resolves[index]();
                 });
