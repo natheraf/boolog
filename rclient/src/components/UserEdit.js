@@ -80,7 +80,7 @@ export const UserEdit = ({ open, handleClose, editObject }) => {
         setUser(
           filteredUserTemplates[
             Math.floor(Math.random() * filteredUserTemplates.length)
-          ]
+          ] ?? {}
         );
       });
     } else {
