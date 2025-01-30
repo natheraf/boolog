@@ -15,9 +15,7 @@ const clientActions = (actions) =>
       actions.map(
         (obj) =>
           new Promise((resolve, reject) => {
-            if (obj.action === "delete") {
-              deleteBook({ id: obj.entryId }, "id").then(resolve);
-            } else if (obj.action === "update") {
+            if (obj.action === "update") {
               getBook("id", obj.entryId).then((res) => {
                 res.cloud = {
                   lastSynced: obj.lastSynced,
@@ -261,9 +259,9 @@ const deleteBookHelper = (db, obj, uid) =>
     }
     request.onsuccess = (event) => {
       const data = event.target.result;
-      if (data !== undefined) {
-        objectStore.delete(data.id);
-      }
+      objectStore.delete(data.id);
+      data.deleted = true;
+      syncMultipleToCloud([data]);
     };
     resolve();
   });
