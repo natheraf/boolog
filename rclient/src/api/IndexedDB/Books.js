@@ -19,8 +19,10 @@ const clientActions = (actions) =>
               deleteBook({ id: obj.entryId }, "id").then(resolve);
             } else if (obj.action === "update") {
               getBook("id", obj.entryId).then((res) => {
-                res.lastSynced = obj.lastSynced;
-                res.cloudId = obj.cloudId;
+                res.cloud = {
+                  lastSynced: obj.lastSynced,
+                  id: obj.cloudId,
+                };
                 setBook(res, true).then(resolve);
               });
             }
@@ -37,12 +39,18 @@ const syncMultipleToCloud = (data) =>
     if (localStorage.getItem("isLoggedIn") !== "true") {
       return resolve();
     }
-    console.log(data);
     handleSimpleRequest(
       "POST",
       {
         data: data.map((entry) => {
-          entry.shelf = "books";
+          if (
+            entry.hasOwnProperty("cloud") === false ||
+            typeof entry.cloud !== "object"
+          ) {
+            entry.cloud = { shelf: "books" };
+          } else {
+            entry.cloud.shelf = "books";
+          }
           return entry;
         }),
       },

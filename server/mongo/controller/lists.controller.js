@@ -34,8 +34,9 @@ exports.putMultiple = (req, res) => {
   for (let index = 0; index < entries.length; index += 1) {
     const entry = entries[index];
     if (
-      entry.hasOwnProperty("shelf") === false ||
-      typeof entry.shelf !== "string"
+      entry.hasOwnProperty("cloud") === false ||
+      typeof entry.cloud !== "object" ||
+      typeof entry.cloud.shelf !== "string"
     ) {
       log.push({
         entryId: entry.id,
@@ -45,9 +46,11 @@ exports.putMultiple = (req, res) => {
       continue;
     }
     getDatabase("userLists").then((db) => {
-      if (entry.hasOwnProperty("cloudId") && entry.deleted === true) {
+      if (entry.cloud.delete === true) {
         db.collection("v1")
-          .deleteOne(ObjectId.createFromHexString(entry.cloudId))
+          .deleteOne(
+            ObjectId.createFromHexString(entry.cloud?.id ?? "0".repeat(24))
+          )
           .catch((error) =>
             log.push({
               entryId: entry.id,
@@ -61,25 +64,21 @@ exports.putMultiple = (req, res) => {
       } else {
         db.collection("v1")
           .findOne(
-            ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
+            ObjectId.createFromHexString(entry.cloud.id ?? "0".repeat(24))
           )
           .then((databaseEntry) => {
-            console.log(entry);
             const localId = entry.id;
             delete entry.id;
-            const shelf = entry.shelf;
-            delete entry.shelf;
-            const cloudId = entry.cloudId;
-            delete entry.cloudId;
+            const cloud = entry.cloud;
+            delete entry.cloud;
             const objectLastSynced = entry.lastSynced;
-            delete entry.lastSynced;
             const lastSynced = Date.now();
             if (databaseEntry === null) {
               db.collection("v1")
                 .insertOne({
                   userId: req.userId,
                   lastSynced,
-                  shelf: shelf,
+                  shelf: cloud.shelf,
                   entry,
                 })
                 .then((insertRes) => {
@@ -97,14 +96,13 @@ exports.putMultiple = (req, res) => {
                 message: "Missing cloud entry. Created one.",
               });
             } else if (true) {
-              console.log(cloudId);
               db.collection("v1")
                 .replaceOne(
-                  { _id: ObjectId.createFromHexString(cloudId) },
+                  { _id: ObjectId.createFromHexString(cloud.id) },
                   {
                     userId: req.userId,
                     lastSynced,
-                    shelf: shelf,
+                    shelf: cloud.shelf,
                     entry,
                   }
                 )
@@ -113,7 +111,7 @@ exports.putMultiple = (req, res) => {
                     entryId: localId,
                     action: "update",
                     lastSynced,
-                    cloudId: cloudId,
+                    cloudId: cloud.id,
                   });
                   resolves[index]();
                 });
