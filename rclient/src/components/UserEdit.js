@@ -28,7 +28,7 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
   ref
 ) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Slide unmountOnExit direction="up" ref={ref} {...props} />;
 });
 
 export const UserEdit = ({ open, handleClose, editObject }) => {
@@ -93,7 +93,6 @@ export const UserEdit = ({ open, handleClose, editObject }) => {
       maxWidth={"xl"}
       open={open}
       onClose={handleClose}
-      unmountOnExit
       TransitionComponent={DialogSlideUpTransition}
       transitionDuration={200 * theme.transitions.reduceMotion}
     >
