@@ -163,9 +163,12 @@ const setBookHelper = (db, data, localOnly) =>
     const updatedBook = (event) => {
       console.log("updated book");
       if (localOnly !== true) {
-        syncMultipleToCloud([data]);
+        syncMultipleToCloud([data]).then(() => {
+          resolve(event.target.result); // returns id of book
+        });
+      } else {
+        resolve(event.target.result);
       }
-      resolve(event.target.result); // returns id of book
     };
     const objectStore = transaction.objectStore("books");
     data.id = data.id ?? -1;
