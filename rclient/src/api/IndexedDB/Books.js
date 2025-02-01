@@ -1,9 +1,9 @@
-import config from "./config";
+import { userDBVersion, shelvesObjectStore } from "./config";
 import { openDatabase } from "./common";
 import { handleSimpleRequest } from "../Axios";
 
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
-const userDataDBVersion = config.userDBVersion;
+const userDataDBVersion = userDBVersion;
 
 /**
  *
@@ -69,8 +69,8 @@ const addBook = (obj) => {
 
 const addBookHelper = (db, obj) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
-    const objectStore = transaction.objectStore("books");
+    const transaction = db.transaction(shelvesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
       obj.id = event.target.result;
@@ -101,7 +101,7 @@ export const getAllBooks = (key, value) => {
 
 const getAllBooksHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readonly");
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
     transaction.oncomplete = (event) => {
       console.log("got all books successfully");
     };
@@ -109,7 +109,7 @@ const getAllBooksHelper = (db, key, value) =>
       console.error("Transaction Error", event);
       reject(new Error(event));
     };
-    const objectStore = transaction.objectStore("books");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     if (key === undefined) {
       objectStore.getAll().onsuccess = (event) => {
         resolve(event.target.result);
@@ -155,7 +155,7 @@ export const setBook = (data, localOnly) =>
  */
 const setBookHelper = (db, data, localOnly) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readwrite");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
@@ -170,7 +170,7 @@ const setBookHelper = (db, data, localOnly) =>
         resolve(event.target.result);
       }
     };
-    const objectStore = transaction.objectStore("books");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     data.id = data.id ?? -1;
     const request = objectStore.get(data.id);
     request.onsuccess = (event) => {
@@ -219,12 +219,12 @@ export const getBook = (key, value) =>
  */
 const getBookHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readwrite");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
     };
-    const objectStore = transaction.objectStore("books");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     if (value === undefined) {
       reject(new Error("value cannot be empty or undefined if key isn't"));
     } else if (key === "id") {
@@ -250,8 +250,8 @@ export const deleteBook = (obj, uid) => {
 
 const deleteBookHelper = (db, obj, uid) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
-    const objectStore = transaction.objectStore("books");
+    const transaction = db.transaction(shelvesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     let request;
     if (uid === "isbn") {
       const index = objectStore.index("isbn");
@@ -282,12 +282,12 @@ const isISBNDuplicate = (id, ISBN) =>
 
 const isISBNDuplicateHelper = (db, id, ISBN) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction("books", "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readwrite");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
     };
-    const objectStore = transaction.objectStore("books");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
     const index = objectStore.index("isbn");
     index.get(ISBN).onsuccess = (event) => {
       const data = event.target.result;

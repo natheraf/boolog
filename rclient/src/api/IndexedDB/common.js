@@ -1,4 +1,5 @@
 import { userTemplates } from "../Local";
+import { shelvesObjectStore } from "./config";
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
@@ -20,18 +21,19 @@ const userDataDBOnupgradeNeeded = function (event) {
   const db = event.target.result;
   switch (event.oldVersion) {
     case 0:
-      const userBooks = db.createObjectStore("books", {
+      const shelves = db.createObjectStore(shelvesObjectStore, {
         keyPath: "id",
         autoIncrement: true,
       });
-      userBooks.createIndex("title", "title");
-      userBooks.createIndex("author", "author");
-      userBooks.createIndex("publisher", "publisher");
-      userBooks.createIndex("year", "year");
-      userBooks.createIndex("isbn", "isbn", { multiEntry: true });
-      userBooks.createIndex("xId", "xId");
-      userBooks.createIndex("deleted", "deleted");
-      userBooks.createIndex("status", "status");
+      shelves.createIndex("title", "title");
+      shelves.createIndex("author", "author");
+      shelves.createIndex("publisher", "publisher");
+      shelves.createIndex("year", "year");
+      shelves.createIndex("isbn", "isbn", { multiEntry: true });
+      shelves.createIndex("xId", "xId");
+      shelves.createIndex("deleted", "deleted");
+      shelves.createIndex("status", "status");
+      shelves.createIndex("shelf", "shelf");
   }
 };
 
