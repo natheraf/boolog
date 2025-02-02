@@ -44,9 +44,7 @@ exports.putMultiple = (req, res) => {
       if (entry.deleted === true) {
         db.collection("v1")
           .deleteOne({
-            _id: ObjectId.createFromHexString(
-              entry.cloud?.id ?? "0".repeat(24)
-            ),
+            _id: ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24)),
           })
           .then((res) => {
             if (res.deleteCount === 1) {
@@ -65,13 +63,12 @@ exports.putMultiple = (req, res) => {
       } else {
         db.collection("v1")
           .findOne(
-            ObjectId.createFromHexString(entry.cloud?.id ?? "0".repeat(24))
+            ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
           )
           .then((databaseEntry) => {
             entry.userId = req.userId;
             const localId = entry.id;
             delete entry.id;
-            delete entry.cloud?.id;
             const objectLastSynced = entry.lastSynced;
             const lastSynced = Date.now();
             if (databaseEntry === null) {
@@ -130,7 +127,6 @@ exports.getAll = (req, res) => {
     const entryCursor = db.collection("v1").find({ userId: req.userId });
     for await (const entry of entryCursor) {
       delete entry.userId;
-      entry.cloud.id = entry._id;
       delete entry._id;
       if (response.shelves.hasOwnProperty(entry.shelf) === false) {
         response.shelves[entry.shelf] = [];
@@ -159,7 +155,6 @@ exports.getMultiple = (req, res) => {
         .toArray();
       response.shelves[shelf].map((entry) => {
         delete entry.userId;
-        entry.cloud.id = entry._id;
         delete entry._id;
       });
     }
