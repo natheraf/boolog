@@ -31,9 +31,11 @@ export const UserInfo = ({ children }) => {
     [loggedIn]
   );
 
-  userInfoMemo.refreshAndIsLoggedIn().then(() => {
-    setIsLoading(false);
-  });
+  React.useEffect(() => {
+    userInfoMemo.refreshAndIsLoggedIn().then(() => {
+      setIsLoading(false);
+    });
+  }, []);
 
   if (isLoading === false) {
     return (
