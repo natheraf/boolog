@@ -100,7 +100,7 @@ const getAllBooksHelper = (db, key, value) =>
     };
     const objectStore = transaction.objectStore(shelvesObjectStore);
     if (key === undefined) {
-      objectStore.getAll().onsuccess = (event) => {
+      objectStore.index("shelf").getAll("books").onsuccess = (event) => {
         resolve(event.target.result);
       };
     } else if (value === undefined) {
