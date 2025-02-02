@@ -71,6 +71,7 @@ exports.putMultiple = (req, res) => {
             delete entry.id;
             const objectLastSynced = entry.lastSynced;
             const lastSynced = Date.now();
+            entry.lastSynced = lastSynced;
             if (databaseEntry === null) {
               db.collection("v1")
                 .insertOne(entry)
