@@ -19,7 +19,7 @@ const clientActions = (actions) =>
               getBook("id", obj.entryId).then((res) => {
                 res.lastSynced = obj.lastSynced;
                 res.cloudId = obj.cloudId;
-                setBook(res, true).then(resolve);
+                setBook(res, "id", true).then(resolve);
               });
             }
           })
@@ -30,7 +30,7 @@ const clientActions = (actions) =>
     })
   );
 
-const syncMultipleToCloud = (data) =>
+export const syncMultipleToCloud = (data) =>
   new Promise((resolve, reject) => {
     if (localStorage.getItem("isLoggedIn") !== "true") {
       return resolve();
@@ -110,7 +110,14 @@ const getAllBooksHelper = (db, key, value) =>
     }
   });
 
-export const setBook = (data, localOnly) =>
+/**
+ *
+ * @param {Object} data
+ * @param {string} key key to set book by
+ * @param {boolean=} localOnly localOnly if true,
+ * @returns
+ */
+export const setBook = (data, key, localOnly) =>
   new Promise((resolve, reject) => {
     if (data.isbn !== undefined) {
       Promise.all(data.isbn.map((isbn) => isISBNDuplicate(data.id, isbn))).then(
@@ -122,14 +129,14 @@ export const setBook = (data, localOnly) =>
             reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
           } else {
             openDatabase(getUserDB(), userDataDBVersion, (db) =>
-              setBookHelper(db, data, localOnly)
+              setBookHelper(db, data, key, localOnly)
             ).then((res) => resolve(res));
           }
         }
       );
     } else {
       openDatabase(getUserDB(), userDataDBVersion, (db) =>
-        setBookHelper(db, data, localOnly)
+        setBookHelper(db, data, key, localOnly)
       ).then((res) => resolve(res));
     }
   });
@@ -139,10 +146,11 @@ export const setBook = (data, localOnly) =>
  * @todo refactor so fallback from id to alternative identifications is not unreadable
  * @param {IDBDatabase} db
  * @param {Object} data
+ * @param {string} key key to set book by
  * @param {boolean=} localOnly if true,
  * @returns {Number} id of book
  */
-const setBookHelper = (db, data, localOnly) =>
+const setBookHelper = (db, data, key, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(shelvesObjectStore, "readwrite");
     transaction.onerror = (event) => {
@@ -161,7 +169,10 @@ const setBookHelper = (db, data, localOnly) =>
     };
     const objectStore = transaction.objectStore(shelvesObjectStore);
     data.id = data.id ?? -1;
-    const request = objectStore.get(data.id);
+    const request =
+      key === "id"
+        ? objectStore.get(data.id ?? -1)
+        : objectStore.index(key).get(IDBKeyRange.only(data[key] ?? -1));
     request.onsuccess = (event) => {
       const result = event.target.result;
       if (result !== undefined) {

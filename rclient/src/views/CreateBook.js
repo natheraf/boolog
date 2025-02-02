@@ -89,7 +89,7 @@ export const CreateBook = ({
           ? bookObject[key]
           : bookObject[key]?.split(",").map((isbn) => isbn.trim()))
     );
-    setBook(bookObject)
+    setBook(bookObject, "id")
       .then(() => {
         handleClose();
         setDataObject(bookObject);
