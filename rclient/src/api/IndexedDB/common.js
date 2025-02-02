@@ -34,6 +34,7 @@ const userDataDBOnupgradeNeeded = function (event) {
       shelves.createIndex("deleted", "deleted");
       shelves.createIndex("status", "status");
       shelves.createIndex("shelf", "shelf");
+      shelves.createIndex("cloudId", "cloudId");
   }
 };
 

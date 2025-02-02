@@ -17,10 +17,8 @@ const clientActions = (actions) =>
           new Promise((resolve, reject) => {
             if (obj.action === "update") {
               getBook("id", obj.entryId).then((res) => {
-                res.cloud = {
-                  lastSynced: obj.lastSynced,
-                  id: obj.cloudId,
-                };
+                res.lastSynced = obj.lastSynced;
+                res.cloudId = obj.cloudId;
                 setBook(res, true).then(resolve);
               });
             }
