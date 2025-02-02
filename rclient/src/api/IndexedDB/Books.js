@@ -40,17 +40,7 @@ const syncMultipleToCloud = (data) =>
     handleSimpleRequest(
       "POST",
       {
-        data: data.map((entry) => {
-          if (
-            entry.hasOwnProperty("cloud") === false ||
-            typeof entry.cloud !== "object"
-          ) {
-            entry.cloud = { shelf: "books" };
-          } else {
-            entry.cloud.shelf = "books";
-          }
-          return entry;
-        }),
+        data,
       },
       "lists/put/multiple"
     )
@@ -71,6 +61,7 @@ const addBookHelper = (db, obj) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(shelvesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(shelvesObjectStore);
+    obj.shelf = "books";
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
       obj.id = event.target.result;

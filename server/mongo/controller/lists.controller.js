@@ -32,11 +32,7 @@ exports.putMultiple = (req, res) => {
   );
   for (let index = 0; index < entries.length; index += 1) {
     const entry = entries[index];
-    if (
-      entry.hasOwnProperty("cloud") === false ||
-      typeof entry.cloud !== "object" ||
-      typeof entry.cloud.shelf !== "string"
-    ) {
+    if (typeof entry.shelf !== "string") {
       log.push({
         entryId: entry.id,
         type: "error",
@@ -69,23 +65,18 @@ exports.putMultiple = (req, res) => {
       } else {
         db.collection("v1")
           .findOne(
-            ObjectId.createFromHexString(entry.cloud.id ?? "0".repeat(24))
+            ObjectId.createFromHexString(entry.cloud?.id ?? "0".repeat(24))
           )
           .then((databaseEntry) => {
+            entry.userId = req.userId;
             const localId = entry.id;
             delete entry.id;
-            const cloud = entry.cloud;
-            delete entry.cloud;
+            delete entry.cloud?.id;
             const objectLastSynced = entry.lastSynced;
             const lastSynced = Date.now();
             if (databaseEntry === null) {
               db.collection("v1")
-                .insertOne({
-                  userId: req.userId,
-                  lastSynced,
-                  shelf: cloud.shelf,
-                  entry,
-                })
+                .insertOne(entry)
                 .then((insertRes) => {
                   clientActions.push({
                     entryId: localId,
@@ -102,21 +93,13 @@ exports.putMultiple = (req, res) => {
               });
             } else if (true) {
               db.collection("v1")
-                .replaceOne(
-                  { _id: ObjectId.createFromHexString(cloud.id) },
-                  {
-                    userId: req.userId,
-                    lastSynced,
-                    shelf: cloud.shelf,
-                    entry,
-                  }
-                )
+                .replaceOne({ _id: databaseEntry._id }, entry)
                 .then(() => {
                   clientActions.push({
                     entryId: localId,
                     action: "update",
                     lastSynced,
-                    cloudId: cloud.id,
+                    cloudId: databaseEntry._id,
                   });
                   resolves[index]();
                 });
@@ -147,6 +130,8 @@ exports.getAll = (req, res) => {
     const entryCursor = db.collection("v1").find({ userId: req.userId });
     for await (const entry of entryCursor) {
       delete entry.userId;
+      entry.cloud.id = entry._id;
+      delete entry._id;
       if (response.shelves.hasOwnProperty(entry.shelf) === false) {
         response.shelves[entry.shelf] = [];
       }
@@ -170,9 +155,13 @@ exports.getMultiple = (req, res) => {
     for (const shelf of shelves) {
       response.shelves[shelf] = await db
         .collection("v1")
-        .find({ userId: req.userId, shelf: shelf })
+        .find({ userId: req.userId, shelf })
         .toArray();
-      response.shelves[shelf].map((entry) => delete entry.userId);
+      response.shelves[shelf].map((entry) => {
+        delete entry.userId;
+        entry.cloud.id = entry._id;
+        delete entry._id;
+      });
     }
     response.message = `Successfully retrieved entries from ${arrayToComplexListString(
       shelves
