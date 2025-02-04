@@ -53,20 +53,24 @@ export const syncMultipleToCloud = (data) =>
       .catch((error) => reject(new Error(error)));
   });
 
-const addBook = (obj) => {
+const addBook = (obj, localOnly) => {
   return openDatabase(getUserDB(), userDataDBVersion, (db) =>
-    addBookHelper(db, obj)
+    addBookHelper(db, obj, localOnly)
   );
 };
 
-const addBookHelper = (db, obj) =>
+const addBookHelper = (db, obj, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(shelvesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(shelvesObjectStore);
     obj.shelf = "books";
-    obj._id = getNewId();
+    obj._id = obj._id ?? getNewId();
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
+      if (localOnly) {
+        console.log("book add request completed successfully");
+        return resolve(event.target.result);
+      }
       syncMultipleToCloud([obj])
         .then(() => {
           console.log("book add request completed successfully");
@@ -172,7 +176,6 @@ const setBookHelper = (db, data, key, localOnly) =>
       }
     };
     const objectStore = transaction.objectStore(shelvesObjectStore);
-    data._id = data._id ?? -1;
     const request =
       key === "id"
         ? objectStore.get(data._id ?? -1)
@@ -194,8 +197,7 @@ const setBookHelper = (db, data, key, localOnly) =>
             requestUpdate.onsuccess = updatedBook;
           } else {
             console.log("no book found to update, adding book...");
-            delete data._id;
-            addBook(data).then((data) => resolve(data)); // returns id of book
+            addBook(data, localOnly).then((data) => resolve(data)); // returns id of book
           }
         };
       }
