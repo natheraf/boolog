@@ -21,7 +21,7 @@ export const Sync = ({ children }) => {
         for (const [shelf, items] of Object.entries(remoteShelves)) {
           const obj = {};
           for (const item of items) {
-            obj[item.cloudId] = item;
+            obj[item._id] = item;
           }
           remoteShelves[shelf] = obj;
         }
@@ -31,20 +31,19 @@ export const Sync = ({ children }) => {
         const entriesNeedCloudUpdate = [];
         for (const book of books) {
           if (
-            book.hasOwnProperty("cloudId") === false ||
-            remoteBooks.hasOwnProperty(book.cloudId) === false ||
-            remoteBooks[book.cloudId].lastSynced < book.lastSynced
+            book.hasOwnProperty("_lastSynced") === false ||
+            remoteBooks.hasOwnProperty(book._id) === false ||
+            remoteBooks[book._id]._lastSynced < book._lastSynced
           ) {
             entriesNeedCloudUpdate.push(book);
-          } else if (remoteBooks[book.cloudId].lastSynced > book.lastSynced) {
-            await setBook(remoteBooks[book.cloudId], "cloudId", true);
+          } else if (remoteBooks[book._id]._lastSynced > book._lastSynced) {
+            await setBook(remoteBooks[book._id], "id", true);
           }
-          delete remoteBooks[book.cloudId];
+          delete remoteBooks[book._id];
         }
-        console.log(remoteBooks);
         for (const book of Object.values(remoteBooks)) {
-          console.log("setting book ", book.cloudId);
-          await setBook(book, "cloudId", true);
+          console.log("setting book ", book._id);
+          await setBook(book, "id", true);
         }
         console.log("updating cloud");
         await syncMultipleToCloud(entriesNeedCloudUpdate);
