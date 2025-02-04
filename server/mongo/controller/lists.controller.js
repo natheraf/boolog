@@ -1,10 +1,11 @@
-const { ObjectId } = require("mongodb");
 const { getDatabase } = require("../database");
 const {
   bodyMissingRequiredFields,
   arrayToComplexListString,
   urlQueryMissingRequiredFields,
 } = require("../middleware/utils");
+
+const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
 
 /**
  * Creates, updates, or deletes entries
@@ -34,7 +35,7 @@ exports.putMultiple = (req, res) => {
     const entry = entries[index];
     if (typeof entry.shelf !== "string") {
       log.push({
-        entryId: entry.id,
+        entryId: entry._id,
         type: "error",
         message: "missing shelf property or is not a string",
       });
@@ -44,16 +45,16 @@ exports.putMultiple = (req, res) => {
       if (entry.deleted === true) {
         db.collection("v1")
           .deleteOne({
-            _id: ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24)),
+            _id: getCloudId(req.userId, entry),
           })
           .then((res) => {
             if (res.deleteCount === 1) {
-              clientActions.push({ entryId: entry.id, action: "delete" });
+              clientActions.push({ entryId: entry._id, action: "delete" });
             }
           })
           .catch((error) =>
             log.push({
-              entryId: entry.id,
+              entryId: entry._id,
               type: "error",
               message: "unable to delete cloud entry, cloudId is missing",
               errorObject: error,
@@ -62,25 +63,22 @@ exports.putMultiple = (req, res) => {
         resolves[index]();
       } else {
         db.collection("v1")
-          .findOne(
-            ObjectId.createFromHexString(entry.cloudId ?? "0".repeat(24))
-          )
+          .findOne({ _id: getCloudId(req.userId, entry) })
           .then((databaseEntry) => {
-            entry.userId = req.userId;
-            const localId = entry.id;
-            delete entry.id;
+            const localId = entry._id;
+            entry._id = getCloudId(req.userId, entry);
+            entry._userId = req.userId;
             const objectLastSynced = entry.lastSynced;
             const lastSynced = Date.now();
-            entry.lastSynced = lastSynced;
+            entry._lastSynced = lastSynced;
             if (databaseEntry === null) {
               db.collection("v1")
                 .insertOne(entry)
-                .then((insertRes) => {
+                .then(() => {
                   clientActions.push({
                     entryId: localId,
                     action: "update",
                     lastSynced,
-                    cloudId: insertRes.insertedId,
                   });
                   resolves[index]();
                 });
@@ -97,7 +95,6 @@ exports.putMultiple = (req, res) => {
                     entryId: localId,
                     action: "update",
                     lastSynced,
-                    cloudId: databaseEntry._id,
                   });
                   resolves[index]();
                 });
@@ -127,8 +124,8 @@ exports.getAll = (req, res) => {
   getDatabase("userLists").then(async (db) => {
     const entryCursor = db.collection("v1").find({ userId: req.userId });
     for await (const entry of entryCursor) {
-      delete entry.userId;
-      delete entry._id;
+      delete entry._userId;
+      entry._id = entry._id.substring(25);
       if (response.shelves.hasOwnProperty(entry.shelf) === false) {
         response.shelves[entry.shelf] = [];
       }
@@ -154,9 +151,9 @@ exports.getMultiple = (req, res) => {
         .collection("v1")
         .find({ userId: req.userId, shelf })
         .toArray();
-      response.shelves[shelf].map((entry) => {
+      response.shelves[shelf].forEach((entry) => {
         delete entry.userId;
-        delete entry._id;
+        entry._id = entry._id.substring(25);
       });
     }
     response.message = `Successfully retrieved entries from ${arrayToComplexListString(
