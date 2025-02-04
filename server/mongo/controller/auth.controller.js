@@ -6,11 +6,20 @@ const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
 const { getUserFromEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
-const {
-  bodyMissingRequiredFields,
-  generateRandomCode,
-} = require("../middleware/utils");
+const { bodyMissingRequiredFields } = require("../middleware/utils");
 const { ObjectId } = require("mongodb");
+
+exports.updateLastWritten = (req, res, next) => {
+  getDatabase("authentication").then((db) => {
+    db.collection("loginInfo")
+      .updateOne(
+        { _id: ObjectId.createFromHexString(req.userId) },
+        { $set: { _lastWritten: Date.now() } }
+      )
+      .then(() => next())
+      .catch((error) => res.stats(500).send({ error }));
+  });
+};
 
 exports.checkUserIdExists = (req, res, next) => {
   getDatabase("authentication").then((db) => {
@@ -20,6 +29,7 @@ exports.checkUserIdExists = (req, res, next) => {
         if (user === null) {
           return res.status(404).send({ message: "User not found" });
         }
+        req.lastWritten = user._lastWritten ?? -1;
         next();
       });
   });

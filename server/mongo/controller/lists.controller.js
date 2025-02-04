@@ -68,9 +68,7 @@ exports.putMultiple = (req, res) => {
             const localId = entry._id;
             entry._id = getCloudId(req.userId, entry);
             entry._userId = req.userId;
-            const objectLastSynced = entry.lastSynced;
-            const lastSynced = Date.now();
-            entry._lastSynced = lastSynced;
+            const objectLastSynced = entry._lastUpdated;
             if (databaseEntry === null) {
               db.collection("v1")
                 .insertOne(entry)
@@ -78,7 +76,6 @@ exports.putMultiple = (req, res) => {
                   clientActions.push({
                     entryId: localId,
                     action: "update",
-                    lastSynced,
                   });
                   resolves[index]();
                 });
@@ -94,7 +91,6 @@ exports.putMultiple = (req, res) => {
                   clientActions.push({
                     entryId: localId,
                     action: "update",
-                    lastSynced,
                   });
                   resolves[index]();
                 });
@@ -119,7 +115,7 @@ exports.putMultiple = (req, res) => {
 };
 
 exports.getAll = (req, res) => {
-  const response = { shelves: {} };
+  const response = { shelves: {}, lastWritten: req.lastWritten ?? -1 };
 
   getDatabase("userLists").then(async (db) => {
     const entryCursor = db.collection("v1").find({ _userId: req.userId });

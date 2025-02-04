@@ -5,7 +5,11 @@ const authController = require("../controller/auth.controller");
 module.exports = function (app) {
   app.post(
     "/api/lists/put/multiple",
-    [authJwt.verifyToken, authController.checkUserIdExists],
+    [
+      authJwt.verifyToken,
+      authController.checkUserIdExists,
+      authController.updateLastWritten,
+    ],
     controller.putMultiple
   );
 
