@@ -5,6 +5,9 @@ import { handleSimpleRequest } from "../Axios";
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = userDBVersion;
 
+const getNewId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
 /**
  *
  * @param {Array<Object>} actions
@@ -18,7 +21,6 @@ const clientActions = (actions) =>
             if (obj.action === "update") {
               getBook("id", obj.entryId).then((res) => {
                 res.lastSynced = obj.lastSynced;
-                res.cloudId = obj.cloudId;
                 setBook(res, "id", true).then(resolve);
               });
             }
@@ -60,9 +62,9 @@ const addBookHelper = (db, obj) =>
     const transaction = db.transaction(shelvesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(shelvesObjectStore);
     obj.shelf = "books";
+    obj._id = getNewId();
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
-      obj.id = event.target.result;
       syncMultipleToCloud([obj])
         .then(() => {
           console.log("book add request completed successfully");
@@ -120,20 +122,20 @@ const getAllBooksHelper = (db, key, value) =>
 export const setBook = (data, key, localOnly) =>
   new Promise((resolve, reject) => {
     if (data.isbn !== undefined) {
-      Promise.all(data.isbn.map((isbn) => isISBNDuplicate(data.id, isbn))).then(
-        (arrayOfResults) => {
-          const duplicateISBNs = data.isbn.filter(
-            (isbn, index) => arrayOfResults[index]
-          );
-          if (duplicateISBNs.length > 0) {
-            reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
-          } else {
-            openDatabase(getUserDB(), userDataDBVersion, (db) =>
-              setBookHelper(db, data, key, localOnly)
-            ).then((res) => resolve(res));
-          }
+      Promise.all(
+        data.isbn.map((isbn) => isISBNDuplicate(data._id, isbn))
+      ).then((arrayOfResults) => {
+        const duplicateISBNs = data.isbn.filter(
+          (isbn, index) => arrayOfResults[index]
+        );
+        if (duplicateISBNs.length > 0) {
+          reject(new Error(`Duplicate ISBNs found: ${duplicateISBNs}`));
+        } else {
+          openDatabase(getUserDB(), userDataDBVersion, (db) =>
+            setBookHelper(db, data, key, localOnly)
+          ).then((res) => resolve(res));
         }
-      );
+      });
     } else {
       openDatabase(getUserDB(), userDataDBVersion, (db) =>
         setBookHelper(db, data, key, localOnly)
@@ -168,15 +170,15 @@ const setBookHelper = (db, data, key, localOnly) =>
       }
     };
     const objectStore = transaction.objectStore(shelvesObjectStore);
-    data.id = data.id ?? -1;
+    data._id = data._id ?? -1;
     const request =
       key === "id"
-        ? objectStore.get(data.id ?? -1)
+        ? objectStore.get(data._id ?? -1)
         : objectStore.index(key).get(IDBKeyRange.only(data[key] ?? -1));
     request.onsuccess = (event) => {
       const result = event.target.result;
       if (result !== undefined) {
-        data.id = result.id;
+        data._id = result._id;
         const requestUpdate = objectStore.put(data);
         requestUpdate.onsuccess = updatedBook;
       } else {
@@ -185,12 +187,12 @@ const setBookHelper = (db, data, key, localOnly) =>
         request.onsuccess = (event) => {
           const result = event.target.result;
           if (result !== undefined) {
-            data.id = result.id;
+            data._id = result._id;
             const requestUpdate = objectStore.put(data);
             requestUpdate.onsuccess = updatedBook;
           } else {
             console.log("no book found to update, adding book...");
-            delete data.id;
+            delete data._id;
             addBook(data).then((data) => resolve(data)); // returns id of book
           }
         };
@@ -258,11 +260,11 @@ const deleteBookHelper = (db, obj, uid) =>
       const isbn = obj.isbn[0];
       request = index.get(isbn);
     } else {
-      request = objectStore.get(obj.id);
+      request = objectStore.get(obj._id);
     }
     request.onsuccess = (event) => {
       const data = event.target.result;
-      objectStore.delete(data.id);
+      objectStore.delete(data._id);
       data.deleted = true;
       syncMultipleToCloud([data]);
     };
@@ -291,7 +293,7 @@ const isISBNDuplicateHelper = (db, id, ISBN) =>
     const index = objectStore.index("isbn");
     index.get(ISBN).onsuccess = (event) => {
       const data = event.target.result;
-      resolve(data === undefined ? false : data.id !== id);
+      resolve(data === undefined ? false : data._id !== id);
     };
   });
 

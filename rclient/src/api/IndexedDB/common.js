@@ -22,8 +22,7 @@ const userDataDBOnupgradeNeeded = function (event) {
   switch (event.oldVersion) {
     case 0:
       const shelves = db.createObjectStore(shelvesObjectStore, {
-        keyPath: "id",
-        autoIncrement: true,
+        keyPath: "_id",
       });
       shelves.createIndex("title", "title");
       shelves.createIndex("author", "author");
@@ -34,7 +33,6 @@ const userDataDBOnupgradeNeeded = function (event) {
       shelves.createIndex("deleted", "deleted");
       shelves.createIndex("status", "status");
       shelves.createIndex("shelf", "shelf");
-      shelves.createIndex("cloudId", "cloudId");
   }
 };
 
