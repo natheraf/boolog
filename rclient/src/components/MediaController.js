@@ -18,7 +18,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
     } else {
       mediaObject.status = value;
       actionArea.api.setBook(mediaObject, "id").then((id) => {
-        mediaObject.id = id;
+        mediaObject._id = id;
         syncMediaObject();
       });
     }
