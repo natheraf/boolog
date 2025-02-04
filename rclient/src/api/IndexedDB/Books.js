@@ -21,7 +21,7 @@ const clientActions = (actions) =>
             if (obj.action === "update") {
               getBook("id", obj.entryId)
                 .then((res) => {
-                  res._lastSynced = obj.lastSynced;
+                  res._lastUpdated = obj.lastUpdated;
                   setBook(res, "id", true).then(resolve);
                 })
                 .catch((error) => console.log(error));
@@ -48,7 +48,8 @@ export const syncMultipleToCloud = (data) =>
     )
       .then((res) => {
         console.log(res.data);
-        clientActions(res.data.clientActions).then(resolve);
+        resolve();
+        // clientActions(res.data.clientActions).then(resolve);
       })
       .catch((error) => reject(new Error(error)));
   });
@@ -175,6 +176,9 @@ const setBookHelper = (db, data, key, localOnly) =>
         resolve(event.target.result);
       }
     };
+    if (localOnly !== true) {
+      data._lastUpdated = Date.now();
+    }
     const objectStore = transaction.objectStore(shelvesObjectStore);
     const request =
       key === "id"
@@ -248,13 +252,13 @@ const getBookHelper = (db, key, value) =>
     }
   });
 
-export const deleteBook = (obj, uid) => {
+export const deleteBook = (obj, uid, localOnly) => {
   return openDatabase(getUserDB(), userDataDBVersion, (db) =>
-    deleteBookHelper(db, obj, uid)
+    deleteBookHelper(db, obj, uid, localOnly)
   );
 };
 
-const deleteBookHelper = (db, obj, uid) =>
+const deleteBookHelper = (db, obj, uid, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(shelvesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(shelvesObjectStore);
@@ -269,8 +273,10 @@ const deleteBookHelper = (db, obj, uid) =>
     request.onsuccess = (event) => {
       const data = event.target.result;
       objectStore.delete(data._id);
-      data.deleted = true;
-      syncMultipleToCloud([data]);
+      if (localOnly !== true) {
+        data.deleted = true;
+        syncMultipleToCloud([data]);
+      }
     };
     resolve();
   });
