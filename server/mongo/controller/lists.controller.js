@@ -122,7 +122,7 @@ exports.getAll = (req, res) => {
   const response = { shelves: {} };
 
   getDatabase("userLists").then(async (db) => {
-    const entryCursor = db.collection("v1").find({ userId: req.userId });
+    const entryCursor = db.collection("v1").find({ _userId: req.userId });
     for await (const entry of entryCursor) {
       delete entry._userId;
       entry._id = entry._id.substring(25);
@@ -149,10 +149,10 @@ exports.getMultiple = (req, res) => {
     for (const shelf of shelves) {
       response.shelves[shelf] = await db
         .collection("v1")
-        .find({ userId: req.userId, shelf })
+        .find({ _userId: req.userId, shelf })
         .toArray();
       response.shelves[shelf].forEach((entry) => {
-        delete entry.userId;
+        delete entry._userId;
         entry._id = entry._id.substring(25);
       });
     }
