@@ -19,10 +19,12 @@ const clientActions = (actions) =>
         (obj) =>
           new Promise((resolve, reject) => {
             if (obj.action === "update") {
-              getBook("id", obj.entryId).then((res) => {
-                res.lastSynced = obj.lastSynced;
-                setBook(res, "id", true).then(resolve);
-              });
+              getBook("id", obj.entryId)
+                .then((res) => {
+                  res._lastSynced = obj.lastSynced;
+                  setBook(res, "id", true).then(resolve);
+                })
+                .catch((error) => console.log(error));
             }
           })
       )
