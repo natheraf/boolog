@@ -1,5 +1,5 @@
 import { userTemplates } from "../Local";
-import { shelvesObjectStore } from "./config";
+import { fileObjectStore, shelvesObjectStore } from "./config";
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
@@ -44,7 +44,7 @@ const appDataDBOnUpgradeNeeded = function (event) {
         keyPath: "id",
         autoIncrement: true,
       });
-      users.put(userTemplates[0]);
+      users.put({ ...userTemplates[0], lastSynced: -1 });
       const state = db.createObjectStore("state", {
         keyPath: "id",
         autoIncrement: true,
