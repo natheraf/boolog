@@ -8,6 +8,7 @@ import {
   syncMultipleToCloud,
 } from "../api/IndexedDB/Books";
 import { getCurrentUser } from "../api/IndexedDB/State";
+import { updateLastSynced } from "../api/IndexedDB/Users";
 
 export const Sync = ({ children }) => {
   const userInfoContext = React.useContext(UserInfoContext);
@@ -20,7 +21,8 @@ export const Sync = ({ children }) => {
       handleSimpleRequest("GET", {}, "lists/get/all").then(async (res) => {
         console.log("starting sync");
         const remoteShelves = res.data.response.shelves;
-        const lastCloudWrite = await getCurrentUser().lastCloudWrite;
+        const lastSync = (await getCurrentUser()).lastSynced;
+        const lastCloudWritten = res.data.response.lastWritten;
         for (const [shelf, items] of Object.entries(remoteShelves)) {
           const obj = {};
           for (const item of items) {
@@ -35,7 +37,7 @@ export const Sync = ({ children }) => {
         for (const book of books) {
           if (
             remoteBooks.hasOwnProperty(book._id) === false &&
-            lastCloudWrite >= book._lastUpdated
+            lastCloudWritten >= book._lastUpdated
           ) {
             await deleteBook(book, "id", true);
           } else if (
@@ -57,6 +59,7 @@ export const Sync = ({ children }) => {
           await syncMultipleToCloud(entriesNeedCloudUpdate);
         }
         console.log("finished sync");
+        await updateLastSynced(Date.now());
         setIsLoading(false);
       });
     }

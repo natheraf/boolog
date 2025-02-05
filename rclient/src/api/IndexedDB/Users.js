@@ -2,15 +2,10 @@ import { openDatabase } from "./common";
 import { appDataDBVersion } from "./config";
 import { getCurrentUser } from "./State";
 
-export const updateLastCloudWrite = () =>
-  openDatabase("appData", appDataDBVersion, (db) =>
-    updateLastCloudWriteHelper(db)
-  );
-
-const updateLastCloudWriteHelper = (db) =>
+export const updateLastSynced = (value) =>
   new Promise((resolve, reject) => {
     getCurrentUser().then((user) => {
-      user.lastCloudWrite = Date.now();
+      user.lastSynced = value;
       updateUser(user).then(resolve);
     });
   });
