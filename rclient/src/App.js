@@ -11,6 +11,7 @@ import { BookLog } from "./views/BookLog";
 import { Passwordless } from "./views/login/Passwordless";
 import { Wrappers } from "./context/Wrappers";
 import { VerifyEmailDirections } from "./views/login/VerifyEmailDirections";
+import { Upload } from "./views/Upload";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -71,6 +72,7 @@ function App() {
             <Container maxWidth="xl" sx={{ mt: "88px" }}>
               <Routes>
                 <Route path="/" element={<Home />} />
+                <Route path="/upload" element={<Upload />} />
                 <Route path="login">
                   <Route path="" element={<Login />} />
                   <Route

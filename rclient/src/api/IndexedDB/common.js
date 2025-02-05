@@ -33,6 +33,11 @@ const userDataDBOnupgradeNeeded = function (event) {
       shelves.createIndex("deleted", "deleted");
       shelves.createIndex("status", "status");
       shelves.createIndex("shelf", "shelf");
+
+      const files = db.createObjectStore(fileObjectStore, {
+        keyPath: "id",
+        autoIncrement: true,
+      });
   }
 };
 
@@ -45,6 +50,7 @@ const appDataDBOnUpgradeNeeded = function (event) {
         autoIncrement: true,
       });
       users.put({ ...userTemplates[0], lastSynced: -1 });
+
       const state = db.createObjectStore("state", {
         keyPath: "id",
         autoIncrement: true,
