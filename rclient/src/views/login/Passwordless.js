@@ -27,7 +27,7 @@ export const Passwordless = () => {
           userInfoContext.refreshAndIsLoggedIn();
         })
         .catch((error) => addAlert(error.toString(), "error"))
-        .finally(() => navigate("/"));
+        .finally(() => (window.location.href = "/"));
     } else if (purpose === "signup") {
       handleSimpleRequest(
         "post",
