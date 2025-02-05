@@ -228,7 +228,7 @@ export const getBook = (key, value) =>
  */
 const getBookHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(shelvesObjectStore, "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
@@ -293,7 +293,7 @@ const isISBNDuplicate = (id, ISBN) =>
 
 const isISBNDuplicateHelper = (db, id, ISBN) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(shelvesObjectStore, "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
