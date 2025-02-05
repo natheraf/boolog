@@ -110,6 +110,7 @@ exports.putMultiple = (req, res) => {
       } errors and ${
         log.filter((obj) => obj.type === "warning").length
       } warnings`,
+      lastWritten: req.lastWritten,
     });
   });
 };
