@@ -1,6 +1,7 @@
 import { userDBVersion, shelvesObjectStore } from "./config";
 import { openDatabase } from "./common";
 import { handleSimpleRequest } from "../Axios";
+import { updateLastCloudWrite } from "./Users";
 
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 const userDataDBVersion = userDBVersion;
@@ -48,8 +49,7 @@ export const syncMultipleToCloud = (data) =>
     )
       .then((res) => {
         console.log(res.data);
-        resolve();
-        // clientActions(res.data.clientActions).then(resolve);
+        updateLastCloudWrite().then(resolve);
       })
       .catch((error) => reject(new Error(error)));
   });

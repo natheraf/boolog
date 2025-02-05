@@ -1,5 +1,19 @@
 import { openDatabase } from "./common";
 import { appDataDBVersion } from "./config";
+import { getCurrentUser } from "./State";
+
+export const updateLastCloudWrite = () =>
+  openDatabase("appData", appDataDBVersion, (db) =>
+    updateLastCloudWriteHelper(db)
+  );
+
+const updateLastCloudWriteHelper = (db) =>
+  new Promise((resolve, reject) => {
+    getCurrentUser().then((user) => {
+      user.lastCloudWrite = Date.now();
+      updateUser(user).then(resolve);
+    });
+  });
 
 export const getAllUsers = () =>
   openDatabase("appData", appDataDBVersion, (db) => getAllUsersHelper(db));
@@ -41,16 +55,13 @@ const getUserHelper = (db, id) =>
 
 /**
  * update a local user
- * @param {Number} userId
- * @param {Object} data user's new data to be written
+ * @param {Object} data user's new data to be written with user id
  * @returns {Promise<Number>} updated user's id, -1 if no user found
  */
-export const updateUser = (userId, data) =>
-  openDatabase("appData", appDataDBVersion, (db) =>
-    updateUserHelper(db, userId, data)
-  );
+export const updateUser = (user) =>
+  openDatabase("appData", appDataDBVersion, (db) => updateUserHelper(db, user));
 
-const updateUserHelper = (db, userId, data) =>
+const updateUserHelper = (db, user) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction("users", "readwrite");
     transaction.oncomplete = (event) => {
@@ -61,14 +72,14 @@ const updateUserHelper = (db, userId, data) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("users");
-    const request = objectStore.get(userId);
+    const request = objectStore.get(user.id);
     request.onsuccess = (event) => {
       const result = event.target.result;
       if (result === undefined) {
         console.log("No user found, missing id");
         resolve(-1);
       }
-      const requestUpdate = objectStore.put(data);
+      const requestUpdate = objectStore.put(user);
       requestUpdate.onsuccess = () => {
         console.log("updated name");
         resolve(result.id); // returns id of user
