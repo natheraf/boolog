@@ -52,7 +52,7 @@ export const UserEdit = ({ open, handleClose, editObject }) => {
         handleSavedSuccessful();
       });
     } else {
-      updateUser(editObject.id, user).then((userId) => {
+      updateUser(user).then((userId) => {
         if (userId === -1) {
           return;
         }
