@@ -11,10 +11,11 @@ const { ObjectId } = require("mongodb");
 
 exports.updateLastWritten = (req, res, next) => {
   getDatabase("authentication").then((db) => {
+    req.lastWritten = Date.now();
     db.collection("loginInfo")
       .updateOne(
         { _id: ObjectId.createFromHexString(req.userId) },
-        { $set: { _lastWritten: Date.now() } }
+        { $set: { _lastWritten: req.lastWritten } }
       )
       .then(() => next())
       .catch((error) => res.stats(500).send({ error }));
