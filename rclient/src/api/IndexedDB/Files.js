@@ -1,6 +1,6 @@
 import { fileObjectStore, userDBVersion } from "./config";
 import { openDatabase } from "./common";
-import { handleSimpleRequest } from "../Axios";
+import { BlobReader, ZipReader } from "@zip.js/zip.js";
 
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 
@@ -46,11 +46,32 @@ const getFileHelper = (db, id) =>
     };
   });
 
-export const exportFile = (itemId) =>
-  getFile(itemId).then((res) => {
+export const exportFile = (id) =>
+  getFile(id).then((res) => {
     const url = window.URL.createObjectURL(res);
     const tempLink = document.createElement("a");
     tempLink.href = url;
     tempLink.setAttribute("download", res.name);
     tempLink.click();
+  });
+
+export const extractFile = (id) =>
+  getFile(id).then((res) => {
+    const zipFileReader = new BlobReader(res);
+    const zipReader = new ZipReader(zipFileReader);
+    zipReader.getEntries().then((res) => {
+      const objectDirectory = {};
+      for (const entry of res) {
+        const path = entry.filename.split("/");
+        let currentDir = objectDirectory;
+        for (let index = 0; index < path.length - 1; index += 1) {
+          if (currentDir.hasOwnProperty(path[index]) === false) {
+            currentDir[path[index]] = {};
+          }
+          currentDir = currentDir[path[index]];
+        }
+        currentDir[path.pop()] = entry;
+      }
+      console.log(objectDirectory);
+    });
   });

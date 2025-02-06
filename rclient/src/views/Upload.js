@@ -1,5 +1,10 @@
 import * as React from "react";
-import { addFile, exportFile, getFile } from "../api/IndexedDB/Files";
+import {
+  addFile,
+  exportFile,
+  extractFile,
+  getFile,
+} from "../api/IndexedDB/Files";
 
 export const Upload = () => {
   const [file, setFile] = React.useState(null);
@@ -73,6 +78,12 @@ export const Upload = () => {
       {itemId && (
         <button onClick={() => exportFile(itemId)} className="submit">
           download item
+        </button>
+      )}
+
+      {itemId && (
+        <button onClick={() => extractFile(itemId)} className="submit">
+          extract
         </button>
       )}
     </div>
