@@ -2,14 +2,19 @@ import * as React from "react";
 import {
   addFile,
   exportFile,
-  extractFile,
   getFile,
+  getObjectFromEpub,
 } from "../api/IndexedDB/Files";
+import { TextField } from "@mui/material";
+import { EpubReader } from "../components/EpubReader";
 
 export const Upload = () => {
   const [file, setFile] = React.useState(null);
   const [storageEstimate, setStorageEstimate] = React.useState(null);
   const [itemId, setItemId] = React.useState(null);
+
+  const [openReader, setOpenReader] = React.useState(false);
+  const [epubObject, setEpubObject] = React.useState(null);
 
   const handleFileChange = (event) => {
     if (event.target.files) {
@@ -25,12 +30,24 @@ export const Upload = () => {
     addFile(file).then((res) => setItemId(res.target.result));
   };
 
+  const handleOpenBook = (obj) => {
+    setEpubObject(obj);
+    setOpenReader(true);
+  };
+
   React.useEffect(() => {
     navigator.storage.estimate().then((res) => setStorageEstimate(res));
   }, []);
 
   return (
     <div>
+      {epubObject === null ? null : (
+        <EpubReader
+          open={openReader}
+          setOpen={setOpenReader}
+          epubObject={epubObject}
+        />
+      )}
       <div className="input-group">
         <input id="file" type="file" onChange={handleFileChange} />
       </div>
@@ -63,6 +80,15 @@ export const Upload = () => {
           Send to IndexedDB
         </button>
       )}
+
+      <br />
+
+      <TextField
+        onKeyDown={(event) =>
+          event.key === "Enter" ? setItemId(parseInt(event.target.value)) : null
+        }
+        label="change file id"
+      />
       <br />
       {itemId && (
         <button
@@ -75,6 +101,8 @@ export const Upload = () => {
         </button>
       )}
 
+      <br />
+
       {itemId && (
         <button onClick={() => exportFile(itemId)} className="submit">
           download item
@@ -82,10 +110,25 @@ export const Upload = () => {
       )}
 
       {itemId && (
-        <button onClick={() => extractFile(itemId)} className="submit">
-          extract
+        <button onClick={() => getObjectFromEpub(itemId)} className="submit">
+          get Object From Epub
         </button>
       )}
+
+      <br />
+      <br />
+
+      <TextField
+        defaultValue="8"
+        onKeyDown={(event) =>
+          event.key === "Enter"
+            ? getObjectFromEpub(parseInt(event.target.value)).then(
+                handleOpenBook
+              )
+            : null
+        }
+        label="open book"
+      />
     </div>
   );
 };
