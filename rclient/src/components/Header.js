@@ -29,7 +29,7 @@ export const Header = () => {
   return (
     <AppBar
       sx={{
-        position: "fixed",
+        position: "sticky",
         top: 0,
         width: "100%",
       }}

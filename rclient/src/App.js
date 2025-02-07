@@ -69,7 +69,7 @@ function App() {
         <Router>
           <Wrappers>
             <Header />
-            <Container maxWidth="xl" sx={{ mt: "88px" }}>
+            <Container maxWidth="xl" sx={{ mt: "10px" }}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/upload" element={<Upload />} />
