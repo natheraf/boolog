@@ -1,6 +1,7 @@
 import { fileObjectStore, userDBVersion } from "./config";
 import { openDatabase } from "./common";
-import { BlobReader, ZipReader } from "@zip.js/zip.js";
+import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
+import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 const getUserDB = () => `user${localStorage.getItem("userId")}`;
 
@@ -55,23 +56,71 @@ export const exportFile = (id) =>
     tempLink.click();
   });
 
-export const extractFile = (id) =>
-  getFile(id).then((res) => {
-    const zipFileReader = new BlobReader(res);
-    const zipReader = new ZipReader(zipFileReader);
-    zipReader.getEntries().then((res) => {
-      const objectDirectory = {};
-      for (const entry of res) {
-        const path = entry.filename.split("/");
-        let currentDir = objectDirectory;
-        for (let index = 0; index < path.length - 1; index += 1) {
-          if (currentDir.hasOwnProperty(path[index]) === false) {
-            currentDir[path[index]] = {};
+const convertZipFileToObjectDirectory = (id) =>
+  new Promise((resolve, reject) => {
+    getFile(id).then((res) => {
+      const zipFileReader = new BlobReader(res);
+      const zipReader = new ZipReader(zipFileReader);
+      zipReader
+        .getEntries()
+        .then(async (res) => {
+          const objectDirectory = {};
+          for (const entry of res) {
+            const path = entry.filename.split("/");
+            let currentDir = objectDirectory;
+            for (let index = 0; index < path.length - 1; index += 1) {
+              if (currentDir.hasOwnProperty(path[index]) === false) {
+                currentDir[path[index]] = {};
+              }
+              currentDir = currentDir[path[index]];
+            }
+            const isXML =
+              entry.filename.indexOf(".xhtml") === entry.filename.length - 6 ||
+              entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
+              entry.filename.indexOf(".opf") === entry.filename.length - 4 ||
+              entry.filename.indexOf(".ncx") === entry.filename.length - 4;
+
+            currentDir[path.pop()] = isXML
+              ? await convertXMLFileToObject(entry)
+              : entry;
           }
-          currentDir = currentDir[path[index]];
-        }
-        currentDir[path.pop()] = entry;
-      }
-      console.log(objectDirectory);
+          resolve(objectDirectory);
+        })
+        .finally(() => zipReader.close());
     });
   });
+
+export const convertFileToString = (entry) =>
+  new Promise((resolve, reject) => {
+    const textWriter = new TextWriter();
+    entry.getData(textWriter).then(resolve);
+  });
+
+export const convertFileToBlob = (entry) =>
+  new Promise((resolve, reject) => {
+    const blobWriter = new BlobWriter();
+    entry.getData(blobWriter).then(resolve);
+  });
+
+const convertXMLFileToObject = (file) =>
+  new Promise((resolve, reject) => {
+    convertFileToString(file).then((res) => {
+      const parser = new XMLParser({ ignoreAttributes: false });
+      const obj = parser.parse(res, true);
+      resolve(obj);
+    });
+  });
+
+export const getObjectFromEpub = (id) =>
+  new Promise((resolve, reject) => {
+    convertZipFileToObjectDirectory(id).then(resolve);
+  });
+
+export const convertObjectToXML = (object) => {
+  const options = {
+    ignoreAttributes: false,
+  };
+  const builder = new XMLBuilder(options);
+  const xmlDataStr = builder.build(object);
+  return xmlDataStr;
+};
