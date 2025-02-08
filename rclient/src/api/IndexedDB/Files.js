@@ -74,15 +74,29 @@ const convertZipFileToObjectDirectory = (id) =>
               }
               currentDir = currentDir[path[index]];
             }
+
+            const isOPF =
+              entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
+              entry.filename.indexOf(".opf") === entry.filename.length - 4;
+
             const isXML =
               entry.filename.indexOf(".xhtml") === entry.filename.length - 6 ||
-              entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
-              entry.filename.indexOf(".opf") === entry.filename.length - 4 ||
               entry.filename.indexOf(".ncx") === entry.filename.length - 4;
 
-            currentDir[path.pop()] = isXML
-              ? await convertXMLFileToObject(entry)
-              : entry;
+            const isCSS =
+              entry.filename.indexOf(".css") === entry.filename.length - 4;
+
+            if (isXML || isCSS) {
+              const string = await convertFileToString(entry);
+              currentDir[path.pop()] = {
+                type: isXML ? "xml" : "css",
+                text: string,
+              };
+            } else if (isOPF) {
+              currentDir[path.pop()] = await convertXMLFileToObject(entry);
+            } else {
+              currentDir[path.pop()] = entry;
+            }
           }
           resolve(objectDirectory);
         })
