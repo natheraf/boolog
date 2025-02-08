@@ -119,7 +119,7 @@ export const Upload = () => {
       <br />
 
       <TextField
-        defaultValue="8"
+        defaultValue="1"
         onKeyDown={(event) =>
           event.key === "Enter"
             ? getObjectFromEpub(parseInt(event.target.value)).then(
