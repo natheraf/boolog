@@ -34,18 +34,62 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [spine, setSpine] = React.useState(null);
   const [hrefSpineMap, setHrefSpineMap] = React.useState(null);
-  const [spinePointer, setSpinePointer] = React.useState(5);
+  const [spinePointer, setSpinePointer] = React.useState(4);
 
   const [pageWidth, setPageWidth] = React.useState(window.innerWidth - 500);
   const [contentHorizontalOffset, setContentHorizontalOffset] =
     React.useState(0);
 
   const [currentContent, setCurrentContent] = React.useState(null);
+  const contentBox = React.useRef(null);
 
   const handlePathHref = (path) => {
-    return console.log(path);
     path = path.substring(path.indexOf("/") + 1);
+    setSpinePointer((prev) => prev + 1);
+    return console.log(spinePointer);
     setSpinePointer(hrefSpineMap.get(path));
+  };
+
+  const createReactDOM = async (htmlElement) => {
+    if (htmlElement === null) {
+      return null;
+    }
+    if (htmlElement.nodeName === "#text") {
+      return htmlElement.data;
+    }
+    const tag = htmlElement.tagName.toLowerCase();
+    if (tag === "br") {
+      return React.createElement("br");
+    }
+    const props = {};
+    for (const attribute of htmlElement.attributes) {
+      if (attribute.name === "class") {
+        props.className = attribute.value;
+      } else if (["style", "href"].includes(attribute.name) === false) {
+        props[attribute.name] = attribute.value;
+      }
+    }
+    if (tag === "img") {
+      const originalSrc = htmlElement.src.substring(
+        htmlElement.src.lastIndexOf("/") + 1
+      );
+      const imgFile = structureRef["Images"][originalSrc];
+      const blob = await convertFileToBlob(imgFile);
+      props.src = URL.createObjectURL(blob);
+      // props.sx = { objectFit: "contain", width: "100%", height: "100%" };
+    } else if (tag === "a") {
+      const originalHref = htmlElement.getAttribute("href");
+      if (originalHref.startsWith("http") === false) {
+        props.onClick = () => handlePathHref(originalHref);
+      }
+    }
+
+    const reactChildren = [];
+    for (const child of htmlElement.childNodes) {
+      reactChildren.push(await createReactDOM(child));
+    }
+
+    return React.createElement(tag, props, ...reactChildren);
   };
 
   const processSpine = async () => {
@@ -62,54 +106,39 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         const styleElement = document.createElement("style");
         styleElement.id = "epub_style";
         styleElement.innerHTML = it.text;
-        document.head.insertAdjacentElement("afterbegin", styleElement);
+        document.head.insertAdjacentElement("beforeend", styleElement);
         continue;
       }
       if (it.hasOwnProperty("filename")) {
         continue;
       }
-      const page = document.createElement("div");
+
+      const page = document.createElement("html");
       page.innerHTML = it.text;
+      const body = page.querySelector("body") ?? page.querySelector("section");
+      const pageContent = document.createElement("div");
+      pageContent.innerHTML = body.innerHTML;
+      const reactNode = await createReactDOM(pageContent);
 
-      const imgs = page.querySelectorAll("img");
-      for (const img of imgs) {
-        const originalSrc = img.src.substring(img.src.lastIndexOf("/") + 1);
-        const imgFile = structureRef["Images"][originalSrc];
-        const blob = await convertFileToBlob(imgFile);
-        img.src = URL.createObjectURL(blob);
-        img.style.objectFit = "contain";
-        img.style.width = "100%";
-        img.style.height = "100%";
-      }
-
-      const anchors = page.querySelectorAll("a");
-      for (const anchor of anchors) {
-        if (anchor.getAttribute("href").startsWith("http")) {
-          continue;
-        }
-        // anchor.setAttribute(
-        //   "onclick",
-        //   `handlePathHref('${anchor.getAttribute("href")}')`
-        // );
-        anchor.removeAttribute("href");
-      }
-
-      const section = page.querySelector("section") ?? page;
       if (item.hasOwnProperty("@_properties")) {
-        elementMap.set(item["@_properties"], section);
+        elementMap.set(item["@_properties"], reactNode);
       }
-      elementMap.set(item["@_id"], { section, href: item["@_href"] });
+      elementMap.set(item["@_id"], {
+        section: reactNode,
+        href: item["@_href"],
+      });
     }
 
     const spineStack = [];
-    const spineMap = new Map();
+    const spineMap = {};
     const spineRef = contentRef.spine.itemref;
     for (const item of spineRef) {
-      spineMap.set(elementMap.get(item["@_idref"]).href, spineStack.length);
+      spineMap[elementMap.get(item["@_idref"]).href] = spineStack.length;
       spineStack.push(elementMap.get(item["@_idref"]).section);
     }
     setSpine(spineStack);
     setHrefSpineMap(spineMap);
+    localStorage.setItem("hrefSpineMap", JSON.stringify(spineMap));
     return spineStack;
   };
 
@@ -120,23 +149,11 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   React.useEffect(() => {
     const processAndRender = async () => {
       const spineStack = await processSpine();
-      const testNode = React.createElement(
-        "div",
-        {},
-        React.createElement(
-          "a",
-          {
-            onClick: () => handlePathHref("Text/cover.xhtml"),
-          },
-          "go to cover"
-        )
+
+      setCurrentContent(
+        spineStack?.[spinePointer] ??
+          "something went wrong...<br/> spine is missing"
       );
-      // createRoot
-      setCurrentContent(testNode);
-      // setCurrentContent(
-      //   spineStack?.[spinePointer].innerHTML ??
-      //     "something went wrong...<br/> spine is missing"
-      // );
 
       console.log("set content");
     };
@@ -177,10 +194,17 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               <CloseIcon />
             </IconButton>
           </Tooltip>
-          <Typography variant="h6">
+          <Typography
+            onClick={() => setSpinePointer((prev) => prev + 1)}
+            variant="h6"
+          >
             {contentRef?.metadata?.["dc:title"]?.["#text"] ?? "err"}
           </Typography>
-          <Stack direction={"row"} spacing={2}>
+          <Stack
+            onClick={() => console.log(spinePointer)}
+            direction={"row"}
+            spacing={2}
+          >
             {"buttons"}
           </Stack>
         </Toolbar>
@@ -200,6 +224,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         <Box sx={{ overflow: "hidden" }}>
           <Box
             id="content"
+            ref={contentBox}
             // dangerouslySetInnerHTML={{ __html: currentContent }}
             sx={{
               height: window.innerHeight - 88,
@@ -209,6 +234,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               columnWidth: pageWidth,
               transform: `translate(-${contentHorizontalOffset}px);`,
             }}
+            key={hrefSpineMap?.size}
           >
             {currentContent ?? "test"}
           </Box>
