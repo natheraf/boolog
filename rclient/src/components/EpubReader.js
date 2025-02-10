@@ -74,6 +74,14 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       const imgFile = structureRef["Images"][originalSrc];
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
+      props.style = {
+        objectFit: "contain",
+        width: pageWidth,
+        height: window.innerHeight - 88,
+        display: "block",
+        margin: "auto",
+      };
+      props.onClick = console.log;
     } else if (tag === "a") {
       const originalHref = htmlElement.getAttribute("href");
       if (originalHref.startsWith("http") === false) {
@@ -246,8 +254,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             <Box
               id="content"
               sx={{
-                width: pageWidth,
-                objectFit: "contain",
                 height: window.innerHeight - 88,
                 columnFill: "auto",
                 columnGap: 0,
