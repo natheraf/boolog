@@ -34,21 +34,19 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [spine, setSpine] = React.useState(null);
   const [hrefSpineMap, setHrefSpineMap] = React.useState(null);
-  const [spinePointer, setSpinePointer] = React.useState(4);
+  const [spinePointer, setSpinePointer] = React.useState(null);
 
+  const [currentPage, setCurrentPage] = React.useState(0);
   const [pageWidth, setPageWidth] = React.useState(window.innerWidth - 500);
-  const [contentHorizontalOffset, setContentHorizontalOffset] =
-    React.useState(0);
 
-  const [currentContent, setCurrentContent] = React.useState(null);
-  const contentBox = React.useRef(null);
-
-  const handlePathHref = (path) => {
-    path = path.substring(path.indexOf("/") + 1);
-    setSpinePointer((prev) => prev + 1);
-    return console.log(spinePointer);
-    setSpinePointer(hrefSpineMap.get(path));
-  };
+  const handlePathHref = React.useCallback(
+    (path) => {
+      setCurrentPage(0);
+      path = path.substring(path.indexOf("/") + 1);
+      setSpinePointer(hrefSpineMap.get(path));
+    },
+    [hrefSpineMap]
+  );
 
   const createReactDOM = async (htmlElement) => {
     if (htmlElement === null) {
@@ -76,11 +74,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       const imgFile = structureRef["Images"][originalSrc];
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
-      // props.sx = { objectFit: "contain", width: "100%", height: "100%" };
     } else if (tag === "a") {
       const originalHref = htmlElement.getAttribute("href");
       if (originalHref.startsWith("http") === false) {
-        props.onClick = () => handlePathHref(originalHref);
+        props.linkto = originalHref;
       }
     }
 
@@ -130,15 +127,14 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
 
     const spineStack = [];
-    const spineMap = {};
+    const spineMap = new Map();
     const spineRef = contentRef.spine.itemref;
     for (const item of spineRef) {
-      spineMap[elementMap.get(item["@_idref"]).href] = spineStack.length;
+      spineMap.set(elementMap.get(item["@_idref"]).href, spineStack.length);
       spineStack.push(elementMap.get(item["@_idref"]).section);
     }
     setSpine(spineStack);
     setHrefSpineMap(spineMap);
-    localStorage.setItem("hrefSpineMap", JSON.stringify(spineMap));
     return spineStack;
   };
 
@@ -146,16 +142,49 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     setOpen(false);
   };
 
+  const addEventListenersToAnchors = React.useMemo(() => {
+    if (spine !== null && spinePointer !== null) {
+      const config = { childList: true, subtree: true };
+      const observer = new MutationObserver((mutationList, observer) => {
+        document.querySelectorAll("a[linkto]").forEach((node) => {
+          node.addEventListener("click", () => {
+            handlePathHref(node.getAttribute("linkto"));
+          });
+        });
+      });
+      observer.observe(document.getElementById("content"), config);
+    }
+  }, [spine]);
+
+  const handleNextPage = () => {
+    const totalWidth = document.getElementById("content").scrollWidth;
+    const totalPages = totalWidth / pageWidth;
+    if (currentPage === totalPages - 1) {
+      setCurrentPage(0);
+      setSpinePointer((prev) => Math.min(spine.length - 1, prev + 1));
+    } else {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    const previousTotalWidth =
+      document.getElementById("previous-content").scrollWidth;
+    const totalPages = Math.ceil(previousTotalWidth / pageWidth);
+    if (currentPage === 0) {
+      setCurrentPage(totalPages - 1);
+      setSpinePointer((prev) => Math.max(0, prev - 1));
+    } else {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
   React.useEffect(() => {
     const processAndRender = async () => {
-      const spineStack = await processSpine();
-
-      setCurrentContent(
-        spineStack?.[spinePointer] ??
-          "something went wrong...<br/> spine is missing"
-      );
-
-      console.log("set content");
+      await processSpine();
+      if (spinePointer === null) {
+        setSpinePointer(4);
+      }
     };
     if (spine === null) {
       processAndRender();
@@ -194,56 +223,60 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               <CloseIcon />
             </IconButton>
           </Tooltip>
-          <Typography
-            onClick={() => setSpinePointer((prev) => prev + 1)}
-            variant="h6"
-          >
+          <Typography variant="h6">
             {contentRef?.metadata?.["dc:title"]?.["#text"] ?? "err"}
           </Typography>
-          <Stack
-            onClick={() => console.log(spinePointer)}
-            direction={"row"}
-            spacing={2}
-          >
+          <Stack direction={"row"} spacing={2}>
             {"buttons"}
           </Stack>
         </Toolbar>
       </AppBar>
-      <Stack
-        direction="row"
-        alignItems={"center"}
-        justifyContent={"center"}
-        sx={{ mt: "10px", height: "100%" }}
-        spacing={1}
-      >
-        <IconButton
-          onClick={() => setContentHorizontalOffset((prev) => prev - pageWidth)}
+      <Stack sx={{ overflow: "hidden" }}>
+        <Stack
+          direction="row"
+          alignItems={"center"}
+          justifyContent={"center"}
+          sx={{ mt: "10px", height: "100%" }}
+          spacing={1}
         >
-          <NavigateBeforeIcon />
-        </IconButton>
-        <Box sx={{ overflow: "hidden" }}>
+          <IconButton onClick={handlePreviousPage}>
+            <NavigateBeforeIcon />
+          </IconButton>
+          <Box sx={{ width: pageWidth, overflow: "hidden" }}>
+            <Box
+              id="content"
+              sx={{
+                width: pageWidth,
+                objectFit: "contain",
+                height: window.innerHeight - 88,
+                columnFill: "auto",
+                columnGap: 0,
+                columnWidth: pageWidth,
+                transform: `translate(-${currentPage * pageWidth}px);`,
+              }}
+            >
+              {spine?.[spinePointer ?? -1] ??
+                "something went wrong...<br/> spine is missing"}
+            </Box>
+          </Box>
+          <IconButton onClick={handleNextPage}>
+            <NavigateNextIcon />
+          </IconButton>
+        </Stack>
+        <Box sx={{ width: pageWidth, visibility: "hidden" }}>
           <Box
-            id="content"
-            ref={contentBox}
-            // dangerouslySetInnerHTML={{ __html: currentContent }}
+            id="previous-content"
             sx={{
               height: window.innerHeight - 88,
-              width: pageWidth,
+              overflow: "visible",
               columnFill: "auto",
               columnGap: 0,
               columnWidth: pageWidth,
-              transform: `translate(-${contentHorizontalOffset}px);`,
             }}
-            key={hrefSpineMap?.size}
           >
-            {currentContent ?? "test"}
+            {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
           </Box>
         </Box>
-        <IconButton
-          onClick={() => setContentHorizontalOffset((prev) => prev + pageWidth)}
-        >
-          <NavigateNextIcon />
-        </IconButton>
       </Stack>
     </Dialog>
   );
