@@ -41,6 +41,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const handlePathHref = React.useCallback(
     (path) => {
+      if (path.startsWith("http")) {
+        window.open(path, "_blank");
+        return;
+      }
       setCurrentPage(0);
       path = path.substring(path.indexOf("/") + 1);
       setSpinePointer(hrefSpineMap.get(path));
@@ -81,12 +85,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         display: "block",
         margin: "auto",
       };
-      props.onClick = console.log;
     } else if (tag === "a") {
-      const originalHref = htmlElement.getAttribute("href");
-      if (originalHref.startsWith("http") === false) {
-        props.linkto = originalHref;
-      }
+      props.linkto = htmlElement.getAttribute("href");
+      props.style = { color: "lightblue" };
     }
 
     const reactChildren = [];
