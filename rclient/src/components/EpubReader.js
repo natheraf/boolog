@@ -85,9 +85,12 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         display: "block",
         margin: "auto",
       };
-    } else if (tag === "a") {
-      props.linkto = htmlElement.getAttribute("href");
+    } else if (
+      tag === "a" &&
+      htmlElement.getAttribute("href")?.indexOf("#") === -1
+    ) {
       props.style = { color: "lightblue" };
+      props.linkto = htmlElement.getAttribute("href");
     }
 
     const reactChildren = [];
