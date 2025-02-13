@@ -240,7 +240,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             </IconButton>
           </Tooltip>
           <Typography variant="h6">
-            {contentRef?.metadata?.["dc:title"]?.["#text"] ?? "err"}
+            {contentRef?.metadata?.["dc:title"]?.["#text"] ??
+              contentRef?.metadata?.["dc:title"] ??
+              "error"}
           </Typography>
           <Stack direction={"row"} spacing={2}>
             {"buttons"}
