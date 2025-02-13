@@ -87,7 +87,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       };
     } else if (
       tag === "a" &&
-      htmlElement.getAttribute("href")?.indexOf("#") === -1
+      (htmlElement.getAttribute("href").startsWith("http") ||
+        (htmlElement.getAttribute("href").startsWith("http") === false &&
+          htmlElement.getAttribute("href")?.indexOf("#") === -1))
     ) {
       props.style = { color: "lightblue" };
       props.linkto = htmlElement.getAttribute("href");
