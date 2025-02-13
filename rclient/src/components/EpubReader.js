@@ -30,7 +30,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const structureRef = epubObject["OEBPS"];
-  const contentRef = structureRef["content.opf"].package;
+  const contentRef = epubObject["opf"].package;
 
   const [spine, setSpine] = React.useState(null);
   const [hrefSpineMap, setHrefSpineMap] = React.useState(null);
@@ -67,22 +67,24 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     for (const attribute of htmlElement.attributes) {
       if (attribute.name === "class") {
         props.className = attribute.value;
-      } else if (["style", "href"].includes(attribute.name) === false) {
-        props[attribute.name] = attribute.value;
       }
     }
     if (tag === "img") {
-      const originalSrc = htmlElement.src.substring(
-        htmlElement.src.lastIndexOf("/") + 1
-      );
-      const imgFile = structureRef["Images"][originalSrc];
+      const src = htmlElement.getAttribute("src");
+      const path = src
+        .substring(src.indexOf("..") === -1 ? 0 : src.indexOf("/") + 1)
+        .split("/");
+      const fileName = path.pop();
+      let it = structureRef;
+      for (const node of path) {
+        it = it[node];
+      }
+      const imgFile = it[fileName];
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
       props.style = {
-        objectFit: "contain",
-        width: pageWidth,
-        height: window.innerHeight - 88,
-        display: "block",
+        maxHeight: window.innerHeight - 88,
+        objectFit: "scale-down",
         margin: "auto",
       };
     } else if (
