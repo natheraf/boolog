@@ -50,7 +50,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [spinePointer, setSpinePointer] = React.useState(null);
 
   const [currentPage, setCurrentPage] = React.useState(0);
-  const [pageWidth, setPageWidth] = React.useState(window.innerWidth - 500);
+  const columnGap = 10;
+  const [pageWidth, setPageWidth] = React.useState(
+    window.innerWidth - 500 - columnGap
+  );
   const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
 
   const handlePathHref = React.useCallback(
@@ -220,7 +223,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const handleNextPage = () => {
     const totalWidth = document.getElementById("content").scrollWidth;
-    const totalPages = totalWidth / pageWidth;
+    const totalPages = Math.floor(totalWidth / pageWidth);
+    console.log(currentPage + 1, totalPages);
     if (currentPage === totalPages - 1) {
       setCurrentPage(0);
       setSpinePointer((prev) => Math.min(spine.length - 1, prev + 1));
@@ -232,7 +236,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handlePreviousPage = () => {
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
-    const totalPages = Math.ceil(previousTotalWidth / pageWidth);
+    const totalPages = Math.floor(previousTotalWidth / pageWidth);
+    console.log(currentPage + 1, totalPages);
     if (currentPage === 0) {
       setCurrentPage(totalPages - 1);
       setSpinePointer((prev) => Math.max(0, prev - 1));
@@ -312,9 +317,11 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               sx={{
                 height: pageHeight,
                 columnFill: "auto",
-                columnGap: 0,
-                columnWidth: pageWidth,
-                transform: `translate(-${currentPage * pageWidth}px);`,
+                columnGap: `${columnGap}px`,
+                columnWidth: `${pageWidth}px`,
+                transform: `translate(-${
+                  currentPage * (pageWidth + columnGap)
+                }px);`,
               }}
             >
               {spine?.[spinePointer ?? -1] ??
@@ -332,8 +339,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               height: pageHeight,
               overflow: "visible",
               columnFill: "auto",
-              columnGap: 0,
-              columnWidth: pageWidth,
+              columnGap: `${columnGap}px`,
+              columnWidth: `${pageWidth}px`,
             }}
           >
             {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
