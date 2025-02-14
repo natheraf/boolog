@@ -81,6 +81,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     for (const attribute of htmlElement.attributes) {
       if (attribute.name === "style") {
         props.style = parseCSSText(attribute.value).style;
+      } else if (attribute.name === "class") {
+        props.className = attribute.value;
       } else if (attribute.name !== "href") {
         props[attribute.name] = attribute.value;
       }
