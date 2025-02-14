@@ -25,6 +25,19 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   return <Slide unmountOnExit direction="up" ref={ref} {...props} />;
 });
 
+const parseCSSText = (cssText) => {
+  var cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ");
+  var style = {},
+    [, ruleName, rule] = cssTxt.match(/ ?(.*?) ?{([^}]*)}/) || [, , cssTxt];
+  var cssToJs = (s) =>
+    s.replace(/\W+\w/g, (match) => match.slice(-1).toUpperCase());
+  var properties = rule
+    .split(";")
+    .map((o) => o.split(":").map((x) => x && x.trim()));
+  for (var [property, value] of properties) style[cssToJs(property)] = value;
+  return { cssText, ruleName, style };
+}; // https://stackoverflow.com/a/43012849
+
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
@@ -38,6 +51,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const [pageWidth, setPageWidth] = React.useState(window.innerWidth - 500);
+  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
 
   const handlePathHref = React.useCallback(
     (path) => {
@@ -65,11 +79,40 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
     const props = {};
     for (const attribute of htmlElement.attributes) {
-      if (attribute.name === "class") {
-        props.className = attribute.value;
+      if (attribute.name === "style") {
+        props.style = parseCSSText(attribute.value).style;
+      } else if (attribute.name !== "href") {
+        props[attribute.name] = attribute.value;
       }
     }
-    if (tag === "img") {
+    if (tag === "svg") {
+      props.style = {
+        height: pageHeight,
+        width: pageWidth,
+      };
+    } else if (tag === "image") {
+      let src = null;
+      for (const key of ["xlink:href", "href"]) {
+        if (htmlElement.getAttribute(key) !== null) {
+          src = htmlElement.getAttribute(key);
+        }
+      }
+      if (src !== null) {
+        const path = src
+          .substring(src.indexOf("..") === -1 ? 0 : src.indexOf("/") + 1)
+          .split("/");
+        const fileName = path.pop();
+        let it = structureRef;
+        for (const node of path) {
+          it = it[node];
+        }
+        const imgFile = it[fileName];
+        const blob = await convertFileToBlob(imgFile);
+        props["href"] = URL.createObjectURL(blob);
+        props["height"] = "100%";
+        delete props.width;
+      }
+    } else if (tag === "img") {
       const src = htmlElement.getAttribute("src");
       const path = src
         .substring(src.indexOf("..") === -1 ? 0 : src.indexOf("/") + 1)
@@ -83,7 +126,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
       props.style = {
-        maxHeight: window.innerHeight - 88,
+        maxHeight: pageHeight,
         objectFit: "scale-down",
         margin: "auto",
       };
@@ -265,7 +308,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             <Box
               id="content"
               sx={{
-                height: window.innerHeight - 88,
+                height: pageHeight,
                 columnFill: "auto",
                 columnGap: 0,
                 columnWidth: pageWidth,
@@ -284,7 +327,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           <Box
             id="previous-content"
             sx={{
-              height: window.innerHeight - 88,
+              height: pageHeight,
               overflow: "visible",
               columnFill: "auto",
               columnGap: 0,
