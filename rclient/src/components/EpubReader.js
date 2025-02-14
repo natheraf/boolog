@@ -135,15 +135,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         objectFit: "scale-down",
         margin: "auto",
       };
-    } else if (
-      tag === "a" &&
-      htmlElement.getAttribute("href") !== null &&
-      (htmlElement.getAttribute("href").startsWith("http") ||
-        (htmlElement.getAttribute("href").startsWith("http") === false &&
-          htmlElement.getAttribute("href")?.indexOf("#") === -1))
-    ) {
+    } else if (tag === "a" && htmlElement.getAttribute("href") !== null) {
+      const href = htmlElement.getAttribute("href");
       props.style = { color: "lightblue" };
-      props.linkto = htmlElement.getAttribute("href");
+      props.linkto =
+        href.startsWith("http") === false && href.indexOf("#") !== -1
+          ? href.substring(0, href.indexOf("#"))
+          : href;
     }
 
     const reactChildren = [];
@@ -224,7 +222,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handleNextPage = () => {
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages = Math.floor(totalWidth / pageWidth);
-    console.log(currentPage + 1, totalPages);
     if (currentPage === totalPages - 1) {
       setCurrentPage(0);
       setSpinePointer((prev) => Math.min(spine.length - 1, prev + 1));
@@ -237,7 +234,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages = Math.floor(previousTotalWidth / pageWidth);
-    console.log(currentPage + 1, totalPages);
     if (currentPage === 0) {
       setCurrentPage(totalPages - 1);
       setSpinePointer((prev) => Math.max(0, prev - 1));
@@ -250,7 +246,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     const processAndRender = async () => {
       await processSpine();
       if (spinePointer === null) {
-        setSpinePointer(4);
+        setSpinePointer(0);
       }
     };
     if (spine === null) {
