@@ -80,6 +80,7 @@ const convertZipFileToObjectDirectory = (id) =>
 
             const isXML =
               entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
+              entry.filename.indexOf(".html") === entry.filename.length - 5 ||
               entry.filename.indexOf(".xhtml") === entry.filename.length - 6 ||
               entry.filename.indexOf(".ncx") === entry.filename.length - 4;
 
