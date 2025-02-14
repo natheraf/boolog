@@ -164,7 +164,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       if (it.type === "css") {
         const styleElement = document.createElement("style");
         styleElement.id = "epub_style";
-        styleElement.innerHTML = it.text;
+        styleElement.innerHTML = `#content, #previous-content {\n${it.text}\n}`;
         document.head.insertAdjacentElement("beforeend", styleElement);
         continue;
       }
