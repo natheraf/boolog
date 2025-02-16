@@ -109,7 +109,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         if (currentPage >= totalPages) {
           setCurrentPage(totalPages - 1);
         }
-      }, 50);
+      }, 150);
     }
   }, [currentPage, pageWidth, formatting]);
 
