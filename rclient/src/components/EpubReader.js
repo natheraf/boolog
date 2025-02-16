@@ -301,11 +301,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     const userFormattingStyle = `
       font-size: ${formatting.fontSize}%; 
       line-height: ${formatting.lineHeight / 10}; 
-      font-family: ${formatting.fontFamily.value}; 
+      font-family: ${formatting.fontFamily.value} !important; 
       text-align: ${formatting.textAlign.value};
     `;
-    const styleElement = document.createElement("style");
-    styleElement.id = `epub-css-user-formatting`;
+    const id = `epub-css-user-formatting`;
+    const styleElement =
+      document.querySelector(`#${id}`) ?? document.createElement("style");
+    styleElement.id = id;
     styleElement.innerHTML = `#content, #previous-content {\n${userFormattingStyle}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
