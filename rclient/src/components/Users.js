@@ -116,12 +116,7 @@ export const Users = () => {
       >
         {localStorage.getItem("userName")?.[0].toUpperCase()}
       </Avatar>
-      <Menu
-        anchorEl={anchorEl}
-        open={openUsers}
-        onClose={handleClose}
-        transitionDuration={200 * theme.transitions.reduceMotion}
-      >
+      <Menu anchorEl={anchorEl} open={openUsers} onClose={handleClose}>
         <Stack
           spacing={1}
           alignItems={"center"}

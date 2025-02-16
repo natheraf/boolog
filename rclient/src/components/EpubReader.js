@@ -41,7 +41,6 @@ const parseCSSText = (cssText) => {
 }; // https://stackoverflow.com/a/43012849
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
-  const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
 
   const [formatting, setFormatting] = React.useState({
@@ -315,7 +314,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       open={open}
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
-      transitionDuration={200 * theme.transitions.reduceMotion}
     >
       <AppBar
         sx={{

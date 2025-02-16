@@ -200,7 +200,6 @@ export const CreateBook = ({
       open={open}
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
-      transitionDuration={200 * theme.transitions.reduceMotion}
     >
       <AppBar sx={{ position: "sticky" }}>
         <Toolbar

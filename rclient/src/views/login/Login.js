@@ -183,7 +183,7 @@ export const Login = () => {
         justifyContent={"center"}
         height="100%"
       >
-        <Grow in={true} timeout={theme.transitions.reduceMotion ? "auto" : 0}>
+        <Grow in={true}>
           <Paper
             sx={{
               borderRadius: "10px",
@@ -200,14 +200,14 @@ export const Login = () => {
               >
                 <Fade
                   in={showLogin}
-                  timeout={2000 * theme.transitions.reduceMotion}
+                  timeout={1000 * theme.transitions.reduceMotion}
                   sx={!showLogin ? { display: "none" } : {}}
                 >
                   <Typography variant="h4">Sign in</Typography>
                 </Fade>
                 <Fade
                   in={!showLogin}
-                  timeout={2000 * theme.transitions.reduceMotion}
+                  timeout={1000 * theme.transitions.reduceMotion}
                   sx={showLogin ? { display: "none" } : {}}
                 >
                   <Typography variant="h4">Sign up</Typography>
@@ -371,7 +371,6 @@ export const Login = () => {
                 </Collapse>
                 <Fade
                   in={showLogin}
-                  timeout={2000 * theme.transitions.reduceMotion}
                   sx={!showLogin ? { display: "none" } : { width: "100%" }}
                 >
                   <Stack spacing={2}>
@@ -400,7 +399,6 @@ export const Login = () => {
                 </Fade>
                 <Fade
                   in={!showLogin}
-                  timeout={2000 * theme.transitions.reduceMotion}
                   sx={showLogin ? { display: "none" } : { width: "100%" }}
                 >
                   <Stack spacing={2}>
@@ -436,7 +434,7 @@ export const Login = () => {
                 alignItems={"center"}
                 justifyContent={"center"}
               >
-                <Fade in={true} timeout={2000 * theme.transitions.reduceMotion}>
+                <Fade in={true}>
                   <Stack spacing={3} width="100%">
                     <Stack
                       direction="column"
