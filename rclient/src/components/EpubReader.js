@@ -300,15 +300,19 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const putFormattingStyleElement = () => {
     const userFormattingStyle = `
       font-size: ${formatting.fontSize}%; 
-      line-height: ${formatting.lineHeight / 10}; 
-      font-family: ${formatting.fontFamily.value} !important; 
+      line-height: ${formatting.lineHeight / 10} !important; 
+      ${
+        formatting.fontFamily.value === "inherit"
+          ? ""
+          : `font-family: ${formatting.fontFamily.value} !important;`
+      }
       text-align: ${formatting.textAlign.value};
     `;
     const id = `epub-css-user-formatting`;
     const styleElement =
       document.querySelector(`#${id}`) ?? document.createElement("style");
     styleElement.id = id;
-    styleElement.innerHTML = `#content, #previous-content {\n${userFormattingStyle}\n}`;
+    styleElement.innerHTML = `#content *, #previous-content * {\n${userFormattingStyle}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
