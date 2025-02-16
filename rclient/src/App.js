@@ -45,6 +45,7 @@ function App() {
     []
   );
 
+  const reduceMotionValue = +!reduceMotion;
   const theme = React.useMemo(
     () =>
       createTheme({
@@ -57,6 +58,26 @@ function App() {
         },
         transitions: {
           reduceMotion: !reduceMotion,
+          duration: {
+            shortest: 150 * reduceMotionValue,
+            shorter: 200 * reduceMotionValue,
+            short: 250 * reduceMotionValue,
+            standard: 300 * reduceMotionValue,
+            complex: 375 * reduceMotionValue,
+            enteringScreen: 225 * reduceMotionValue,
+            leavingScreen: 195 * reduceMotionValue,
+          },
+        },
+        components: {
+          MuiPaper: {
+            styleOverrides: {
+              root: reduceMotion
+                ? {
+                    transition: "none !important",
+                  }
+                : {},
+            },
+          },
         },
       }),
     [mode, reduceMotion]
@@ -66,10 +87,15 @@ function App() {
     <ThemeContext.Provider value={themeModes}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Wrappers>
             <Header />
-            <Container maxWidth="xl" sx={{ mt: "88px" }}>
+            <Container maxWidth="xl" sx={{ mt: "10px" }}>
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/upload" element={<Upload />} />

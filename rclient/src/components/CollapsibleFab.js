@@ -29,11 +29,7 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
   ];
 
   return (
-    <Slide
-      in={true}
-      timeout={200 * theme.transitions.reduceMotion}
-      direction="up"
-    >
+    <Slide in={true} direction="up">
       <Stack
         gap={3}
         sx={{

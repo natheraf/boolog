@@ -1,6 +1,5 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { useTheme } from "@emotion/react";
 import {
   AppBar,
   Avatar,
@@ -32,7 +31,6 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
 });
 
 export const UserEdit = ({ open, handleClose, editObject }) => {
-  const theme = useTheme();
   const userInfoContext = React.useContext(UserInfoContext);
   const [user, setUser] = React.useState({});
 
@@ -94,7 +92,6 @@ export const UserEdit = ({ open, handleClose, editObject }) => {
       open={open}
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
-      transitionDuration={200 * theme.transitions.reduceMotion}
     >
       <AppBar sx={{ position: "sticky" }}>
         <Toolbar
