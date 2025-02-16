@@ -44,7 +44,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [formatting, setFormatting] = React.useState({
     fontSize: 100,
-    _fontSizeStep: 10,
+    _fontSizeStep: 1,
     _fontSizeBounds: { min: 10, max: Infinity },
     lineHeight: 12,
     _lineHeightBounds: { min: 7, max: Infinity },
@@ -103,11 +103,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         true
       )
     ) {
-      const totalWidth = document.getElementById("content").scrollWidth;
-      const totalPages = Math.floor(totalWidth / pageWidth);
-      if (currentPage >= totalPages) {
-        setCurrentPage(totalPages - 1);
-      }
+      setTimeout(() => {
+        const totalWidth = document.getElementById("content").scrollWidth;
+        const totalPages = Math.floor(totalWidth / pageWidth);
+        if (currentPage >= totalPages) {
+          setCurrentPage(totalPages - 1);
+        }
+      }, 50);
     }
   }, [currentPage, pageWidth, formatting]);
 
