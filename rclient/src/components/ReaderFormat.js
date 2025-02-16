@@ -18,6 +18,7 @@ import {
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 export const ReaderFormat = ({ formatting, setFormatting }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -29,6 +30,18 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
   const handleCloseFormatting = (event) => {
     setAnchorEl(null);
   };
+
+  const [fieldState, setFieldState] = React.useState({
+    fontSize: formatting.fontSize,
+    fontSizeFocus: false,
+    lineHeight: formatting.lineHeight,
+    lineHeightFocus: false,
+    pageMargins: formatting.pageMargins,
+    pageMarginsFocus: false,
+    pagesShown: formatting.pagesShown,
+    pagesShownFocus: false,
+    fontFamilyOpen: false,
+  });
 
   const handleStepValue = (key, direction) => {
     setFormatting((prev) => ({
@@ -46,12 +59,55 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
     }));
   };
 
-  const handleOnChangeField = (key) => (event) => {
+  const handleOnChangeSelect = (key) => (event) => {
     const value = event?.target;
-    console.log(event?.target);
     setFormatting((prev) => ({
       ...prev,
       [key]: value,
+    }));
+  };
+
+  const handleOnChangeField = (key) => (event) => {
+    setFieldState((prev) => ({
+      ...prev,
+      [key]: event?.target?.value,
+    }));
+  };
+
+  const handleFieldReturn = (key) => (event) => {
+    if (event.key === "Enter") {
+      setFormatting((prev) => ({ ...prev, [key]: fieldState[key] }));
+    }
+  };
+
+  const handleFieldOnFocus = (key) => {
+    setFieldState((prev) => ({
+      ...prev,
+      [`${key}Focus`]: true,
+    }));
+  };
+
+  const handleFieldOnBlur = (key) => {
+    setFieldState((prev) => ({
+      ...prev,
+      [key]: formatting[key],
+      [`${key}Focus`]: false,
+    }));
+  };
+
+  const handleOnOpen = (key) => {
+    setFieldState((prev) => ({
+      ...prev,
+      [key]: formatting[key],
+      [`${key}Open`]: true,
+    }));
+  };
+
+  const handleOnClose = (key) => {
+    setFieldState((prev) => ({
+      ...prev,
+      [key]: formatting[key],
+      [`${key}Open`]: false,
     }));
   };
 
@@ -70,7 +126,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
         <Stack
           spacing={2}
           alignItems={"center"}
-          sx={{ minWidth: "300px", margin: 2 }}
+          sx={{ width: "300px", margin: 2 }}
         >
           <Typography variant="h5">{"Formatting"}</Typography>
           <Paper sx={{ width: "100%", p: 1 }}>
@@ -79,13 +135,14 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
               <Tooltip
                 title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
                 placement="top"
-                enterDelay={300}
-                enterNextDelay={300}
+                open={fieldState.fontFamilyOpen}
               >
                 <Select
                   value={formatting.fontFamily.value}
-                  onChange={handleOnChangeField("fontFamily")}
+                  onChange={handleOnChangeSelect("fontFamily")}
                   size="small"
+                  onOpen={() => handleOnOpen("fontFamily")}
+                  onClose={() => handleOnClose("fontFamily")}
                   fullWidth
                 >
                   {formatting._fontFamilies.map((item) => {
@@ -113,7 +170,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
             { title: "Font Size", value: "fontSize", endText: "%" },
             { title: "Line Height", value: "lineHeight", endText: "u" },
             { title: "Page Margins", value: "pageMargins", endText: "px" },
-            { title: "Pages Shown", value: "pagesShown", endText: "pages" },
+            { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
           ].map((obj) => (
             <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
               <Stack spacing={1} alignItems={"center"}>
@@ -122,6 +179,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
                   direction="row"
                   justifyContent={"space-evenly"}
                   sx={{ width: "100%" }}
+                  spacing={1}
                 >
                   <IconButton
                     onClick={() => handleStepValue(obj.value, "decrease")}
@@ -130,15 +188,29 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
                   </IconButton>
                   <Paper>
                     <TextField
-                      sx={{ width: "7rem" }}
-                      value={formatting[obj.value]}
+                      fullWidth
+                      value={fieldState[obj.value]}
                       InputProps={{
                         endAdornment: (
-                          <InputAdornment position="end">
-                            {obj.endText}
-                          </InputAdornment>
+                          <Stack direction="row">
+                            <InputAdornment position="end">
+                              {obj.endText}
+                            </InputAdornment>
+                            {fieldState[`${obj.value}Focus`] === true ? (
+                              <InputAdornment position="end">
+                                <KeyboardReturnIcon
+                                  fontSize="small"
+                                  color="success"
+                                />
+                              </InputAdornment>
+                            ) : null}
+                          </Stack>
                         ),
                       }}
+                      onChange={handleOnChangeField(obj.value)}
+                      onBlur={() => handleFieldOnBlur(obj.value)}
+                      onFocus={() => handleFieldOnFocus(obj.value)}
+                      onKeyDown={handleFieldReturn(obj.value)}
                       size="small"
                     />
                   </Paper>
@@ -156,7 +228,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
               <Typography variant="h6">{"Justify"}</Typography>
               <Select
                 value={formatting.textAlign.value}
-                onChange={handleOnChangeField("textAlign")}
+                onChange={handleOnChangeSelect("textAlign")}
                 size="small"
                 fullWidth
               >
