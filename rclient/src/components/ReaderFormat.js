@@ -35,8 +35,14 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
       ...prev,
       [key]:
         direction === "increase"
-          ? prev[key] + (prev[`_${key}Step`] ?? 1)
-          : Math.max(0, prev[key] - (prev[`_${key}Step`] ?? 1)),
+          ? Math.min(
+              prev[`_${key}Bounds`].max,
+              prev[key] + (prev[`_${key}Step`] ?? 1)
+            )
+          : Math.max(
+              prev[`_${key}Bounds`].min,
+              prev[key] - (prev[`_${key}Step`] ?? 1)
+            ),
     }));
   };
 
@@ -100,7 +106,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
             { title: "Font Size", value: "fontSize", endText: "%" },
             { title: "Line Height", value: "lineHeight", endText: "u" },
             { title: "Page Margins", value: "pageMargins", endText: "px" },
-            { title: "Show pages", value: "pagesNumber", endText: "pages" },
+            { title: "Pages Shown", value: "pagesShown", endText: "pages" },
           ].map((obj) => (
             <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
               <Stack spacing={1} alignItems={"center"}>

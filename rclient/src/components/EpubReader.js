@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useTheme } from "@emotion/react";
 import {
   AppBar,
   Box,
@@ -46,11 +45,16 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [formatting, setFormatting] = React.useState({
     fontSize: 100,
     _fontSizeStep: 10,
+    _fontSizeBounds: { min: 10, max: Infinity },
     lineHeight: 12,
+    _lineHeightBounds: { min: 7, max: Infinity },
     _lineHeightStep: 1,
     pageMargins: 500,
     _pageMarginsStep: 50,
-    pagesNumber: 1,
+    _pageMarginsBounds: { min: 50, max: Infinity },
+    pagesShown: 1,
+    _pagesShownStep: 1,
+    _pagesShownBounds: { min: 1, max: Infinity },
     fontFamily: { label: "Original", value: "inherit" },
     _fontFamilies: [
       // formatted for MUI Selector use
