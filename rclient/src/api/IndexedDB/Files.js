@@ -88,10 +88,12 @@ const convertZipFileToObjectDirectory = (id) =>
               entry.filename.indexOf(".css") === entry.filename.length - 4;
 
             if (isXML || isCSS) {
+              // convert to string
               const string = await convertFileToString(entry);
               currentDir[path.pop()] = {
                 type: isXML ? "xml" : "css",
                 text: string,
+                name: entry.filename,
               };
             } else if (isOPF) {
               const object = await convertXMLFileToObject(entry);
