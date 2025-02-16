@@ -20,7 +20,11 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
-export const ReaderFormat = ({ formatting, setFormatting }) => {
+export const ReaderFormat = ({
+  formatting,
+  setFormatting,
+  defaultFormatting,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
 
@@ -78,7 +82,12 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
 
   const handleFieldReturn = (key) => (event) => {
     if (event.key === "Enter" && isNaN(fieldState[key]) === false) {
-      setFormatting((prev) => ({ ...prev, [key]: parseInt(fieldState[key]) }));
+      const newValue = Math.max(
+        formatting[`_${key}Bounds`].min,
+        Math.min(formatting[`_${key}Bounds`].max, parseInt(fieldState[key]))
+      );
+      setFormatting((prev) => ({ ...prev, [key]: newValue }));
+      setFieldState((prev) => ({ ...prev, [key]: newValue }));
     }
   };
 
@@ -185,6 +194,10 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
                 >
                   <IconButton
                     onClick={() => handleStepValue(obj.value, "decrease")}
+                    disabled={
+                      fieldState[obj.value] <=
+                      formatting[`_${obj.value}Bounds`].min
+                    }
                   >
                     <RemoveIcon />
                   </IconButton>
@@ -192,6 +205,7 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
                     <TextField
                       fullWidth
                       value={fieldState[obj.value]}
+                      placeholder={defaultFormatting[obj.value].toString()}
                       InputProps={{
                         endAdornment: (
                           <Stack direction="row">
@@ -218,6 +232,10 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
                   </Paper>
                   <IconButton
                     onClick={() => handleStepValue(obj.value, "increase")}
+                    disabled={
+                      fieldState[obj.value] >=
+                      formatting[`_${obj.value}Bounds`].max
+                    }
                   >
                     <AddIcon />
                   </IconButton>
@@ -251,4 +269,5 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
 ReaderFormat.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
+  defaultFormatting: PropTypes.object.isRequired,
 };
