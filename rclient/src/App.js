@@ -66,7 +66,12 @@ function App() {
     <ThemeContext.Provider value={themeModes}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <Router>
+        <Router
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <Wrappers>
             <Header />
             <Container maxWidth="xl" sx={{ mt: "10px" }}>
