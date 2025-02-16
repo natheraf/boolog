@@ -46,23 +46,26 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [formatting, setFormatting] = React.useState({
     fontSize: 100,
     _fontSizeStep: 10,
-    lineHeight: 1,
+    lineHeight: 12,
     _lineHeightStep: 1,
     pageMargins: 500,
-    _pageMarginsStep: 10,
+    _pageMarginsStep: 50,
     pagesNumber: 1,
     fontFamily: { label: "Original", value: "inherit" },
     _fontFamilies: [
+      // formatted for MUI Selector use
+      { group: "none" },
       { label: "Original", value: "inherit" },
 
-      { label: "Serif", group: "Generic", value: "serif" },
-      { label: "Sans-Serif", group: "Generic", value: "sans-serif" },
-      { label: "Monospace", group: "Generic", value: "monospace" },
-      { label: "Cursive", group: "Generic", value: "cursive" },
-      { label: "Fantasy", group: "Generic", value: "fantasy" },
-      { label: "Math", group: "Generic", value: "math" },
-      { label: "Fangsong", group: "Generic", value: "fangsong" },
-      { label: "System-UI", group: "Generic", value: "system-ui" },
+      { group: "Generic" },
+      { label: "Serif", value: "serif" },
+      { label: "Sans-Serif", value: "sans-serif" },
+      { label: "Monospace", value: "monospace" },
+      { label: "Cursive", value: "cursive" },
+      { label: "Fantasy", value: "fantasy" },
+      { label: "Math", value: "math" },
+      { label: "Fangsong", value: "fangsong" },
+      { label: "System-UI", value: "system-ui" },
     ],
     textAlign: { label: "Original", value: "inherit" },
     _textAlignments: [
@@ -83,24 +86,18 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
-  const [pageWidth, setPageWidth] = React.useState(
-    window.innerWidth - formatting.pageMargins - columnGap
+  const pageWidth = React.useMemo(
+    () => window.innerWidth - formatting.pageMargins - columnGap,
+    [formatting.pageMargins]
   );
   const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
 
-  const [fontSize, setFontSize] = React.useState(1);
-  const fontSizeStep = 1;
-  const [lineHeight, setLineHeight] = React.useState(1.5);
-  const lineHeightStep = 1;
-
   const handleViewOutOfBounds = React.useEffect(() => {
     if (
-      [
-        document.getElementById("content"),
-        currentPage,
-        fontSize,
-        lineHeight,
-      ].reduce((acc, val) => acc && val, true)
+      [document.getElementById("content"), currentPage, formatting].reduce(
+        (acc, val) => acc && val,
+        true
+      )
     ) {
       const totalWidth = document.getElementById("content").scrollWidth;
       const totalPages = Math.floor(totalWidth / pageWidth);
@@ -108,7 +105,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         setCurrentPage(totalPages - 1);
       }
     }
-  }, [currentPage, fontSize, pageWidth, lineHeight]);
+  }, [currentPage, pageWidth, formatting]);
 
   const handlePathHref = React.useCallback(
     (path) => {
@@ -218,7 +215,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       }
       if (it.type === "css") {
         const styleElement = document.createElement("style");
-        styleElement.id = "epub_style";
+        styleElement.id = `epub-css-${it.name}`;
         styleElement.innerHTML = `#content, #previous-content {\n${it.text}\n}`;
         document.head.insertAdjacentElement("beforeend", styleElement);
         continue;
@@ -296,15 +293,36 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
   };
 
+  const putFormattingStyleElement = () => {
+    const userFormattingStyle = `
+      font-size: ${formatting.fontSize}%; 
+      line-height: ${formatting.lineHeight / 10}; 
+      font-family: ${formatting.fontFamily.value}; 
+      text-align: ${formatting.textAlign.value};
+    `;
+    const styleElement = document.createElement("style");
+    styleElement.id = `epub-css-user-formatting`;
+    styleElement.innerHTML = `#content, #previous-content {\n${userFormattingStyle}\n}`;
+    document.head.insertAdjacentElement("beforeend", styleElement);
+  };
+
+  const updateFormattingStyle = React.useEffect(putFormattingStyleElement, [
+    formatting,
+  ]);
+
+  const processSpineAndRenderEpubDOM = () =>
+    new Promise((resolve, reject) => {
+      processSpine().then(resolve);
+    });
+
   React.useEffect(() => {
-    const processAndRender = async () => {
-      await processSpine();
-      if (spinePointer === null) {
-        setSpinePointer(0);
-      }
-    };
     if (spine === null) {
-      processAndRender();
+      processSpineAndRenderEpubDOM().then(() => {
+        if (spinePointer === null) {
+          setSpinePointer(0);
+        }
+        putFormattingStyleElement();
+      });
     }
   }, []);
 
