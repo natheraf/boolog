@@ -76,30 +76,37 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
           <Paper sx={{ width: "100%", p: 1 }}>
             <Stack spacing={1} alignItems={"center"}>
               <Typography variant="h6">{"Font Family"}</Typography>
-              <Select
-                value={formatting.fontFamily.value}
-                onChange={handleOnChangeField("fontFamily")}
-                size="small"
-                fullWidth
+              <Tooltip
+                title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
+                placement="top"
+                enterDelay={300}
+                enterNextDelay={300}
               >
-                {formatting._fontFamilies.map((item) => {
-                  if (item.group === "none") {
-                    return null;
-                  }
-                  if (item.hasOwnProperty("group")) {
+                <Select
+                  value={formatting.fontFamily.value}
+                  onChange={handleOnChangeField("fontFamily")}
+                  size="small"
+                  fullWidth
+                >
+                  {formatting._fontFamilies.map((item) => {
+                    if (item.group === "none") {
+                      return null;
+                    }
+                    if (item.hasOwnProperty("group")) {
+                      return (
+                        <ListSubheader key={item.group}>
+                          {item.group}
+                        </ListSubheader>
+                      );
+                    }
                     return (
-                      <ListSubheader key={item.group}>
-                        {item.group}
-                      </ListSubheader>
+                      <MenuItem key={item.value} value={item.value}>
+                        {item.label}
+                      </MenuItem>
                     );
-                  }
-                  return (
-                    <MenuItem key={item.value} value={item.value}>
-                      {item.label}
-                    </MenuItem>
-                  );
-                })}
-              </Select>
+                  })}
+                </Select>
+              </Tooltip>
             </Stack>
           </Paper>
           {[
