@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTheme } from "@emotion/react";
 import {
   AppBar,
   Box,
@@ -11,9 +12,10 @@ import {
   Typography,
 } from "@mui/material";
 
-import CloseIcon from "@mui/icons-material/Close";
-import { useTheme } from "@emotion/react";
+import { ReaderFormat } from "./ReaderFormat";
 import { convertFileToBlob } from "../api/IndexedDB/Files";
+
+import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 
@@ -42,6 +44,36 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const [formatting, setFormatting] = React.useState({
+    fontSize: 100,
+    _fontSizeStep: 10,
+    lineHeight: 1,
+    _lineHeightStep: 1,
+    fontFamily: { label: "Original", value: "inherit" },
+    _fontFamilies: [
+      { label: "Original", value: "inherit" },
+
+      { label: "Serif", group: "Generic", value: "serif" },
+      { label: "Sans-Serif", group: "Generic", value: "sans-serif" },
+      { label: "Monospace", group: "Generic", value: "monospace" },
+      { label: "Cursive", group: "Generic", value: "cursive" },
+      { label: "Fantasy", group: "Generic", value: "fantasy" },
+      { label: "Math", group: "Generic", value: "math" },
+      { label: "Fangsong", group: "Generic", value: "fangsong" },
+      { label: "System-UI", group: "Generic", value: "system-ui" },
+    ],
+    textAlign: { label: "Original", value: "inherit" },
+    _textAlignments: [
+      { label: "Left", value: "start" },
+      { label: "Right", value: "end" },
+      { label: "Middle", value: "center" },
+      { label: "Justified", value: "justify" },
+    ],
+    pageMargins: { label: "Original", value: 500 },
+    _pageMarginStep: 20,
+    pagesNumber: 1,
+  });
+
   const structureRef = epubObject["OEBPS"];
   const contentRef = epubObject["opf"].package;
 
@@ -55,6 +87,28 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     window.innerWidth - 500 - columnGap
   );
   const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
+
+  const [fontSize, setFontSize] = React.useState(1);
+  const fontSizeStep = 1;
+  const [lineHeight, setLineHeight] = React.useState(1.5);
+  const lineHeightStep = 1;
+
+  const handleViewOutOfBounds = React.useEffect(() => {
+    if (
+      [
+        document.getElementById("content"),
+        currentPage,
+        fontSize,
+        lineHeight,
+      ].reduce((acc, val) => acc && val, true)
+    ) {
+      const totalWidth = document.getElementById("content").scrollWidth;
+      const totalPages = Math.floor(totalWidth / pageWidth);
+      if (currentPage >= totalPages) {
+        setCurrentPage(totalPages - 1);
+      }
+    }
+  }, [currentPage, fontSize, pageWidth, lineHeight]);
 
   const handlePathHref = React.useCallback(
     (path) => {
@@ -292,7 +346,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               "error"}
           </Typography>
           <Stack direction={"row"} spacing={2}>
-            {"buttons"}
+            <ReaderFormat
+              formatting={formatting}
+              setFormatting={setFormatting}
+            />
           </Stack>
         </Toolbar>
       </AppBar>
@@ -315,6 +372,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 columnFill: "auto",
                 columnGap: `${columnGap}px`,
                 columnWidth: `${pageWidth}px`,
+                fontSize: `${fontSize}rem`,
+                lineHeight: lineHeight,
                 transform: `translate(-${
                   currentPage * (pageWidth + columnGap)
                 }px);`,
@@ -337,6 +396,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               columnFill: "auto",
               columnGap: `${columnGap}px`,
               columnWidth: `${pageWidth}px`,
+              fontSize: `${fontSize}rem`,
+              lineHeight: lineHeight,
             }}
           >
             {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
