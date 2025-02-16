@@ -94,11 +94,22 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
   const pageWidth = React.useMemo(
-    () => window.innerWidth - formatting.pageMargins - columnGap,
-    [formatting.pageMargins]
+    () => windowWidth - formatting.pageMargins - columnGap,
+    [formatting.pageMargins, windowWidth]
   );
-  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
+  const pageHeight = React.useMemo(() => {
+    const value = windowHeight - 88;
+    document
+      .getElementById("content")
+      ?.querySelectorAll("img")
+      .forEach((element) => {
+        element.style.maxHeight = `${value}px`;
+      });
+    return value;
+  }, [windowHeight]);
 
   const handleViewOutOfBounds = React.useEffect(() => {
     if (
@@ -266,15 +277,18 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     setOpen(false);
   };
 
-  const addEventListenersToAnchors = React.useMemo(() => {
+  const addEventListenersToEpubAnchors = React.useMemo(() => {
     if (spine !== null && spinePointer !== null) {
       const config = { childList: true, subtree: true };
       const observer = new MutationObserver((mutationList, observer) => {
-        document.querySelectorAll("a[linkto]").forEach((node) => {
-          node.addEventListener("click", () => {
-            handlePathHref(node.getAttribute("linkto"));
+        document
+          .getElementById("content")
+          .querySelectorAll("a[linkto]")
+          .forEach((node) => {
+            node.addEventListener("click", () => {
+              handlePathHref(node.getAttribute("linkto"));
+            });
           });
-        });
       });
       observer.observe(document.getElementById("content"), config);
     }
@@ -344,6 +358,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         putFormattingStyleElement();
       });
     }
+    window.addEventListener("resize", () => {
+      setWindowWidth(window.innerWidth);
+      setWindowHeight(window.innerHeight);
+    });
   }, []);
 
   return (
