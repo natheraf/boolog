@@ -44,19 +44,21 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
   });
 
   const handleStepValue = (key, direction) => {
+    const newValue =
+      direction === "increase"
+        ? Math.min(
+            formatting[`_${key}Bounds`].max,
+            formatting[key] + (formatting[`_${key}Step`] ?? 1)
+          )
+        : Math.max(
+            formatting[`_${key}Bounds`].min,
+            formatting[key] - (formatting[`_${key}Step`] ?? 1)
+          );
     setFormatting((prev) => ({
       ...prev,
-      [key]:
-        direction === "increase"
-          ? Math.min(
-              prev[`_${key}Bounds`].max,
-              prev[key] + (prev[`_${key}Step`] ?? 1)
-            )
-          : Math.max(
-              prev[`_${key}Bounds`].min,
-              prev[key] - (prev[`_${key}Step`] ?? 1)
-            ),
+      [key]: newValue,
     }));
+    setFieldState((prev) => ({ ...prev, [key]: newValue }));
   };
 
   const handleOnChangeSelect = (key) => (event) => {
@@ -75,8 +77,8 @@ export const ReaderFormat = ({ formatting, setFormatting }) => {
   };
 
   const handleFieldReturn = (key) => (event) => {
-    if (event.key === "Enter") {
-      setFormatting((prev) => ({ ...prev, [key]: fieldState[key] }));
+    if (event.key === "Enter" && isNaN(fieldState[key]) === false) {
+      setFormatting((prev) => ({ ...prev, [key]: parseInt(fieldState[key]) }));
     }
   };
 
