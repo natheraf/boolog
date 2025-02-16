@@ -42,12 +42,12 @@ const parseCSSText = (cssText) => {
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
-  const [formatting, setFormatting] = React.useState({
+  const defaultFormatting = {
     fontSize: 100,
     _fontSizeStep: 1,
-    _fontSizeBounds: { min: 10, max: Infinity },
+    _fontSizeBounds: { min: 1, max: Infinity },
     lineHeight: 12,
-    _lineHeightBounds: { min: 7, max: Infinity },
+    _lineHeightBounds: { min: 1, max: Infinity },
     _lineHeightStep: 1,
     pageMargins: 500,
     _pageMarginsStep: 50,
@@ -79,7 +79,11 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       { label: "Right", value: "end" },
       { label: "Justified", value: "justify" },
     ],
-  });
+  };
+
+  const [formatting, setFormatting] = React.useState(
+    structuredClone(defaultFormatting)
+  );
 
   const structureRef = epubObject["OEBPS"];
   const contentRef = epubObject["opf"].package;
@@ -382,6 +386,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             <ReaderFormat
               formatting={formatting}
               setFormatting={setFormatting}
+              defaultFormatting={defaultFormatting}
             />
           </Stack>
         </Toolbar>
