@@ -49,6 +49,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     _fontSizeStep: 10,
     lineHeight: 1,
     _lineHeightStep: 1,
+    pageMargins: 500,
+    _pageMarginsStep: 10,
+    pagesNumber: 1,
     fontFamily: { label: "Original", value: "inherit" },
     _fontFamilies: [
       { label: "Original", value: "inherit" },
@@ -64,14 +67,12 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     ],
     textAlign: { label: "Original", value: "inherit" },
     _textAlignments: [
+      { label: "Original", value: "inherit" },
       { label: "Left", value: "start" },
-      { label: "Right", value: "end" },
       { label: "Middle", value: "center" },
+      { label: "Right", value: "end" },
       { label: "Justified", value: "justify" },
     ],
-    pageMargins: { label: "Original", value: 500 },
-    _pageMarginStep: 20,
-    pagesNumber: 1,
   });
 
   const structureRef = epubObject["OEBPS"];
@@ -84,7 +85,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [pageWidth, setPageWidth] = React.useState(
-    window.innerWidth - 500 - columnGap
+    window.innerWidth - formatting.pageMargins - columnGap
   );
   const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
 
@@ -340,7 +341,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               <CloseIcon />
             </IconButton>
           </Tooltip>
-          <Typography variant="h6">
+          <Typography variant="h6" noWrap>
             {contentRef?.metadata?.["dc:title"]?.["#text"] ??
               contentRef?.metadata?.["dc:title"] ??
               "error"}
@@ -372,8 +373,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 columnFill: "auto",
                 columnGap: `${columnGap}px`,
                 columnWidth: `${pageWidth}px`,
-                fontSize: `${fontSize}rem`,
-                lineHeight: lineHeight,
                 transform: `translate(-${
                   currentPage * (pageWidth + columnGap)
                 }px);`,
@@ -396,8 +395,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               columnFill: "auto",
               columnGap: `${columnGap}px`,
               columnWidth: `${pageWidth}px`,
-              fontSize: `${fontSize}rem`,
-              lineHeight: lineHeight,
             }}
           >
             {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
