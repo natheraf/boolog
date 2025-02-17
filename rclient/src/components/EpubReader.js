@@ -478,7 +478,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 height: pageHeight,
                 columnFill: "balance",
                 columnGap: `${columnGap}px`,
-                columnWidth: `${pageWidth}px`,
+                columnWidth: `${
+                  (pageWidth - columnGap * formatting.pagesShown) /
+                  formatting.pagesShown
+                }px`,
                 transform: `translate(-${
                   currentPage * (pageWidth + columnGap)
                 }px);`,
@@ -510,9 +513,12 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             sx={{
               height: pageHeight,
               overflow: "visible",
-              columnFill: "auto",
+              columnFill: "balance",
               columnGap: `${columnGap}px`,
-              columnWidth: `${pageWidth}px`,
+              columnWidth: `${
+                (pageWidth - columnGap * formatting.pagesShown) /
+                formatting.pagesShown
+              }px`,
             }}
           >
             {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
