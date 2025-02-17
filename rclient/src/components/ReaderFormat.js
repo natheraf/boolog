@@ -81,10 +81,12 @@ export const ReaderFormat = ({
   };
 
   const handleFieldReturn = (key) => (event) => {
-    if (event.key === "Enter" && isNaN(fieldState[key]) === false) {
+    const value =
+      fieldState[key].length === 0 ? defaultFormatting[key] : fieldState[key];
+    if (event.key === "Enter" && isNaN(value) === false) {
       const newValue = Math.max(
         formatting[`_${key}Bounds`].min,
-        Math.min(formatting[`_${key}Bounds`].max, parseInt(fieldState[key]))
+        Math.min(formatting[`_${key}Bounds`].max, parseInt(value))
       );
       setFormatting((prev) => ({ ...prev, [key]: newValue }));
       setFieldState((prev) => ({ ...prev, [key]: newValue }));
