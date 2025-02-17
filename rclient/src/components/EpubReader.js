@@ -300,7 +300,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
   }, [spine]);
 
-  const handleNextPage = () => {
+  const handleNextPage = React.useCallback(() => {
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages = Math.floor(totalWidth / pageWidth);
     if (currentPage >= totalPages - 1) {
@@ -309,9 +309,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     } else {
       setCurrentPage((prev) => prev + 1);
     }
-  };
+  }, [currentPage, pageWidth, spine]);
 
-  const handlePreviousPage = () => {
+  const handlePreviousPage = React.useCallback(() => {
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages = Math.floor(previousTotalWidth / pageWidth);
@@ -321,7 +321,25 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     } else {
       setCurrentPage((prev) => prev - 1);
     }
-  };
+  }, [currentPage, pageWidth]);
+
+  const handleOnKeyDown = React.useCallback(
+    (event) => {
+      if (event.key === "ArrowLeft") {
+        handlePreviousPage();
+      } else if (event.key === "ArrowRight") {
+        handleNextPage();
+      }
+    },
+    [handleNextPage, handlePreviousPage]
+  );
+  const addEventListenerToKeyboard = React.useEffect(() => {
+    if (spine !== null) {
+      document.addEventListener("keydown", handleOnKeyDown);
+
+      return () => document.removeEventListener("keydown", handleOnKeyDown);
+    }
+  }, [handleOnKeyDown, spine]);
 
   const putFormattingStyleElement = () => {
     const userFormattingStyle = `
