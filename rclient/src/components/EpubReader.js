@@ -117,7 +117,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     return value;
   }, [windowHeight]);
 
-  const handleViewOutOfBounds = React.useEffect(() => {
+  // handle if view is out of bounds
+  React.useEffect(() => {
     if (
       [document.getElementById("content"), currentPage, formatting].reduce(
         (acc, val) => acc && val,
@@ -283,7 +284,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     setOpen(false);
   };
 
-  const addEventListenersToEpubAnchors = React.useMemo(() => {
+  const addEventListenersToEpubAnchors = React.useEffect(() => {
     if (spine !== null && spinePointer !== null) {
       const config = { childList: true, subtree: true };
       const observer = new MutationObserver((mutationList, observer) => {
@@ -297,6 +298,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           });
       });
       observer.observe(document.getElementById("content"), config);
+
+      return () => observer.disconnect();
     }
   }, [spine]);
 
@@ -333,7 +336,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     },
     [handleNextPage, handlePreviousPage]
   );
-  const addEventListenerToKeyboard = React.useEffect(() => {
+  // addEventListenerToKeyboard
+  React.useEffect(() => {
     if (spine !== null) {
       document.addEventListener("keydown", handleOnKeyDown);
 
@@ -364,15 +368,20 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
-  const updateFormattingStyle = React.useEffect(putFormattingStyleElement, [
-    formatting,
-  ]);
+  // update formatting style element
+  React.useEffect(putFormattingStyleElement, [formatting]);
 
   const processSpineAndRenderEpubDOM = () =>
     new Promise((resolve, reject) => {
       processSpine().then(resolve);
     });
 
+  const updateWindowSize = () => {
+    setWindowWidth(window.innerWidth);
+    setWindowHeight(window.innerHeight);
+  };
+
+  // on load
   React.useEffect(() => {
     if (spine === null) {
       processSpineAndRenderEpubDOM().then(() => {
@@ -382,10 +391,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         putFormattingStyleElement();
       });
     }
-    window.addEventListener("resize", () => {
-      setWindowWidth(window.innerWidth);
-      setWindowHeight(window.innerHeight);
-    });
+    window.addEventListener("resize", updateWindowSize);
+
+    return () => window.removeEventListener("resize", updateWindowSize);
   }, []);
 
   return (
