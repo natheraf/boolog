@@ -51,7 +51,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     _lineHeightStep: 1,
     pageMargins: 500,
     _pageMarginsStep: 50,
-    _pageMarginsBounds: { min: 50, max: Infinity },
+    _pageMarginsBounds: { min: 70, max: Infinity },
     pagesShown: 1,
     _pagesShownStep: 1,
     _pagesShownBounds: { min: 1, max: Infinity },
@@ -96,10 +96,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
   const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
-  const pageWidth = React.useMemo(
-    () => windowWidth - formatting.pageMargins - columnGap,
-    [formatting.pageMargins, windowWidth]
-  );
+  const pageWidth = React.useMemo(() => {
+    const value = windowWidth - formatting.pageMargins - columnGap;
+    if (value <= 50) {
+      setFormatting((prev) => ({ ...prev, pageMargins: 70 }));
+    }
+    return value;
+  }, [formatting.pageMargins, windowWidth]);
   const pageHeight = React.useMemo(() => {
     const value = windowHeight - 88;
     document
@@ -297,7 +300,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handleNextPage = () => {
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages = Math.floor(totalWidth / pageWidth);
-    if (currentPage === totalPages - 1) {
+    if (currentPage >= totalPages - 1) {
       setCurrentPage(0);
       setSpinePointer((prev) => Math.min(spine.length - 1, prev + 1));
     } else {
@@ -414,12 +417,18 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           direction="row"
           alignItems={"center"}
           justifyContent={"center"}
-          sx={{ mt: "10px", height: "100%" }}
+          sx={{ mt: "10px", height: "100%", backgroundColor: "black" }}
           spacing={1}
         >
-          <IconButton onClick={handlePreviousPage}>
+          <Box
+            sx={{
+              height: "100%",
+              backgroundColor: "gray",
+            }}
+            onClick={handlePreviousPage}
+          >
             <NavigateBeforeIcon />
-          </IconButton>
+          </Box>
           <Box sx={{ width: pageWidth, overflow: "hidden" }}>
             <Box
               id="content"
@@ -437,9 +446,15 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 "something went wrong...<br/> spine is missing"}
             </Box>
           </Box>
-          <IconButton onClick={handleNextPage}>
+          <Box
+            sx={{
+              height: "100%",
+              backgroundColor: "gray",
+            }}
+            onClick={handleNextPage}
+          >
             <NavigateNextIcon />
-          </IconButton>
+          </Box>
         </Stack>
         <Box sx={{ width: pageWidth, visibility: "hidden" }}>
           <Box
