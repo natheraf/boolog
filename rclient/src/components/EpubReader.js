@@ -284,7 +284,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     setOpen(false);
   };
 
-  const addEventListenersToEpubAnchors = React.useEffect(() => {
+  // add event listener to epub anchors
+  React.useEffect(() => {
     if (spine !== null && spinePointer !== null) {
       const config = { childList: true, subtree: true };
       const observer = new MutationObserver((mutationList, observer) => {
@@ -475,7 +476,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               id="content"
               sx={{
                 height: pageHeight,
-                columnFill: "auto",
+                columnFill: "balance",
                 columnGap: `${columnGap}px`,
                 columnWidth: `${pageWidth}px`,
                 transform: `translate(-${
