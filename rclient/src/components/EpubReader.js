@@ -1,7 +1,9 @@
 import * as React from "react";
+import { useTheme } from "@emotion/react";
 import {
   AppBar,
   Box,
+  Button,
   Dialog,
   IconButton,
   Slide,
@@ -40,6 +42,7 @@ const parseCSSText = (cssText) => {
 }; // https://stackoverflow.com/a/43012849
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
+  const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
 
   const defaultFormatting = {
@@ -417,19 +420,31 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           direction="row"
           alignItems={"center"}
           justifyContent={"center"}
-          sx={{ mt: "10px", height: "100%", backgroundColor: "black" }}
+          sx={{ mt: "10px", height: "100%" }}
           spacing={1}
         >
+          <Button
+            variant="text"
+            onClick={handlePreviousPage}
+            sx={{
+              width: "100%",
+              height: "100%",
+              "&.MuiButtonBase-root:hover": {
+                backgroundColor: "transparent",
+              },
+              filter: `blur(100px)`,
+              justifyContent: "flex-start",
+            }}
+            startIcon={<NavigateBeforeIcon htmlColor={"gray"} />}
+            disableRipple={!theme.transitions.reduceMotion}
+          />
           <Box
             sx={{
-              height: "100%",
-              backgroundColor: "gray",
+              maxWidth: `${pageWidth}px`,
+              minWidth: `${pageWidth}px`,
+              overflow: "hidden",
             }}
-            onClick={handlePreviousPage}
           >
-            <NavigateBeforeIcon />
-          </Box>
-          <Box sx={{ width: pageWidth, overflow: "hidden" }}>
             <Box
               id="content"
               sx={{
@@ -446,15 +461,21 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 "something went wrong...<br/> spine is missing"}
             </Box>
           </Box>
-          <Box
-            sx={{
-              height: "100%",
-              backgroundColor: "gray",
-            }}
+          <Button
+            variant="text"
             onClick={handleNextPage}
-          >
-            <NavigateNextIcon />
-          </Box>
+            sx={{
+              width: "100%",
+              height: "100%",
+              "&.MuiButtonBase-root:hover": {
+                backgroundColor: "transparent",
+              },
+              filter: `blur(100px)`,
+              justifyContent: "flex-end",
+            }}
+            endIcon={<NavigateNextIcon htmlColor={"gray"} />}
+            disableRipple={!theme.transitions.reduceMotion}
+          />
         </Stack>
         <Box sx={{ width: pageWidth, visibility: "hidden" }}>
           <Box
