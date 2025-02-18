@@ -45,6 +45,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
 
+  const contentElementRef = React.useRef(null);
+  const [resizeObserver, setResizeObserver] = React.useState(null);
+
   const defaultFormatting = {
     fontSize: 100,
     _fontSizeStep: 1,
@@ -117,23 +120,36 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     return value;
   }, [windowHeight]);
 
-  // handle if view is out of bounds
-  React.useEffect(() => {
-    if (
-      [document.getElementById("content"), currentPage, formatting].reduce(
-        (acc, val) => acc && val,
-        true
-      )
-    ) {
-      setTimeout(() => {
-        const totalWidth = document.getElementById("content").scrollWidth;
-        const totalPages = Math.floor(totalWidth / pageWidth);
-        if (currentPage >= totalPages) {
-          setCurrentPage(totalPages - 1);
-        }
-      }, 150);
+  const handleViewOutOfBounds = React.useCallback(() => {
+    const totalWidth = document.getElementById("content").scrollWidth;
+    const totalPages =
+      Math.floor(totalWidth / pageWidth) +
+      +(
+        formatting.pagesShown > 1 &&
+        (totalWidth % pageWidth) / pageWidth > 1 / formatting.pagesShown
+      );
+    if (currentPage >= totalPages) {
+      setCurrentPage(totalPages - 1);
     }
-  }, [currentPage, pageWidth, formatting]);
+  }, [formatting, pageWidth]);
+
+  React.useEffect(() => {
+    if (contentElementRef.current !== null) {
+      console.log("recon");
+      resizeObserver?.disconnect();
+      const _resizeObserver = new ResizeObserver((entries) => {
+        console.log("resized");
+        handleViewOutOfBounds();
+      });
+      const innerContentElement =
+        contentElementRef.current.children?.[0] ??
+        document.getElementById("inner-content");
+      if (innerContentElement) {
+        _resizeObserver.observe(innerContentElement);
+        setResizeObserver(_resizeObserver);
+      }
+    }
+  }, [handleViewOutOfBounds]);
 
   const handlePathHref = React.useCallback(
     (path) => {
@@ -256,6 +272,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       page.innerHTML = it.text;
       const body = page.querySelector("body") ?? page.querySelector("section");
       const pageContent = document.createElement("div");
+      pageContent.id = "inner-content";
       pageContent.innerHTML = body.innerHTML;
       const reactNode = await createReactDOM(pageContent);
 
@@ -286,7 +303,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   // add event listener to epub anchors
   React.useEffect(() => {
-    if (spine !== null && spinePointer !== null) {
+    if (contentElementRef.current !== null) {
       const config = { childList: true, subtree: true };
       const observer = new MutationObserver((mutationList, observer) => {
         document
@@ -298,34 +315,47 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             });
           });
       });
-      observer.observe(document.getElementById("content"), config);
-
+      observer.observe(contentElementRef.current, config);
       return () => observer.disconnect();
     }
-  }, [spine]);
+  }, [contentElementRef, handlePathHref]);
 
   const handleNextPage = React.useCallback(() => {
     const totalWidth = document.getElementById("content").scrollWidth;
-    const totalPages = Math.floor(totalWidth / pageWidth);
+    const totalPages =
+      Math.floor(totalWidth / pageWidth) +
+      +(
+        formatting.pagesShown > 1 &&
+        (document.getElementById("content").scrollWidth % pageWidth) /
+          pageWidth >
+          1 / formatting.pagesShown
+      );
     if (currentPage >= totalPages - 1) {
       setCurrentPage(0);
       setSpinePointer((prev) => Math.min(spine.length - 1, prev + 1));
     } else {
       setCurrentPage((prev) => prev + 1);
     }
-  }, [currentPage, pageWidth, spine]);
+  }, [currentPage, pageWidth, formatting, spine]);
 
   const handlePreviousPage = React.useCallback(() => {
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
-    const totalPages = Math.floor(previousTotalWidth / pageWidth);
+    const totalPages =
+      Math.floor(previousTotalWidth / pageWidth) +
+      +(
+        formatting.pagesShown > 1 &&
+        (document.getElementById("previous-content").scrollWidth % pageWidth) /
+          pageWidth >
+          1 / formatting.pagesShown
+      );
     if (currentPage === 0) {
       setCurrentPage(totalPages - 1);
       setSpinePointer((prev) => Math.max(0, prev - 1));
     } else {
       setCurrentPage((prev) => prev - 1);
     }
-  }, [currentPage, pageWidth]);
+  }, [currentPage, pageWidth, formatting]);
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
@@ -474,6 +504,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           >
             <Box
               id="content"
+              ref={contentElementRef}
               sx={{
                 height: pageHeight,
                 columnFill: "balance",
