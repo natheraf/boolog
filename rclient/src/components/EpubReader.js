@@ -46,7 +46,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const contentElementRef = React.useRef(null);
-  const [resizeObserver, setResizeObserver] = React.useState(null);
 
   const defaultFormatting = {
     fontSize: 100,
@@ -121,35 +120,34 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   }, [windowHeight]);
 
   const handleViewOutOfBounds = React.useCallback(() => {
-    const totalWidth = document.getElementById("content").scrollWidth;
-    const totalPages =
-      Math.floor(totalWidth / pageWidth) +
-      +(
-        formatting.pagesShown > 1 &&
-        (totalWidth % pageWidth) / pageWidth > 1 / formatting.pagesShown
-      );
-    if (currentPage >= totalPages) {
-      setCurrentPage(totalPages - 1);
+    if (contentElementRef.current !== null) {
+      const totalWidth = document.getElementById("content").scrollWidth;
+      const totalPages =
+        Math.floor(totalWidth / pageWidth) +
+        +(
+          formatting.pagesShown > 1 &&
+          (totalWidth % pageWidth) / pageWidth > 1 / formatting.pagesShown
+        );
+      if (currentPage >= totalPages) {
+        setCurrentPage(totalPages - 1);
+      }
     }
-  }, [formatting, pageWidth]);
+  }, [currentPage, formatting, pageWidth]);
 
   React.useEffect(() => {
-    if (contentElementRef.current !== null) {
-      console.log("recon");
-      resizeObserver?.disconnect();
-      const _resizeObserver = new ResizeObserver((entries) => {
-        console.log("resized");
+    if (contentElementRef.current !== null && spinePointer !== null) {
+      const resizeObserver = new ResizeObserver((entries) => {
         handleViewOutOfBounds();
       });
       const innerContentElement =
         contentElementRef.current.children?.[0] ??
         document.getElementById("inner-content");
       if (innerContentElement) {
-        _resizeObserver.observe(innerContentElement);
-        setResizeObserver(_resizeObserver);
+        resizeObserver.observe(innerContentElement);
       }
+      return () => resizeObserver.disconnect();
     }
-  }, [handleViewOutOfBounds]);
+  }, [handleViewOutOfBounds, spinePointer]);
 
   const handlePathHref = React.useCallback(
     (path) => {
