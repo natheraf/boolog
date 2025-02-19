@@ -58,19 +58,19 @@ export const ReaderFormat = ({
             formatting[`_${key}Bounds`].min,
             formatting[key] - (formatting[`_${key}Step`] ?? 1)
           );
-    setFormatting((prev) => ({
-      ...prev,
+    setFormatting({
+      ...formatting,
       [key]: newValue,
-    }));
+    });
     setFieldState((prev) => ({ ...prev, [key]: newValue }));
   };
 
   const handleOnChangeSelect = (key) => (event) => {
     const value = event?.target;
-    setFormatting((prev) => ({
-      ...prev,
+    setFormatting({
+      ...formatting,
       [key]: value,
-    }));
+    });
   };
 
   const handleOnChangeField = (key) => (event) => {
@@ -88,8 +88,8 @@ export const ReaderFormat = ({
         formatting[`_${key}Bounds`].min,
         Math.min(formatting[`_${key}Bounds`].max, parseInt(value))
       );
-      setFormatting((prev) => ({ ...prev, [key]: newValue }));
-      setFieldState((prev) => ({ ...prev, [key]: newValue }));
+      setFormatting({ ...formatting, [key]: newValue });
+      setFieldState({ ...formatting, [key]: newValue });
     }
   };
 
