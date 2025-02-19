@@ -25,7 +25,7 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
   ref
 ) {
-  return <Slide unmountOnExit direction="up" ref={ref} {...props} />;
+  return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const parseCSSText = (cssText) => {
@@ -40,6 +40,8 @@ const parseCSSText = (cssText) => {
   for (var [property, value] of properties) style[cssToJs(property)] = value;
   return { cssText, ruleName, style };
 }; // https://stackoverflow.com/a/43012849
+
+let runInit = false;
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
@@ -301,22 +303,20 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   // add event listener to epub anchors
   React.useEffect(() => {
-    if (contentElementRef.current !== null) {
-      const config = { childList: true, subtree: true };
-      const observer = new MutationObserver((mutationList, observer) => {
-        document
-          .getElementById("content")
-          .querySelectorAll("a[linkto]")
-          .forEach((node) => {
-            node.addEventListener("click", () => {
-              handlePathHref(node.getAttribute("linkto"));
-            });
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver((mutationList, observer) => {
+      document
+        .getElementById("content")
+        ?.querySelectorAll("a[linkto]")
+        .forEach((node) => {
+          node.addEventListener("click", () => {
+            handlePathHref(node.getAttribute("linkto"));
           });
-      });
-      observer.observe(contentElementRef.current, config);
-      return () => observer.disconnect();
-    }
-  }, [contentElementRef, handlePathHref]);
+        });
+    });
+    observer.observe(document.body, config);
+    return () => observer.disconnect();
+  }, [handlePathHref]);
 
   const handleNextPage = React.useCallback(() => {
     const totalWidth = document.getElementById("content").scrollWidth;
@@ -365,28 +365,28 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     },
     [handleNextPage, handlePreviousPage]
   );
-  // addEventListenerToKeyboard
+  // prob did implementation wrong cause this reruns every page
   React.useEffect(() => {
     if (spine !== null) {
       document.addEventListener("keydown", handleOnKeyDown);
-
       return () => document.removeEventListener("keydown", handleOnKeyDown);
     }
   }, [handleOnKeyDown, spine]);
 
-  const putFormattingStyleElement = () => {
+  const putFormattingStyleElement = (forceFormatting) => {
+    const format = forceFormatting ?? formatting;
     const userFormattingStyle = `
-      font-size: ${formatting.fontSize}%; 
-      line-height: ${formatting.lineHeight / 10} !important;
+      font-size: ${format.fontSize}%; 
+      line-height: ${format.lineHeight / 10} !important;
       ${
-        formatting.fontFamily.value === "inherit"
+        format.fontFamily.value === "inherit"
           ? ""
-          : `font-family: ${formatting.fontFamily.value} !important;`
+          : `font-family: ${format.fontFamily.value} !important;`
       }
       ${
-        formatting.textAlign.value === "inherit"
+        format.textAlign.value === "inherit"
           ? ""
-          : `text-align: ${formatting.textAlign.value} !important;`
+          : `text-align: ${format.textAlign.value} !important;`
       }
     `;
     const id = `epub-css-user-formatting`;
@@ -397,8 +397,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
-  // update formatting style element
-  React.useEffect(putFormattingStyleElement, [formatting]);
+  const handleSetFormatting = (formatting) => {
+    setFormatting(formatting);
+    putFormattingStyleElement(formatting);
+  };
 
   const processSpineAndRenderEpubDOM = () =>
     new Promise((resolve, reject) => {
@@ -412,7 +414,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   // on load
   React.useEffect(() => {
-    if (spine === null) {
+    if (spine === null && runInit === false) {
+      runInit = true;
       processSpineAndRenderEpubDOM().then(() => {
         if (spinePointer === null) {
           setSpinePointer(0);
@@ -422,7 +425,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
     window.addEventListener("resize", updateWindowSize);
 
-    return () => window.removeEventListener("resize", updateWindowSize);
+    return () => {
+      window.removeEventListener("resize", updateWindowSize);
+      runInit = false;
+    };
   }, []);
 
   return (
@@ -464,7 +470,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           <Stack direction={"row"} spacing={2}>
             <ReaderFormat
               formatting={formatting}
-              setFormatting={setFormatting}
+              setFormatting={handleSetFormatting}
               defaultFormatting={defaultFormatting}
             />
           </Stack>
@@ -550,7 +556,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               }px`,
             }}
           >
-            {spine?.[(spinePointer ?? 0) - 1] ?? "test"}
+            {spine?.[(spinePointer ?? 0) - 1] ??
+              "something went wrong...<br/> spine is missing"}
           </Box>
         </Box>
       </Stack>
