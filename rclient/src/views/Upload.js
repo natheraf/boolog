@@ -46,6 +46,7 @@ export const Upload = () => {
           open={openReader}
           setOpen={setOpenReader}
           epubObject={epubObject}
+          key={epubObject?.opf?.package?.metadata?.["dc:identifier"]?.["#text"]}
         />
       )}
       <div className="input-group">
