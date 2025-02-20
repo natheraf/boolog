@@ -255,7 +255,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         margin: "auto",
       };
     } else if (tag === "a" && htmlElement.getAttribute("href") !== null) {
-      props.style = { color: "lightblue" };
+      props.style = { color: "lightblue", cursor: "pointer" };
       props.linkto = htmlElement.getAttribute("href");
     }
 
