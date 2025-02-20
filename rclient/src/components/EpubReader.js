@@ -19,6 +19,7 @@ import { convertFileToBlob } from "../api/IndexedDB/Files";
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import PropTypes from "prop-types";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -43,50 +44,50 @@ const parseCSSText = (cssText) => {
 
 let runInit = false;
 
+const defaultFormatting = {
+  fontSize: 100,
+  _fontSizeStep: 1,
+  _fontSizeBounds: { min: 1, max: Infinity },
+  lineHeight: 12,
+  _lineHeightBounds: { min: 1, max: Infinity },
+  _lineHeightStep: 1,
+  pageMargins: 500,
+  _pageMarginsStep: 50,
+  _pageMarginsBounds: { min: 70, max: Infinity },
+  pagesShown: 1,
+  _pagesShownStep: 1,
+  _pagesShownBounds: { min: 1, max: Infinity },
+  fontFamily: { label: "Original", value: "inherit" },
+  _fontFamilies: [
+    // formatted for MUI Selector use
+    { group: "none" },
+    { label: "Original", value: "inherit" },
+
+    { group: "Generic" },
+    { label: "Serif", value: "serif" },
+    { label: "Sans-Serif", value: "sans-serif" },
+    { label: "Monospace", value: "monospace" },
+    { label: "Cursive", value: "cursive" },
+    { label: "Fantasy", value: "fantasy" },
+    { label: "Math", value: "math" },
+    { label: "Fangsong", value: "fangsong" },
+    { label: "System-UI", value: "system-ui" },
+  ],
+  textAlign: { label: "Original", value: "inherit" },
+  _textAlignments: [
+    { label: "Original", value: "inherit" },
+    { label: "Left", value: "start" },
+    { label: "Middle", value: "center" },
+    { label: "Right", value: "end" },
+    { label: "Justified", value: "justify" },
+  ],
+};
+
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
   const [isLoading, setIsLoading] = React.useState(true);
 
   const contentElementRef = React.useRef(null);
-
-  const defaultFormatting = {
-    fontSize: 100,
-    _fontSizeStep: 1,
-    _fontSizeBounds: { min: 1, max: Infinity },
-    lineHeight: 12,
-    _lineHeightBounds: { min: 1, max: Infinity },
-    _lineHeightStep: 1,
-    pageMargins: 500,
-    _pageMarginsStep: 50,
-    _pageMarginsBounds: { min: 70, max: Infinity },
-    pagesShown: 1,
-    _pagesShownStep: 1,
-    _pagesShownBounds: { min: 1, max: Infinity },
-    fontFamily: { label: "Original", value: "inherit" },
-    _fontFamilies: [
-      // formatted for MUI Selector use
-      { group: "none" },
-      { label: "Original", value: "inherit" },
-
-      { group: "Generic" },
-      { label: "Serif", value: "serif" },
-      { label: "Sans-Serif", value: "sans-serif" },
-      { label: "Monospace", value: "monospace" },
-      { label: "Cursive", value: "cursive" },
-      { label: "Fantasy", value: "fantasy" },
-      { label: "Math", value: "math" },
-      { label: "Fangsong", value: "fangsong" },
-      { label: "System-UI", value: "system-ui" },
-    ],
-    textAlign: { label: "Original", value: "inherit" },
-    _textAlignments: [
-      { label: "Original", value: "inherit" },
-      { label: "Left", value: "start" },
-      { label: "Middle", value: "center" },
-      { label: "Right", value: "end" },
-      { label: "Justified", value: "justify" },
-    ],
-  };
 
   const [formatting, setFormatting] = React.useState(
     structuredClone(defaultFormatting)
@@ -582,4 +583,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       </Stack>
     </Dialog>
   );
+};
+
+EpubReader.propTypes = {
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
+  epubObject: PropTypes.object.isRequired,
 };
