@@ -26,9 +26,11 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { Tiles } from "../components/Tiles";
 import { indexedDBBooksInterface } from "../api/IndexedDB/Books";
 import { useTheme } from "@emotion/react";
+import { AlertsContext } from "../context/Alerts";
 
 export const SearchBook = () => {
   const theme = useTheme();
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const greaterThanMid = useMediaQuery(theme.breakpoints.up("md"));
   const [useDetailedSearch, setUseDetailedSearch] = React.useState(false);
   const [isSearching, setIsSearching] = React.useState(false);
@@ -115,16 +117,20 @@ export const SearchBook = () => {
       }`,
       searchRowsPerPage,
       searchPage
-    ).then((res) => {
-      setSearchResults(repackApiResponse(res));
-      setRenderSearchResultsApi(selApi);
-      setIsSearching(false);
-      setPerformNewSearch(false);
-      topResultRef?.current?.scrollIntoView({
-        behavior: theme.transitions.reduceMotion ? "smooth" : "instant",
-        block: "start",
+    )
+      .then((res) => {
+        setSearchResults(repackApiResponse(res));
+        setRenderSearchResultsApi(selApi);
+        setIsSearching(false);
+        setPerformNewSearch(false);
+        topResultRef?.current?.scrollIntoView({
+          behavior: theme.transitions.reduceMotion ? "smooth" : "instant",
+          block: "start",
+        });
+      })
+      .catch((error) => {
+        addAlert(error, "error");
       });
-    });
   }, [performNewSearch, selApi, searchPage, searchSortType, searchRowsPerPage]);
 
   const repackApiResponse = (response) => {
