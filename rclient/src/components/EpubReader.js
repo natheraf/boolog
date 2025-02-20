@@ -29,15 +29,15 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
 });
 
 const parseCSSText = (cssText) => {
-  var cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ");
-  var style = {},
+  const cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ");
+  const style = {},
     [, ruleName, rule] = cssTxt.match(/ ?(.*?) ?{([^}]*)}/) || [, , cssTxt];
-  var cssToJs = (s) =>
+  const cssToJs = (s) =>
     s.replace(/\W+\w/g, (match) => match.slice(-1).toUpperCase());
-  var properties = rule
+  const properties = rule
     .split(";")
     .map((o) => o.split(":").map((x) => x && x.trim()));
-  for (var [property, value] of properties) style[cssToJs(property)] = value;
+  for (const [property, value] of properties) style[cssToJs(property)] = value;
   return { cssText, ruleName, style };
 }; // https://stackoverflow.com/a/43012849
 
@@ -121,6 +121,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     return value;
   }, [windowHeight]);
 
+  const [linkFragment, setLinkFragment] = React.useState(null);
+
   const handleViewOutOfBounds = React.useCallback(() => {
     if (contentElementRef.current !== null) {
       const totalWidth = document.getElementById("content").scrollWidth;
@@ -137,10 +139,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   }, [currentPage, formatting, pageWidth]);
 
   React.useEffect(() => {
-    if (contentElementRef.current !== null && spinePointer !== null) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        handleViewOutOfBounds();
-      });
+    if (contentElementRef.current !== null) {
+      const resizeObserver = new ResizeObserver(handleViewOutOfBounds);
       const innerContentElement =
         contentElementRef.current.children?.[0] ??
         document.getElementById("inner-content");
@@ -149,20 +149,43 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       }
       return () => resizeObserver.disconnect();
     }
-  }, [handleViewOutOfBounds, spinePointer]);
+  }, [handleViewOutOfBounds]);
 
   const handlePathHref = React.useCallback(
     (path) => {
       if (path.startsWith("http")) {
-        window.open(path, "_blank");
-        return;
+        return window.open(path, "_blank");
       }
       setCurrentPage(0);
       path = path.substring(path.indexOf("/") + 1);
+      if (path.indexOf("#") !== -1) {
+        setLinkFragment(path.substring(path.indexOf("#") + 1));
+        path = path.substring(0, path.indexOf("#"));
+      }
       setSpinePointer(hrefSpineMap.get(path));
     },
     [hrefSpineMap]
   );
+
+  React.useEffect(() => {
+    if (linkFragment !== null && document.getElementById(linkFragment)) {
+      const content = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      const fragment = document
+        .getElementById(linkFragment)
+        .getBoundingClientRect();
+      if (fragment.top > content.bottom) {
+        return;
+      }
+      const pageDelta = Math.floor(
+        (Math.floor(fragment.left) - Math.floor(content.left)) /
+          Math.floor(pageWidth + columnGap)
+      );
+      setCurrentPage((prev) => prev + pageDelta);
+      setLinkFragment(null);
+    }
+  }, [linkFragment, pageWidth]);
 
   const createReactDOM = async (htmlElement) => {
     if (htmlElement === null) {
@@ -231,12 +254,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         margin: "auto",
       };
     } else if (tag === "a" && htmlElement.getAttribute("href") !== null) {
-      const href = htmlElement.getAttribute("href");
       props.style = { color: "lightblue" };
-      props.linkto =
-        href.startsWith("http") === false && href.indexOf("#") !== -1
-          ? href.substring(0, href.indexOf("#"))
-          : href;
+      props.linkto = htmlElement.getAttribute("href");
     }
 
     const reactChildren = [];
