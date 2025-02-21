@@ -81,7 +81,9 @@ const convertZipFileToObjectDirectory = (id) =>
             const isXML =
               entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
               entry.filename.indexOf(".html") === entry.filename.length - 5 ||
-              entry.filename.indexOf(".xhtml") === entry.filename.length - 6 ||
+              entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
+
+            const isTOC =
               entry.filename.indexOf(".ncx") === entry.filename.length - 4;
 
             const isCSS =
@@ -95,9 +97,11 @@ const convertZipFileToObjectDirectory = (id) =>
                 text: string,
                 name: entry.filename,
               };
-            } else if (isOPF) {
+            } else if (isOPF || isTOC) {
               const object = await convertXMLFileToObject(entry);
-              objectDirectory["opf"] = object;
+              objectDirectory[
+                entry.filename.substring(entry.filename.lastIndexOf(".") + 1)
+              ] = object;
             } else {
               currentDir[path.pop()] = entry;
             }
