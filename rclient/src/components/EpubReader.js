@@ -2,12 +2,14 @@ import * as React from "react";
 import { useTheme } from "@emotion/react";
 import {
   AppBar,
+  Autocomplete,
   Box,
   Button,
   Dialog,
   IconButton,
   Slide,
   Stack,
+  TextField,
   Toolbar,
   Tooltip,
   Typography,
@@ -95,6 +97,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const structureRef = epubObject["OEBPS"];
   const contentRef = epubObject["opf"].package;
+  const tocRef = epubObject["ncx"].ncx;
 
   const [spine, setSpine] = React.useState(null);
   const [hrefSpineMap, setHrefSpineMap] = React.useState(null);
@@ -123,6 +126,70 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   }, [windowHeight]);
 
   const [linkFragment, setLinkFragment] = React.useState(null);
+
+  const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
+  const searchNeedle = React.useRef(null);
+  const [searchResult, setSearchResult] = React.useState([]);
+  const [webWorker, setWebWorker] = React.useState(null);
+
+  const searchEpub = (needle) => {
+    searchNeedle.current = needle;
+    setSearchResult([]);
+    setSpineSearchPointer(0);
+  };
+
+  const searchContent = React.useCallback(() => {
+    if (
+      spineSearchPointer !== null &&
+      document.getElementById("previous-content")
+    ) {
+      const result = document.evaluate(
+        `//*[text()[contains(.,'${searchNeedle.current}')]]`,
+        document.getElementById("previous-content"),
+        null,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+        null
+      );
+      let node = result.iterateNext();
+      while (node) {
+        const content = document
+          .getElementById("content")
+          .getBoundingClientRect();
+        const fragment = node.getBoundingClientRect();
+        const page = Math.floor(
+          Math.floor(fragment.left) / Math.floor(pageWidth + columnGap)
+        );
+        if (fragment.top < content.bottom) {
+          node = result.iterateNext();
+          continue;
+        }
+
+        const text = node.textContent;
+        webWorker.postMessage({
+          text,
+          searchNeedle: searchNeedle.current,
+          spineSearchPointer,
+          page,
+        });
+
+        node = result.iterateNext();
+      }
+    }
+  }, [pageWidth, spineSearchPointer, webWorker]);
+
+  const incrementSearchPointer = React.useCallback(() => {
+    if (spineSearchPointer !== null && spineSearchPointer + 1 < spine.length) {
+      setSpineSearchPointer((prev) => (prev ?? 0) + 1);
+    } else {
+      console.log(searchResult);
+      setSpineSearchPointer(null);
+    }
+  }, [spine, spineSearchPointer]);
+
+  React.useEffect(() => {
+    searchContent();
+    setTimeout(incrementSearchPointer, 50);
+  }, [incrementSearchPointer, searchContent]);
 
   const handleViewOutOfBounds = React.useCallback(() => {
     if (contentElementRef.current !== null) {
@@ -305,13 +372,25 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       });
     }
 
+    const navMap = new Map(); // content -> nav label / chapter name
+    for (const navPoint of tocRef.navMap.navPoint) {
+      navMap.set(
+        navPoint.content?.["@_src"],
+        navPoint.navLabel?.text ?? "error: no label"
+      );
+    }
+
     const spineStack = [];
     const spineMap = new Map();
     const spineRef = contentRef.spine.itemref;
     for (const item of spineRef) {
       spineMap.set(elementMap.get(item["@_idref"]).href, spineStack.length);
-      spineStack.push(elementMap.get(item["@_idref"]).section);
+      spineStack.push({
+        element: elementMap.get(item["@_idref"]).section,
+        label: navMap.get(elementMap.get(item["@_idref"]).href),
+      });
     }
+
     setSpine(spineStack);
     setHrefSpineMap(spineMap);
     return spineStack;
@@ -445,7 +524,16 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
     window.addEventListener("resize", updateWindowSize);
 
+    const webWorker = new Worker(
+      new URL("../features/epubSearch/xPathResultWorker.js", import.meta.url)
+    );
+    webWorker.addEventListener("message", (event) => {
+      setSearchResult((prev) => [...prev, event.data]);
+    });
+    setWebWorker(webWorker);
+
     return () => {
+      webWorker?.terminate();
       window.removeEventListener("resize", updateWindowSize);
       runInit = false;
     };
@@ -483,7 +571,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             </IconButton>
           </Tooltip>
           <Typography variant="h6" noWrap>
-            {contentRef?.metadata?.["dc:title"]?.["#text"] ??
+            {tocRef.docTitle.text ??
+              contentRef?.metadata?.["dc:title"]?.["#text"] ??
               contentRef?.metadata?.["dc:title"] ??
               "error"}
           </Typography>
@@ -493,6 +582,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               setFormatting={handleSetFormatting}
               defaultFormatting={defaultFormatting}
             />
+            <Autocomplete
+              options={searchResult}
+              groupBy={(option) => spine?.[option?.spineIndex]?.label}
+              renderInput={(params) => <TextField {...params} label="Search" />}
+              size="small"
+            />
+            <Button onClick={() => searchEpub("a")}>search</Button>
           </Stack>
         </Toolbar>
       </AppBar>
@@ -542,7 +638,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 }px);`,
               }}
             >
-              {spine?.[spinePointer ?? -1] ??
+              {spine?.[spinePointer ?? -1]?.element ??
                 "something went wrong...<br/> spine is missing"}
             </Box>
           </Box>
@@ -576,7 +672,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               }px`,
             }}
           >
-            {spine?.[(spinePointer ?? 0) - 1] ??
+            {spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]?.element ??
               "something went wrong...<br/> spine is missing"}
           </Box>
         </Box>
