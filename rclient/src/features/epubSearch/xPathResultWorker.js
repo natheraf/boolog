@@ -10,7 +10,13 @@ onmessage = ({ data: { text, searchNeedle, spineSearchPointer, page } }) => {
     res.push({
       spineIndex: spineSearchPointer,
       page,
-      preview: text.substring(index - 50, index + searchNeedle.length + 50),
+      textIndex: index,
+      previewStart: text.substring(index - 50, index),
+      needle: searchNeedle,
+      previewEnd: text.substring(
+        index + searchNeedle.length,
+        index + searchNeedle.length + 50
+      ),
     });
   }
   postMessage(res);

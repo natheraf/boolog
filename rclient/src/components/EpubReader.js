@@ -528,7 +528,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       new URL("../features/epubSearch/xPathResultWorker.js", import.meta.url)
     );
     webWorker.addEventListener("message", (event) => {
-      setSearchResult((prev) => [...prev, event.data]);
+      setSearchResult((prev) => prev.concat(event.data));
     });
     setWebWorker(webWorker);
 
@@ -585,10 +585,29 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             <Autocomplete
               options={searchResult}
               groupBy={(option) => spine?.[option?.spineIndex]?.label}
+              getOptionLabel={(option) =>
+                option.previewStart + option.needle + option.previewEnd
+              }
+              renderOption={(props, option) => (
+                <Box
+                  component="li"
+                  {...props}
+                  key={[option.spineIndex, option.page, option.textIndex].join(
+                    "|"
+                  )}
+                >
+                  <span>
+                    {option.previewStart}
+                    {<strong>{option.needle}</strong>}
+                    {option.previewEnd}
+                  </span>
+                </Box>
+              )}
               renderInput={(params) => <TextField {...params} label="Search" />}
               size="small"
+              sx={{ width: "300px" }}
             />
-            <Button onClick={() => searchEpub("a")}>search</Button>
+            <Button onClick={() => searchEpub("test")}>search</Button>
           </Stack>
         </Toolbar>
       </AppBar>
