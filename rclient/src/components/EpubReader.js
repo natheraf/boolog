@@ -251,7 +251,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handleSearchOnChange = (event, value) => {
     setSpinePointer(value.spineIndex);
     setCurrentPage(value.page);
-    console.log(value);
     if (value.bleeds) {
       addAlert(
         "Search result might be on the top of the next page.",
@@ -695,11 +694,18 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                     option.randomKey,
                   ].join("|")}
                 >
-                  <span>
-                    <span style={{ color: "gray" }}>{option.previewStart}</span>
-                    {option.needle}
-                    <span style={{ color: "gray" }}>{option.previewEnd}</span>
-                  </span>
+                  <Stack>
+                    <Typography variant="caption">{`Chapter page ${
+                      option.page + 1
+                    }`}</Typography>
+                    <span>
+                      <span style={{ color: "gray" }}>
+                        {option.previewStart}
+                      </span>
+                      {option.needle}
+                      <span style={{ color: "gray" }}>{option.previewEnd}</span>
+                    </span>
+                  </Stack>
                 </Box>
               )}
               loading={searchNeedle.current !== null}
