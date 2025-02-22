@@ -1,5 +1,5 @@
 onmessage = ({
-  data: { text, searchNeedle, spineSearchPointer, page, fragment },
+  data: { text, searchNeedle, spineSearchPointer, page, bleeds },
 }) => {
   let index = text.indexOf(searchNeedle);
   const indexAppearances = [];
@@ -37,6 +37,7 @@ onmessage = ({
       needle: searchNeedle,
       previewEnd: text.substring(index + searchNeedle.length, endIndex),
       randomKey: Math.floor(Math.random() * 100000),
+      bleeds,
     });
   }
   postMessage(res);
