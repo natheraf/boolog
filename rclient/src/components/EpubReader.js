@@ -721,24 +721,31 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           justifyContent={"space-between"}
           spacing={2}
         >
-          <Tooltip title="esc">
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleClose}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6" noWrap>
-            {greaterThanSmall
-              ? tocRef.docTitle.text ??
-                contentRef?.metadata?.["dc:title"]?.["#text"] ??
-                contentRef?.metadata?.["dc:title"] ??
-                "error"
-              : null}
-          </Typography>
+          <Stack
+            alignItems={"center"}
+            direction="row"
+            gap={1}
+            sx={{ overflow: "hidden" }}
+          >
+            <Tooltip title="esc">
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleClose}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
+            <Typography variant="h6" noWrap>
+              {greaterThanSmall
+                ? tocRef.docTitle.text ??
+                  contentRef?.metadata?.["dc:title"]?.["#text"] ??
+                  contentRef?.metadata?.["dc:title"] ??
+                  "error"
+                : null}
+            </Typography>
+          </Stack>
           <Stack direction={"row"} spacing={2}>
             <Autocomplete
               value={null}
@@ -824,7 +831,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               size="small"
               disabled={spine === null}
               disableClearable
-              sx={{ width: greaterThanSmall ? "300px" : "150px" }}
+              sx={{ width: greaterThanSmall ? "300px" : "200px" }}
             />
             <ReaderFormat
               formatting={formatting}
