@@ -13,6 +13,7 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
@@ -87,6 +88,7 @@ const defaultFormatting = {
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
+  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [isLoading, setIsLoading] = React.useState(true);
 
   const contentElementRef = React.useRef(null);
@@ -129,11 +131,19 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
   const searchNeedle = React.useRef(null);
+  const searchResultAccumulator = React.useRef([]);
   const [searchResult, setSearchResult] = React.useState([]);
+  const [searchValue, setSearchValue] = React.useState(null);
+  const [searchFocused, setSearchFocused] = React.useState(false);
   const [webWorker, setWebWorker] = React.useState(null);
 
   const searchEpub = (needle) => {
+    needle = needle.trim();
+    if (needle.length === 0) {
+      return;
+    }
     searchNeedle.current = needle;
+    searchResultAccumulator.current = [];
     setSearchResult([]);
     setSpineSearchPointer(0);
   };
@@ -143,6 +153,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       spineSearchPointer !== null &&
       document.getElementById("previous-content")
     ) {
+      const needle = searchNeedle.current;
       const result = document.evaluate(
         `//*[text()[contains(.,'${searchNeedle.current}')]]`,
         document.getElementById("previous-content"),
@@ -152,6 +163,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       );
       let node = result.iterateNext();
       while (node) {
+        if (spineSearchPointer === null || needle !== searchNeedle.current) {
+          return;
+        }
         const content = document
           .getElementById("content")
           .getBoundingClientRect();
@@ -170,6 +184,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           searchNeedle: searchNeedle.current,
           spineSearchPointer,
           page,
+          fragment,
         });
 
         node = result.iterateNext();
@@ -181,15 +196,38 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     if (spineSearchPointer !== null && spineSearchPointer + 1 < spine.length) {
       setSpineSearchPointer((prev) => (prev ?? 0) + 1);
     } else {
-      console.log(searchResult);
+      searchNeedle.current = null;
+      setSearchResult(searchResultAccumulator.current);
       setSpineSearchPointer(null);
     }
   }, [spine, spineSearchPointer]);
 
   React.useEffect(() => {
     searchContent();
-    setTimeout(incrementSearchPointer, 50);
+    incrementSearchPointer();
   }, [incrementSearchPointer, searchContent]);
+
+  const handleSearchOnKeyDown = (event) => {
+    if (event.key === "Enter") {
+      searchEpub(searchValue);
+    }
+  };
+
+  const handleSearchOnChange = (event, newInputValue) => {
+    setSearchValue(newInputValue);
+  };
+
+  const handleSearchOnBlur = () => {
+    setSearchFocused(false);
+    searchNeedle.current = null;
+    setSpineSearchPointer(null);
+    setSearchResult([]);
+  };
+
+  const handleSearchOnFocus = () => {
+    setSearchFocused(true);
+    setSearchResult([]);
+  };
 
   const handleViewOutOfBounds = React.useCallback(() => {
     if (contentElementRef.current !== null) {
@@ -387,7 +425,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       spineMap.set(elementMap.get(item["@_idref"]).href, spineStack.length);
       spineStack.push({
         element: elementMap.get(item["@_idref"]).section,
-        label: navMap.get(elementMap.get(item["@_idref"]).href),
+        label:
+          navMap.get(elementMap.get(item["@_idref"]).href) ??
+          spineStack[spineStack.length - 1].label ??
+          "No Chapter",
       });
     }
 
@@ -456,13 +497,16 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
+      if (searchFocused) {
+        return;
+      }
       if (event.key === "ArrowLeft") {
         handlePreviousPage();
       } else if (event.key === "ArrowRight") {
         handleNextPage();
       }
     },
-    [handleNextPage, handlePreviousPage]
+    [handleNextPage, handlePreviousPage, searchFocused]
   );
   // prob did implementation wrong cause this reruns every page
   React.useEffect(() => {
@@ -528,7 +572,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       new URL("../features/epubSearch/xPathResultWorker.js", import.meta.url)
     );
     webWorker.addEventListener("message", (event) => {
-      setSearchResult((prev) => prev.concat(event.data));
+      if (event.data?.[0]?.needle !== searchNeedle.current) {
+        return;
+      }
+      searchResultAccumulator.current.push(...event.data);
     });
     setWebWorker(webWorker);
 
@@ -577,14 +624,16 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               "error"}
           </Typography>
           <Stack direction={"row"} spacing={2}>
-            <ReaderFormat
-              formatting={formatting}
-              setFormatting={handleSetFormatting}
-              defaultFormatting={defaultFormatting}
-            />
             <Autocomplete
+              onInputChange={handleSearchOnChange}
+              onKeyDown={handleSearchOnKeyDown}
               options={searchResult}
-              groupBy={(option) => spine?.[option?.spineIndex]?.label}
+              onFocus={handleSearchOnFocus}
+              onBlur={handleSearchOnBlur}
+              aria-placeholder={searchNeedle.current}
+              groupBy={(option) =>
+                spine?.[option?.spineIndex]?.label ?? "No Chapter"
+              }
               getOptionLabel={(option) =>
                 option.previewStart + option.needle + option.previewEnd
               }
@@ -592,22 +641,30 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                 <Box
                   component="li"
                   {...props}
-                  key={[option.spineIndex, option.page, option.textIndex].join(
-                    "|"
-                  )}
+                  key={[
+                    option.spineIndex,
+                    option.page,
+                    option.textIndex,
+                    option.randomKey,
+                  ].join("|")}
                 >
                   <span>
-                    {option.previewStart}
-                    {<strong>{option.needle}</strong>}
-                    {option.previewEnd}
+                    <span style={{ color: "gray" }}>{option.previewStart}</span>
+                    {option.needle}
+                    <span style={{ color: "gray" }}>{option.previewEnd}</span>
                   </span>
                 </Box>
               )}
               renderInput={(params) => <TextField {...params} label="Search" />}
               size="small"
-              sx={{ width: "300px" }}
+              disabled={spine === null}
+              sx={{ width: greaterThanSmall ? "300px" : "200px" }}
             />
-            <Button onClick={() => searchEpub("test")}>search</Button>
+            <ReaderFormat
+              formatting={formatting}
+              setFormatting={handleSetFormatting}
+              defaultFormatting={defaultFormatting}
+            />
           </Stack>
         </Toolbar>
       </AppBar>
