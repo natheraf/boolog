@@ -810,6 +810,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                               }
                               color={"inherit"}
                               size={20}
+                              sx={{ circle: { transition: "none" } }}
                             />
                           )
                         ) : null}
