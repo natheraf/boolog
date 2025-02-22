@@ -186,7 +186,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     ) {
       const needle = searchNeedle.current;
       const result = document.evaluate(
-        `//*[text()[contains(.,'${searchNeedle.current}')]]`,
+        `.//*[text()[contains(.,'${searchNeedle.current}')]]`,
         document.getElementById("previous-content"),
         null,
         XPathResult.ORDERED_NODE_ITERATOR_TYPE,
@@ -261,7 +261,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   React.useEffect(() => {
     if (selectedSearchResult !== null) {
       const result = document.evaluate(
-        `//*[text()[contains(.,'${[selectedSearchResult.needle].join("")}')]]`,
+        `.//*[text()[contains(.,'${[selectedSearchResult.needle].join("")}')]]`,
         document.getElementById("content"),
         null,
         XPathResult.ORDERED_NODE_ITERATOR_TYPE,
