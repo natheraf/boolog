@@ -19,6 +19,7 @@ import {
 
 import { ReaderFormat } from "./ReaderFormat";
 import { convertFileToBlob } from "../api/IndexedDB/Files";
+import { AlertsContext } from "../context/Alerts";
 
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -117,6 +118,7 @@ const defaultFormatting = {
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -213,7 +215,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           searchNeedle: searchNeedle.current,
           spineSearchPointer,
           page,
-          fragment,
+          bleeds: fragment.right - fragment.left - (pageWidth + columnGap) > 0,
         });
 
         node = result.iterateNext();
@@ -242,8 +244,21 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
   };
 
-  const handleSearchOnChange = (event, newInputValue) => {
+  const handleSearchInputOnChange = (event, newInputValue) => {
     setSearchValue(newInputValue);
+  };
+
+  const handleSearchOnChange = (event, value) => {
+    setSpinePointer(value.spineIndex);
+    setCurrentPage(value.page);
+    console.log(value);
+    if (value.bleeds) {
+      addAlert(
+        "Search result might be on the top of the next page.",
+        "warning"
+      );
+    }
+    handleSearchOnBlur();
   };
 
   const handleSearchOnBlur = () => {
@@ -655,7 +670,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           </Typography>
           <Stack direction={"row"} spacing={2}>
             <Autocomplete
-              onInputChange={handleSearchOnChange}
+              value={null}
+              onChange={handleSearchOnChange}
+              onInputChange={handleSearchInputOnChange}
               onKeyDown={handleSearchOnKeyDown}
               options={searchResult}
               onFocus={handleSearchOnFocus}
@@ -727,6 +744,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               )}
               size="small"
               disabled={spine === null}
+              disableClearable
               sx={{ width: greaterThanSmall ? "300px" : "200px" }}
             />
             <ReaderFormat
