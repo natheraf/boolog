@@ -19,7 +19,6 @@ import {
 
 import { ReaderFormat } from "./ReaderFormat";
 import { convertFileToBlob } from "../api/IndexedDB/Files";
-import { AlertsContext } from "../context/Alerts";
 
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -733,10 +732,12 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             </IconButton>
           </Tooltip>
           <Typography variant="h6" noWrap>
-            {tocRef.docTitle.text ??
-              contentRef?.metadata?.["dc:title"]?.["#text"] ??
-              contentRef?.metadata?.["dc:title"] ??
-              "error"}
+            {greaterThanSmall
+              ? tocRef.docTitle.text ??
+                contentRef?.metadata?.["dc:title"]?.["#text"] ??
+                contentRef?.metadata?.["dc:title"] ??
+                "error"
+              : null}
           </Typography>
           <Stack direction={"row"} spacing={2}>
             <Autocomplete
@@ -823,7 +824,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               size="small"
               disabled={spine === null}
               disableClearable
-              sx={{ width: greaterThanSmall ? "300px" : "200px" }}
+              sx={{ width: greaterThanSmall ? "300px" : "150px" }}
             />
             <ReaderFormat
               formatting={formatting}
