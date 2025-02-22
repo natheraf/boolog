@@ -165,6 +165,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [searchValue, setSearchValue] = React.useState(null);
   const [searchFocused, setSearchFocused] = React.useState(false);
   const [selectedSearchResult, setSelectedSearchResult] = React.useState(null);
+  const searchResultElement = React.useRef(null);
+  const searchResultElementClone = React.useRef(null);
   const [webWorker, setWebWorker] = React.useState(null);
 
   const searchEpub = (needle) => {
@@ -251,6 +253,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   };
 
   const handleSearchOnChange = (event, value) => {
+    cleanUpMarkNode();
     setSpinePointer(value.spineIndex);
     setCurrentPage(value.page);
     setSelectedSearchResult(value);
@@ -302,7 +305,13 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               continue;
             }
             if (textContentIndex === selectedSearchResult.textIndex) {
-              node.innerHTML = `${inner.substring(
+              searchResultElement.current = node;
+              searchResultElementClone.current = node.cloneNode(true);
+              node.parentElement.replaceChild(
+                searchResultElementClone.current,
+                node
+              );
+              searchResultElementClone.current.innerHTML = `${inner.substring(
                 0,
                 index
               )}<mark id="${markId}">${
@@ -329,6 +338,17 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       setSelectedSearchResult(null);
     }
   }, [selectedSearchResult]);
+
+  const cleanUpMarkNode = () => {
+    if (searchResultElementClone.current !== null) {
+      searchResultElementClone.current.parentElement.replaceChild(
+        searchResultElement.current,
+        searchResultElementClone.current
+      );
+      searchResultElement.current = null;
+      searchResultElementClone.current = null;
+    }
+  };
 
   const handleSearchOnBlur = () => {
     setSearchFocused(false);
@@ -573,6 +593,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   }, [handlePathHref]);
 
   const handleNextPage = React.useCallback(() => {
+    cleanUpMarkNode();
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
       Math.floor(totalWidth / pageWidth) +
@@ -591,6 +612,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   }, [currentPage, pageWidth, formatting, spine]);
 
   const handlePreviousPage = React.useCallback(() => {
+    cleanUpMarkNode();
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages =
