@@ -14,6 +14,7 @@ import {
   Tooltip,
   Typography,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
@@ -31,6 +32,34 @@ const DialogSlideUpTransition = React.forwardRef(function Transition(
 ) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
+
+const CircularProgressWithLabel = (props) => {
+  return (
+    <Box sx={{ position: "relative", display: "inline-flex" }}>
+      <CircularProgress variant="determinate" {...props} />
+      <Box
+        sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: "absolute",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography
+          variant="caption"
+          component="div"
+          sx={{ color: "text.secondary" }}
+        >
+          {`${Math.round(props.value)}`}
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
 
 const parseCSSText = (cssText) => {
   const cssTxt = cssText.replace(/\/\*(.|\s)*?\*\//g, " ").replace(/\s+/g, " ");
@@ -220,6 +249,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handleSearchOnBlur = () => {
     setSearchFocused(false);
     searchNeedle.current = null;
+    searchResultAccumulator.current = [];
     setSpineSearchPointer(null);
     setSearchResult([]);
   };
@@ -655,7 +685,46 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                   </span>
                 </Box>
               )}
-              renderInput={(params) => <TextField {...params} label="Search" />}
+              loading={searchNeedle.current !== null}
+              loadingText={
+                (spineSearchPointer ?? 0) === (spine?.length ?? 0) - 1
+                  ? "Loading results…"
+                  : "Searching…"
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Search"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {searchNeedle.current !== null ? (
+                          (spineSearchPointer ?? 0) ===
+                          (spine?.length ?? 0) - 1 ? (
+                            <CircularProgress
+                              color={"inherit"}
+                              size={20}
+                              disableShrink
+                            />
+                          ) : (
+                            <CircularProgressWithLabel
+                              value={
+                                ((spineSearchPointer ?? 0) /
+                                  (spine?.length ?? 0)) *
+                                100
+                              }
+                              color={"inherit"}
+                              size={20}
+                            />
+                          )
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
               size="small"
               disabled={spine === null}
               sx={{ width: greaterThanSmall ? "300px" : "200px" }}
