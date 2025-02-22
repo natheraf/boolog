@@ -724,7 +724,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           <Stack
             alignItems={"center"}
             direction="row"
-            gap={1}
+            spacing={1}
             sx={{ overflow: "hidden" }}
           >
             <Tooltip title="esc">
@@ -831,7 +831,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               size="small"
               disabled={spine === null}
               disableClearable
-              sx={{ width: greaterThanSmall ? "300px" : "200px" }}
+              sx={{ width: greaterThanSmall ? "300px" : "180px" }}
             />
             <ReaderFormat
               formatting={formatting}
