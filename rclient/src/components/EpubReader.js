@@ -118,7 +118,6 @@ const defaultFormatting = {
 
 export const EpubReader = ({ open, setOpen, epubObject }) => {
   const theme = useTheme();
-  const addAlert = React.useContext(AlertsContext).addAlert;
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [isLoading, setIsLoading] = React.useState(true);
 
@@ -166,6 +165,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [searchResult, setSearchResult] = React.useState([]);
   const [searchValue, setSearchValue] = React.useState(null);
   const [searchFocused, setSearchFocused] = React.useState(false);
+  const [selectedSearchResult, setSelectedSearchResult] = React.useState(null);
   const [webWorker, setWebWorker] = React.useState(null);
 
   const searchEpub = (needle) => {
@@ -192,6 +192,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         XPathResult.ORDERED_NODE_ITERATOR_TYPE,
         null
       );
+      let nodeNumber = 0;
       let node = result.iterateNext();
       while (node) {
         if (spineSearchPointer === null || needle !== searchNeedle.current) {
@@ -216,8 +217,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           spineSearchPointer,
           page,
           bleeds: fragment.right - fragment.left - (pageWidth + columnGap) > 0,
+          nodeNumber,
         });
 
+        nodeNumber += 1;
         node = result.iterateNext();
       }
     }
@@ -251,14 +254,82 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const handleSearchOnChange = (event, value) => {
     setSpinePointer(value.spineIndex);
     setCurrentPage(value.page);
-    if (value.bleeds) {
-      addAlert(
-        "Search result might be on the top of the next page.",
-        "warning"
-      );
-    }
+    setSelectedSearchResult(value);
     handleSearchOnBlur();
   };
+
+  React.useEffect(() => {
+    if (selectedSearchResult !== null) {
+      const result = document.evaluate(
+        `//*[text()[contains(.,'${[selectedSearchResult.needle].join("")}')]]`,
+        document.getElementById("content"),
+        null,
+        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+        null
+      );
+      const content = document
+        .getElementById("next-page-button")
+        .getBoundingClientRect();
+      let nodeNumber = 0;
+      let node = result.iterateNext();
+      while (node) {
+        const fragment = node.getBoundingClientRect();
+        if (fragment.top > content.bottom) {
+          node = result.iterateNext();
+          continue;
+        }
+        if (nodeNumber < selectedSearchResult.nodeNumber) {
+          nodeNumber += 1;
+          node = result.iterateNext();
+          continue;
+        }
+
+        const keysForMarkId = ["spineIndex", "page", "textIndex", "nodeNumber"];
+        const markId = keysForMarkId
+          .map((key) => selectedSearchResult[key])
+          .join("|");
+        const markIsPresent = Boolean(document.getElementById(markId));
+        const inner = node.innerHTML;
+        let index = 0;
+        const text = node.textContent;
+        let textContentIndex = 0;
+        if (markIsPresent === false) {
+          while (index < inner.length) {
+            if (
+              inner[index] === "<" &&
+              inner[index] !== text[textContentIndex]
+            ) {
+              index = inner.indexOf(">", index + 1) + 1;
+              continue;
+            }
+            if (textContentIndex === selectedSearchResult.textIndex) {
+              node.innerHTML = `${inner.substring(
+                0,
+                index
+              )}<mark id="${markId}">${
+                selectedSearchResult.needle
+              }</mark>${inner.substring(
+                index + selectedSearchResult.needle.length
+              )}`;
+              break;
+            }
+            index += 1;
+            textContentIndex += 1;
+          }
+        }
+        if (markId !== null && document.getElementById(markId)) {
+          const marked = document
+            .getElementById(markId)
+            .getBoundingClientRect();
+          if (marked.left > content.right) {
+            setCurrentPage((prev) => prev + 1);
+          }
+        }
+        break;
+      }
+      setSelectedSearchResult(null);
+    }
+  }, [selectedSearchResult]);
 
   const handleSearchOnBlur = () => {
     setSearchFocused(false);
@@ -691,7 +762,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                     option.spineIndex,
                     option.page,
                     option.textIndex,
-                    option.randomKey,
+                    option.nodeNumber,
                   ].join("|")}
                 >
                   <Stack>
@@ -710,7 +781,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               )}
               loading={searchNeedle.current !== null}
               loadingText={
-                (spineSearchPointer ?? 0) === (spine?.length ?? 0) - 1
+                (spineSearchPointer ?? 0) >= (spine?.length ?? 0) - 2
                   ? "Loading results…"
                   : "Searching…"
               }
@@ -723,8 +794,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
                     endAdornment: (
                       <>
                         {searchNeedle.current !== null ? (
-                          (spineSearchPointer ?? 0) ===
-                          (spine?.length ?? 0) - 1 ? (
+                          (spineSearchPointer ?? 0) >=
+                          (spine?.length ?? 0) - 2 ? (
                             <CircularProgress
                               color={"inherit"}
                               size={20}
@@ -812,6 +883,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
             </Box>
           </Box>
           <Button
+            id="next-page-button"
             variant="text"
             onClick={handleNextPage}
             sx={{
