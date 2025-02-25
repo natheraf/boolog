@@ -46,7 +46,7 @@ const getBlobIdHelper = (db, id) =>
 
     request.onsuccess = (event) => {
       const fileMeta = event.target.result;
-      resolve(fileMeta.id);
+      resolve(fileMeta.fileId);
     };
     request.onerror = () => {
       console.log("Request Error", request.error);
