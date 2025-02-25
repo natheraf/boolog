@@ -1,13 +1,13 @@
 import * as React from "react";
+import PropTypes from "prop-types";
+import { useTheme } from "@emotion/react";
 
 import { Button, Stack, Typography } from "@mui/material";
 
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { useTheme } from "@emotion/react";
 
-export const Upload = () => {
+export const Upload = ({ file, setFile }) => {
   const theme = useTheme();
-  const [file, setFile] = React.useState(null);
   const inputFile = React.useRef(null);
 
   const handleFileChange = (event) => {
@@ -60,4 +60,9 @@ export const Upload = () => {
       <input type="file" ref={inputFile} onChange={handleFileChange} hidden />
     </Stack>
   );
+};
+
+Upload.prototype = {
+  file: PropTypes.object.isRequired,
+  setFile: PropTypes.func.isRequired,
 };
