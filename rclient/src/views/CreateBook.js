@@ -31,7 +31,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "../components/DynamicButton";
 import { AlertsContext } from "../context/Alerts";
-import { Upload } from "../features/files/Upload";
+import { Upload } from "../features/files/components/Upload";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
