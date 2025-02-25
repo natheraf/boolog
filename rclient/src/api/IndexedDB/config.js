@@ -2,5 +2,6 @@ module.exports = {
   userDBVersion: 1,
   appDataDBVersion: 1,
   shelvesObjectStore: "v1",
-  fileObjectStore: "files",
+  filesObjectStore: "files",
+  filesMetaObjectStore: "filesMeta",
 };

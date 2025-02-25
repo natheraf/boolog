@@ -1,5 +1,9 @@
 import { userTemplates } from "../Local";
-import { fileObjectStore, shelvesObjectStore } from "./config";
+import {
+  filesObjectStore,
+  shelvesObjectStore,
+  filesMetaObjectStore,
+} from "./config";
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
@@ -34,9 +38,13 @@ const userDataDBOnupgradeNeeded = function (event) {
       shelves.createIndex("status", "status");
       shelves.createIndex("shelf", "shelf");
 
-      const files = db.createObjectStore(fileObjectStore, {
+      const files = db.createObjectStore(filesObjectStore, {
         keyPath: "id",
         autoIncrement: true,
+      });
+
+      const fileMeta = db.createObjectStore(filesMetaObjectStore, {
+        keyPath: "_id",
       });
   }
 };
@@ -71,3 +79,8 @@ export const openDatabase = async (name, version, crudFn) => {
     }
   }
 };
+
+export const getNewId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+
+export const getUserDB = () => `user${localStorage.getItem("userId")}`;
