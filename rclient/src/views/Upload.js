@@ -1,5 +1,5 @@
 import * as React from "react";
-import { getObjectFromEpub } from "../api/IndexedDB/Files";
+import { getObjectFromEpub } from "../features/files/fileUtils";
 import { addFile, exportFile, getFile } from "../api/IndexedDB/filesMeta";
 import { TextField } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
