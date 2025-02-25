@@ -1,5 +1,5 @@
-import { fileObjectStore, userDBVersion } from "./config";
-import { openDatabase, getUserDB, getNewId } from "./common";
+import { filesObjectStore, userDBVersion } from "./config";
+import { openDatabase, getUserDB } from "./common";
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
@@ -8,9 +8,8 @@ export const addFile = (file) =>
 
 const addFileHelper = (db, file) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(fileObjectStore, "readwrite");
-    const objectStore = transaction.objectStore(fileObjectStore);
-    file._id = getNewId();
+    const transaction = db.transaction(filesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(filesObjectStore);
     const request = objectStore.add(file);
     request.onsuccess = (event) => {
       console.log("added file!");
@@ -27,12 +26,12 @@ export const getFile = (id) =>
 
 const getFileHelper = (db, id) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(fileObjectStore, "readonly");
+    const transaction = db.transaction(filesObjectStore, "readonly");
     transaction.onerror = (event) => {
       console.error("Transaction Error", event);
       reject(new Error(event));
     };
-    const objectStore = transaction.objectStore(fileObjectStore);
+    const objectStore = transaction.objectStore(filesObjectStore);
     const request = objectStore.get(id);
     request.onsuccess = (event) => {
       const data = event.target.result;
