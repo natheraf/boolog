@@ -3,12 +3,10 @@ import { openDatabase, getUserDB, getNewId } from "./common";
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
-export const addFile = (file, localOnly) =>
-  openDatabase(getUserDB(), userDBVersion, (db) =>
-    addFileHelper(db, file, localOnly)
-  );
+export const addFile = (file) =>
+  openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, file));
 
-const addFileHelper = (db, file, localOnly) =>
+const addFileHelper = (db, file) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(fileObjectStore, "readwrite");
     const objectStore = transaction.objectStore(fileObjectStore);
