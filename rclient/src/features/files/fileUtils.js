@@ -1,6 +1,6 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { getFile } from "../../api/IndexedDB/FilesMeta";
+import { getFile } from "../../api/IndexedDB/filesMeta";
 
 const convertZipFileToObjectDirectory = (id) =>
   new Promise((resolve, reject) => {

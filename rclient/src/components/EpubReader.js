@@ -18,7 +18,7 @@ import {
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
-import { convertFileToBlob } from "../api/IndexedDB/Files";
+import { convertFileToBlob } from "../features/files/fileUtils";
 
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
