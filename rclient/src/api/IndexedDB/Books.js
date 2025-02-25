@@ -1,12 +1,10 @@
-import { userDBVersion, shelvesObjectStore } from "./config";
+import {
+  userDBVersion as userDataDBVersion,
+  shelvesObjectStore,
+} from "./config";
 import { openDatabase } from "./common";
 import { handleSimpleRequest } from "../Axios";
-
-const getUserDB = () => `user${localStorage.getItem("userId")}`;
-const userDataDBVersion = userDBVersion;
-
-const getNewId = () =>
-  `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+import { getUserDB, getNewId } from "./common";
 
 /**
  *
