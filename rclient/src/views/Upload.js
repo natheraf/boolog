@@ -1,10 +1,6 @@
 import * as React from "react";
-import {
-  addFile,
-  exportFile,
-  getFile,
-  getObjectFromEpub,
-} from "../api/IndexedDB/Files";
+import { getObjectFromEpub } from "../api/IndexedDB/Files";
+import { addFile, exportFile, getFile } from "../api/IndexedDB/filesMeta";
 import { TextField } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
 
@@ -123,9 +119,7 @@ export const Upload = () => {
         defaultValue="1"
         onKeyDown={(event) =>
           event.key === "Enter"
-            ? getObjectFromEpub(parseInt(event.target.value)).then(
-                handleOpenBook
-              )
+            ? getObjectFromEpub(event.target.value).then(handleOpenBook)
             : null
         }
         label="open book"
