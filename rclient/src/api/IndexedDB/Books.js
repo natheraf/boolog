@@ -2,9 +2,8 @@ import {
   userDBVersion as userDataDBVersion,
   shelvesObjectStore,
 } from "./config";
-import { openDatabase } from "./common";
+import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
-import { getUserDB, getNewId } from "./common";
 
 /**
  *

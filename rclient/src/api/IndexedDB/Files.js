@@ -1,8 +1,7 @@
 import { fileObjectStore, userDBVersion } from "./config";
-import { openDatabase } from "./common";
+import { openDatabase, getUserDB, getNewId } from "./common";
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { getNewId, getUserDB } from "./common";
 
 export const addFile = (file, localOnly) =>
   openDatabase(getUserDB(), userDBVersion, (db) =>
