@@ -27,14 +27,12 @@ export const DeleteMediaDialog = ({
       <DialogTitle>Deleting from library?</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          <Typography>
-            Deleting this from your library will immediately destroy all data
-            relating to this entry. Entry will be destroyed after refresh.
-          </Typography>
-          <br />
-          <Typography>
-            Please consider setting item as dropped instead of deleting.
-          </Typography>
+          Deleting this from your library will immediately destroy all data
+          relating to this entry. Entry will be destroyed after refresh.
+        </DialogContentText>
+        <br />
+        <DialogContentText>
+          Please consider setting item as dropped instead of deleting.
         </DialogContentText>
       </DialogContent>
       <DialogActions>
