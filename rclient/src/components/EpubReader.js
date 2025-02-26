@@ -489,7 +489,6 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
       props.style = {
-        maxHeight: pageHeight,
         objectFit: "scale-down",
         margin: "auto",
       };
@@ -705,7 +704,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     window.addEventListener("resize", updateWindowSize);
 
     const webWorker = new Worker(
-      new URL("../features/epubSearch/xPathResultWorker.js", import.meta.url)
+      new URL("../features/epub/xPathResultWorker.js", import.meta.url)
     );
     webWorker.addEventListener("message", (event) => {
       if (event.data?.[0]?.needle !== searchNeedle.current) {
