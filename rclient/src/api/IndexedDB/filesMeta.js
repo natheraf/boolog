@@ -4,6 +4,7 @@ import {
   addFile as importFile,
   getFile as getFileBlob,
   exportFile as exportBlob,
+  deleteFile as deleteBlob,
 } from "./Files";
 
 export const addFile = (file, localOnly) =>
@@ -46,7 +47,7 @@ const getBlobIdHelper = (db, id) =>
 
     request.onsuccess = (event) => {
       const fileMeta = event.target.result;
-      resolve(fileMeta.fileId);
+      resolve(fileMeta?.fileId);
     };
     request.onerror = () => {
       console.log("Request Error", request.error);
@@ -58,6 +59,9 @@ export const getFile = (id) =>
   new Promise((resolve, reject) => {
     getBlobId(id)
       .then((blobId) => {
+        if (!blobId) {
+          return resolve(null);
+        }
         getFileBlob(blobId).then((data) => resolve(data));
       })
       .catch((error) => {
@@ -69,3 +73,22 @@ export const getFile = (id) =>
 export const exportFile = (id) => {
   getBlobId(id).then((blobId) => exportBlob(blobId));
 };
+
+export const deleteFile = (id) =>
+  openDatabase(getUserDB(), userDBVersion, (db) => deleteFileHelper(db, id));
+
+const deleteFileHelper = (db, id) =>
+  new Promise((resolve, reject) => {
+    getBlobId(id)
+      .then((blobId) => deleteBlob(blobId))
+      .then(() => {
+        const transaction = db.transaction(filesMetaObjectStore, "readwrite");
+        const objectStore = transaction.objectStore(filesMetaObjectStore);
+        const request = objectStore.delete(id);
+        request.onsuccess = resolve;
+        request.onerror = () => {
+          console.log("Request Error", request.error);
+          reject(new Error(`Request Error: ${request.error}`));
+        };
+      });
+  });

@@ -45,3 +45,26 @@ export const exportFile = (id) =>
     tempLink.setAttribute("download", res.name);
     tempLink.click();
   });
+
+export const deleteFile = (id) =>
+  openDatabase(getUserDB(), userDBVersion, (db) => deleteFileHelper(db, id));
+
+const deleteFileHelper = (db, id) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(filesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(filesObjectStore);
+    try {
+      const request = objectStore.delete(id);
+      request.onsuccess = resolve;
+      request.onerror = (error) => {
+        console.log("Request Error", error);
+        reject(new Error(`Request Error: ${error}`));
+      };
+    } catch (error) {
+      if (error.name === "DataError") {
+        resolve();
+      } else {
+        reject(new Error(error));
+      }
+    }
+  });
