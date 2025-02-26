@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Typography,
 } from "@mui/material";
 import PropTypes from "prop-types";
 
@@ -19,20 +20,21 @@ export const DeleteMediaDialog = ({
   return (
     <Dialog
       open={openDeleteAlert}
-      onClose={setOpenDeleteAlert}
+      onClose={() => setOpenDeleteAlert(false)}
       aria-labelledby="delete-entry"
       aria-describedby="delete-this-media-from-library"
     >
       <DialogTitle>Deleting from library?</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Deleting this from your library will delete all data relating to this
-          entry.
+          <Typography>
+            Deleting this from your library will immediately destroy all data
+            relating to this entry. Entry will be destroyed after refresh.
+          </Typography>
           <br />
-          Item will be destroyed after refresh.
-          <br />
-          If not dropped already, please reconsider dropping instead.
-          <br />
+          <Typography>
+            Please consider setting item as dropped instead of deleting.
+          </Typography>
         </DialogContentText>
       </DialogContent>
       <DialogActions>
