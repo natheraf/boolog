@@ -1,10 +1,14 @@
-import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
-import LinkIcon from "@mui/icons-material/Link";
 import * as React from "react";
-import { MediaController } from "./MediaController";
+import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
 import { Link } from "react-router-dom";
-import PropTypes from "prop-types";
+
+import { Box, Grid, Paper, Stack, Typography } from "@mui/material";
+
+import { MediaController } from "./MediaController";
+
+import LinkIcon from "@mui/icons-material/Link";
+import BookIcon from "@mui/icons-material/Book";
 
 export const TileCard = ({ data, keysData, actionArea }) => {
   const theme = useTheme();
@@ -30,18 +34,35 @@ export const TileCard = ({ data, keysData, actionArea }) => {
     >
       <Grid item sx={{ width: "25%" }}>
         <Box
-          component="img"
-          src={dataObject.cover_url}
-          alt={`cover for ${dataObject.title}`}
           sx={{
-            borderRadius: "5px",
-            objectFit: "cover",
-            width: "100%",
-            height: "100%",
-            wordWrap: "break-word",
-            display: "block",
+            position: "relative",
+            cursor: dataObject?.fileId ? "pointer" : "inherit",
           }}
-        />
+        >
+          <Box
+            component="img"
+            src={dataObject.cover_url}
+            alt={`cover for ${dataObject.title}`}
+            sx={{
+              borderRadius: "5px",
+              objectFit: "cover",
+              width: "100%",
+              height: "100%",
+              wordWrap: "break-word",
+              display: "block",
+            }}
+          />
+          {dataObject?.fileId ? (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 0,
+              }}
+            >
+              <BookIcon sx={{ mixBlendMode: "difference" }} htmlColor="white" />
+            </Box>
+          ) : null}
+        </Box>
       </Grid>
       <Grid
         item
