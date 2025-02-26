@@ -25,13 +25,14 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
-import { setBook } from "../api/IndexedDB/Books";
+import { setBookWithFile } from "../api/IndexedDB/Books";
 import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "../components/DynamicButton";
 import { AlertsContext } from "../context/Alerts";
 import { Upload } from "../features/files/components/Upload";
+import { getFile } from "../api/IndexedDB/filesMeta";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -56,18 +57,24 @@ export const CreateBook = ({
     type: undefined,
   });
   const [restorableBookObject, setRestorableBookObject] = React.useState(null);
+  const [file, setFile] = React.useState(null);
+  const [restorableFile, setRestorableFile] = React.useState(null);
 
   const handleClearAll = () => {
     setBookObject({
       status: undefined,
       type: undefined,
     });
+    setRestorableFile(file);
     setRestorableBookObject(bookObject);
+    setFile(null);
   };
 
   const handleUndoClear = () => {
     setBookObject(restorableBookObject);
+    setFile(restorableFile);
     setRestorableBookObject(null);
+    setRestorableFile(null);
   };
 
   const handleClose = (event, reason) => {
@@ -90,7 +97,7 @@ export const CreateBook = ({
           ? bookObject[key]
           : bookObject[key]?.split(",").map((isbn) => isbn.trim()))
     );
-    setBook(bookObject, "id")
+    setBookWithFile(bookObject, file, "id")
       .then(() => {
         handleClose();
         setDataObject(bookObject);
@@ -192,6 +199,11 @@ export const CreateBook = ({
   React.useEffect(() => {
     if (editBookObject) {
       setBookObject(editBookObject);
+      if (editBookObject.fileId) {
+        getFile(editBookObject.fileId)
+          .then((file) => setFile(file))
+          .catch((error) => console.log(error));
+      }
     }
   }, [editBookObject]);
 
@@ -415,7 +427,7 @@ export const CreateBook = ({
               </Grid>
             ))}
           </Grid>
-          <Upload />
+          <Upload file={file} setFile={setFile} />
         </Stack>
       </Stack>
     </Dialog>

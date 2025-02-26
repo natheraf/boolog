@@ -4,6 +4,7 @@ import {
 } from "./config";
 import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
+import { addFile, deleteFile } from "./filesMeta";
 
 /**
  *
@@ -203,6 +204,36 @@ const setBookHelper = (db, data, key, localOnly) =>
       }
     };
   });
+
+export const setBookWithFile = (entry, file, key, localOnly) => {
+  const goSetBook = () => setBook(entry, key, localOnly);
+  if (
+    file?.hasOwnProperty("id") ||
+    (file === null && entry.hasOwnProperty("fileId") === false)
+  ) {
+    return goSetBook();
+  }
+  return new Promise((resolve, reject) => {
+    const addFileAndSetBook = () => {
+      addFile(file).then((res) => {
+        const insertedId = res.target.result;
+        entry.fileId = insertedId;
+        goSetBook().then(resolve);
+      });
+    };
+    if (entry.hasOwnProperty("fileId")) {
+      deleteFile(entry.fileId).then(() => {
+        if (file === null) {
+          delete entry.fileId;
+          return goSetBook().then(resolve);
+        }
+        addFileAndSetBook();
+      });
+    } else {
+      addFileAndSetBook();
+    }
+  });
+};
 
 /**
  * Get a single book that have the key and value given
