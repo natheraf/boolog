@@ -5,16 +5,19 @@ import PropTypes from "prop-types";
 export const DynamicButton = (props) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const { icon, text, ...otherProps } = props;
+  const { icon, text, endIcon, ...otherProps } = props;
 
   return greaterThanSmall ? (
-    <Button {...otherProps}>{text}</Button>
+    <Button endIcon={endIcon} {...otherProps}>
+      {text}
+    </Button>
   ) : (
     <IconButton {...otherProps}>{icon}</IconButton>
   );
 };
 
 DynamicButton.propTypes = {
+  endIcon: PropTypes.element,
   icon: PropTypes.element.isRequired,
   text: PropTypes.string.isRequired,
 };
