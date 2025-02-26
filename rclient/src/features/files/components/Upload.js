@@ -62,7 +62,7 @@ export const Upload = ({ file, setFile }) => {
   );
 };
 
-Upload.prototype = {
+Upload.propTypes = {
   file: PropTypes.object.isRequired,
   setFile: PropTypes.func.isRequired,
 };
