@@ -4,6 +4,9 @@ import { addFile, exportFile, getFile } from "../api/IndexedDB/filesMeta";
 import { TextField } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
 
+/**
+ * @deprecated
+ */
 export const Upload = () => {
   const [file, setFile] = React.useState(null);
   const [storageEstimate, setStorageEstimate] = React.useState(null);
