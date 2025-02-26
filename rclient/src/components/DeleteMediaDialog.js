@@ -51,6 +51,7 @@ export const DeleteMediaDialog = ({
                 syncMediaObject();
                 delete dataObject._id;
                 delete dataObject.status;
+                delete dataObject.fileId;
               });
           }}
           autoFocus
