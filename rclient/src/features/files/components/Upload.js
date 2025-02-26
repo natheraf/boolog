@@ -63,6 +63,6 @@ export const Upload = ({ file, setFile }) => {
 };
 
 Upload.propTypes = {
-  file: PropTypes.object.isRequired,
+  file: PropTypes.object,
   setFile: PropTypes.func.isRequired,
 };
