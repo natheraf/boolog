@@ -287,7 +287,7 @@ export const deleteBook = (obj, uid, localOnly) => {
 
 const deleteBookHelper = (db, obj, uid, localOnly) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(shelvesObjectStore, "readwrite");
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
     const objectStore = transaction.objectStore(shelvesObjectStore);
     let request;
     if (uid === "isbn") {
@@ -299,13 +299,19 @@ const deleteBookHelper = (db, obj, uid, localOnly) =>
     }
     request.onsuccess = (event) => {
       const data = event.target.result;
-      objectStore.delete(data._id);
-      if (localOnly !== true) {
-        data.deleted = true;
-        syncMultipleToCloud([data]);
-      }
+      deleteFile(data.fileId).then(() => {
+        const transaction = db.transaction(shelvesObjectStore, "readwrite");
+        const objectStore = transaction.objectStore(shelvesObjectStore);
+        const request = objectStore.delete(data._id);
+        request.onsuccess = () => {
+          if (localOnly !== true) {
+            data.deleted = true;
+            syncMultipleToCloud([data]);
+          }
+          resolve();
+        };
+      });
     };
-    resolve();
   });
 
 /**
