@@ -221,19 +221,26 @@ export const CreateBook = ({
           alignItems={"center"}
           justifyContent={"space-between"}
         >
-          <Tooltip title="esc">
-            <IconButton
-              edge="start"
-              color="inherit"
-              onClick={handleClose}
-              aria-label="close"
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
-          <Typography variant="h6">
-            {editBookObject === undefined ? "Create Entry" : "Edit Entry"}
-          </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems={"center"}
+            sx={{ overflow: "hidden" }}
+          >
+            <Tooltip title="esc">
+              <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleClose}
+                aria-label="close"
+              >
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
+            <Typography variant="h6" noWrap>
+              {editBookObject === undefined ? "Create Entry" : "Edit Entry"}
+            </Typography>
+          </Stack>
           <Stack direction={"row"} spacing={2}>
             {restorableBookObject === null ? (
               <DynamicButton
