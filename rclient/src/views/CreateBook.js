@@ -57,6 +57,7 @@ export const CreateBook = ({
     type: undefined,
   });
   const [restorableBookObject, setRestorableBookObject] = React.useState(null);
+  const [originalFile, setOriginalFile] = React.useState(null);
   const [file, setFile] = React.useState(null);
   const [restorableFile, setRestorableFile] = React.useState(null);
 
@@ -77,11 +78,9 @@ export const CreateBook = ({
     setRestorableFile(null);
   };
 
-  const handleClose = (event, reason) => {
+  const handleClose = () => {
     setOpen(false);
-    if (editBookObject === undefined) {
-      handleClearAll();
-    }
+    handleClearAll();
   };
 
   const handleSave = () => {
@@ -201,7 +200,10 @@ export const CreateBook = ({
       setBookObject(editBookObject);
       if (editBookObject.fileId) {
         getFile(editBookObject.fileId)
-          .then((file) => setFile(file))
+          .then((file) => {
+            setFile(file);
+            setOriginalFile(file);
+          })
           .catch((error) => console.log(error));
       }
     }
@@ -434,7 +436,7 @@ export const CreateBook = ({
               </Grid>
             ))}
           </Grid>
-          <Upload file={file} setFile={setFile} />
+          <Upload file={file} setFile={setFile} originalFile={originalFile} />
         </Stack>
       </Stack>
     </Dialog>
