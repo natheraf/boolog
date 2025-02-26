@@ -198,7 +198,7 @@ export const BookLog = () => {
   }
 
   return (
-    <Box>
+    <>
       <CollapsibleFab setOpenEditor={setOpenEditor} />
       <CreateBook
         open={openEditor}
@@ -248,6 +248,6 @@ export const BookLog = () => {
           </Slide>
         ))}
       </Stack>
-    </Box>
+    </>
   );
 };
