@@ -1,8 +1,8 @@
 import * as React from "react";
-import { getObjectFromEpub } from "../features/files/fileUtils";
-import { addEpub, exportFile, getFile } from "../api/IndexedDB/filesMeta";
+import { convertZipFileToObjectDirectory as getObjectFromEpub } from "../features/files/fileUtils";
 import { TextField } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
+import { addEpub, exportFile, getFile } from "../api/IndexedDB/Files";
 
 /**
  * @deprecated

@@ -489,6 +489,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       const blob = await convertFileToBlob(imgFile);
       props.src = URL.createObjectURL(blob);
       props.style = {
+        maxHeight: pageHeight,
         objectFit: "scale-down",
         margin: "auto",
       };

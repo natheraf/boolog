@@ -1,14 +1,25 @@
 import { filesObjectStore, userDBVersion } from "./config";
-import { openDatabase, getUserDB } from "./common";
+import { openDatabase, getNewId, getUserDB } from "./common";
 
-export const addFile = (file) =>
-  openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, file));
+export const addEpub = (file) =>
+  new Promise((resolve, reject) => {
+    if (!file || file?.type !== "application/epub+zip") {
+      console.log(`Cannot add file: Missing file or not an epub`);
+      return reject(new Error("File is falsy or not an epub"));
+    }
+    const data = { blob: file };
+    addFile(data).then(resolve);
+  });
 
-const addFileHelper = (db, file) =>
+const addFile = (data) =>
+  openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, data));
+
+const addFileHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(filesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(filesObjectStore);
-    const request = objectStore.add(file);
+    data._id = getNewId();
+    const request = objectStore.add(data);
     request.onsuccess = (event) => {
       console.log("added file!");
       resolve(event);
@@ -39,10 +50,10 @@ const getFileHelper = (db, id) =>
 
 export const exportFile = (id) =>
   getFile(id).then((res) => {
-    const url = window.URL.createObjectURL(res);
+    const url = window.URL.createObjectURL(res.blob);
     const tempLink = document.createElement("a");
     tempLink.href = url;
-    tempLink.setAttribute("download", res.name);
+    tempLink.setAttribute("download", res.blob.name);
     tempLink.click();
   });
 

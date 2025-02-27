@@ -1,11 +1,11 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { getFile } from "../../api/IndexedDB/filesMeta";
+import { getFile } from "../../api/IndexedDB/Files";
 
-const convertZipFileToObjectDirectory = (id) =>
+export const convertZipFileToObjectDirectory = (id) =>
   new Promise((resolve, reject) => {
     getFile(id).then((res) => {
-      const zipFileReader = new BlobReader(res);
+      const zipFileReader = new BlobReader(res.blob);
       const zipReader = new ZipReader(zipFileReader);
       zipReader
         .getEntries()
@@ -79,11 +79,6 @@ const convertXMLFileToObject = (file) =>
       const obj = parser.parse(res, true);
       resolve(obj);
     });
-  });
-
-export const getObjectFromEpub = (id) =>
-  new Promise((resolve, reject) => {
-    convertZipFileToObjectDirectory(id).then(resolve);
   });
 
 export const convertObjectToXML = (object) => {

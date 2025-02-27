@@ -32,7 +32,7 @@ import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import { DynamicButton } from "../components/DynamicButton";
 import { AlertsContext } from "../context/Alerts";
 import { Upload } from "../features/files/components/Upload";
-import { getFile } from "../api/IndexedDB/filesMeta";
+import { getFile } from "../api/IndexedDB/Files";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -200,9 +200,9 @@ export const CreateBook = ({
       setBookObject(editBookObject);
       if (editBookObject.fileId) {
         getFile(editBookObject.fileId)
-          .then((file) => {
-            setFile(file);
-            setOriginalFile(file);
+          .then((res) => {
+            setFile(res.blob);
+            setOriginalFile(res.blob);
           })
           .catch((error) => console.log(error));
       }

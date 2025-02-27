@@ -4,7 +4,7 @@ import {
 } from "./config";
 import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
-import { addFile, deleteFile } from "./filesMeta";
+import { addEpub, deleteFile } from "./Files";
 
 /**
  *
@@ -215,7 +215,7 @@ export const setBookWithFile = (entry, file, key, localOnly) => {
   }
   return new Promise((resolve, reject) => {
     const addFileAndSetBook = () => {
-      addFile(file).then((res) => {
+      addEpub(file).then((res) => {
         const insertedId = res.target.result;
         entry.fileId = insertedId;
         goSetBook().then(resolve);

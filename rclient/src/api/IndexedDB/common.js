@@ -1,9 +1,5 @@
 import { userTemplates } from "../Local";
-import {
-  filesObjectStore,
-  shelvesObjectStore,
-  filesMetaObjectStore,
-} from "./config";
+import { filesObjectStore, shelvesObjectStore } from "./config";
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
@@ -39,11 +35,6 @@ const userDataDBOnupgradeNeeded = function (event) {
       shelves.createIndex("shelf", "shelf");
 
       const files = db.createObjectStore(filesObjectStore, {
-        keyPath: "id",
-        autoIncrement: true,
-      });
-
-      const fileMeta = db.createObjectStore(filesMetaObjectStore, {
         keyPath: "_id",
       });
   }
