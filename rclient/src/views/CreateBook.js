@@ -1,4 +1,11 @@
 import * as React from "react";
+import { useTheme } from "@emotion/react";
+import PropTypes from "prop-types";
+
+import { AlertsContext } from "../context/Alerts";
+import { setBookWithFile } from "../api/IndexedDB/Books";
+import { getFile } from "../api/IndexedDB/Files";
+
 import {
   AppBar,
   Box,
@@ -16,23 +23,20 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+
+import { Textarea } from "../components/Textarea";
+import { DynamicButton } from "../components/DynamicButton";
+import { Upload } from "../features/files/components/Upload";
+
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
-import { useTheme } from "@emotion/react";
-import { Textarea } from "../components/Textarea";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
-import { setBookWithFile } from "../api/IndexedDB/Books";
-import PropTypes from "prop-types";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
-import { DynamicButton } from "../components/DynamicButton";
-import { AlertsContext } from "../context/Alerts";
-import { Upload } from "../features/files/components/Upload";
-import { getFile } from "../api/IndexedDB/Files";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -201,8 +205,10 @@ export const CreateBook = ({
       if (editBookObject.fileId) {
         getFile(editBookObject.fileId)
           .then((res) => {
-            setFile(res.blob);
-            setOriginalFile(res.blob);
+            if (res) {
+              setFile(res.blob);
+              setOriginalFile(res.blob);
+            }
           })
           .catch((error) => console.log(error));
       }
