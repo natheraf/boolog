@@ -39,7 +39,7 @@ export const convertZipFileToObjectDirectory = (id) =>
               // convert to string
               const string = await convertFileToString(entry);
               currentDir[path.pop()] = {
-                type: isXML ? "xml" : "css",
+                type: isXML || isTOC ? "xml" : "css",
                 text: string,
                 name: entry.filename,
               };
