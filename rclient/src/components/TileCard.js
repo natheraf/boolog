@@ -24,6 +24,12 @@ export const TileCard = ({ data, keysData, actionArea }) => {
     );
   };
 
+  const handleImageOnClick = (value) => {
+    if (value && actionArea?.imageOnClickKey && actionArea?.imageOnClick) {
+      actionArea.imageOnClick(value);
+    }
+  };
+
   return (
     <Grid
       container
@@ -36,8 +42,13 @@ export const TileCard = ({ data, keysData, actionArea }) => {
         <Box
           sx={{
             position: "relative",
-            cursor: dataObject?.fileId ? "pointer" : "inherit",
+            cursor: dataObject?.[actionArea?.imageOnClickKey]
+              ? "pointer"
+              : "inherit",
           }}
+          onClick={() =>
+            handleImageOnClick(dataObject?.[actionArea?.imageOnClickKey])
+          }
         >
           <Box
             component="img"
