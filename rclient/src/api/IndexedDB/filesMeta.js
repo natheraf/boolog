@@ -7,6 +7,15 @@ import {
   deleteFile as deleteBlob,
 } from "./Files";
 
+export const addEpub = (file, localOnly) =>
+  new Promise((resolve, reject) => {
+    if (!file || file?.type !== "application/epub+zip") {
+      console.log(`Cannot add file: Missing file or not an epub`);
+      return reject(new Error("File is falsy or not an epub"));
+    }
+    addFile(file, localOnly).then(resolve);
+  });
+
 export const addFile = (file, localOnly) =>
   openDatabase(getUserDB(), userDBVersion, (db) =>
     addFileHelper(db, file, localOnly)

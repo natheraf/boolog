@@ -1,6 +1,6 @@
 import * as React from "react";
 import { getObjectFromEpub } from "../features/files/fileUtils";
-import { addFile, exportFile, getFile } from "../api/IndexedDB/filesMeta";
+import { addEpub, exportFile, getFile } from "../api/IndexedDB/filesMeta";
 import { TextField } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
 
@@ -26,7 +26,9 @@ export const Upload = () => {
       return;
     }
     console.log("Uploading file...");
-    addFile(file).then((res) => setItemId(res.target.result));
+    addEpub(file)
+      .then((res) => setItemId(res.target.result))
+      .catch((error) => console.log(error)); // throw alert
   };
 
   const handleOpenBook = (obj) => {
@@ -119,7 +121,7 @@ export const Upload = () => {
       <br />
 
       <TextField
-        defaultValue="1"
+        defaultValue="1740604130655_4r1g"
         onKeyDown={(event) =>
           event.key === "Enter"
             ? getObjectFromEpub(event.target.value).then(handleOpenBook)
