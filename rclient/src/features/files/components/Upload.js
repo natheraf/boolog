@@ -167,6 +167,9 @@ export const Upload = ({ file, setFile, originalFile }) => {
           }}
         />
       ) : null}
+      <Typography variant="caption">
+        {"Storage estimates can be inaccurate"}
+      </Typography>
       <input type="file" ref={inputFile} onChange={handleFileChange} hidden />
     </Stack>
   );
