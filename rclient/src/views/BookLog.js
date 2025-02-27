@@ -25,6 +25,8 @@ import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
+import { EpubReader } from "../components/EpubReader";
+import { convertZipFileToObjectDirectory as getObjectFromEpub } from "../features/files/fileUtils";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -48,6 +50,8 @@ export const BookLog = () => {
           Finished: { defaultExpanded: true },
         }
   );
+  const [openEpubReader, setOpenEpubReader] = React.useState(false);
+  const [epubObject, setEpubObject] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const keysData = [
@@ -75,6 +79,12 @@ export const BookLog = () => {
     mediaUniqueIdentifier: ["id", "xId"],
     orientation: "horizontal",
     inLibrary: true,
+    imageOnClick: (fileId) =>
+      getObjectFromEpub(fileId).then((object) => {
+        setOpenEpubReader(Boolean(object));
+        setEpubObject(object);
+      }),
+    imageOnClickKey: "fileId",
   };
 
   const statuses = [
@@ -206,6 +216,14 @@ export const BookLog = () => {
         setDataObject={() => {}}
         syncMediaObject={() => window.location.reload()}
       />
+      {epubObject ? (
+        <EpubReader
+          open={openEpubReader}
+          setOpen={setOpenEpubReader}
+          epubObject={epubObject}
+          key={epubObject?.opf?.package?.metadata?.["dc:identifier"]?.["#text"]}
+        />
+      ) : null}
       <Stack>
         {statuses.map((obj, index) => (
           <Slide
