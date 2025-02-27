@@ -169,6 +169,12 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const searchResultElementClone = React.useRef(null);
   const [webWorker, setWebWorker] = React.useState(null);
 
+  const epubStyleIds = React.useRef([]);
+
+  const clearEpubStyles = () => {
+    epubStyleIds.current.forEach((id) => document.getElementById(id)?.remove());
+  };
+
   const searchEpub = (needle) => {
     needle = needle.trim();
     if (needle.length === 0) {
@@ -521,6 +527,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         styleElement.id = `epub-css-${it.name}`;
         styleElement.innerHTML = `#content, #previous-content {\n${it.text}\n}`;
         document.head.insertAdjacentElement("beforeend", styleElement);
+        epubStyleIds.current.push(styleElement.id);
         continue;
       }
       if (it.hasOwnProperty("filename")) {
@@ -547,7 +554,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     const navMap = new Map(); // content -> nav label / chapter name
     for (const navPoint of tocRef.navMap.navPoint) {
       navMap.set(
-        navPoint.content?.["@_src"],
+        navPoint.content?.["@_src"]?.substring(
+          0,
+          navPoint.content?.["@_src"]?.indexOf("#")
+        ),
         navPoint.navLabel?.text ?? "error: no label"
       );
     }
@@ -560,11 +570,15 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       spineStack.push({
         element: elementMap.get(item["@_idref"]).section,
         label:
-          navMap.get(elementMap.get(item["@_idref"]).href) ??
-          spineStack[spineStack.length - 1].label ??
+          navMap.get(elementMap.get(item["@_idref"])?.href) ??
+          spineStack[spineStack.length - 1]?.label ??
           "No Chapter",
       });
     }
+
+    const end = document.createElement("h1");
+    end.innerHTML = "Fin";
+    spineStack.push({ element: await createReactDOM(end), label: "End" });
 
     setSpine(spineStack);
     setHrefSpineMap(spineMap);
@@ -719,6 +733,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       webWorker?.terminate();
       window.removeEventListener("resize", updateWindowSize);
       runInit = false;
+      clearEpubStyles();
     };
   }, []);
 
