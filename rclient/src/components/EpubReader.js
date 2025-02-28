@@ -149,7 +149,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     const value = windowHeight - 88;
     document
       .getElementById("content")
-      ?.querySelectorAll("img")
+      ?.querySelectorAll("img, svg")
       .forEach((element) => {
         element.style.maxHeight = `${value}px`;
       });
@@ -456,8 +456,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
     }
     if (tag === "svg") {
       props.style = {
-        height: pageHeight,
-        width: pageWidth,
+        maxHeight: pageHeight,
       };
     } else if (tag === "image") {
       let src = null;
