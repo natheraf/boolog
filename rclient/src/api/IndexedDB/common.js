@@ -1,5 +1,9 @@
-import { userTemplates } from "../Local";
-import { filesObjectStore, shelvesObjectStore } from "./config";
+import { defaultFormatting, userTemplates } from "../Local";
+import {
+  filesObjectStore,
+  shelvesObjectStore,
+  userPreferencesObjectStore,
+} from "./config";
 
 const connect = (name, version) => {
   return new Promise((resolve, reject) => {
@@ -36,6 +40,14 @@ const userDataDBOnupgradeNeeded = function (event) {
 
       const files = db.createObjectStore(filesObjectStore, {
         keyPath: "_id",
+      });
+
+      const userPreferences = db.createObjectStore(userPreferencesObjectStore, {
+        keyPath: "name",
+      });
+      userPreferences.put({
+        name: "epubGlobalFormatting",
+        value: defaultFormatting,
       });
   }
 };
