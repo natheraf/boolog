@@ -178,7 +178,9 @@ export const ReaderFormat = ({
                 <Autocomplete
                   value={formatting.fontFamily}
                   options={formatting._fontFamilies}
-                  groupBy={(option) => option.group ?? "Google Fonts"}
+                  groupBy={(option) =>
+                    option.group === undefined ? "Google Fonts" : option.group
+                  }
                   isOptionEqualToValue={(option, value) =>
                     (option.value ?? option.family) ===
                     (value?.value ?? value?.family)

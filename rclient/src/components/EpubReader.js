@@ -92,12 +92,12 @@ const defaultFormatting = {
   fontFamily: {
     label: "Original",
     value: "inherit",
-    group: "none",
+    group: null,
     kind: "local",
   },
   _fontFamilies: [
     // formatted for MUI Selector use
-    { label: "Original", value: "inherit", group: "none", kind: "local" },
+    { label: "Original", value: "inherit", group: null, kind: "local" },
 
     { label: "Serif", value: "serif", group: "Generic", kind: "local" },
     {
