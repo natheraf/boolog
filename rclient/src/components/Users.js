@@ -113,6 +113,9 @@ export const Users = () => {
         onClick={handleClick}
         alt="user icon"
         src={localStorage.getItem("profilePicture")}
+        aria-controls={openUsers ? "basic-menu" : undefined}
+        aria-haspopup="true"
+        aria-expanded={openUsers ? "true" : undefined}
       >
         {localStorage.getItem("userName")?.[0].toUpperCase()}
       </Avatar>
