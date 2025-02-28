@@ -20,7 +20,7 @@ export const ThemeContext = React.createContext({
 
 function App() {
   const [mode, setMode] = React.useState(
-    localStorage.getItem("theme") === "dark" ? "dark" : "light"
+    localStorage.getItem("theme") === "light" ? "light" : "dark"
   );
   const [reduceMotion, setReduceMotion] = React.useState(
     localStorage.getItem("reduceMotion") !== "false"
