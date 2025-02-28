@@ -79,10 +79,10 @@ export const BookLog = () => {
     mediaUniqueIdentifier: ["id", "xId"],
     orientation: "horizontal",
     inLibrary: true,
-    imageOnClick: (fileId) =>
+    imageOnClick: (id, fileId) =>
       getObjectFromEpub(fileId).then((object) => {
         setOpenEpubReader(Boolean(object));
-        setEpubObject(object);
+        setEpubObject({ object, entryId: id });
       }),
     imageOnClickKey: "fileId",
   };
@@ -220,8 +220,9 @@ export const BookLog = () => {
         <EpubReader
           open={openEpubReader}
           setOpen={setOpenEpubReader}
-          epubObject={epubObject}
-          key={epubObject?.opf?.package?.metadata?.["dc:identifier"]?.["#text"]}
+          epubObject={epubObject.object}
+          entryId={epubObject.entryId}
+          key={epubObject.entryId}
         />
       ) : null}
       <Stack>

@@ -24,9 +24,9 @@ export const TileCard = ({ data, keysData, actionArea }) => {
     );
   };
 
-  const handleImageOnClick = (value) => {
+  const handleImageOnClick = (id, value) => {
     if (value && actionArea?.imageOnClickKey && actionArea?.imageOnClick) {
-      actionArea.imageOnClick(value);
+      actionArea.imageOnClick(id, value);
     }
   };
 
@@ -47,7 +47,10 @@ export const TileCard = ({ data, keysData, actionArea }) => {
               : "inherit",
           }}
           onClick={() =>
-            handleImageOnClick(dataObject?.[actionArea?.imageOnClickKey])
+            handleImageOnClick(
+              dataObject._id,
+              dataObject?.[actionArea?.imageOnClickKey]
+            )
           }
         >
           <Box
