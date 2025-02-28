@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import {
   Autocomplete,
   Box,
+  FormControlLabel,
+  FormGroup,
   IconButton,
   InputAdornment,
   Menu,
@@ -10,6 +12,7 @@ import {
   Paper,
   Select,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
@@ -22,13 +25,37 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
+const fontFamilies = [
+  { label: "Original", value: "inherit", group: null, kind: "local" },
+
+  { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+  {
+    label: "Sans-Serif",
+    value: "sans-serif",
+    group: "Generic",
+    kind: "local",
+  },
+  { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
+  { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+  { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+  { label: "Math", value: "math", group: "Generic" },
+  { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+  { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
+];
+
 export const ReaderFormat = ({
   formatting,
   setFormatting,
   defaultFormatting,
+  useGlobalFormatting,
+  setUseGlobalFormatting,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
+
+  const handleCheckedOnChange = () => {
+    setUseGlobalFormatting((prev) => !prev);
+  };
 
   const handleOpenFormatting = (event) => {
     setAnchorEl(event.currentTarget);
@@ -123,15 +150,10 @@ export const ReaderFormat = ({
   const handleOnOpen = (key) => {
     if (
       key === "fontFamily" &&
-      formatting._fontFamilies.some(
-        (obj) => obj.kind === "webfonts#webfont"
-      ) === false
+      fontFamilies.some((obj) => obj.kind === "webfonts#webfont") === false
     ) {
       getGoogleFonts().then((obj) => {
-        setFormatting({
-          ...formatting,
-          _fontFamilies: [...formatting["_fontFamilies"], ...obj.items],
-        });
+        fontFamilies.push(...obj.items);
       });
     }
     setFieldState((prev) => ({
@@ -177,7 +199,7 @@ export const ReaderFormat = ({
               >
                 <Autocomplete
                   value={formatting.fontFamily}
-                  options={formatting._fontFamilies}
+                  options={fontFamilies}
                   groupBy={(option) =>
                     option.group === undefined ? "Google Fonts" : option.group
                   }
@@ -279,6 +301,14 @@ export const ReaderFormat = ({
               </Select>
             </Stack>
           </Paper>
+          <FormGroup>
+            <FormControlLabel
+              control={<Switch />}
+              checked={useGlobalFormatting}
+              onChange={handleCheckedOnChange}
+              label="Use Global"
+            />
+          </FormGroup>
         </Stack>
       </Menu>
     </Box>
@@ -289,4 +319,6 @@ ReaderFormat.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
   defaultFormatting: PropTypes.object.isRequired,
+  useGlobalFormatting: PropTypes.bool.isRequired,
+  setUseGlobalFormatting: PropTypes.func.isRequired,
 };
