@@ -1,10 +1,10 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import {
+  Autocomplete,
   Box,
   IconButton,
   InputAdornment,
-  ListSubheader,
   Menu,
   MenuItem,
   Paper,
@@ -14,6 +14,8 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+
+import { getGoogleFonts } from "../api/IndexedDB/State";
 
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import AddIcon from "@mui/icons-material/Add";
@@ -73,6 +75,16 @@ export const ReaderFormat = ({
     });
   };
 
+  const handleOnChangeAutoComplete = (key) => (event, value) => {
+    if (!value) {
+      value = defaultFormatting.fontFamily;
+    }
+    setFormatting({
+      ...formatting,
+      [key]: value,
+    });
+  };
+
   const handleOnChangeField = (key) => (event) => {
     setFieldState((prev) => ({
       ...prev,
@@ -109,6 +121,19 @@ export const ReaderFormat = ({
   };
 
   const handleOnOpen = (key) => {
+    if (
+      key === "fontFamily" &&
+      formatting._fontFamilies.some(
+        (obj) => obj.kind === "webfonts#webfont"
+      ) === false
+    ) {
+      getGoogleFonts().then((obj) => {
+        setFormatting({
+          ...formatting,
+          _fontFamilies: [...formatting["_fontFamilies"], ...obj.items],
+        });
+      });
+    }
     setFieldState((prev) => ({
       ...prev,
       [key]: formatting[key],
@@ -150,32 +175,22 @@ export const ReaderFormat = ({
                 placement="top"
                 open={fieldState.fontFamilyOpen}
               >
-                <Select
-                  value={formatting.fontFamily.value}
-                  onChange={handleOnChangeSelect("fontFamily")}
-                  size="small"
+                <Autocomplete
+                  value={formatting.fontFamily}
+                  options={formatting._fontFamilies}
+                  groupBy={(option) => option.group ?? "Google Fonts"}
+                  isOptionEqualToValue={(option, value) =>
+                    (option.value ?? option.family) ===
+                    (value?.value ?? value?.family)
+                  }
+                  getOptionLabel={(option) => option.label ?? option.family}
+                  onChange={handleOnChangeAutoComplete("fontFamily")}
                   onOpen={() => handleOnOpen("fontFamily")}
                   onClose={() => handleOnClose("fontFamily")}
+                  renderInput={(params) => <TextField {...params} />}
+                  size="small"
                   fullWidth
-                >
-                  {formatting._fontFamilies.map((item) => {
-                    if (item.group === "none") {
-                      return null;
-                    }
-                    if (item.hasOwnProperty("group")) {
-                      return (
-                        <ListSubheader key={item.group}>
-                          {item.group}
-                        </ListSubheader>
-                      );
-                    }
-                    return (
-                      <MenuItem key={item.value} value={item.value}>
-                        {item.label}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
+                />
               </Tooltip>
             </Stack>
           </Paper>

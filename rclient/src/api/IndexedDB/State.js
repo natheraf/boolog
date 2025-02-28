@@ -1,6 +1,7 @@
 import { openDatabase } from "./common";
 import { appDataDBVersion } from "./config";
 import { addUser, getAllUsers, getUser } from "./Users";
+import { getGoogleFonts as downloadGoogleFonts } from "../GoogleAPI";
 
 export const getCurrentUser = () =>
   openDatabase("appData", appDataDBVersion, (db) => getCurrentUserHelper(db));
@@ -16,8 +17,8 @@ const getCurrentUserHelper = (db) =>
       reject(new Error(event));
     };
     const objectStore = transaction.objectStore("state");
-    const indexKey = objectStore.index("key");
-    const request = async (event) => {
+    const request = objectStore.get("userId");
+    const getUserFromId = async (event) => {
       let userIdState = event?.target?.result ?? {
         // if state in appdata is cleared
         key: "userId",
@@ -58,8 +59,8 @@ const getCurrentUserHelper = (db) =>
         resolve(result);
       });
     };
-    indexKey.get("userId").onsuccess = request;
-    indexKey.get("userId").onerror = request;
+    request.onsuccess = getUserFromId;
+    request.onerror = getUserFromId;
   });
 
 export const getCurrentUserId = () =>
@@ -86,8 +87,7 @@ const changeUserHelper = (db, id) =>
         reject(new Error(event));
       };
       const objectStore = transaction.objectStore("state");
-      const index = objectStore.index("key");
-      const request = index.get("userId");
+      const request = objectStore.get("userId");
       request.onsuccess = (event) => {
         const data = event.target.result;
         data.userId = result.id;
@@ -97,4 +97,31 @@ const changeUserHelper = (db, id) =>
         };
       };
     });
+  });
+
+export const getGoogleFonts = () =>
+  openDatabase("appData", appDataDBVersion, (db) => getGoogleFontsHelper(db));
+
+const getGoogleFontsHelper = (db) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("state", "readonly");
+    const objectStore = transaction.objectStore("state");
+    const request = objectStore.get("googleFonts");
+    request.onsuccess = (event) => {
+      const result = event.target.result;
+      if (result === undefined) {
+        downloadGoogleFonts()
+          .then((res) => {
+            const transaction = db.transaction("state", "readwrite");
+            const objectStore = transaction.objectStore("state");
+            const request = objectStore.add({ key: "googleFonts", value: res });
+            request.onsuccess = () => resolve(res);
+            request.onerror = (error) => reject(new Error(error));
+          })
+          .catch((error) => reject(new Error(error)));
+      } else {
+        resolve(result.value);
+      }
+    };
+    request.onerror = (error) => reject(new Error(error));
   });

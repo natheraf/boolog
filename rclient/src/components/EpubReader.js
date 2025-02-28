@@ -89,21 +89,29 @@ const defaultFormatting = {
   pagesShown: 1,
   _pagesShownStep: 1,
   _pagesShownBounds: { min: 1, max: Infinity },
-  fontFamily: { label: "Original", value: "inherit" },
+  fontFamily: {
+    label: "Original",
+    value: "inherit",
+    group: "none",
+    kind: "local",
+  },
   _fontFamilies: [
     // formatted for MUI Selector use
-    { group: "none" },
-    { label: "Original", value: "inherit" },
+    { label: "Original", value: "inherit", group: "none", kind: "local" },
 
-    { group: "Generic" },
-    { label: "Serif", value: "serif" },
-    { label: "Sans-Serif", value: "sans-serif" },
-    { label: "Monospace", value: "monospace" },
-    { label: "Cursive", value: "cursive" },
-    { label: "Fantasy", value: "fantasy" },
-    { label: "Math", value: "math" },
-    { label: "Fangsong", value: "fangsong" },
-    { label: "System-UI", value: "system-ui" },
+    { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+    {
+      label: "Sans-Serif",
+      value: "sans-serif",
+      group: "Generic",
+      kind: "local",
+    },
+    { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
+    { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+    { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+    { label: "Math", value: "math", group: "Generic" },
+    { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+    { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
   ],
   textAlign: { label: "Original", value: "inherit" },
   _textAlignments: [
@@ -448,6 +456,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       ["class", "className"],
       ["xlink:href", "xlinkHref"],
       ["xmlns:xlink", "xmlnsXlink"],
+      ["xml:lang", "xmlLang"],
     ]);
     const props = {};
     for (const attribute of htmlElement.attributes) {
@@ -672,13 +681,30 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
 
   const putFormattingStyleElement = (forceFormatting) => {
     const format = forceFormatting ?? formatting;
+
+    const linkId = "webfont-google";
+    if (format.fontFamily.kind === "webfonts#webfont") {
+      const linkElement =
+        document.querySelector(`#${linkId}`) ?? document.createElement("link");
+      linkElement.id = linkId;
+      linkElement.rel = "stylesheet";
+      linkElement.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(
+        format.fontFamily.family
+      )}`;
+      document.head.insertAdjacentElement("afterbegin", linkElement);
+    } else {
+      document.getElementById(linkId)?.remove();
+    }
+
+    const fontFamily =
+      format.fontFamily.kind === "local"
+        ? format.fontFamily.value
+        : `"${format.fontFamily.family}"`;
     const userFormattingStyle = `
       font-size: ${format.fontSize}%; 
       line-height: ${format.lineHeight / 10} !important;
       ${
-        format.fontFamily.value === "inherit"
-          ? ""
-          : `font-family: ${format.fontFamily.value} !important;`
+        fontFamily === "inherit" ? "" : `font-family: ${fontFamily} !important;`
       }
       ${
         format.textAlign.value === "inherit"
@@ -686,10 +712,10 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
           : `text-align: ${format.textAlign.value} !important;`
       }
     `;
-    const id = `epub-css-user-formatting`;
+    const styleId = `epub-css-user-formatting`;
     const styleElement =
-      document.querySelector(`#${id}`) ?? document.createElement("style");
-    styleElement.id = id;
+      document.querySelector(`#${styleId}`) ?? document.createElement("style");
+    styleElement.id = styleId;
     styleElement.innerHTML = `#content *, #previous-content * {\n${userFormattingStyle}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
   };

@@ -43,10 +43,10 @@ const userDataDBOnupgradeNeeded = function (event) {
       });
 
       const userPreferences = db.createObjectStore(userPreferencesObjectStore, {
-        keyPath: "name",
+        keyPath: "key",
       });
       userPreferences.put({
-        name: "epubGlobalFormatting",
+        key: "epubGlobalFormatting",
         value: defaultFormatting,
       });
   }
@@ -63,10 +63,8 @@ const appDataDBOnUpgradeNeeded = function (event) {
       users.put({ ...userTemplates[0], lastSynced: -1 });
 
       const state = db.createObjectStore("state", {
-        keyPath: "id",
-        autoIncrement: true,
+        keyPath: "key",
       });
-      state.createIndex("key", "key");
       state.put({ key: "userId", userId: 1 });
   }
 };
