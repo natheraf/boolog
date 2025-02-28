@@ -19,6 +19,12 @@ import {
 
 import { ReaderFormat } from "./ReaderFormat";
 import { convertFileToBlob } from "../features/files/fileUtils";
+import { defaultFormatting } from "../api/Local";
+import {
+  getPreference,
+  getPreferenceWithDefault,
+  putPreference,
+} from "../api/IndexedDB/userPreferences";
 
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -76,54 +82,7 @@ const parseCSSText = (cssText) => {
 
 let runInit = false;
 
-const defaultFormatting = {
-  fontSize: 100,
-  _fontSizeStep: 1,
-  _fontSizeBounds: { min: 1, max: Infinity },
-  lineHeight: 12,
-  _lineHeightBounds: { min: 1, max: Infinity },
-  _lineHeightStep: 1,
-  pageMargins: 500,
-  _pageMarginsStep: 50,
-  _pageMarginsBounds: { min: 70, max: Infinity },
-  pagesShown: 1,
-  _pagesShownStep: 1,
-  _pagesShownBounds: { min: 1, max: Infinity },
-  fontFamily: {
-    label: "Original",
-    value: "inherit",
-    group: null,
-    kind: "local",
-  },
-  _fontFamilies: [
-    // formatted for MUI Selector use
-    { label: "Original", value: "inherit", group: null, kind: "local" },
-
-    { label: "Serif", value: "serif", group: "Generic", kind: "local" },
-    {
-      label: "Sans-Serif",
-      value: "sans-serif",
-      group: "Generic",
-      kind: "local",
-    },
-    { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
-    { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
-    { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
-    { label: "Math", value: "math", group: "Generic" },
-    { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
-    { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
-  ],
-  textAlign: { label: "Original", value: "inherit" },
-  _textAlignments: [
-    { label: "Original", value: "inherit" },
-    { label: "Left", value: "start" },
-    { label: "Middle", value: "center" },
-    { label: "Right", value: "end" },
-    { label: "Justified", value: "justify" },
-  ],
-};
-
-export const EpubReader = ({ open, setOpen, epubObject }) => {
+export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [isLoading, setIsLoading] = React.useState(true);
@@ -133,6 +92,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [formatting, setFormatting] = React.useState(
     structuredClone(defaultFormatting)
   );
+  const [useGlobalFormatting, setUseGlobalFormatting] = React.useState(true);
 
   const structureRef = epubObject["OEBPS"];
   const contentRef = epubObject["opf"].package;
@@ -178,6 +138,35 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const [webWorker, setWebWorker] = React.useState(null);
 
   const epubStyleIds = React.useRef([]);
+
+  const updateFormattingOnDB = (value) => {
+    if (useGlobalFormatting) {
+      putPreference({ key: "epubGlobalFormatting", value });
+    }
+    putPreference({
+      key: entryId,
+      value: { useGlobalFormatting, formatting: value },
+    });
+  };
+
+  const setUseGlobalFormattingHelper = (newValue) => {
+    if (newValue) {
+      getPreference("epubGlobalFormatting").then((res) => {
+        setFormatting(res.value);
+        putFormattingStyleElement(res.value);
+        putPreference({
+          key: entryId,
+          value: { useGlobalFormatting: newValue, formatting: res.value },
+        });
+      });
+    } else {
+      putPreference({
+        key: entryId,
+        value: { useGlobalFormatting: newValue, formatting },
+      });
+    }
+    setUseGlobalFormatting(newValue);
+  };
 
   const clearEpubStyles = () => {
     epubStyleIds.current.forEach((id) => document.getElementById(id)?.remove());
@@ -682,8 +671,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   const putFormattingStyleElement = (forceFormatting) => {
     const format = forceFormatting ?? formatting;
 
+    const remoteFont = format.fontFamily.kind === "webfonts#webfont";
     const linkId = "webfont-google";
-    if (format.fontFamily.kind === "webfonts#webfont") {
+    if (remoteFont) {
       const linkElement =
         document.querySelector(`#${linkId}`) ?? document.createElement("link");
       linkElement.id = linkId;
@@ -696,10 +686,9 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
       document.getElementById(linkId)?.remove();
     }
 
-    const fontFamily =
-      format.fontFamily.kind === "local"
-        ? format.fontFamily.value
-        : `"${format.fontFamily.family}"`;
+    const fontFamily = remoteFont
+      ? `"${format.fontFamily.family}"`
+      : format.fontFamily.value;
     const userFormattingStyle = `
       font-size: ${format.fontSize}%; 
       line-height: ${format.lineHeight / 10} !important;
@@ -721,6 +710,7 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
   };
 
   const handleSetFormatting = (formatting) => {
+    updateFormattingOnDB(formatting);
     setFormatting(formatting);
     putFormattingStyleElement(formatting);
   };
@@ -743,9 +733,28 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
         if (spinePointer === null) {
           setSpinePointer(0);
         }
-        putFormattingStyleElement();
       });
     }
+    getPreferenceWithDefault({
+      key: "epubGlobalFormatting",
+      value: defaultFormatting,
+    }).then((res) => {
+      const globalFormatting = res.value;
+      getPreferenceWithDefault({
+        key: entryId,
+        value: { useGlobalFormatting: true, formatting: globalFormatting },
+      }).then((res) => {
+        const useGlobalFormatting = res.value.useGlobalFormatting;
+        setUseGlobalFormatting(useGlobalFormatting);
+        const nonGlobalFormatting = res.value.formatting;
+        const formatting = useGlobalFormatting
+          ? globalFormatting
+          : nonGlobalFormatting;
+        setFormatting(formatting);
+        putFormattingStyleElement(formatting);
+      });
+    });
+
     window.addEventListener("resize", updateWindowSize);
 
     const webWorker = new Worker(
@@ -904,6 +913,8 @@ export const EpubReader = ({ open, setOpen, epubObject }) => {
               formatting={formatting}
               setFormatting={handleSetFormatting}
               defaultFormatting={defaultFormatting}
+              useGlobalFormatting={useGlobalFormatting}
+              setUseGlobalFormatting={setUseGlobalFormattingHelper}
             />
           </Stack>
         </Toolbar>
@@ -1002,4 +1013,5 @@ EpubReader.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   epubObject: PropTypes.object.isRequired,
+  entryId: PropTypes.string.isRequired,
 };

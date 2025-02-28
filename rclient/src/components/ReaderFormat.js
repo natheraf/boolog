@@ -25,23 +25,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
-const fontFamilies = [
-  { label: "Original", value: "inherit", group: null, kind: "local" },
-
-  { label: "Serif", value: "serif", group: "Generic", kind: "local" },
-  {
-    label: "Sans-Serif",
-    value: "sans-serif",
-    group: "Generic",
-    kind: "local",
-  },
-  { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
-  { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
-  { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
-  { label: "Math", value: "math", group: "Generic" },
-  { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
-  { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
-];
+let runEffectOnce = false;
 
 export const ReaderFormat = ({
   formatting,
@@ -53,8 +37,40 @@ export const ReaderFormat = ({
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
 
+  const [fontFamilies, setFontFamilies] = React.useState([
+    { label: "Original", value: "inherit", group: null, kind: "local" },
+
+    { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+    {
+      label: "Sans-Serif",
+      value: "sans-serif",
+      group: "Generic",
+      kind: "local",
+    },
+    { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
+    { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+    { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+    { label: "Math", value: "math", group: "Generic" },
+    { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+    { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
+  ]);
+
+  const [loadedGoogleFonts, setLoadedGoogleFonts] = React.useState(false);
+
+  const [autoCompleteValue, setAutoCompleteValue] = React.useState(
+    formatting.fontFamily.kind === "local"
+      ? formatting.fontFamily
+      : fontFamilies[0]
+  );
+
+  React.useEffect(() => {
+    if (loadedGoogleFonts) {
+      setAutoCompleteValue(formatting.fontFamily);
+    }
+  }, [formatting.fontFamily, loadedGoogleFonts]);
+
   const handleCheckedOnChange = () => {
-    setUseGlobalFormatting((prev) => !prev);
+    setUseGlobalFormatting(!useGlobalFormatting);
   };
 
   const handleOpenFormatting = (event) => {
@@ -75,6 +91,15 @@ export const ReaderFormat = ({
     pagesShownFocus: false,
     fontFamilyOpen: false,
   });
+
+  React.useEffect(() => {
+    setFieldState((prev) => {
+      ["fontSize", "lineHeight", "pageMargins", "pagesShown"].forEach(
+        (key) => (prev[key] = formatting?.[key])
+      );
+      return prev;
+    });
+  }, [formatting]);
 
   const handleStepValue = (key, direction) => {
     const newValue =
@@ -148,14 +173,6 @@ export const ReaderFormat = ({
   };
 
   const handleOnOpen = (key) => {
-    if (
-      key === "fontFamily" &&
-      fontFamilies.some((obj) => obj.kind === "webfonts#webfont") === false
-    ) {
-      getGoogleFonts().then((obj) => {
-        fontFamilies.push(...obj.items);
-      });
-    }
     setFieldState((prev) => ({
       ...prev,
       [key]: formatting[key],
@@ -170,6 +187,16 @@ export const ReaderFormat = ({
       [`${key}Open`]: false,
     }));
   };
+
+  React.useEffect(() => {
+    if (runEffectOnce === false) {
+      runEffectOnce = true;
+      getGoogleFonts().then((obj) => {
+        setFontFamilies((prev) => [...prev, ...obj.items]);
+        setLoadedGoogleFonts(true);
+      });
+    }
+  });
 
   return (
     <Box>
@@ -198,7 +225,7 @@ export const ReaderFormat = ({
                 open={fieldState.fontFamilyOpen}
               >
                 <Autocomplete
-                  value={formatting.fontFamily}
+                  value={autoCompleteValue}
                   options={fontFamilies}
                   groupBy={(option) =>
                     option.group === undefined ? "Google Fonts" : option.group
