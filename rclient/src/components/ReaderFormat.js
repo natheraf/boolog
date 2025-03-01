@@ -342,13 +342,15 @@ export const ReaderFormat = ({
               checked={formatting.showArrows}
               onChange={handleCheckedOnChange("showArrows")}
               label="Show Arrows"
+              slotProps={{ typography: { variant: "subtitle2" } }}
               labelPlacement="top"
             />
             <FormControlLabel
               control={<Switch />}
               checked={formatting.showDividers}
               onChange={handleCheckedOnChange("showDividers")}
-              label="Show Dividers"
+              label="Show Edges"
+              slotProps={{ typography: { variant: "subtitle2" } }}
               labelPlacement="top"
             />
           </Stack>
