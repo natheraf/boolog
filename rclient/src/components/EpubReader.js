@@ -407,6 +407,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [hrefSpineMap]
   );
 
+  // handles setting page so fragment is visible
   React.useEffect(() => {
     if (linkFragment !== null && document.getElementById(linkFragment)) {
       const content = document
