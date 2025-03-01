@@ -131,7 +131,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const searchResultAccumulator = React.useRef([]);
   const [searchResult, setSearchResult] = React.useState([]);
   const [searchValue, setSearchValue] = React.useState(null);
-  const [searchFocused, setSearchFocused] = React.useState(false);
   const [selectedSearchResult, setSelectedSearchResult] = React.useState(null);
   const searchResultElement = React.useRef(null);
   const searchResultElementClone = React.useRef(null);
@@ -354,7 +353,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const handleSearchOnBlur = () => {
-    setSearchFocused(false);
     searchNeedle.current = null;
     searchResultAccumulator.current = [];
     setSpineSearchPointer(null);
@@ -362,7 +360,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const handleSearchOnFocus = () => {
-    setSearchFocused(true);
     setSearchResult([]);
   };
 
@@ -649,7 +646,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
-      if (searchFocused) {
+      if (document.activeElement.tagName === "INPUT") {
         return;
       }
       if (event.key === "ArrowLeft") {
@@ -658,8 +655,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         handleNextPage();
       }
     },
-    [handleNextPage, handlePreviousPage, searchFocused]
+    [handleNextPage, handlePreviousPage]
   );
+
   // prob did implementation wrong cause this reruns every page
   React.useEffect(() => {
     if (spine !== null) {
@@ -715,11 +713,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     putFormattingStyleElement(formatting);
   };
 
-  const processSpineAndRenderEpubDOM = () =>
-    new Promise((resolve, reject) => {
-      processSpine().then(resolve);
-    });
-
   const updateWindowSize = () => {
     setWindowWidth(window.innerWidth);
     setWindowHeight(window.innerHeight);
@@ -729,7 +722,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   React.useEffect(() => {
     if (spine === null && runInit === false) {
       runInit = true;
-      processSpineAndRenderEpubDOM().then(() => {
+      processSpine().then(() => {
         if (spinePointer === null) {
           setSpinePointer(0);
         }
