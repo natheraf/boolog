@@ -73,8 +73,16 @@ export const ReaderFormat = ({
     [fontFamilies, googleFonts]
   );
 
-  const handleCheckedOnChange = () => {
-    setUseGlobalFormatting(!useGlobalFormatting);
+  const handleCheckedOnChange = (key) => (event) => {
+    const checked = event.target.checked;
+    if (key === "useGlobal") {
+      setUseGlobalFormatting(!useGlobalFormatting);
+    } else {
+      setFormatting({
+        ...formatting,
+        [key]: checked,
+      });
+    }
   };
 
   const handleOpenFormatting = (event) => {
@@ -328,14 +336,28 @@ export const ReaderFormat = ({
               </Select>
             </Stack>
           </Paper>
-          <FormGroup>
+          <Stack direction={"row"}>
             <FormControlLabel
               control={<Switch />}
-              checked={useGlobalFormatting}
-              onChange={handleCheckedOnChange}
-              label="Use Global"
+              checked={formatting.showArrows}
+              onChange={handleCheckedOnChange("showArrows")}
+              label="Show Arrows"
+              labelPlacement="top"
             />
-          </FormGroup>
+            <FormControlLabel
+              control={<Switch />}
+              checked={formatting.showDividers}
+              onChange={handleCheckedOnChange("showDividers")}
+              label="Show Dividers"
+              labelPlacement="top"
+            />
+          </Stack>
+          <FormControlLabel
+            control={<Switch />}
+            checked={useGlobalFormatting}
+            onChange={handleCheckedOnChange("useGlobal")}
+            label="Use Global"
+          />
         </Stack>
       </Menu>
     </Box>

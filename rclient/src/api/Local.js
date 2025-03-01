@@ -63,4 +63,6 @@ export const defaultFormatting = {
     { label: "Right", value: "end" },
     { label: "Justified", value: "justify" },
   ],
+  showDividers: true,
+  showArrows: true,
 };

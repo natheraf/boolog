@@ -936,6 +936,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 position: "absolute",
                 top: 0,
                 right: 0,
+                visibility: formatting.showDividers ? "visible" : "hidden",
               }}
             />
             <NavigateBeforeIcon
@@ -945,6 +946,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 top: 0,
                 bottom: 0,
                 margin: "auto",
+                visibility: formatting.showArrows ? "visible" : "hidden",
               }}
               htmlColor={"gray"}
             />
@@ -1005,6 +1007,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 position: "absolute",
                 top: 0,
                 left: 0,
+                visibility: formatting.showDividers ? "visible" : "hidden",
               }}
             />
             <NavigateNextIcon
@@ -1014,6 +1017,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 top: 0,
                 bottom: 0,
                 margin: "auto",
+                visibility: formatting.showArrows ? "visible" : "hidden",
               }}
               htmlColor={"gray"}
             />
