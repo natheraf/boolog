@@ -927,19 +927,27 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               width: "100%",
               height: "100%",
               position: "relative",
+              opacity: 0.4,
             }}
           >
             <Divider
               orientation="vertical"
               sx={{
-                opacity: 0.4,
                 position: "absolute",
                 top: 0,
-                right: -15,
+                right: 0,
               }}
-            >
-              <NavigateBeforeIcon htmlColor={"gray"} />
-            </Divider>
+            />
+            <NavigateBeforeIcon
+              sx={{
+                position: "absolute",
+                left: 0,
+                top: 0,
+                bottom: 0,
+                margin: "auto",
+              }}
+              htmlColor={"gray"}
+            />
             <Button
               variant="text"
               onClick={handlePreviousPage}
@@ -988,19 +996,27 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               width: "100%",
               height: "100%",
               position: "relative",
+              opacity: 0.4,
             }}
           >
             <Divider
               orientation="vertical"
               sx={{
-                opacity: 0.4,
                 position: "absolute",
                 top: 0,
-                left: -15,
+                left: 0,
               }}
-            >
-              <NavigateNextIcon htmlColor={"gray"} />
-            </Divider>
+            />
+            <NavigateNextIcon
+              sx={{
+                position: "absolute",
+                right: 0,
+                top: 0,
+                bottom: 0,
+                margin: "auto",
+              }}
+              htmlColor={"gray"}
+            />
             <Button
               id="next-page-button"
               variant="text"
