@@ -25,8 +25,6 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
-let runEffectOnce = false;
-
 export const ReaderFormat = ({
   formatting,
   setFormatting,
@@ -37,37 +35,43 @@ export const ReaderFormat = ({
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
 
-  const [fontFamilies, setFontFamilies] = React.useState([
-    { label: "Original", value: "inherit", group: null, kind: "local" },
+  const fontFamilies = React.useMemo(
+    () => [
+      { label: "Original", value: "inherit", group: null, kind: "local" },
 
-    { label: "Serif", value: "serif", group: "Generic", kind: "local" },
-    {
-      label: "Sans-Serif",
-      value: "sans-serif",
-      group: "Generic",
-      kind: "local",
-    },
-    { label: "Monospace", value: "monospace", group: "Generic", kind: "local" },
-    { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
-    { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
-    { label: "Math", value: "math", group: "Generic" },
-    { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
-    { label: "System-UI", value: "system-ui", group: "Generic", kind: "local" },
-  ]);
-
-  const [loadedGoogleFonts, setLoadedGoogleFonts] = React.useState(false);
-
-  const [autoCompleteValue, setAutoCompleteValue] = React.useState(
-    formatting.fontFamily.kind === "local"
-      ? formatting.fontFamily
-      : fontFamilies[0]
+      { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+      {
+        label: "Sans-Serif",
+        value: "sans-serif",
+        group: "Generic",
+        kind: "local",
+      },
+      {
+        label: "Monospace",
+        value: "monospace",
+        group: "Generic",
+        kind: "local",
+      },
+      { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+      { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+      { label: "Math", value: "math", group: "Generic" },
+      { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+      {
+        label: "System-UI",
+        value: "system-ui",
+        group: "Generic",
+        kind: "local",
+      },
+    ],
+    []
   );
 
-  React.useEffect(() => {
-    if (loadedGoogleFonts) {
-      setAutoCompleteValue(formatting.fontFamily);
-    }
-  }, [formatting.fontFamily, loadedGoogleFonts]);
+  const [googleFonts, setGoogleFonts] = React.useState([]);
+
+  const allFonts = React.useMemo(
+    () => fontFamilies.concat(googleFonts),
+    [fontFamilies, googleFonts]
+  );
 
   const handleCheckedOnChange = () => {
     setUseGlobalFormatting(!useGlobalFormatting);
@@ -189,14 +193,10 @@ export const ReaderFormat = ({
   };
 
   React.useEffect(() => {
-    if (runEffectOnce === false) {
-      runEffectOnce = true;
-      getGoogleFonts().then((obj) => {
-        setFontFamilies((prev) => [...prev, ...obj.items]);
-        setLoadedGoogleFonts(true);
-      });
-    }
-  });
+    getGoogleFonts().then((obj) => {
+      setGoogleFonts(obj.items);
+    });
+  }, []);
 
   return (
     <Box>
@@ -225,8 +225,8 @@ export const ReaderFormat = ({
                 open={fieldState.fontFamilyOpen}
               >
                 <Autocomplete
-                  value={autoCompleteValue}
-                  options={fontFamilies}
+                  value={formatting.fontFamily}
+                  options={allFonts}
                   groupBy={(option) =>
                     option.group === undefined ? "Google Fonts" : option.group
                   }
