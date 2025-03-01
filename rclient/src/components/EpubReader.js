@@ -15,6 +15,7 @@ import {
   Typography,
   useMediaQuery,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
@@ -921,21 +922,40 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           sx={{ mt: "10px", height: "100%" }}
           spacing={1}
         >
-          <Button
-            variant="text"
-            onClick={handlePreviousPage}
+          <Box
             sx={{
               width: "100%",
               height: "100%",
-              "&.MuiButtonBase-root:hover": {
-                backgroundColor: "transparent",
-              },
-              filter: `blur(100px)`,
-              justifyContent: "flex-start",
+              position: "relative",
             }}
-            startIcon={<NavigateBeforeIcon htmlColor={"gray"} />}
-            disableRipple={!theme.transitions.reduceMotion}
-          />
+          >
+            <Divider
+              orientation="vertical"
+              sx={{
+                opacity: 0.4,
+                position: "absolute",
+                top: 0,
+                right: -15,
+              }}
+            >
+              <NavigateBeforeIcon htmlColor={"gray"} />
+            </Divider>
+            <Button
+              variant="text"
+              onClick={handlePreviousPage}
+              sx={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                "&.MuiButtonBase-root:hover": {
+                  backgroundColor: "transparent",
+                },
+                filter: `blur(100px)`,
+                justifyContent: "flex-start",
+              }}
+              disableRipple={!theme.transitions.reduceMotion}
+            />
+          </Box>
           <Box
             sx={{
               maxWidth: `${pageWidth}px`,
@@ -963,22 +983,41 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 "something went wrong...<br/> spine is missing"}
             </Box>
           </Box>
-          <Button
-            id="next-page-button"
-            variant="text"
-            onClick={handleNextPage}
+          <Box
             sx={{
               width: "100%",
               height: "100%",
-              "&.MuiButtonBase-root:hover": {
-                backgroundColor: "transparent",
-              },
-              filter: `blur(100px)`,
-              justifyContent: "flex-end",
+              position: "relative",
             }}
-            endIcon={<NavigateNextIcon htmlColor={"gray"} />}
-            disableRipple={!theme.transitions.reduceMotion}
-          />
+          >
+            <Divider
+              orientation="vertical"
+              sx={{
+                opacity: 0.4,
+                position: "absolute",
+                top: 0,
+                left: -15,
+              }}
+            >
+              <NavigateNextIcon htmlColor={"gray"} />
+            </Divider>
+            <Button
+              id="next-page-button"
+              variant="text"
+              onClick={handleNextPage}
+              sx={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                "&.MuiButtonBase-root:hover": {
+                  backgroundColor: "transparent",
+                },
+                filter: `blur(100px)`,
+                justifyContent: "flex-end",
+              }}
+              disableRipple={!theme.transitions.reduceMotion}
+            />
+          </Box>
         </Stack>
         <Box sx={{ width: pageWidth, visibility: "hidden" }}>
           <Box
