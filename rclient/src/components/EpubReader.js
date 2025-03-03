@@ -31,6 +31,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PropTypes from "prop-types";
+import { Loading } from "../features/loading/Loading";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -138,6 +139,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [webWorker, setWebWorker] = React.useState(null);
 
   const epubStyleIds = React.useRef([]);
+
+  const [loadingText, setLoadingText] = React.useState(null);
+  const [subLoadingText, setSubLoadingText] = React.useState(null);
+  const [subLoadingProgress, setSubLoadingProgress] = React.useState(null);
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
@@ -517,7 +522,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     const manifestRef = contentRef.manifest.item;
 
     const elementMap = new Map();
-    for (const item of manifestRef) {
+    setLoadingText("Creating Elements...");
+    setSubLoadingProgress({ current: 0, total: manifestRef?.length ?? 1 });
+    for (let index = 0; index < manifestRef.length; index += 1) {
+      const item = manifestRef[index];
+      setSubLoadingText(item["@_href"]);
+      setSubLoadingProgress({ current: index, total: manifestRef.length });
       const path = item["@_href"].split("/");
       let it = structureRef;
       for (const node of path) {
@@ -818,6 +828,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             </Typography>
           </Stack>
           <Stack direction={"row"} spacing={2}>
+            {/**
+             * @todo maybe move search component out
+             */}
             <Autocomplete
               value={null}
               onChange={handleSearchOnChange}
@@ -914,150 +927,158 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           </Stack>
         </Toolbar>
       </AppBar>
-      <Stack sx={{ overflow: "hidden" }}>
-        <Stack
-          direction="row"
-          alignItems={"center"}
-          justifyContent={"center"}
-          sx={{ mt: "10px", height: "100%" }}
-          spacing={1}
-        >
-          <Box
-            sx={{
-              width: "100%",
-              height: "100%",
-              position: "relative",
-              opacity: 0.4,
-            }}
-          >
-            <Divider
-              orientation="vertical"
-              sx={{
-                position: "absolute",
-                top: 0,
-                right: 0,
-                visibility: formatting.showDividers ? "visible" : "hidden",
-              }}
-            />
-            <NavigateBeforeIcon
-              sx={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                bottom: 0,
-                margin: "auto",
-                visibility: formatting.showArrows ? "visible" : "hidden",
-              }}
-              htmlColor={"gray"}
-            />
-            <Button
-              variant="text"
-              onClick={handlePreviousPage}
-              sx={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                "&.MuiButtonBase-root:hover": {
-                  backgroundColor: "transparent",
-                },
-                filter: `blur(100px)`,
-                justifyContent: "flex-start",
-              }}
-              disableRipple={!theme.transitions.reduceMotion}
-            />
-          </Box>
-          <Box
-            sx={{
-              maxWidth: `${pageWidth}px`,
-              minWidth: `${pageWidth}px`,
-              overflow: "hidden",
-            }}
+      {spinePointer === null ? (
+        <Loading
+          loadingText={loadingText}
+          subLoadingText={subLoadingText}
+          subLoadingProcess={subLoadingProgress}
+        />
+      ) : (
+        <Stack sx={{ overflow: "hidden" }}>
+          <Stack
+            direction="row"
+            alignItems={"center"}
+            justifyContent={"center"}
+            sx={{ mt: "10px", height: "100%" }}
+            spacing={1}
           >
             <Box
-              id="content"
-              ref={contentElementRef}
+              sx={{
+                width: "100%",
+                height: "100%",
+                position: "relative",
+                opacity: 0.4,
+              }}
+            >
+              <Divider
+                orientation="vertical"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: 0,
+                  visibility: formatting.showDividers ? "visible" : "hidden",
+                }}
+              />
+              <NavigateBeforeIcon
+                sx={{
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  margin: "auto",
+                  visibility: formatting.showArrows ? "visible" : "hidden",
+                }}
+                htmlColor={"gray"}
+              />
+              <Button
+                variant="text"
+                onClick={handlePreviousPage}
+                sx={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  "&.MuiButtonBase-root:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  filter: `blur(100px)`,
+                  justifyContent: "flex-start",
+                }}
+                disableRipple={!theme.transitions.reduceMotion}
+              />
+            </Box>
+            <Box
+              sx={{
+                maxWidth: `${pageWidth}px`,
+                minWidth: `${pageWidth}px`,
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                id="content"
+                ref={contentElementRef}
+                sx={{
+                  height: pageHeight,
+                  columnFill: "balance",
+                  columnGap: `${columnGap}px`,
+                  columnWidth: `${
+                    (pageWidth - columnGap * formatting.pagesShown) /
+                    formatting.pagesShown
+                  }px`,
+                  transform: `translate(-${
+                    currentPage * (pageWidth + columnGap)
+                  }px);`,
+                }}
+              >
+                {spine?.[spinePointer ?? -1]?.element ??
+                  "something went wrong...<br/> spine is missing"}
+              </Box>
+            </Box>
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                position: "relative",
+                opacity: 0.4,
+              }}
+            >
+              <Divider
+                orientation="vertical"
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  visibility: formatting.showDividers ? "visible" : "hidden",
+                }}
+              />
+              <NavigateNextIcon
+                sx={{
+                  position: "absolute",
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  margin: "auto",
+                  visibility: formatting.showArrows ? "visible" : "hidden",
+                }}
+                htmlColor={"gray"}
+              />
+              <Button
+                id="next-page-button"
+                variant="text"
+                onClick={handleNextPage}
+                sx={{
+                  position: "absolute",
+                  width: "100%",
+                  height: "100%",
+                  "&.MuiButtonBase-root:hover": {
+                    backgroundColor: "transparent",
+                  },
+                  filter: `blur(100px)`,
+                  justifyContent: "flex-end",
+                }}
+                disableRipple={!theme.transitions.reduceMotion}
+              />
+            </Box>
+          </Stack>
+          <Box sx={{ width: pageWidth, visibility: "hidden" }}>
+            <Box
+              id="previous-content"
               sx={{
                 height: pageHeight,
+                overflow: "visible",
                 columnFill: "balance",
                 columnGap: `${columnGap}px`,
                 columnWidth: `${
                   (pageWidth - columnGap * formatting.pagesShown) /
                   formatting.pagesShown
                 }px`,
-                transform: `translate(-${
-                  currentPage * (pageWidth + columnGap)
-                }px);`,
               }}
             >
-              {spine?.[spinePointer ?? -1]?.element ??
-                "something went wrong...<br/> spine is missing"}
+              {spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
+                ?.element ?? "something went wrong...<br/> spine is missing"}
             </Box>
           </Box>
-          <Box
-            sx={{
-              width: "100%",
-              height: "100%",
-              position: "relative",
-              opacity: 0.4,
-            }}
-          >
-            <Divider
-              orientation="vertical"
-              sx={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                visibility: formatting.showDividers ? "visible" : "hidden",
-              }}
-            />
-            <NavigateNextIcon
-              sx={{
-                position: "absolute",
-                right: 0,
-                top: 0,
-                bottom: 0,
-                margin: "auto",
-                visibility: formatting.showArrows ? "visible" : "hidden",
-              }}
-              htmlColor={"gray"}
-            />
-            <Button
-              id="next-page-button"
-              variant="text"
-              onClick={handleNextPage}
-              sx={{
-                position: "absolute",
-                width: "100%",
-                height: "100%",
-                "&.MuiButtonBase-root:hover": {
-                  backgroundColor: "transparent",
-                },
-                filter: `blur(100px)`,
-                justifyContent: "flex-end",
-              }}
-              disableRipple={!theme.transitions.reduceMotion}
-            />
-          </Box>
         </Stack>
-        <Box sx={{ width: pageWidth, visibility: "hidden" }}>
-          <Box
-            id="previous-content"
-            sx={{
-              height: pageHeight,
-              overflow: "visible",
-              columnFill: "balance",
-              columnGap: `${columnGap}px`,
-              columnWidth: `${
-                (pageWidth - columnGap * formatting.pagesShown) /
-                formatting.pagesShown
-              }px`,
-            }}
-          >
-            {spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]?.element ??
-              "something went wrong...<br/> spine is missing"}
-          </Box>
-        </Box>
-      </Stack>
+      )}
     </Dialog>
   );
 };
