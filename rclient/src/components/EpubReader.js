@@ -26,6 +26,7 @@ import {
   getPreferenceWithDefault,
   putPreference,
 } from "../api/IndexedDB/userPreferences";
+import { AlertsContext } from "../context/Alerts";
 
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
@@ -87,6 +88,7 @@ let runInit = false;
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
+  const addAlert = React.useContext(AlertsContext).addAlert;
   const [isLoading, setIsLoading] = React.useState(true);
 
   const contentElementRef = React.useRef(null);
@@ -107,7 +109,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
-  const [windowHeight, setWindowHeight] = React.useState(window.innerHeight);
+  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
   const pageWidth = React.useMemo(() => {
     const value = windowWidth - formatting.pageMargins - columnGap;
     if (value <= 50) {
@@ -115,16 +117,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
     return value;
   }, [formatting.pageMargins, windowWidth]);
-  const pageHeight = React.useMemo(() => {
-    const value = windowHeight - 88;
-    document
-      .getElementById("content")
-      ?.querySelectorAll("img, svg")
-      .forEach((element) => {
-        element.style.maxHeight = `${value}px`;
-      });
-    return value;
-  }, [windowHeight]);
 
   const [linkFragment, setLinkFragment] = React.useState(null);
 
@@ -188,14 +180,46 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     setSpineSearchPointer(0);
   };
 
+  const getXPathSearchExpression = React.useCallback(
+    (needle) => {
+      const listOfTags = [
+        "p",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "li",
+        "table",
+      ];
+      if (needle && needle.indexOf(`'`) === -1) {
+        return `.//*[${listOfTags
+          .map((tag) => `self::${tag}`)
+          .join(" or ")}][contains(string(.), '${needle}')]`;
+      } else if (needle && needle.indexOf(`"`) === -1) {
+        return `.//*[self::p or self::h1 or self::h2][contains(string(.), "${needle}")]`;
+      }
+      addAlert("Searching single and double quotes unsupported", "warning");
+      return null;
+    },
+    [addAlert]
+  );
+
   const searchContent = React.useCallback(() => {
     if (
       spineSearchPointer !== null &&
       document.getElementById("previous-content")
     ) {
       const needle = searchNeedle.current;
+      const xPathExpression = getXPathSearchExpression(needle);
+      if (xPathExpression === null) {
+        searchNeedle.current = null;
+        setSpineSearchPointer(null);
+        return;
+      }
       const result = document.evaluate(
-        `.//*[text()[contains(.,'${searchNeedle.current}')]]`,
+        xPathExpression,
         document.getElementById("previous-content"),
         null,
         XPathResult.ORDERED_NODE_ITERATOR_TYPE,
@@ -233,7 +257,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         node = result.iterateNext();
       }
     }
-  }, [pageWidth, spineSearchPointer, webWorker]);
+  }, [getXPathSearchExpression, pageWidth, spineSearchPointer, webWorker]);
 
   const incrementSearchPointer = React.useCallback(() => {
     if (spineSearchPointer !== null && spineSearchPointer + 1 < spine.length) {
@@ -270,8 +294,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   React.useEffect(() => {
     if (selectedSearchResult !== null) {
+      const xPathExpression = getXPathSearchExpression(
+        selectedSearchResult.needle
+      );
+      if (xPathExpression === null) {
+        return;
+      }
       const result = document.evaluate(
-        `.//*[text()[contains(.,'${[selectedSearchResult.needle].join("")}')]]`,
+        xPathExpression,
         document.getElementById("content"),
         null,
         XPathResult.ORDERED_NODE_ITERATOR_TYPE,
@@ -334,12 +364,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           }
         }
         if (markId !== null && document.getElementById(markId)) {
-          const marked = document
-            .getElementById(markId)
-            .getBoundingClientRect();
-          if (marked.left > content.right) {
-            setCurrentPage((prev) => prev + 1);
-          }
+          setLinkFragment(markId);
         }
         break;
       }
@@ -429,11 +454,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         (Math.floor(fragment.left) - Math.floor(content.left)) /
           Math.floor(pageWidth + columnGap)
       );
-      setCurrentPage((prev) => prev + pageDelta);
+      setCurrentPage(pageDelta);
       setLinkFragment(null);
     }
   }, [linkFragment, pageWidth]);
 
+  /**
+   * @deprecated
+   * @param {HTMLElement} htmlElement
+   * @returns {React.ReactElement}
+   */
   const createReactDOM = async (htmlElement) => {
     if (htmlElement === null) {
       return null;
@@ -547,29 +577,79 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
       const page = document.createElement("html");
       page.innerHTML = it.text;
+      for (const node of page.querySelectorAll("img, image, a")) {
+        const tag = node.tagName.toLowerCase();
+        if (tag === "img") {
+          const src = node.getAttribute("src");
+          if (!src) {
+            continue;
+          }
+          const path = src
+            .substring(src.indexOf("..") === -1 ? 0 : src.indexOf("/") + 1)
+            .split("/");
+          const fileName = path.pop();
+          let it = structureRef;
+          for (const node of path) {
+            it = it[node];
+          }
+          const imgFile = it[fileName];
+          const blob = await convertFileToBlob(imgFile);
+          node.src = URL.createObjectURL(blob);
+          node.style.objectFit = "scale-down";
+          node.style.margin = "auto";
+        } else if (tag === "image") {
+          let src = null;
+          for (const key of ["xlink:href", "href"]) {
+            if (node.getAttribute(key) !== null) {
+              src = node.getAttribute(key);
+            }
+          }
+          if (src !== null) {
+            const path = src
+              .substring(src.indexOf("..") === -1 ? 0 : src.indexOf("/") + 1)
+              .split("/");
+            const fileName = path.pop();
+            let it = structureRef;
+            for (const node of path) {
+              it = it[node];
+            }
+            const imgFile = it[fileName];
+            const blob = await convertFileToBlob(imgFile);
+            node.setAttribute("href", URL.createObjectURL(blob));
+            node.style.height = "100%";
+            node.style.width = "";
+          }
+        } else if (tag === "a") {
+          node.style.color = "lightblue";
+          node.style.cursor = "pointer";
+          node.setAttribute("linkto", node.getAttribute("href"));
+          node.removeAttribute("href");
+        }
+      }
       const body = page.querySelector("body") ?? page.querySelector("section");
       const pageContent = document.createElement("div");
       pageContent.id = "inner-content";
       pageContent.innerHTML = body.innerHTML;
-      const reactNode = await createReactDOM(pageContent);
+      const element = pageContent.outerHTML;
 
       if (item.hasOwnProperty("@_properties")) {
-        elementMap.set(item["@_properties"], reactNode);
+        elementMap.set(item["@_properties"], element);
       }
       elementMap.set(item["@_id"], {
-        section: reactNode,
+        section: element,
         href: item["@_href"],
       });
     }
 
     const navMap = new Map(); // content -> nav label / chapter name
     for (const navPoint of tocRef.navMap.navPoint) {
+      const src = navPoint.content?.["@_src"];
       navMap.set(
-        navPoint.content?.["@_src"]?.substring(
+        src?.substring(
           0,
-          navPoint.content?.["@_src"]?.indexOf("#")
+          src?.indexOf("#") === -1 ? undefined : src?.indexOf("#")
         ),
-        navPoint.navLabel?.text ?? "error: no label"
+        navPoint.navLabel?.text ?? "error: no chapter name"
       );
     }
 
@@ -587,9 +667,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       });
     }
 
-    const end = document.createElement("h1");
-    end.innerHTML = "Fin";
-    spineStack.push({ element: await createReactDOM(end), label: "End" });
+    const end = document.createElement("div");
+    end.id = "inner-content";
+    end.innerHTML = "<h1>Fin</h1>";
+    spineStack.push({ element: end.outerHTML, label: "End" });
 
     setSpine(spineStack);
     setHrefSpineMap(spineMap);
@@ -616,6 +697,21 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     observer.observe(document.body, config);
     return () => observer.disconnect();
   }, [handlePathHref]);
+
+  // add event listener to resize images
+  React.useEffect(() => {
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver((mutationList, observer) => {
+      document
+        .getElementById("content")
+        ?.querySelectorAll("img, svg")
+        .forEach((element) => {
+          element.style.maxHeight = `${pageHeight}px`;
+        });
+    });
+    observer.observe(document.body, config);
+    return () => observer.disconnect();
+  }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
     cleanUpMarkNode();
@@ -727,7 +823,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateWindowSize = () => {
     setWindowWidth(window.innerWidth);
-    setWindowHeight(window.innerHeight);
+    const pageHeight = window.innerHeight - 88;
+    setPageHeight(pageHeight);
   };
 
   // on load
@@ -928,11 +1025,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         </Toolbar>
       </AppBar>
       {spinePointer === null ? (
-        <Loading
-          loadingText={loadingText}
-          subLoadingText={subLoadingText}
-          subLoadingProcess={subLoadingProgress}
-        />
+        // <Loading
+        //   loadingText={loadingText}
+        //   subLoadingText={subLoadingText}
+        //   subLoadingProcess={subLoadingProgress}
+        // />
+        "Loading, please wait..."
       ) : (
         <Stack sx={{ overflow: "hidden" }}>
           <Stack
@@ -1008,10 +1106,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     currentPage * (pageWidth + columnGap)
                   }px);`,
                 }}
-              >
-                {spine?.[spinePointer ?? -1]?.element ??
-                  "something went wrong...<br/> spine is missing"}
-              </Box>
+                dangerouslySetInnerHTML={{
+                  __html:
+                    spine?.[spinePointer ?? -1]?.element ??
+                    "something went wrong...<br/> spine is missing",
+                }}
+              />
             </Box>
             <Box
               sx={{
@@ -1072,10 +1172,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   formatting.pagesShown
                 }px`,
               }}
-            >
-              {spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
-                ?.element ?? "something went wrong...<br/> spine is missing"}
-            </Box>
+              dangerouslySetInnerHTML={{
+                __html:
+                  spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
+                    ?.element ??
+                  "something went wrong...<br/> spine is missing",
+              }}
+            />
           </Box>
         </Stack>
       )}
