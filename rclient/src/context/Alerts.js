@@ -10,24 +10,24 @@ export const AlertsContext = React.createContext({
 
 export const Alerts = ({ children }) => {
   const theme = useTheme();
-  const [alerts, setAlerts] = new React.useState([]);
+  const [alerts, setAlerts] = new React.useState({});
   const timeout = { ms: 5000, str: "5s" };
   const alertSeverities = ["info", "success", "warning", "error"];
 
   const alertMemo = React.useMemo(
     () => ({
       addAlert: (children, severity) => {
-        setAlerts((prev) => [
+        setAlerts((prev) => ({
           ...prev,
-          {
+          [children]: {
             children,
             severity,
             timeOutId: setTimeout(
-              () => setAlerts((prev) => prev.slice(1)),
+              () => setAlerts((prev) => delete prev.children),
               timeout.ms
             ),
           },
-        ]);
+        }));
       },
     }),
     []
@@ -44,7 +44,7 @@ export const Alerts = ({ children }) => {
           zIndex: 1301 /* default zIndex for modal (floating dialog) is 1300 */,
         }}
       >
-        {alerts.map((alert) => (
+        {Object.values(alerts).map((alert) => (
           <FadingBox
             key={alert.timeOutId}
             duration={500}
