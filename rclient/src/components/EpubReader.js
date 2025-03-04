@@ -69,8 +69,6 @@ const CircularProgressWithLabel = (props) => {
   );
 };
 
-let runInit = false;
-
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -694,7 +692,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return () => {
       searchWebWorker?.terminate();
       window.removeEventListener("resize", updateWindowSize);
-      runInit = false;
       clearEpubStyles();
       handleClearObjectURLs();
     };
@@ -738,7 +735,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               </IconButton>
             </Tooltip>
             <Typography variant="h6" noWrap>
-              {greaterThanSmall ? "add title" : null}
+              {greaterThanSmall ? epubObject.metadata.title : null}
             </Typography>
           </Stack>
           <Stack direction={"row"} spacing={2}>

@@ -95,10 +95,24 @@ export const processEpub = (epubObject) => {
   end.innerHTML = "<h1>Fin</h1>";
   spineStack.push({ element: end.outerHTML, label: "End" });
 
+  const metadata = {
+    title:
+      tocRef.docTitle?.text ??
+      contentRef?.metadata?.["dc:title"]?.["#text"] ??
+      contentRef?.metadata?.["dc:title"] ??
+      "Untitled",
+    artist:
+      tocRef.docAuthor?.text ??
+      contentRef?.metadata?.["dc:creator"]?.["#text"] ??
+      contentRef?.metadata?.["dc:creator"] ??
+      "No Creator",
+  };
+
   return {
     spine: spineStack,
     spineIndexMap: spineMap,
     css: epubObject.css,
     images: epubObject.images,
+    metadata,
   };
 };
