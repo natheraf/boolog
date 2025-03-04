@@ -892,7 +892,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   "&.MuiButtonBase-root:hover": {
                     backgroundColor: "transparent",
                   },
-                  filter: `blur(100px)`,
+                  maskImage:
+                    "linear-gradient(to right, black 50%, transparent)",
                   justifyContent: "flex-start",
                 }}
                 disableRipple={!theme.transitions.reduceMotion}
@@ -966,7 +967,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   "&.MuiButtonBase-root:hover": {
                     backgroundColor: "transparent",
                   },
-                  filter: `blur(100px)`,
+                  maskImage: "linear-gradient(to left, black 50%, transparent)",
                   justifyContent: "flex-end",
                 }}
                 disableRipple={!theme.transitions.reduceMotion}
