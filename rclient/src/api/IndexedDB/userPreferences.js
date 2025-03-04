@@ -66,3 +66,28 @@ const getPreferenceWithDefaultHelper = (db, data) =>
     };
     request.onerror = (error) => reject(new Error(error));
   });
+
+export const deletePreference = (id) =>
+  openDatabase(getUserDB(), appDataDBVersion, (db) =>
+    deletePreferenceHelper(db, id)
+  );
+
+const deletePreferenceHelper = (db, id) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(userPreferencesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    try {
+      const request = objectStore.delete(id);
+      request.onsuccess = resolve;
+      request.onerror = (error) => {
+        console.log("Request Error", error);
+        reject(new Error(`Request Error: ${error}`));
+      };
+    } catch (error) {
+      if (error.name === "DataError") {
+        resolve();
+      } else {
+        reject(new Error(error));
+      }
+    }
+  });

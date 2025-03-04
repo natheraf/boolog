@@ -5,6 +5,7 @@ import {
 import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
 import { addEpub, deleteFile } from "./Files";
+import { deletePreference } from "./userPreferences";
 
 /**
  *
@@ -299,18 +300,20 @@ const deleteBookHelper = (db, obj, uid, localOnly) =>
     }
     request.onsuccess = (event) => {
       const data = event.target.result;
-      deleteFile(data.fileId).then(() => {
-        const transaction = db.transaction(shelvesObjectStore, "readwrite");
-        const objectStore = transaction.objectStore(shelvesObjectStore);
-        const request = objectStore.delete(data._id);
-        request.onsuccess = () => {
-          if (localOnly !== true) {
-            data.deleted = true;
-            syncMultipleToCloud([data]);
-          }
-          resolve();
-        };
-      });
+      deleteFile(data.fileId).then(() =>
+        deletePreference(data._id).then(() => {
+          const transaction = db.transaction(shelvesObjectStore, "readwrite");
+          const objectStore = transaction.objectStore(shelvesObjectStore);
+          const request = objectStore.delete(data._id);
+          request.onsuccess = () => {
+            if (localOnly !== true) {
+              data.deleted = true;
+              syncMultipleToCloud([data]);
+            }
+            resolve();
+          };
+        })
+      );
     };
   });
 
