@@ -37,9 +37,9 @@ export const userTemplates = [
 ];
 
 export const defaultFormatting = {
-  fontSize: 100,
-  _fontSizeStep: 1,
-  _fontSizeBounds: { min: 1, max: Infinity },
+  fontSize: 1,
+  _fontSizeStep: 0.05,
+  _fontSizeBounds: { min: 0.05, max: Infinity },
   lineHeight: 12,
   _lineHeightBounds: { min: 1, max: Infinity },
   _lineHeightStep: 1,

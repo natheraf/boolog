@@ -605,7 +605,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       ? `"${format.fontFamily.family}"`
       : format.fontFamily.value;
     const userFormattingStyle = `
-      font-size: ${format.fontSize}%; 
+      font-size: ${format.fontSize}rem; 
       line-height: ${format.lineHeight / 10} !important;
       ${
         fontFamily === "inherit" ? "" : `font-family: ${fontFamily} !important;`

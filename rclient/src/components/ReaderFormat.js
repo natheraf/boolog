@@ -118,11 +118,11 @@ export const ReaderFormat = ({
       direction === "increase"
         ? Math.min(
             formatting[`_${key}Bounds`].max,
-            formatting[key] + (formatting[`_${key}Step`] ?? 1)
+            (formatting[key] + (formatting[`_${key}Step`] ?? 1)).toFixed(3)
           )
         : Math.max(
             formatting[`_${key}Bounds`].min,
-            formatting[key] - (formatting[`_${key}Step`] ?? 1)
+            (formatting[key] - (formatting[`_${key}Step`] ?? 1)).toFixed(3)
           );
     setFormatting({
       ...formatting,
@@ -162,7 +162,7 @@ export const ReaderFormat = ({
     if (event.key === "Enter" && isNaN(value) === false) {
       const newValue = Math.max(
         formatting[`_${key}Bounds`].min,
-        Math.min(formatting[`_${key}Bounds`].max, parseInt(value))
+        Math.min(formatting[`_${key}Bounds`].max, parseFloat(value).toFixed(3))
       );
       setFormatting({ ...formatting, [key]: newValue });
       setFieldState({ ...formatting, [key]: newValue });
@@ -254,7 +254,7 @@ export const ReaderFormat = ({
             </Stack>
           </Paper>
           {[
-            { title: "Font Size", value: "fontSize", endText: "%" },
+            { title: "Font Size", value: "fontSize", endText: "rem" },
             { title: "Line Height", value: "lineHeight", endText: "u" },
             { title: "Page Margins", value: "pageMargins", endText: "px" },
             { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
