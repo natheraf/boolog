@@ -37,6 +37,7 @@ import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 import DoneIcon from "@mui/icons-material/Done";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const DialogSlideUpTransition = React.forwardRef(function Transition(
   props,
@@ -64,6 +65,7 @@ export const CreateBook = ({
   const [originalFile, setOriginalFile] = React.useState(null);
   const [file, setFile] = React.useState(null);
   const [restorableFile, setRestorableFile] = React.useState(null);
+  const [saveLoading, setSaveLoading] = React.useState(false);
 
   const handleClearAll = () => {
     setBookObject({
@@ -88,6 +90,7 @@ export const CreateBook = ({
   };
 
   const handleSave = () => {
+    setSaveLoading(true);
     const keysToProcessMultiple = [
       "isbn",
       "authors",
@@ -106,7 +109,8 @@ export const CreateBook = ({
         setDataObject(bookObject);
         syncMediaObject();
       })
-      .catch((error) => addAlert(error.toString(), "error"));
+      .catch((error) => addAlert(error.toString(), "error"))
+      .finally(() => setSaveLoading(false));
   };
 
   const handleOnChangeProperty = (key) => (event, value) => {
@@ -283,14 +287,27 @@ export const CreateBook = ({
                 <DynamicButton
                   color="inherit"
                   onClick={handleSave}
-                  endIcon={<SaveIcon />}
+                  endIcon={
+                    saveLoading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : (
+                      <SaveIcon />
+                    )
+                  }
                   sx={{ alignItems: "center" }}
                   disabled={
                     !bookObject.type ||
                     !bookObject.status ||
-                    !bookObject.title?.length > 0
+                    !bookObject.title?.length > 0 ||
+                    saveLoading
                   }
-                  icon={<SaveIcon />}
+                  icon={
+                    saveLoading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : (
+                      <SaveIcon />
+                    )
+                  }
                   text={"save"}
                 />
               </Box>
