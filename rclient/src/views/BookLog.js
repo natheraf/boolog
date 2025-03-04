@@ -5,7 +5,6 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Box,
   Collapse,
   Fade,
   Grid,
@@ -26,7 +25,7 @@ import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
 import { EpubReader } from "../components/EpubReader";
-import { convertZipFileToObjectDirectory as getObjectFromEpub } from "../features/files/fileUtils";
+import { getFile } from "../api/IndexedDB/Files";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -51,7 +50,7 @@ export const BookLog = () => {
         }
   );
   const [openEpubReader, setOpenEpubReader] = React.useState(false);
-  const [epubObject, setEpubObject] = React.useState(null);
+  const [epub, setEpub] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const keysData = [
@@ -80,9 +79,9 @@ export const BookLog = () => {
     orientation: "horizontal",
     inLibrary: true,
     imageOnClick: (id, fileId) =>
-      getObjectFromEpub(fileId).then((object) => {
-        setOpenEpubReader(Boolean(object));
-        setEpubObject({ object, entryId: id });
+      getFile(fileId).then((data) => {
+        setOpenEpubReader(Boolean(data.epubObject));
+        setEpub({ object: data.epubObject, entryId: id });
       }),
     imageOnClickKey: "fileId",
   };
@@ -216,13 +215,13 @@ export const BookLog = () => {
         setDataObject={() => {}}
         syncMediaObject={() => window.location.reload()}
       />
-      {epubObject ? (
+      {epub ? (
         <EpubReader
           open={openEpubReader}
           setOpen={setOpenEpubReader}
-          epubObject={epubObject.object}
-          entryId={epubObject.entryId}
-          key={epubObject.entryId}
+          epubObject={epub.object}
+          entryId={epub.entryId}
+          key={epub.entryId}
         />
       ) : null}
       <Stack>

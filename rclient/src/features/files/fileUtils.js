@@ -1,63 +1,111 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import { getFile } from "../../api/IndexedDB/Files";
 
-export const convertZipFileToObjectDirectory = (id) =>
+export const convertZipFileToObjectDirectory = (data) =>
   new Promise((resolve, reject) => {
-    getFile(id).then((res) => {
-      const zipFileReader = new BlobReader(res.blob);
-      const zipReader = new ZipReader(zipFileReader);
-      zipReader
-        .getEntries()
-        .then(async (res) => {
-          const objectDirectory = {};
-          for (const entry of res) {
-            const path = entry.filename.split("/");
-            let currentDir = objectDirectory;
-            for (let index = 0; index < path.length - 1; index += 1) {
-              if (currentDir.hasOwnProperty(path[index]) === false) {
-                currentDir[path[index]] = {};
-              }
-              currentDir = currentDir[path[index]];
+    const zipFileReader = new BlobReader(data.blob);
+    const zipReader = new ZipReader(zipFileReader);
+    zipReader
+      .getEntries()
+      .then(async (res) => {
+        const objectDirectory = {};
+        for (const entry of res) {
+          const path = entry.filename.split("/");
+          let currentDir = objectDirectory;
+          for (let index = 0; index < path.length - 1; index += 1) {
+            if (currentDir.hasOwnProperty(path[index]) === false) {
+              currentDir[path[index]] = {};
             }
-
-            const isOPF =
-              entry.filename.indexOf(".opf") === entry.filename.length - 4;
-
-            const isXML =
-              entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
-              entry.filename.indexOf(".html") === entry.filename.length - 5 ||
-              entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
-
-            const isTOC =
-              entry.filename.indexOf(".ncx") === entry.filename.length - 4;
-
-            const isCSS =
-              entry.filename.indexOf(".css") === entry.filename.length - 4;
-
-            if (isXML || isCSS || isTOC) {
-              // convert to string
-              const string = await convertFileToString(entry);
-              currentDir[path.pop()] = {
-                type: isXML || isTOC ? "xml" : "css",
-                text: string,
-                name: entry.filename,
-              };
-            }
-            if (isOPF || isTOC) {
-              const object = await convertXMLFileToObject(entry);
-              objectDirectory[
-                entry.filename.substring(entry.filename.lastIndexOf(".") + 1)
-              ] = object;
-            }
-            if (!(isOPF || isXML || isTOC || isCSS)) {
-              currentDir[path.pop()] = entry;
-            }
+            currentDir = currentDir[path[index]];
           }
-          resolve(objectDirectory);
-        })
-        .finally(() => zipReader.close());
-    });
+
+          const isOPF =
+            entry.filename.indexOf(".opf") === entry.filename.length - 4;
+
+          const isXML =
+            entry.filename.indexOf(".xml") === entry.filename.length - 4 ||
+            entry.filename.indexOf(".html") === entry.filename.length - 5 ||
+            entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
+
+          const isTOC =
+            entry.filename.indexOf(".ncx") === entry.filename.length - 4;
+
+          const isCSS =
+            entry.filename.indexOf(".css") === entry.filename.length - 4;
+
+          if (isXML || isCSS || isTOC) {
+            // convert to string
+            const string = await convertFileToString(entry);
+            currentDir[path.pop()] = {
+              type: isXML || isTOC ? "xml" : "css",
+              text: string,
+              name: entry.filename,
+            };
+          }
+          if (isOPF || isTOC) {
+            const object = await convertXMLFileToObject(entry);
+            objectDirectory[
+              entry.filename.substring(entry.filename.lastIndexOf(".") + 1)
+            ] = object;
+          }
+          if (!(isOPF || isXML || isTOC || isCSS)) {
+            currentDir[path.pop()] = entry;
+          }
+        }
+        resolve(objectDirectory);
+      })
+      .finally(() => zipReader.close());
+  });
+
+export const convertZipFileToObjectResource = (file) =>
+  new Promise((resolve, reject) => {
+    const zipFileReader = new BlobReader(file);
+    const zipReader = new ZipReader(zipFileReader);
+    zipReader
+      .getEntries()
+      .then(async (res) => {
+        const objectResource = { html: {}, images: {}, css: {} };
+        for (const entry of res) {
+          const isOPF =
+            entry.filename.indexOf(".opf") === entry.filename.length - 4;
+
+          const isHTML =
+            entry.filename.indexOf(".html") === entry.filename.length - 5 ||
+            entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
+
+          const isTOC =
+            entry.filename.indexOf(".ncx") === entry.filename.length - 4;
+
+          const isCSS =
+            entry.filename.indexOf(".css") === entry.filename.length - 4;
+
+          const isImage =
+            entry.filename.indexOf(".jpeg") === entry.filename.length - 5 ||
+            entry.filename.indexOf(".jpg") === entry.filename.length - 4 ||
+            entry.filename.indexOf(".png") === entry.filename.length - 4 ||
+            entry.filename.indexOf(".gif") === entry.filename.length - 4;
+
+          const fileName = entry.filename.substring(
+            entry.filename.indexOf("OEBPS/") + 6
+          );
+
+          if (isHTML) {
+            objectResource.html[fileName] = await convertFileToString(entry);
+          }
+          if (isCSS) {
+            objectResource.css[fileName] = await convertFileToString(entry);
+          }
+          if (isOPF || isTOC) {
+            objectResource[fileName.substring(fileName.lastIndexOf(".") + 1)] =
+              await convertXMLFileToObject(entry);
+          }
+          if (isImage) {
+            objectResource.images[fileName] = await convertFileToBlob(entry);
+          }
+        }
+        resolve(objectResource);
+      })
+      .finally(() => zipReader.close());
   });
 
 export const convertFileToString = (entry) =>

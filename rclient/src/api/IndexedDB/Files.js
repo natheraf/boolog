@@ -1,5 +1,7 @@
 import { filesObjectStore, userDBVersion } from "./config";
 import { openDatabase, getNewId, getUserDB } from "./common";
+import { convertZipFileToObjectResource as getObjectFromEpub } from "../../features/files/fileUtils";
+import { processEpub } from "../../features/epub/epubUtils";
 
 export const addEpub = (file) =>
   new Promise((resolve, reject) => {
@@ -7,8 +9,11 @@ export const addEpub = (file) =>
       console.log(`Cannot add file: Missing file or not an epub`);
       return reject(new Error("File is falsy or not an epub"));
     }
-    const data = { blob: file };
-    addFile(data).then(resolve);
+    getObjectFromEpub(file).then((object) => {
+      const epubObject = processEpub(object);
+      const data = { blob: file, epubObject };
+      addFile(data).then(resolve);
+    });
   });
 
 const addFile = (data) =>
