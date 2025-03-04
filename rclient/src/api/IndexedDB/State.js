@@ -114,7 +114,7 @@ const getGoogleFontsHelper = (db) =>
           .then((res) => {
             const transaction = db.transaction("state", "readwrite");
             const objectStore = transaction.objectStore("state");
-            const request = objectStore.add({ key: "googleFonts", value: res });
+            const request = objectStore.put({ key: "googleFonts", value: res });
             request.onsuccess = () => resolve(res);
             request.onerror = (error) => reject(new Error(error));
           })
