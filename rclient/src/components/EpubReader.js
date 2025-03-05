@@ -94,7 +94,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
-  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 88);
+  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 64);
   const pageWidth = React.useMemo(() => {
     const value = windowWidth - formatting.pageMargins - columnGap;
     if (value <= 50) {
@@ -444,67 +444,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [handleViewOutOfBounds]);
 
-  const handlePathHref = React.useCallback((path) => {
-    if (path.startsWith("http")) {
-      return window.open(path, "_blank");
-    }
-    setCurrentPage(0);
-    path = path.substring(path.indexOf("/") + 1);
-    if (path.indexOf("#") !== -1) {
-      setLinkFragment(path.substring(path.indexOf("#") + 1));
-      path = path.substring(0, path.indexOf("#"));
-    }
-    setSpinePointer(hrefSpineMap.current[path]);
-  }, []);
-
-  // handles setting page so fragment is visible
-  React.useEffect(() => {
-    if (linkFragment !== null && document.getElementById(linkFragment)) {
-      const content = document
-        .getElementById("content")
-        .getBoundingClientRect();
-      const fragment = document
-        .getElementById(linkFragment)
-        .getBoundingClientRect();
-      if (fragment.top > content.bottom) {
-        return;
-      }
-      const pageDelta = Math.floor(
-        (Math.floor(fragment.left) - Math.floor(content.left)) /
-          Math.floor(pageWidth + columnGap)
-      );
-      setCurrentPage(pageDelta);
-      setLinkFragment(null);
-    }
-  }, [linkFragment, pageWidth]);
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  /**
-   * add event listener to epub anchors and create object urls for images
-   * if too slow, look into adding id to elements, storing those ids in processEpub, then referencing them here so we can access elements with getElementById faster
-   */
-  React.useEffect(() => {
-    const config = { childList: true, subtree: true };
-    const observer = new MutationObserver((mutationList, observer) => {
-      document
-        .getElementById("content")
-        ?.querySelectorAll("a[linkto], img, image")
-        .forEach(async (node) => {
-          const tag = node.tagName.toLowerCase();
-          if (tag === "a") {
-            node.addEventListener("click", () => {
-              handlePathHref(node.getAttribute("linkto"));
-            });
-          }
-        });
-    });
-    observer.observe(document.body, config);
-    return () => observer.disconnect();
-  }, [handlePathHref]);
-
   const preloadImages = React.useCallback(
     (spinePointer) => {
       const loadedImages = {};
@@ -569,6 +508,71 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     },
     [loadedImageURLs]
   );
+
+  const handlePathHref = React.useCallback(
+    (path) => {
+      if (path.startsWith("http")) {
+        return window.open(path, "_blank");
+      }
+      setCurrentPage(0);
+      path = path.substring(path.indexOf("/") + 1);
+      if (path.indexOf("#") !== -1) {
+        setLinkFragment(path.substring(path.indexOf("#") + 1));
+        path = path.substring(0, path.indexOf("#"));
+      }
+      preloadImages(hrefSpineMap.current[path]);
+      setSpinePointer(hrefSpineMap.current[path]);
+    },
+    [preloadImages]
+  );
+
+  // handles setting page so fragment is visible
+  React.useEffect(() => {
+    if (linkFragment !== null && document.getElementById(linkFragment)) {
+      const content = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      const fragment = document
+        .getElementById(linkFragment)
+        .getBoundingClientRect();
+      if (fragment.top > content.bottom) {
+        return;
+      }
+      const pageDelta = Math.floor(
+        (Math.floor(fragment.left) - Math.floor(content.left)) /
+          Math.floor(pageWidth + columnGap)
+      );
+      setCurrentPage(pageDelta);
+      setLinkFragment(null);
+    }
+  }, [linkFragment, pageWidth]);
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  /**
+   * add event listener to epub anchors and create object urls for images
+   * if too slow, look into adding id to elements, storing those ids in processEpub, then referencing them here so we can access elements with getElementById faster
+   */
+  React.useEffect(() => {
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver((mutationList, observer) => {
+      document
+        .getElementById("content")
+        ?.querySelectorAll("a[linkto], img, image")
+        .forEach(async (node) => {
+          const tag = node.tagName.toLowerCase();
+          if (tag === "a") {
+            node.addEventListener("click", () => {
+              handlePathHref(node.getAttribute("linkto"));
+            });
+          }
+        });
+    });
+    observer.observe(document.body, config);
+    return () => observer.disconnect();
+  }, []);
 
   // add event listener to resize images
   React.useEffect(() => {
@@ -684,6 +688,21 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           ? ""
           : `text-align: ${format.textAlign.value} !important;`
       }
+      ${
+        format.fontWeight === "Original"
+          ? ""
+          : `font-weight: ${format.fontWeight} !important;`
+      }
+      ${
+        format.textColor === "Original"
+          ? ""
+          : `color: ${format.textColor} !important;`
+      }
+      ${
+        format.pageColor === "Original"
+          ? ""
+          : `background-color: ${format.pageColor} !important;`
+      }
     `;
     const styleId = `epub-css-user-formatting`;
     const styleElement =
@@ -701,8 +720,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateWindowSize = () => {
     setWindowWidth(window.innerWidth);
-    const pageHeight = window.innerHeight - 88;
-    setPageHeight(pageHeight);
+    const appBarHeight = document
+      .getElementById("appBar")
+      ?.getBoundingClientRect().height;
+    setPageHeight(window.innerHeight - appBarHeight);
   };
 
   const handleClearObjectURLs = () => {
@@ -776,6 +797,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       TransitionComponent={DialogSlideUpTransition}
     >
       <AppBar
+        id="appBar"
         sx={{
           position: "sticky",
           top: 0,
@@ -917,12 +939,19 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         // />
         "Loading, please wait..."
       ) : (
-        <Stack sx={{ overflow: "hidden" }}>
+        <Stack
+          sx={{
+            overflow: "hidden",
+            ...(formatting.pageColor === "Original"
+              ? {}
+              : { backgroundColor: formatting.pageColor }),
+          }}
+        >
           <Stack
             direction="row"
             alignItems={"center"}
             justifyContent={"center"}
-            sx={{ mt: "10px", height: "100%" }}
+            sx={{ height: "100%" }}
             spacing={1}
           >
             <Box
