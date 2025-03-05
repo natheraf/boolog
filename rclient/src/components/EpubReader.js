@@ -478,70 +478,70 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return () => observer.disconnect();
   }, [handlePathHref]);
 
-  React.useEffect(() => {
-    if (spinePointer === null) {
-      return;
-    }
-    const loadedImages = {};
-    for (const index of [spinePointer - 1, spinePointer, spinePointer + 1]) {
-      if (
-        index < 0 ||
-        index === spine.length ||
-        visitedSpineIndexes.current.has(index)
-      ) {
-        continue;
-      }
-      visitedSpineIndexes.current.add(index);
-      const parser = new DOMParser();
-      const page = parser.parseFromString(
-        spine.current[index].element,
-        "text/html"
-      );
-      const nodes = page?.querySelectorAll("img, image");
-      for (const node of nodes) {
-        const tag = node.tagName.toLowerCase();
-        if (tag === "img") {
-          const src = node
-            .getAttribute("src")
-            ?.substring(node.getAttribute("src").indexOf("/") + 1);
-          if (
-            !src ||
-            !images.current[src] ||
-            loadedImageURLs.hasOwnProperty(src)
-          ) {
-            return;
-          }
-          const url = URL.createObjectURL(images.current[src]);
-          node.src = url;
-          loadedImages[src] = url;
-          node.style.objectFit = "scale-down";
-          node.style.margin = "auto";
-        } else if (tag === "image") {
-          let src = null;
-          for (const key of ["xlink:href", "href"]) {
-            if (node.getAttribute(key) !== null) {
-              src = node.getAttribute(key);
-            }
-          }
-          src = src?.substring(src.indexOf("/") + 1);
-          if (
-            !src ||
-            !images.current[src] ||
-            loadedImageURLs.hasOwnProperty(src)
-          ) {
-            return;
-          }
-          const url = URL.createObjectURL(images.current[src]);
-          loadedImages[src] = url;
-          node.setAttribute("href", url);
-          node.style.height = "100%";
-          node.style.width = "";
+  const preloadImages = React.useCallback(
+    (spinePointer) => {
+      const loadedImages = {};
+      for (const index of [spinePointer - 1, spinePointer, spinePointer + 1]) {
+        if (
+          index < 0 ||
+          index === spine.length ||
+          visitedSpineIndexes.current.has(index)
+        ) {
+          continue;
         }
+        visitedSpineIndexes.current.add(index);
+        const parser = new DOMParser();
+        const page = parser.parseFromString(
+          spine.current[index].element,
+          "text/html"
+        );
+        const nodes = page?.querySelectorAll("img, image");
+        for (const node of nodes) {
+          const tag = node.tagName.toLowerCase();
+          if (tag === "img") {
+            const src = node
+              .getAttribute("src")
+              ?.substring(node.getAttribute("src").indexOf("/") + 1);
+            if (
+              !src ||
+              !images.current[src] ||
+              loadedImageURLs.hasOwnProperty(src)
+            ) {
+              return;
+            }
+            const url = URL.createObjectURL(images.current[src]);
+            node.src = url;
+            loadedImages[src] = url;
+            node.style.objectFit = "scale-down";
+            node.style.margin = "auto";
+          } else if (tag === "image") {
+            let src = null;
+            for (const key of ["xlink:href", "href"]) {
+              if (node.getAttribute(key) !== null) {
+                src = node.getAttribute(key);
+              }
+            }
+            src = src?.substring(src.indexOf("/") + 1);
+            if (
+              !src ||
+              !images.current[src] ||
+              loadedImageURLs.hasOwnProperty(src)
+            ) {
+              return;
+            }
+            const url = URL.createObjectURL(images.current[src]);
+            loadedImages[src] = url;
+            node.setAttribute("href", url);
+            node.style.height = "100%";
+            node.style.width = "";
+          }
+        }
+        spine.current[index].element = page.documentElement.outerHTML;
       }
-      spine.current[index].element = page.documentElement.outerHTML;
-    }
-    setLoadedImageURLs((prev) => ({ ...prev, ...loadedImages }));
-  }, [spinePointer]);
+      setLoadedImageURLs((prev) => ({ ...prev, ...loadedImages }));
+    },
+    [loadedImageURLs]
+  );
 
   // add event listener to resize images
   React.useEffect(() => {
@@ -570,11 +570,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       );
     if (currentPage >= totalPages - 1) {
       setCurrentPage(0);
-      setSpinePointer((prev) => Math.min(spine.current.length - 1, prev + 1));
+      setSpinePointer((prev) => {
+        preloadImages(prev + 1);
+        return Math.min(spine.current.length - 1, prev + 1);
+      });
     } else {
       setCurrentPage((prev) => prev + 1);
     }
-  }, [currentPage, pageWidth, formatting]);
+  }, [pageWidth, formatting, currentPage, preloadImages]);
 
   const handlePreviousPage = React.useCallback(() => {
     const previousTotalWidth =
@@ -589,11 +592,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       );
     if (currentPage === 0) {
       setCurrentPage(totalPages - 1);
-      setSpinePointer((prev) => Math.max(0, prev - 1));
+      setSpinePointer((prev) => {
+        preloadImages(prev - 1);
+        return Math.max(0, prev - 1);
+      });
     } else {
       setCurrentPage((prev) => prev - 1);
     }
-  }, [currentPage, pageWidth, formatting]);
+  }, [currentPage, pageWidth, formatting, preloadImages]);
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
@@ -679,16 +685,18 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   // on load
   React.useEffect(() => {
-    if (spinePointer === null) {
-      for (const [key, value] of Object.entries(epubObject.css)) {
-        const styleElement = document.createElement("style");
-        styleElement.id = `epub-css-${key}`;
-        styleElement.innerHTML = `#content, #previous-content {\n${value}\n}`;
-        document.head.insertAdjacentElement("beforeend", styleElement);
-        epubStyleIds.current.push(styleElement.id);
-      }
-      setSpinePointer(0);
+    for (const [key, value] of Object.entries(epubObject.css)) {
+      const styleElement = document.createElement("style");
+      styleElement.id = `epub-css-${key}`;
+      styleElement.innerHTML = `#content, #previous-content {\n${value}\n}`;
+      document.head.insertAdjacentElement("beforeend", styleElement);
+      epubStyleIds.current.push(styleElement.id);
     }
+    setSpinePointer((prev) => {
+      const startIndex = prev ?? 0;
+      preloadImages(startIndex);
+      return startIndex;
+    });
 
     getPreferenceWithDefault({
       key: "epubGlobalFormatting",
