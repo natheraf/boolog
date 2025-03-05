@@ -278,6 +278,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const handleSearchOnChange = (event, value) => {
+    cleanUpMarkNode();
     setSpinePointer(value.spineIndex);
     setCurrentPage(value.page);
     setSelectedSearchResult(value);
@@ -341,14 +342,43 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 searchResultElementClone.current,
                 node
               );
+              let currentIndex = index;
+              let needleIndex = 0;
+              const markedNeedleBuilder = [];
+              while (needleIndex < selectedSearchResult.needle.length) {
+                if (
+                  inner[currentIndex] === "<" &&
+                  inner[currentIndex] !==
+                    selectedSearchResult.needle[needleIndex]
+                ) {
+                  markedNeedleBuilder.push(`</mark>`);
+                  while (
+                    inner.indexOf('"', currentIndex) !== -1 &&
+                    inner.indexOf('"', currentIndex) <
+                      inner.indexOf(">", currentIndex)
+                  ) {
+                    currentIndex = inner.indexOf('"', currentIndex + 1) + 1;
+                  }
+                  const tagEndIndex = inner.indexOf(">", currentIndex + 1) + 1;
+                  markedNeedleBuilder.push(
+                    inner.substring(currentIndex, tagEndIndex)
+                  );
+                  currentIndex = tagEndIndex;
+                  markedNeedleBuilder.push(
+                    `<mark style="font-size: inherit;" class="${markId}">`
+                  );
+                } else {
+                  markedNeedleBuilder.push(inner[currentIndex]);
+                  currentIndex += 1;
+                  needleIndex += 1;
+                }
+              }
               searchResultElementClone.current.innerHTML = `${inner.substring(
                 0,
                 index
-              )}<mark style="font-size: inherit;" id="${markId}">${
-                selectedSearchResult.needle
-              }</mark>${inner.substring(
-                index + selectedSearchResult.needle.length
-              )}`;
+              )}<mark style="font-size: inherit;" id="${markId}">${markedNeedleBuilder.join(
+                ""
+              )}</mark>${inner.substring(currentIndex)}`;
               break;
             }
             index += 1;
@@ -364,9 +394,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [getXPathSearchExpression, selectedSearchResult]);
 
-  /**
-   * @deprecated
-   */
   const cleanUpMarkNode = () => {
     if (searchResultElementClone.current !== null) {
       searchResultElementClone.current.parentElement.replaceChild(
@@ -559,6 +586,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
+    cleanUpMarkNode();
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
       Math.floor(totalWidth / pageWidth) +
@@ -580,6 +608,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [pageWidth, formatting, currentPage, preloadImages]);
 
   const handlePreviousPage = React.useCallback(() => {
+    cleanUpMarkNode();
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages =
