@@ -344,7 +344,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               searchResultElementClone.current.innerHTML = `${inner.substring(
                 0,
                 index
-              )}<mark id="${markId}">${
+              )}<mark style="font-size: inherit;" id="${markId}">${
                 selectedSearchResult.needle
               }</mark>${inner.substring(
                 index + selectedSearchResult.needle.length
