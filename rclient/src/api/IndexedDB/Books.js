@@ -4,7 +4,8 @@ import {
 } from "./config";
 import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
-import { addEpub, deleteFile } from "./Files";
+import { deleteFile } from "./Files";
+import { addEpub } from "../../features/files/fileUtils";
 import { deletePreference } from "./userPreferences";
 
 /**

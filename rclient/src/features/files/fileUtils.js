@@ -1,5 +1,7 @@
 import { BlobReader, BlobWriter, TextWriter, ZipReader } from "@zip.js/zip.js";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
+import { processEpub } from "../epub/epubUtils";
+import { addFile } from "../../api/IndexedDB/Files";
 
 export const convertZipFileToObjectDirectory = (data) =>
   new Promise((resolve, reject) => {
@@ -137,3 +139,16 @@ export const convertObjectToXML = (object) => {
   const xmlDataStr = builder.build(object);
   return xmlDataStr;
 };
+
+export const addEpub = (file) =>
+  new Promise((resolve, reject) => {
+    if (!file || file?.type !== "application/epub+zip") {
+      console.log(`Cannot add file: Missing file or not an epub`);
+      return reject(new Error("File is falsy or not an epub"));
+    }
+    convertZipFileToObjectResource(file).then((object) => {
+      const epubObject = processEpub(object);
+      const data = { blob: file, epubObject };
+      addFile(data).then(resolve);
+    });
+  });
