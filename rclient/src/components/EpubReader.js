@@ -749,6 +749,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       document.head.insertAdjacentElement("beforeend", styleElement);
       epubStyleIds.current.push(styleElement.id);
     }
+    putFormattingStyleElement();
     setSpinePointer((prev) => {
       const startIndex = prev ?? 0;
       preloadImages(startIndex);
