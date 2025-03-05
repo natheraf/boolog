@@ -4,7 +4,6 @@ import {
   Autocomplete,
   Box,
   FormControlLabel,
-  FormGroup,
   IconButton,
   InputAdornment,
   Menu,
@@ -19,6 +18,7 @@ import {
 } from "@mui/material";
 
 import { getGoogleFonts } from "../api/IndexedDB/State";
+import { defaultFormatting } from "../api/Local";
 
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import AddIcon from "@mui/icons-material/Add";
@@ -28,7 +28,6 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 export const ReaderFormat = ({
   formatting,
   setFormatting,
-  defaultFormatting,
   useGlobalFormatting,
   setUseGlobalFormatting,
 }) => {
@@ -93,36 +92,33 @@ export const ReaderFormat = ({
   };
 
   const [fieldState, setFieldState] = React.useState({
-    fontSize: formatting.fontSize,
+    ...formatting,
     fontSizeFocus: false,
-    lineHeight: formatting.lineHeight,
     lineHeightFocus: false,
-    pageMargins: formatting.pageMargins,
     pageMarginsFocus: false,
-    pagesShown: formatting.pagesShown,
     pagesShownFocus: false,
     fontFamilyOpen: false,
+    fontWeightFocus: false,
+    textColorFocus: false,
+    pageColorFocus: false,
+    pageHeightMarginsFocus: false,
+    textIndentFocus: false,
   });
 
-  React.useEffect(() => {
-    setFieldState((prev) => {
-      ["fontSize", "lineHeight", "pageMargins", "pagesShown"].forEach(
-        (key) => (prev[key] = formatting?.[key])
-      );
-      return prev;
-    });
-  }, [formatting]);
-
   const handleStepValue = (key, direction) => {
+    let oldValue = formatting[key];
+    if (oldValue === "Original") {
+      oldValue = defaultFormatting[`_${key}Default`];
+    }
     const newValue =
       direction === "increase"
         ? Math.min(
-            formatting[`_${key}Bounds`].max,
-            (formatting[key] + (formatting[`_${key}Step`] ?? 1)).toFixed(3)
+            defaultFormatting[`_${key}Bounds`].max,
+            (oldValue + (defaultFormatting[`_${key}Step`] ?? 1)).toFixed(3)
           )
         : Math.max(
-            formatting[`_${key}Bounds`].min,
-            (formatting[key] - (formatting[`_${key}Step`] ?? 1)).toFixed(3)
+            defaultFormatting[`_${key}Bounds`].min,
+            (oldValue - (defaultFormatting[`_${key}Step`] ?? 1)).toFixed(3)
           );
     setFormatting({
       ...formatting,
@@ -157,12 +153,26 @@ export const ReaderFormat = ({
   };
 
   const handleFieldReturn = (key) => (event) => {
+    event.stopPropagation();
+    if (event.key === "Enter" && fieldState[key] === "") {
+      setFormatting({ ...formatting, [key]: defaultFormatting[key] });
+      setFieldState({ ...formatting, [key]: defaultFormatting[key] });
+      return;
+    }
+    if (event.key === "Enter" && key.indexOf("Color") !== -1) {
+      setFormatting({ ...formatting, [key]: fieldState[key] });
+      setFieldState({ ...formatting, [key]: fieldState[key] });
+      return;
+    }
     const value =
       fieldState[key].length === 0 ? defaultFormatting[key] : fieldState[key];
     if (event.key === "Enter" && isNaN(value) === false) {
       const newValue = Math.max(
-        formatting[`_${key}Bounds`].min,
-        Math.min(formatting[`_${key}Bounds`].max, parseFloat(value).toFixed(3))
+        defaultFormatting[`_${key}Bounds`].min,
+        Math.min(
+          defaultFormatting[`_${key}Bounds`].max,
+          parseFloat(value).toFixed(3)
+        )
       );
       setFormatting({ ...formatting, [key]: newValue });
       setFieldState({ ...formatting, [key]: newValue });
@@ -230,7 +240,7 @@ export const ReaderFormat = ({
               <Tooltip
                 title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
                 placement="top"
-                open={fieldState.fontFamilyOpen}
+                open={fieldState.fontFamilyOpen ?? false}
               >
                 <Autocomplete
                   value={formatting.fontFamily}
@@ -255,9 +265,20 @@ export const ReaderFormat = ({
           </Paper>
           {[
             { title: "Font Size", value: "fontSize", endText: "rem" },
-            { title: "Line Height", value: "lineHeight", endText: "u" },
-            { title: "Page Margins", value: "pageMargins", endText: "px" },
+            { title: "Font Weight", value: "fontWeight", endText: "abs" },
+            {
+              title: "Page Width Margins",
+              value: "pageMargins",
+              endText: "px",
+            },
+            {
+              title: "Page Height Margins",
+              value: "pageHeightMargins",
+              endText: "px",
+            },
             { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
+            { title: "Indent", value: "textIndent", endText: "rem" },
+            { title: "Line Height", value: "lineHeight", endText: "u" },
           ].map((obj) => (
             <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
               <Stack spacing={1} alignItems={"center"}>
@@ -272,7 +293,7 @@ export const ReaderFormat = ({
                     onClick={() => handleStepValue(obj.value, "decrease")}
                     disabled={
                       fieldState[obj.value] <=
-                      formatting[`_${obj.value}Bounds`].min
+                      defaultFormatting[`_${obj.value}Bounds`].min
                     }
                   >
                     <RemoveIcon />
@@ -310,7 +331,7 @@ export const ReaderFormat = ({
                     onClick={() => handleStepValue(obj.value, "increase")}
                     disabled={
                       fieldState[obj.value] >=
-                      formatting[`_${obj.value}Bounds`].max
+                      defaultFormatting[`_${obj.value}Bounds`].max
                     }
                   >
                     <AddIcon />
@@ -328,7 +349,7 @@ export const ReaderFormat = ({
                 size="small"
                 fullWidth
               >
-                {formatting._textAlignments.map((obj) => (
+                {defaultFormatting._textAlignments.map((obj) => (
                   <MenuItem key={obj.value} value={obj.value}>
                     {obj.label}
                   </MenuItem>
@@ -336,6 +357,43 @@ export const ReaderFormat = ({
               </Select>
             </Stack>
           </Paper>
+          {[
+            { title: "Text Color", value: "textColor" },
+            { title: "Page Color", value: "pageColor" },
+          ].map((obj) => (
+            <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
+              <Stack spacing={1} alignItems={"center"}>
+                <Typography variant="h6">{obj.title}</Typography>
+                <Tooltip
+                  title="Enter a color name, RGB, HEX, or HSL"
+                  open={fieldState[`${obj.value}Focus`] ?? false}
+                  placement="top"
+                >
+                  <TextField
+                    fullWidth
+                    value={fieldState[obj.value]}
+                    placeholder={defaultFormatting[obj.value].toString()}
+                    InputProps={{
+                      endAdornment:
+                        fieldState[`${obj.value}Focus`] === true ? (
+                          <InputAdornment position="end">
+                            <KeyboardReturnIcon
+                              fontSize="small"
+                              color="success"
+                            />
+                          </InputAdornment>
+                        ) : null,
+                    }}
+                    onChange={handleOnChangeField(obj.value)}
+                    onBlur={() => handleFieldOnBlur(obj.value)}
+                    onFocus={() => handleFieldOnFocus(obj.value)}
+                    onKeyDown={handleFieldReturn(obj.value)}
+                    size="small"
+                  />
+                </Tooltip>
+              </Stack>
+            </Paper>
+          ))}
           <Stack direction={"row"}>
             <FormControlLabel
               control={<Switch />}
@@ -369,7 +427,6 @@ export const ReaderFormat = ({
 ReaderFormat.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
-  defaultFormatting: PropTypes.object.isRequired,
   useGlobalFormatting: PropTypes.bool.isRequired,
   setUseGlobalFormatting: PropTypes.func.isRequired,
 };

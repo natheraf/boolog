@@ -37,10 +37,12 @@ export const userTemplates = [
 ];
 
 export const defaultFormatting = {
-  fontSize: 1,
+  fontSize: "Original",
+  _fontSizeDefault: 1,
   _fontSizeStep: 0.05,
   _fontSizeBounds: { min: 0.05, max: Infinity },
-  lineHeight: 12,
+  lineHeight: "Original",
+  _lineHeightDefault: 12,
   _lineHeightBounds: { min: 1, max: Infinity },
   _lineHeightStep: 1,
   pageMargins: 500,
@@ -65,4 +67,17 @@ export const defaultFormatting = {
   ],
   showDividers: true,
   showArrows: true,
+  fontWeight: "Original",
+  _fontWeightDefault: 400,
+  _fontWeightStep: 100,
+  _fontWeightBounds: { min: 1, max: 1000 },
+  textColor: "Original",
+  pageColor: "Original",
+  pageHeightMargins: 25,
+  _pageHeightMarginsStep: 25,
+  _pageHeightMarginsBounds: { min: 0, max: Infinity },
+  textIndent: "Original",
+  _textIndentDefault: 1,
+  _textIndentStep: 1,
+  _textIndentBounds: { min: 0, max: Infinity },
 };

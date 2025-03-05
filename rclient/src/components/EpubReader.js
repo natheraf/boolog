@@ -685,8 +685,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       ? `"${format.fontFamily.family}"`
       : format.fontFamily.value;
     const userFormattingStyle = `
-      font-size: ${format.fontSize}rem; 
-      line-height: ${format.lineHeight / 10} !important;
+    ${format.fontSize === "Original" ? "" : `font-size: ${format.fontSize}rem;`}
+    ${
+      format.lineHeight === "Original"
+        ? ""
+        : `line-height: ${format.lineHeight / 10} !important;`
+    }
       ${
         fontFamily === "inherit" ? "" : `font-family: ${fontFamily} !important;`
       }
@@ -709,6 +713,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         format.pageColor === "Original"
           ? ""
           : `background-color: ${format.pageColor} !important;`
+      }
+      ${
+        format.textIndent === "Original"
+          ? ""
+          : `text-indent: ${format.textIndent}rem !important;`
       }
     `;
     const styleId = `epub-css-user-formatting`;
@@ -912,7 +921,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             <ReaderFormat
               formatting={formatting}
               setFormatting={handleSetFormatting}
-              defaultFormatting={defaultFormatting}
               useGlobalFormatting={useGlobalFormatting}
               setUseGlobalFormatting={setUseGlobalFormattingHelper}
             />
