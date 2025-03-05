@@ -26,6 +26,8 @@ import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
 import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
+import { getPreferenceWithDefault } from "../api/IndexedDB/userPreferences";
+import { defaultFormatting } from "../api/Local";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -79,10 +81,23 @@ export const BookLog = () => {
     orientation: "horizontal",
     inLibrary: true,
     imageOnClick: (id, fileId) =>
-      getFile(fileId).then((data) => {
-        setOpenEpubReader(Boolean(data.epubObject));
-        setEpub({ object: data.epubObject, entryId: id });
-      }),
+      getFile(fileId).then((data) =>
+        getPreferenceWithDefault({
+          key: "epubGlobalFormatting",
+          value: defaultFormatting,
+        }).then((res) => {
+          const globalFormatting = res.value;
+          getPreferenceWithDefault({
+            key: id,
+            useGlobalFormatting: true,
+            value: globalFormatting,
+          }).then((res) => {
+            data.epubObject.formatting = res;
+            setOpenEpubReader(Boolean(data.epubObject));
+            setEpub({ object: data.epubObject, entryId: id });
+          });
+        })
+      ),
     imageOnClickKey: "fileId",
   };
 

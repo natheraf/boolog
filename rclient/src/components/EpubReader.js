@@ -78,9 +78,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const contentElementRef = React.useRef(null);
 
   const [formatting, setFormatting] = React.useState(
-    structuredClone(defaultFormatting)
+    epubObject.formatting.value
   );
-  const [useGlobalFormatting, setUseGlobalFormatting] = React.useState(true);
+  const [useGlobalFormatting, setUseGlobalFormatting] = React.useState(
+    epubObject.formatting.useGlobalFormatting
+  );
 
   const spine = React.useRef(epubObject.spine);
   const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
@@ -94,7 +96,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
-  const [pageHeight, setPageHeight] = React.useState(window.innerHeight - 64);
+  const [dialogContentHeight, setDialogContentHeight] = React.useState(
+    window.innerHeight - 64
+  );
+  const pageHeight = React.useMemo(
+    () => dialogContentHeight - formatting.pageHeightMargins,
+    [dialogContentHeight, formatting.pageHeightMargins]
+  );
   const pageWidth = React.useMemo(() => {
     const value = windowWidth - formatting.pageMargins - columnGap;
     if (value <= 50) {
@@ -127,7 +135,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
     putPreference({
       key: entryId,
-      value: { useGlobalFormatting, formatting: value },
+      useGlobalFormatting,
+      value,
     });
   };
 
@@ -721,7 +730,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     const appBarHeight = document
       .getElementById("appBar")
       ?.getBoundingClientRect().height;
-    setPageHeight(window.innerHeight - appBarHeight);
+    setDialogContentHeight(window.innerHeight - appBarHeight);
   };
 
   const handleClearObjectURLs = () => {
@@ -744,26 +753,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const startIndex = prev ?? 0;
       preloadImages(startIndex);
       return startIndex;
-    });
-
-    getPreferenceWithDefault({
-      key: "epubGlobalFormatting",
-      value: defaultFormatting,
-    }).then((res) => {
-      const globalFormatting = res.value;
-      getPreferenceWithDefault({
-        key: entryId,
-        value: { useGlobalFormatting: true, formatting: globalFormatting },
-      }).then((res) => {
-        const useGlobalFormatting = res.value.useGlobalFormatting;
-        setUseGlobalFormatting(useGlobalFormatting);
-        const nonGlobalFormatting = res.value.formatting;
-        const formatting = useGlobalFormatting
-          ? globalFormatting
-          : nonGlobalFormatting;
-        setFormatting(formatting);
-        putFormattingStyleElement(formatting);
-      });
     });
 
     window.addEventListener("resize", updateWindowSize);
@@ -955,7 +944,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             <Box
               sx={{
                 width: "100%",
-                height: "100%",
+                height: dialogContentHeight,
                 position: "relative",
                 opacity: 0.4,
               }}
@@ -1029,7 +1018,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             <Box
               sx={{
                 width: "100%",
-                height: "100%",
+                height: dialogContentHeight,
                 position: "relative",
                 opacity: 0.4,
               }}
