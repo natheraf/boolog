@@ -75,33 +75,38 @@ export const BookLog = () => {
     },
   ];
 
+  const handleOpenEpub = (id, fileId) =>
+    getFile(fileId).then((data) => {
+      const formatting = structuredClone(defaultFormatting);
+      Object.keys(formatting).forEach(
+        (key) => key.startsWith("_") && delete formatting[key]
+      );
+      getPreferenceWithDefault({
+        key: "epubGlobalFormatting",
+        value: formatting,
+      }).then((res) => {
+        const globalFormatting = res.value;
+        getPreferenceWithDefault({
+          key: id,
+          useGlobalFormatting: true,
+          value: globalFormatting,
+        }).then((res) => {
+          if (res.useGlobalFormatting) {
+            res.value = globalFormatting;
+          }
+          data.epubObject.formatting = res;
+          setOpenEpubReader(Boolean(data.epubObject));
+          setEpub({ object: data.epubObject, entryId: id });
+        });
+      });
+    });
+
   const actionArea = {
     api: indexedDBBooksInterface,
     mediaUniqueIdentifier: ["id", "xId"],
     orientation: "horizontal",
     inLibrary: true,
-    imageOnClick: (id, fileId) =>
-      getFile(fileId).then((data) => {
-        const formatting = structuredClone(defaultFormatting);
-        Object.keys(formatting).forEach(
-          (key) => key.startsWith("_") && delete formatting[key]
-        );
-        getPreferenceWithDefault({
-          key: "epubGlobalFormatting",
-          value: formatting,
-        }).then((res) => {
-          const globalFormatting = res.value;
-          getPreferenceWithDefault({
-            key: id,
-            useGlobalFormatting: true,
-            value: globalFormatting,
-          }).then((res) => {
-            data.epubObject.formatting = res;
-            setOpenEpubReader(Boolean(data.epubObject));
-            setEpub({ object: data.epubObject, entryId: id });
-          });
-        });
-      }),
+    imageOnClick: handleOpenEpub,
     imageOnClickKey: "fileId",
   };
 
