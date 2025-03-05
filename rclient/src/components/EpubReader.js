@@ -147,13 +147,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         putFormattingStyleElement(res.value);
         putPreference({
           key: entryId,
-          value: { useGlobalFormatting: newValue, formatting: res.value },
+          useGlobalFormatting: newValue,
+          formatting: res.value,
         });
       });
     } else {
       putPreference({
         key: entryId,
-        value: { useGlobalFormatting: newValue, formatting },
+        useGlobalFormatting: newValue,
+        formatting,
       });
     }
     setUseGlobalFormatting(newValue);
