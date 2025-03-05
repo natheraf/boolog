@@ -105,6 +105,10 @@ export const ReaderFormat = ({
     textIndentFocus: false,
   });
 
+  React.useEffect(() => {
+    setFieldState((prev) => ({ ...prev, ...formatting }));
+  }, [formatting]);
+
   const handleStepValue = (key, direction) => {
     let oldValue = formatting[key];
     if (oldValue === "Original") {
