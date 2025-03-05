@@ -210,8 +210,8 @@ export const CreateBook = ({
         getFile(editBookObject.fileId)
           .then((res) => {
             if (res) {
-              setFile(res.blob);
-              setOriginalFile(res.blob);
+              setFile(res);
+              setOriginalFile(res);
             }
           })
           .catch((error) => console.log(error));
@@ -459,7 +459,11 @@ export const CreateBook = ({
               </Grid>
             ))}
           </Grid>
-          <Upload file={file} setFile={setFile} originalFile={originalFile} />
+          <Upload
+            file={file?.blob ?? file}
+            setFile={setFile}
+            originalFile={originalFile?.blob}
+          />
         </Stack>
       </Stack>
     </Dialog>

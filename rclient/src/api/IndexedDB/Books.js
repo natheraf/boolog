@@ -209,7 +209,7 @@ const setBookHelper = (db, data, key, localOnly) =>
 export const setBookWithFile = (entry, file, key, localOnly) => {
   const goSetBook = () => setBook(entry, key, localOnly);
   if (
-    file?.hasOwnProperty("id") ||
+    file?.hasOwnProperty("blob") ||
     (file === null && entry.hasOwnProperty("fileId") === false)
   ) {
     return goSetBook();
