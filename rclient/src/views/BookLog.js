@@ -81,10 +81,14 @@ export const BookLog = () => {
     orientation: "horizontal",
     inLibrary: true,
     imageOnClick: (id, fileId) =>
-      getFile(fileId).then((data) =>
+      getFile(fileId).then((data) => {
+        const formatting = structuredClone(defaultFormatting);
+        Object.keys(formatting).forEach(
+          (key) => key.startsWith("_") && delete formatting[key]
+        );
         getPreferenceWithDefault({
           key: "epubGlobalFormatting",
-          value: defaultFormatting,
+          value: formatting,
         }).then((res) => {
           const globalFormatting = res.value;
           getPreferenceWithDefault({
@@ -96,8 +100,8 @@ export const BookLog = () => {
             setOpenEpubReader(Boolean(data.epubObject));
             setEpub({ object: data.epubObject, entryId: id });
           });
-        })
-      ),
+        });
+      }),
     imageOnClickKey: "fileId",
   };
 
