@@ -468,14 +468,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             const src = node
               .getAttribute("src")
               ?.substring(node.getAttribute("src").indexOf("/") + 1);
-            if (
-              !src ||
-              !images.current[src] ||
-              loadedImageURLs.hasOwnProperty(src)
-            ) {
+            if (!src || !images.current[src]) {
               return;
             }
-            const url = URL.createObjectURL(images.current[src]);
+            const url =
+              loadedImages[src] ??
+              loadedImageURLs[src] ??
+              URL.createObjectURL(images.current[src]);
             node.src = url;
             loadedImages[src] = url;
             node.style.objectFit = "scale-down";
@@ -488,14 +487,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }
             }
             src = src?.substring(src.indexOf("/") + 1);
-            if (
-              !src ||
-              !images.current[src] ||
-              loadedImageURLs.hasOwnProperty(src)
-            ) {
+            if (!src || !images.current[src]) {
               return;
             }
-            const url = URL.createObjectURL(images.current[src]);
+            const url =
+              loadedImages[src] ??
+              loadedImageURLs[src] ??
+              URL.createObjectURL(images.current[src]);
             loadedImages[src] = url;
             node.setAttribute("href", url);
             node.style.height = "100%";
