@@ -93,6 +93,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const visitedSpineIndexes = React.useRef(new Set());
   const [loadedImageURLs, setLoadedImageURLs] = React.useState({});
 
+  const appBarHeight = 48;
+
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
@@ -569,7 +571,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     const observer = new MutationObserver((mutationList, observer) => {
       document
         .getElementById("content")
-        ?.querySelectorAll("a[linkto], img, image")
+        ?.querySelectorAll("a[linkto]")
         .forEach(async (node) => {
           const tag = node.tagName.toLowerCase();
           if (tag === "a") {
@@ -797,6 +799,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     >
       <AppBar
         id="appBar"
+        variant="outlined"
         sx={{
           position: "sticky",
           top: 0,
@@ -809,6 +812,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           alignItems={"center"}
           justifyContent={"space-between"}
           spacing={2}
+          sx={{ minHeight: `${appBarHeight}px`, height: `${appBarHeight}px` }}
+          variant="dense"
         >
           <Stack
             alignItems={"center"}
@@ -883,7 +888,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Search"
+                  placeholder="Search"
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
