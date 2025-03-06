@@ -48,7 +48,6 @@ export const processEpub = (epubObject) => {
         node.id = node.getAttribute("src");
         imageIds.push(node.getAttribute("src"));
       } else if (tag === "a") {
-        node.style.color = "lightblue";
         node.style.cursor = "pointer";
         node.setAttribute("linkto", node.getAttribute("href"));
         node.removeAttribute("href");
@@ -84,6 +83,7 @@ export const processEpub = (epubObject) => {
   }
 
   let wordCountAccumulator = 0;
+  const contentWordCounter = [];
   const spineStack = [];
   const spineMap = {};
   const spineRef = contentRef.spine.itemref;
@@ -92,13 +92,26 @@ export const processEpub = (epubObject) => {
     spineStack.push({
       element: elementMap.get(item["@_idref"]).section,
       label:
-        navMap.get(elementMap.get(item["@_idref"])?.href) ??
+        navMap.get(elementMap.get(item["@_idref"]).href) ??
         spineStack[spineStack.length - 1]?.label ??
         "No Chapter",
       type: elementMap.get(item["@_idref"])?.type,
       wordCount: elementMap.get(item["@_idref"])?.length,
       onGoingWordCount: wordCountAccumulator,
     });
+    if (
+      contentWordCounter[contentWordCounter.length - 1]?.label !==
+      spineStack[spineStack.length - 1]?.label
+    ) {
+      contentWordCounter.push({
+        label: spineStack[spineStack.length - 1]?.label,
+        wordCount: 0,
+        onGoingWordCount: wordCountAccumulator,
+        spineStartIndex: spineStack.length - 1,
+      });
+    }
+    contentWordCounter[contentWordCounter.length - 1].wordCount +=
+      elementMap.get(item["@_idref"])?.length ?? 0;
     wordCountAccumulator += elementMap.get(item["@_idref"])?.length;
   }
 
@@ -130,5 +143,6 @@ export const processEpub = (epubObject) => {
     css: epubObject.css,
     images: epubObject.images,
     metadata,
+    contentWordCounter,
   };
 };
