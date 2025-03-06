@@ -800,6 +800,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       <AppBar
         id="appBar"
         variant="outlined"
+        elevation={0}
         sx={{
           position: "sticky",
           top: 0,
