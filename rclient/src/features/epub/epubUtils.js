@@ -1,3 +1,10 @@
+function countWords(s) {
+  s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
+  s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
+  s = s.replace(/\n /, "\n"); // exclude newline with a start spacing
+  return s.split(" ").filter((char) => char !== " ").length;
+} // https://stackoverflow.com/a/18679657
+
 export const processEpub = (epubObject) => {
   const contentRef = epubObject["opf"].package;
   const tocRef = epubObject["ncx"].ncx;
@@ -60,6 +67,7 @@ export const processEpub = (epubObject) => {
       section: element,
       href: item["@_href"],
       type,
+      length: countWords(body.textContent),
     });
   }
 
@@ -75,6 +83,7 @@ export const processEpub = (epubObject) => {
     );
   }
 
+  let wordCountAccumulator = 0;
   const spineStack = [];
   const spineMap = {};
   const spineRef = contentRef.spine.itemref;
@@ -87,13 +96,20 @@ export const processEpub = (epubObject) => {
         spineStack[spineStack.length - 1]?.label ??
         "No Chapter",
       type: elementMap.get(item["@_idref"])?.type,
+      wordCount: elementMap.get(item["@_idref"])?.length,
+      onGoingWordCount: wordCountAccumulator,
     });
+    wordCountAccumulator += elementMap.get(item["@_idref"])?.length;
   }
 
   const end = document.createElement("div");
   end.id = "inner-content";
   end.innerHTML = "<h1>Fin</h1>";
-  spineStack.push({ element: end.outerHTML, label: "End" });
+  spineStack.push({
+    element: end.outerHTML,
+    label: "End",
+    onGoingWordCount: wordCountAccumulator,
+  });
 
   const metadata = {
     title:
