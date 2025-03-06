@@ -90,9 +90,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const visitedSpineIndexes = React.useRef(new Set());
   const [loadedImageURLs, setLoadedImageURLs] = React.useState({});
 
-  const leftOverHeight = 64;
+  const leftOverHeight = 68;
   const appBarHeight = 48;
-  const bottomHeight = leftOverHeight - appBarHeight;
+  const pageNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const [totalPagesForNavigator, setTotalPagesForNavigator] = React.useState(0);
+  const spineNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
@@ -428,6 +430,18 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     setSearchResult([]);
   };
 
+  const getCurrentTotalPages = React.useCallback(() => {
+    return document.getElementById("content")
+      ? Math.floor(document.getElementById("content").scrollWidth / pageWidth) +
+          +(
+            formatting.pagesShown > 1 &&
+            (document.getElementById("content").scrollWidth % pageWidth) /
+              pageWidth >
+              1 / formatting.pagesShown
+          )
+      : 0;
+  }, [formatting, pageWidth]);
+
   const handleViewOutOfBounds = React.useCallback(() => {
     if (contentElementRef.current !== null) {
       const totalWidth = document.getElementById("content").scrollWidth;
@@ -591,6 +605,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     observer.observe(document.body, config);
     return () => observer.disconnect();
   }, []);
+
+  React.useEffect(() => {
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver((mutationList, observer) => {
+      setTotalPagesForNavigator(getCurrentTotalPages());
+    });
+    observer.observe(document.body, config);
+    return () => observer.disconnect();
+  }, [getCurrentTotalPages]);
 
   // add event listener to resize images
   React.useEffect(() => {
@@ -960,6 +983,35 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         >
           <Stack>
             <Stack
+              justifyContent="center"
+              sx={{
+                position: "relative",
+                top: -3,
+                height: `${pageNavigateHeight}px`,
+                overflow: "hidden",
+              }}
+              direction={"row"}
+            >
+              {[...Array(totalPagesForNavigator).keys()].map((index) => (
+                <Tooltip key={index} title={`Page ${index}`} arrow>
+                  <Box
+                    onClick={() => setCurrentPage(index)}
+                    sx={{
+                      backgroundColor: `${
+                        currentPage >= index
+                          ? theme.palette.text.primary
+                          : theme.palette.text.disabled
+                      }`,
+                      opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
+                      cursor: "pointer",
+                      width: "100%",
+                      borderRadius: "5px",
+                    }}
+                  />
+                </Tooltip>
+              ))}
+            </Stack>
+            <Stack
               direction="row"
               alignItems={"center"}
               justifyContent={"center"}
@@ -1087,18 +1139,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 />
               </Box>
             </Stack>
-            <Grid
-              container
+            <Stack
               justifyContent="center"
-              columns={contentWordCounter.current.length}
-              columnGap={"3px"}
-              sx={{ height: `${bottomHeight}px` }}
+              sx={{
+                height: `${spineNavigateHeight}px`,
+                overflow: "hidden",
+              }}
+              direction={"row"}
             >
-              {contentWordCounter.current.map((obj, index) => (
-                <Tooltip key={obj.label} title={obj.label}>
-                  <Grid
-                    item
-                    xs={1}
+              {contentWordCounter.current.map((obj) => (
+                <Tooltip key={obj.label} title={obj.label} arrow>
+                  <Box
                     onClick={() =>
                       setSpinePointerAndPreloadImages(
                         obj.spineStartIndex ?? spinePointer
@@ -1110,15 +1161,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                           ? theme.palette.text.primary
                           : theme.palette.text.disabled
                       }`,
-                      opacity: 0.2,
+                      opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
                       cursor: "pointer",
-                      height: `${bottomHeight}px`,
+                      width: "100%",
                       borderRadius: "5px",
+                      marginBottom: `-3px`,
                     }}
                   />
                 </Tooltip>
               ))}
-            </Grid>
+            </Stack>
           </Stack>
           <Box sx={{ width: pageWidth, visibility: "hidden" }}>
             <Box
