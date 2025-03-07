@@ -541,6 +541,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               URL.createObjectURL(images.current[src]);
             node.src = url;
             loadedImages[src] = url;
+            if (["DIV", "SECTION"].includes(node.parentElement.tagName)) {
+              node.style.display = "block";
+            }
             node.style.objectFit = "scale-down";
             node.style.margin = "auto";
           } else if (tag === "image") {
