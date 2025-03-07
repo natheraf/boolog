@@ -167,6 +167,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [spinePointer]
   );
 
+  const functionsForNextRender = React.useRef([]);
+
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
       putPreference({ key: "epubGlobalFormatting", value });
@@ -568,31 +570,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [loadedImageURLs]
   );
 
-  const setSpinePointerAndPreloadImages = React.useCallback(
-    (value) => {
-      preloadImages(value);
-      setSpinePointer(value);
-      setCurrentPage(0);
-    },
-    [preloadImages]
-  );
-
-  const handlePathHref = React.useCallback(
-    (path) => {
-      if (path.startsWith("http")) {
-        return window.open(path, "_blank");
-      }
-      setCurrentPage(0);
-      path = path.substring(path.indexOf("/") + 1);
-      if (path.indexOf("#") !== -1) {
-        setLinkFragment(path.substring(path.indexOf("#") + 1));
-        path = path.substring(0, path.indexOf("#"));
-      }
-      setSpinePointerAndPreloadImages(hrefSpineMap.current[path]);
-    },
-    [setSpinePointerAndPreloadImages]
-  );
-
   // handles setting page so fragment is visible
   React.useEffect(() => {
     if (linkFragment !== null && document.getElementById(linkFragment)) {
@@ -644,6 +621,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   React.useEffect(() => {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver((mutationList, observer) => {
+      functionsForNextRender.current.forEach((fn) => fn());
+      functionsForNextRender.current = [];
       setTotalPagesForNavigator(getCurrentTotalPages());
     });
     observer.observe(document.body, config);
@@ -709,6 +688,47 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setCurrentPage((prev) => prev - 1);
     }
   }, [currentPage, pageWidth, formatting, preloadImages]);
+
+  const turnToLastPage = React.useCallback(() => {
+    const totalWidth = document.getElementById("content").scrollWidth;
+    const totalPages =
+      Math.floor(totalWidth / pageWidth) +
+      +(
+        formatting.pagesShown > 1 &&
+        (document.getElementById("content").scrollWidth % pageWidth) /
+          pageWidth >
+          1 / formatting.pagesShown
+      );
+    setCurrentPage(totalPages - 1);
+  }, [formatting, pageWidth]);
+
+  const setSpinePointerAndPreloadImages = React.useCallback(
+    (value, toLastPage) => {
+      preloadImages(value);
+      setSpinePointer(value);
+      setCurrentPage(0);
+      if (toLastPage === true) {
+        functionsForNextRender.current.push(turnToLastPage);
+      }
+    },
+    [preloadImages, turnToLastPage]
+  );
+
+  const handlePathHref = React.useCallback(
+    (path) => {
+      if (path.startsWith("http")) {
+        return window.open(path, "_blank");
+      }
+      setCurrentPage(0);
+      path = path.substring(path.indexOf("/") + 1);
+      if (path.indexOf("#") !== -1) {
+        setLinkFragment(path.substring(path.indexOf("#") + 1));
+        path = path.substring(0, path.indexOf("#"));
+      }
+      setSpinePointerAndPreloadImages(hrefSpineMap.current[path]);
+    },
+    [setSpinePointerAndPreloadImages]
+  );
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
@@ -1044,7 +1064,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                       onClick={() => {
                         setSpinePointerAndPreloadImages(
                           spinePointer -
-                            (spine.current[spinePointer].backCount - index)
+                            (spine.current[spinePointer].backCount - index),
+                          true
                         );
                       }}
                       sx={{
