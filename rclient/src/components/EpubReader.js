@@ -91,7 +91,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const leftOverHeight = 68;
   const appBarHeight = 48;
-  const pageNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const leftOverNavHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const pageNavigateHeight = leftOverNavHeight;
   const [totalPagesForNavigator, setTotalPagesForNavigator] = React.useState(0);
   const arrayForPageNavigator = React.useMemo(
     () => [...Array(totalPagesForNavigator).keys()],
@@ -111,14 +112,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         : [...Array(spine.current[spinePointer].frontCount).keys()],
     [spinePointer]
   );
-  const spineNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const spineNavigateHeight = leftOverNavHeight;
   const arrayForSpineNavigator = React.useMemo(() => chapterMeta.current, []);
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
   const [dialogContentHeight, setDialogContentHeight] = React.useState(
-    window.innerHeight - leftOverHeight
+    window.innerHeight -
+      leftOverHeight +
+      (!formatting.showPageNavigator + !formatting.showSpineNavigator) *
+        leftOverNavHeight
   );
   const pageHeight = React.useMemo(
     () => dialogContentHeight - formatting.pageHeightMargins,
@@ -780,17 +784,29 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
-  const handleSetFormatting = (formatting) => {
-    updateFormattingOnDB(formatting);
-    setFormatting(formatting);
-    putFormattingStyleElement(formatting);
+  const handleSetFormatting = (newFormatting) => {
+    const turnedOffNav =
+      (formatting.showPageNavigator &&
+        newFormatting.showPageNavigator === false) ||
+      (formatting.showSpineNavigator &&
+        newFormatting.showSpineNavigator === false);
+    const turnedOnNav =
+      (formatting.showPageNavigator === false &&
+        newFormatting.showPageNavigator) ||
+      (formatting.showSpineNavigator === false &&
+        newFormatting.showSpineNavigator);
+    if (turnedOffNav) {
+      setDialogContentHeight((prev) => prev + pageNavigateHeight);
+    } else if (turnedOnNav) {
+      setDialogContentHeight((prev) => prev - pageNavigateHeight);
+    }
+    updateFormattingOnDB(newFormatting);
+    setFormatting(newFormatting);
+    putFormattingStyleElement(newFormatting);
   };
 
   const updateWindowSize = () => {
     setWindowWidth(window.innerWidth);
-    const appBarHeight = document
-      .getElementById("appBar")
-      ?.getBoundingClientRect().height;
     setDialogContentHeight(window.innerHeight - leftOverHeight);
   };
 
@@ -1000,92 +1016,90 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           }}
         >
           <Stack>
-            <Stack
-              sx={{
-                height: `${pageNavigateHeight}px`,
-                overflow: "hidden",
-              }}
-              direction={"row"}
-              spacing={1}
-            >
-              {formatting.showPageNavigator &&
-              spinePointer !== spine.current.length - 1 ? (
-                <>
-                  {arrayForPreviousChapterNavigator.map((index) => (
-                    <Tooltip key={index} title={`Part ${index + 1}`} arrow>
+            {formatting.showPageNavigator &&
+            spinePointer !== spine.current.length - 1 ? (
+              <Stack
+                sx={{
+                  height: `${pageNavigateHeight}px`,
+                  overflow: "hidden",
+                }}
+                direction={"row"}
+                spacing={1}
+              >
+                {arrayForPreviousChapterNavigator.map((index) => (
+                  <Tooltip key={index} title={`Part ${index + 1}`} arrow>
+                    <Box
+                      onClick={() => {
+                        setSpinePointerAndPreloadImages(
+                          spinePointer -
+                            (spine.current[spinePointer].backCount - index)
+                        );
+                      }}
+                      sx={{
+                        backgroundColor: `${theme.palette.text.disabled}`,
+                        opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
+                        cursor: "pointer",
+                        width: "100%",
+                        borderRadius: "5px",
+                        position: "relative",
+                        top: 3,
+                      }}
+                    />
+                  </Tooltip>
+                ))}
+                <Stack sx={{ width: "100%" }} spacing={0} direction={"row"}>
+                  {arrayForPageNavigator.map((index) => (
+                    <Tooltip key={index} title={`Page ${index + 1}`} arrow>
                       <Box
-                        onClick={() => {
-                          setSpinePointerAndPreloadImages(
-                            spinePointer -
-                              (spine.current[spinePointer].backCount - index)
-                          );
-                        }}
+                        onClick={() => setCurrentPage(index)}
                         sx={{
-                          backgroundColor: `${theme.palette.text.disabled}`,
+                          backgroundColor: `${
+                            currentPage === index
+                              ? theme.palette.secondary.main
+                              : theme.palette.primary.dark
+                          }`,
                           opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
                           cursor: "pointer",
                           width: "100%",
                           borderRadius: "5px",
-                          position: "relative",
-                          top: 3,
+                          marginBottom: "-3px",
                         }}
                       />
                     </Tooltip>
                   ))}
-                  <Stack sx={{ width: "100%" }} spacing={0} direction={"row"}>
-                    {arrayForPageNavigator.map((index) => (
-                      <Tooltip key={index} title={`Page ${index + 1}`} arrow>
-                        <Box
-                          onClick={() => setCurrentPage(index)}
-                          sx={{
-                            backgroundColor: `${
-                              currentPage === index
-                                ? theme.palette.secondary.main
-                                : theme.palette.primary.dark
-                            }`,
-                            opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
-                            cursor: "pointer",
-                            width: "100%",
-                            borderRadius: "5px",
-                            marginBottom: "-3px",
-                          }}
-                        />
-                      </Tooltip>
-                    ))}
-                  </Stack>
-                  {arrayForNextChapterNavigator.map((index) => (
-                    <Tooltip
-                      key={index}
-                      title={`Part ${
-                        spine.current[spinePointer].backCount +
-                        spine.current[spinePointer].frontCount +
-                        1 -
-                        (spine.current[spinePointer].frontCount - index) +
-                        1
-                      }`}
-                      arrow
-                    >
-                      <Box
-                        onClick={() => {
-                          setSpinePointerAndPreloadImages(
-                            spinePointer + (index + 1)
-                          );
-                        }}
-                        sx={{
-                          backgroundColor: `${theme.palette.text.disabled}`,
-                          opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
-                          cursor: "pointer",
-                          width: "100%",
-                          borderRadius: "5px",
-                          position: "relative",
-                          top: 3,
-                        }}
-                      />
-                    </Tooltip>
-                  ))}
-                </>
-              ) : null}
-            </Stack>
+                </Stack>
+                {arrayForNextChapterNavigator.map((index) => (
+                  <Tooltip
+                    key={index}
+                    title={`Part ${
+                      spine.current[spinePointer].backCount +
+                      spine.current[spinePointer].frontCount +
+                      1 -
+                      (spine.current[spinePointer].frontCount - index) +
+                      1
+                    }`}
+                    arrow
+                  >
+                    <Box
+                      onClick={() => {
+                        setSpinePointerAndPreloadImages(
+                          spinePointer + (index + 1)
+                        );
+                      }}
+                      sx={{
+                        backgroundColor: `${theme.palette.text.disabled}`,
+                        opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
+                        cursor: "pointer",
+                        width: "100%",
+                        borderRadius: "5px",
+                        position: "relative",
+                        top: 3,
+                      }}
+                    />
+                  </Tooltip>
+                ))}
+              </Stack>
+            ) : null}
             <Stack
               direction="row"
               alignItems={"center"}
@@ -1214,40 +1228,40 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 />
               </Box>
             </Stack>
-            <Stack
-              justifyContent="center"
-              sx={{
-                height: `${spineNavigateHeight}px`,
-                overflow: "hidden",
-              }}
-              direction={"row"}
-            >
-              {formatting.showSpineNavigator
-                ? arrayForSpineNavigator.map((obj) => (
-                    <Tooltip key={obj.label} title={obj.label} arrow>
-                      <Box
-                        onClick={() =>
-                          setSpinePointerAndPreloadImages(
-                            obj.spineStartIndex ?? spinePointer
-                          )
-                        }
-                        sx={{
-                          backgroundColor: `${
-                            spinePointer >= obj.spineStartIndex
-                              ? theme.palette.text.primary
-                              : theme.palette.text.disabled
-                          }`,
-                          opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
-                          cursor: "pointer",
-                          width: "100%",
-                          borderRadius: "5px",
-                          marginBottom: `-3px`,
-                        }}
-                      />
-                    </Tooltip>
-                  ))
-                : null}
-            </Stack>
+            {formatting.showSpineNavigator ? (
+              <Stack
+                justifyContent="center"
+                sx={{
+                  height: `${spineNavigateHeight}px`,
+                  overflow: "hidden",
+                }}
+                direction={"row"}
+              >
+                {arrayForSpineNavigator.map((obj) => (
+                  <Tooltip key={obj.label} title={obj.label} arrow>
+                    <Box
+                      onClick={() =>
+                        setSpinePointerAndPreloadImages(
+                          obj.spineStartIndex ?? spinePointer
+                        )
+                      }
+                      sx={{
+                        backgroundColor: `${
+                          spinePointer >= obj.spineStartIndex
+                            ? theme.palette.text.primary
+                            : theme.palette.text.disabled
+                        }`,
+                        opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
+                        cursor: "pointer",
+                        width: "100%",
+                        borderRadius: "5px",
+                        marginBottom: `-3px`,
+                      }}
+                    />
+                  </Tooltip>
+                ))}
+              </Stack>
+            ) : null}
           </Stack>
           <Box sx={{ width: pageWidth, visibility: "hidden" }}>
             <Box
