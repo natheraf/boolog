@@ -16,7 +16,6 @@ import {
   useMediaQuery,
   CircularProgress,
   Divider,
-  Grid,
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
@@ -94,7 +93,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const appBarHeight = 48;
   const pageNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
   const [totalPagesForNavigator, setTotalPagesForNavigator] = React.useState(0);
+  const arrayForPageNavigator = React.useMemo(
+    () => [...Array(totalPagesForNavigator).keys()],
+    [totalPagesForNavigator]
+  );
   const spineNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const arrayForSpineNavigator = React.useMemo(
+    () => contentWordCounter.current,
+    []
+  );
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
@@ -992,7 +999,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               direction={"row"}
             >
-              {[...Array(totalPagesForNavigator).keys()].map((index) => (
+              {arrayForPageNavigator.map((index) => (
                 <Tooltip key={index} title={`Page ${index}`} arrow>
                   <Box
                     onClick={() => setCurrentPage(index)}
@@ -1147,7 +1154,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               direction={"row"}
             >
-              {contentWordCounter.current.map((obj) => (
+              {arrayForSpineNavigator.map((obj) => (
                 <Tooltip key={obj.label} title={obj.label} arrow>
                   <Box
                     onClick={() =>
