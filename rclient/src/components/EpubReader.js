@@ -332,8 +332,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handleSearchOnChange = (event, value) => {
     cleanUpMarkNode();
-    setSpinePointer(value.spineIndex);
-    setCurrentPage(value.page);
+    goToAndPreloadImages(value.spineIndex, value.page);
     setSelectedSearchResult(value);
     handleSearchOnBlur();
   };
@@ -704,12 +703,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     setCurrentPage(totalPages - 1);
   }, [formatting, pageWidth]);
 
-  const setSpinePointerAndPreloadImages = React.useCallback(
-    (value, toLastPage) => {
-      preloadImages(value);
-      setSpinePointer(value);
-      setCurrentPage(0);
-      if (toLastPage === true) {
+  const goToAndPreloadImages = React.useCallback(
+    (spineIndex, page) => {
+      preloadImages(spineIndex);
+      setSpinePointer(spineIndex);
+      setCurrentPage(page === -1 ? 0 : page);
+      if (page === -1) {
         functionsForNextRender.current.push(turnToLastPage);
       }
     },
@@ -727,9 +726,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         setLinkFragment(path.substring(path.indexOf("#") + 1));
         path = path.substring(0, path.indexOf("#"));
       }
-      setSpinePointerAndPreloadImages(hrefSpineMap.current[path]);
+      goToAndPreloadImages(hrefSpineMap.current[path]);
     },
-    [setSpinePointerAndPreloadImages]
+    [goToAndPreloadImages]
   );
 
   const handleOnKeyDown = React.useCallback(
@@ -1064,10 +1063,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   <Tooltip key={index} title={`Part ${index + 1}`} arrow>
                     <Box
                       onClick={() => {
-                        setSpinePointerAndPreloadImages(
+                        goToAndPreloadImages(
                           spinePointer -
                             (spine.current[spinePointer].backCount - index),
-                          true
+                          -1
                         );
                       }}
                       sx={{
@@ -1119,9 +1118,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   >
                     <Box
                       onClick={() => {
-                        setSpinePointerAndPreloadImages(
-                          spinePointer + (index + 1)
-                        );
+                        goToAndPreloadImages(spinePointer + (index + 1));
                       }}
                       sx={{
                         backgroundColor: `${theme.palette.text.disabled}`,
@@ -1277,7 +1274,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   <Tooltip key={obj.label} title={obj.label} arrow>
                     <Box
                       onClick={() =>
-                        setSpinePointerAndPreloadImages(
+                        goToAndPreloadImages(
                           obj.spineStartIndex ?? spinePointer
                         )
                       }
