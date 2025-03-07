@@ -27,6 +27,7 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PropTypes from "prop-types";
 import { Loading } from "../features/loading/Loading";
+import { TableOfContents } from "../features/epub/components/TableOfContents";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -747,7 +748,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         return window.open(path, "_blank");
       }
       setCurrentPage(0);
-      path = path.substring(path.indexOf("/") + 1);
+      if (path.startsWith("../")) {
+        path = path.substring(3);
+      } else if (path.startsWith("/")) {
+        path = path.substring(1);
+      }
       if (path.indexOf("#") !== -1) {
         setLinkFragment(path.substring(path.indexOf("#") + 1));
         path = path.substring(0, path.indexOf("#"));
@@ -958,7 +963,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             </Tooltip>
             {greaterThanSmall ? (
               <Stack>
-                <Typography variant="caption" noWrap>
+                <Typography variant="subtitle2" noWrap>
                   {epubObject.metadata.title}
                 </Typography>
                 <Typography variant="subtitle1" noWrap>
@@ -1058,6 +1063,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               disabled={spine.current === null}
               disableClearable
               sx={{ width: greaterThanSmall ? "300px" : "180px" }}
+            />
+            <TableOfContents
+              toc={epubObject.toc}
+              handlePathHref={handlePathHref}
             />
             <ReaderFormat
               formatting={formatting}

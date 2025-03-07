@@ -71,6 +71,7 @@ export const processEpub = (epubObject) => {
   }
 
   const navMap = new Map(); // content -> nav label / chapter name
+  const toc = [];
   for (const navPoint of tocRef.navMap.navPoint) {
     const src = navPoint.content?.["@_src"];
     navMap.set(
@@ -80,6 +81,14 @@ export const processEpub = (epubObject) => {
       ),
       navPoint.navLabel?.text ?? "error: no chapter name"
     );
+    toc.push({
+      src,
+      label: navPoint.navLabel?.text ?? "error: no chapter name",
+      playOrder: navPoint["@_playOrder"] ?? null,
+    });
+  }
+  if (toc[0]?.playOrder !== null) {
+    toc.sort((a, b) => a.playOrder - b.playOrder);
   }
 
   let wordCountAccumulator = 0;
@@ -165,5 +174,6 @@ export const processEpub = (epubObject) => {
     images: epubObject.images,
     metadata,
     chapterMeta,
+    toc,
   };
 };
