@@ -83,7 +83,7 @@ export const processEpub = (epubObject) => {
   }
 
   let wordCountAccumulator = 0;
-  const contentWordCounter = [];
+  const chapterMeta = [];
   const spineStack = [];
   const spineMap = {};
   const spineRef = contentRef.spine.itemref;
@@ -100,19 +100,39 @@ export const processEpub = (epubObject) => {
       onGoingWordCount: wordCountAccumulator,
     });
     if (
-      contentWordCounter[contentWordCounter.length - 1]?.label !==
+      chapterMeta[chapterMeta.length - 1]?.label !==
       spineStack[spineStack.length - 1]?.label
     ) {
-      contentWordCounter.push({
+      chapterMeta.push({
         label: spineStack[spineStack.length - 1]?.label,
         wordCount: 0,
         onGoingWordCount: wordCountAccumulator,
         spineStartIndex: spineStack.length - 1,
+        lengthInSpine: 0,
       });
     }
-    contentWordCounter[contentWordCounter.length - 1].wordCount +=
+    chapterMeta[chapterMeta.length - 1].wordCount +=
       elementMap.get(item["@_idref"])?.length ?? 0;
+    chapterMeta[chapterMeta.length - 1].lengthInSpine += 1;
     wordCountAccumulator += elementMap.get(item["@_idref"])?.length;
+  }
+
+  let chapterIndex = 0;
+  for (let index = 0; index < spineStack.length; index += 1) {
+    if (
+      index >=
+      chapterMeta[chapterIndex].lengthInSpine +
+        chapterMeta[chapterIndex].spineStartIndex
+    ) {
+      chapterIndex += 1;
+    }
+    const content = spineStack[index];
+    content.frontCount =
+      chapterMeta[chapterIndex].lengthInSpine +
+      chapterMeta[chapterIndex].spineStartIndex -
+      index -
+      1;
+    content.backCount = index - chapterMeta[chapterIndex].spineStartIndex;
   }
 
   const end = document.createElement("div");
@@ -143,6 +163,6 @@ export const processEpub = (epubObject) => {
     css: epubObject.css,
     images: epubObject.images,
     metadata,
-    contentWordCounter,
+    chapterMeta,
   };
 };

@@ -82,7 +82,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const spine = React.useRef(epubObject.spine);
   const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
   const images = React.useRef(epubObject.images);
-  const contentWordCounter = React.useRef(epubObject.contentWordCounter);
+  const chapterMeta = React.useRef(epubObject.chapterMeta);
 
   const [spinePointer, setSpinePointer] = React.useState(null);
 
@@ -97,11 +97,22 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     () => [...Array(totalPagesForNavigator).keys()],
     [totalPagesForNavigator]
   );
-  const spineNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
-  const arrayForSpineNavigator = React.useMemo(
-    () => contentWordCounter.current,
-    []
+  const arrayForPreviousChapterNavigator = React.useMemo(
+    () =>
+      spinePointer === null
+        ? []
+        : [...Array(spine.current[spinePointer].backCount).keys()],
+    [spinePointer]
   );
+  const arrayForNextChapterNavigator = React.useMemo(
+    () =>
+      spinePointer === null
+        ? []
+        : [...Array(spine.current[spinePointer].frontCount).keys()],
+    [spinePointer]
+  );
+  const spineNavigateHeight = Math.floor((leftOverHeight - appBarHeight) / 2);
+  const arrayForSpineNavigator = React.useMemo(() => chapterMeta.current, []);
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
@@ -990,35 +1001,85 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         >
           <Stack>
             <Stack
-              justifyContent="center"
               sx={{
                 position: "relative",
-                top: -3,
+                top: 3,
                 height: `${pageNavigateHeight}px`,
                 overflow: "hidden",
               }}
               direction={"row"}
+              spacing={1}
             >
-              {formatting.showPageNavigator
-                ? arrayForPageNavigator.map((index) => (
-                    <Tooltip key={index} title={`Page ${index}`} arrow>
+              {formatting.showPageNavigator &&
+              spinePointer !== spine.current.length - 1 ? (
+                <>
+                  {arrayForPreviousChapterNavigator.map((index) => (
+                    <Tooltip
+                      key={index}
+                      title={
+                        spinePointer -
+                        (spine.current[spinePointer].backCount - index)
+                      }
+                      arrow
+                    >
                       <Box
-                        onClick={() => setCurrentPage(index)}
+                        onClick={() => {
+                          setSpinePointerAndPreloadImages(
+                            spinePointer -
+                              (spine.current[spinePointer].backCount - index)
+                          );
+                        }}
                         sx={{
-                          backgroundColor: `${
-                            currentPage >= index
-                              ? theme.palette.text.primary
-                              : theme.palette.text.disabled
-                          }`,
-                          opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
+                          backgroundColor: `${theme.palette.text.disabled}`,
+                          opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
                           cursor: "pointer",
                           width: "100%",
                           borderRadius: "5px",
                         }}
                       />
                     </Tooltip>
-                  ))
-                : null}
+                  ))}
+                  <Stack sx={{ width: "100%" }} spacing={0} direction={"row"}>
+                    {arrayForPageNavigator.map((index) => (
+                      <Tooltip key={index} title={`Page ${index}`} arrow>
+                        <Box
+                          onClick={() => setCurrentPage(index)}
+                          sx={{
+                            backgroundColor: `${
+                              currentPage === index
+                                ? theme.palette.secondary.main
+                                : theme.palette.primary.dark
+                            }`,
+                            opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
+                            cursor: "pointer",
+                            width: "100%",
+                            borderRadius: "5px",
+                            marginBottom: "-3px",
+                          }}
+                        />
+                      </Tooltip>
+                    ))}
+                  </Stack>
+                  {arrayForNextChapterNavigator.map((index) => (
+                    <Tooltip key={index} title={index} arrow>
+                      <Box
+                        onClick={() => {
+                          setSpinePointerAndPreloadImages(
+                            spinePointer + (index + 1)
+                          );
+                        }}
+                        sx={{
+                          backgroundColor: `${theme.palette.text.disabled}`,
+                          opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
+                          cursor: "pointer",
+                          width: "100%",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </Tooltip>
+                  ))}
+                </>
+              ) : null}
             </Stack>
             <Stack
               direction="row"
