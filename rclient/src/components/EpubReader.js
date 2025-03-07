@@ -118,11 +118,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
   const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
-  const [dialogContentHeight, setDialogContentHeight] = React.useState(
+  const getDialogContentHeight = () =>
     window.innerHeight -
-      leftOverHeight +
-      (!formatting.showPageNavigator + !formatting.showSpineNavigator) *
-        leftOverNavHeight
+    leftOverHeight +
+    (!formatting.showPageNavigator + !formatting.showSpineNavigator) *
+      leftOverNavHeight;
+  const [dialogContentHeight, setDialogContentHeight] = React.useState(
+    getDialogContentHeight
   );
   const pageHeight = React.useMemo(
     () => dialogContentHeight - formatting.pageHeightMargins,
@@ -807,7 +809,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateWindowSize = () => {
     setWindowWidth(window.innerWidth);
-    setDialogContentHeight(window.innerHeight - leftOverHeight);
+    setDialogContentHeight(getDialogContentHeight());
   };
 
   const handleClearObjectURLs = () => {
