@@ -40,6 +40,9 @@ export const processEpub = (epubObject) => {
         }
         node.style.objectFit = "scale-down";
         node.style.margin = "auto";
+        if (node.parentElement.tagName === "DIV") {
+          node.style.display = "block";
+        }
         node.id = node.getAttribute("src");
         imageIds.push(node.getAttribute("src"));
       } else if (tag === "image") {
