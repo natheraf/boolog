@@ -450,6 +450,7 @@ export const ReaderFormat = ({
             checked={useGlobalFormatting}
             onChange={handleCheckedOnChange("useGlobal")}
             label="Use Global"
+            labelPlacement="start"
           />
         </Stack>
       </Menu>
