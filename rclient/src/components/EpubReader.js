@@ -287,6 +287,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           page,
           bleeds: fragment.right - fragment.left - (pageWidth + columnGap) > 0,
           nodeNumber,
+          chapterPartNumber:
+            (spine.current[spineSearchPointer]?.backCount ?? 0) + 1,
         });
 
         nodeNumber += 1;
@@ -964,9 +966,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   ].join("|")}
                 >
                   <Stack>
-                    <Typography variant="caption">{`Chapter page ${
-                      option.page + 1
-                    }`}</Typography>
+                    <Typography variant="caption">{`Part ${
+                      option.chapterPartNumber
+                    } Page ${option.page + 1}`}</Typography>
                     <span>
                       <span style={{ color: "gray" }}>
                         {option.previewStart}

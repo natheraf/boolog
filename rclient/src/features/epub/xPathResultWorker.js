@@ -1,5 +1,13 @@
 onmessage = ({
-  data: { text, searchNeedle, spineSearchPointer, page, bleeds, nodeNumber },
+  data: {
+    text,
+    searchNeedle,
+    spineSearchPointer,
+    page,
+    bleeds,
+    nodeNumber,
+    chapterPartNumber,
+  },
 }) => {
   let index = text.indexOf(searchNeedle);
   const indexAppearances = [];
@@ -38,6 +46,7 @@ onmessage = ({
       previewEnd: text.substring(index + searchNeedle.length, endIndex),
       bleeds,
       nodeNumber,
+      chapterPartNumber,
     });
   }
   postMessage(res);
