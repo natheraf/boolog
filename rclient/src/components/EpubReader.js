@@ -169,8 +169,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const functionsForNextRender = React.useRef([]);
 
-  const showChapterNameInsteadOfTitle = React.useState(true);
-
   const getChapterPartWidthInNav = React.useCallback(
     (index, part) => {
       let spineIndex = spinePointer;
@@ -958,13 +956,18 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 <CloseIcon />
               </IconButton>
             </Tooltip>
-            <Typography variant="h6" noWrap>
-              {greaterThanSmall
-                ? spinePointer !== null && showChapterNameInsteadOfTitle
-                  ? spine.current[spinePointer].label
-                  : epubObject.metadata.title
-                : null}
-            </Typography>
+            {greaterThanSmall ? (
+              <Stack>
+                <Typography variant="caption" noWrap>
+                  {epubObject.metadata.title}
+                </Typography>
+                <Typography variant="subtitle1" noWrap>
+                  {spinePointer !== null
+                    ? spine.current[spinePointer].label
+                    : null}
+                </Typography>
+              </Stack>
+            ) : null}
           </Stack>
           <Stack direction={"row"} spacing={2}>
             {/**
