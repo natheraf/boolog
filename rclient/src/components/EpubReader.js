@@ -100,14 +100,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
   const arrayForPreviousChapterNavigator = React.useMemo(
     () =>
-      spinePointer === null
+      spinePointer === null || spinePointer === spine.current.length - 1
         ? []
         : [...Array(spine.current[spinePointer].backCount).keys()],
     [spinePointer]
   );
   const arrayForNextChapterNavigator = React.useMemo(
     () =>
-      spinePointer === null
+      spinePointer === null || spinePointer === spine.current.length - 1
         ? []
         : [...Array(spine.current[spinePointer].frontCount).keys()],
     [spinePointer]
@@ -155,6 +155,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [loadingText, setLoadingText] = React.useState(null);
   const [subLoadingText, setSubLoadingText] = React.useState(null);
   const [subLoadingProgress, setSubLoadingProgress] = React.useState(null);
+
+  const bookTotalWords =
+    spine.current[spine.current.length - 1].onGoingWordCount;
+  const currentContentTotalWords = React.useMemo(
+    () => spine.current[spinePointer]?.wordCount ?? 0,
+    [spinePointer]
+  );
+  const totalOnGoingWords = React.useMemo(
+    () => spine.current[spinePointer]?.onGoingWordCount ?? 0,
+    [spinePointer]
+  );
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
@@ -1018,8 +1029,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           }}
         >
           <Stack>
-            {formatting.showPageNavigator &&
-            spinePointer !== spine.current.length - 1 ? (
+            {formatting.showPageNavigator ? (
               <Stack
                 sx={{
                   height: `${pageNavigateHeight}px`,
@@ -1235,7 +1245,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 justifyContent="center"
                 sx={{
                   height: `${spineNavigateHeight}px`,
-                  overflow: "hidden",
                 }}
                 direction={"row"}
               >
@@ -1264,6 +1273,24 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 ))}
               </Stack>
             ) : null}
+            <Tooltip title={"% of Words Seen"} arrow>
+              <Typography
+                sx={{
+                  position: "absolute",
+                  bottom: `${spineNavigateHeight}px`,
+                  right: "3px",
+                }}
+              >
+                {Math.ceil(
+                  (((currentContentTotalWords / totalPagesForNavigator) *
+                    (currentPage + 1) +
+                    totalOnGoingWords) /
+                    bookTotalWords) *
+                    100
+                )}
+                %
+              </Typography>
+            </Tooltip>
           </Stack>
           <Box sx={{ width: pageWidth, visibility: "hidden" }}>
             <Box
