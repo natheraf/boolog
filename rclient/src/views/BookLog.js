@@ -81,6 +81,7 @@ export const BookLog = () => {
       Object.keys(formatting).forEach(
         (key) => key.startsWith("_") && delete formatting[key]
       );
+      formatting.pageMargins = Math.max(70, window.innerWidth - 700);
       getPreferenceWithDefault({
         key: "epubGlobalFormatting",
         value: formatting,
