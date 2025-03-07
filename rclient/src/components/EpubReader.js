@@ -1002,8 +1002,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           <Stack>
             <Stack
               sx={{
-                position: "relative",
-                top: 3,
                 height: `${pageNavigateHeight}px`,
                 overflow: "hidden",
               }}
@@ -1014,14 +1012,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               spinePointer !== spine.current.length - 1 ? (
                 <>
                   {arrayForPreviousChapterNavigator.map((index) => (
-                    <Tooltip
-                      key={index}
-                      title={
-                        spinePointer -
-                        (spine.current[spinePointer].backCount - index)
-                      }
-                      arrow
-                    >
+                    <Tooltip key={index} title={`Part ${index + 1}`} arrow>
                       <Box
                         onClick={() => {
                           setSpinePointerAndPreloadImages(
@@ -1035,13 +1026,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                           cursor: "pointer",
                           width: "100%",
                           borderRadius: "5px",
+                          position: "relative",
+                          top: 3,
                         }}
                       />
                     </Tooltip>
                   ))}
                   <Stack sx={{ width: "100%" }} spacing={0} direction={"row"}>
                     {arrayForPageNavigator.map((index) => (
-                      <Tooltip key={index} title={`Page ${index}`} arrow>
+                      <Tooltip key={index} title={`Page ${index + 1}`} arrow>
                         <Box
                           onClick={() => setCurrentPage(index)}
                           sx={{
@@ -1061,7 +1054,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     ))}
                   </Stack>
                   {arrayForNextChapterNavigator.map((index) => (
-                    <Tooltip key={index} title={index} arrow>
+                    <Tooltip
+                      key={index}
+                      title={`Part ${
+                        spine.current[spinePointer].backCount +
+                        spine.current[spinePointer].frontCount +
+                        1 -
+                        (spine.current[spinePointer].frontCount - index) +
+                        1
+                      }`}
+                      arrow
+                    >
                       <Box
                         onClick={() => {
                           setSpinePointerAndPreloadImages(
@@ -1074,6 +1077,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                           cursor: "pointer",
                           width: "100%",
                           borderRadius: "5px",
+                          position: "relative",
+                          top: 3,
                         }}
                       />
                     </Tooltip>
