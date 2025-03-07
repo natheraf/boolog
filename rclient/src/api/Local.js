@@ -80,4 +80,6 @@ export const defaultFormatting = {
   _textIndentDefault: 1,
   _textIndentStep: 1,
   _textIndentBounds: { min: 0, max: Infinity },
+  showPageNavigator: true,
+  showSpineNavigator: true,
 };

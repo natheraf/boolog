@@ -999,24 +999,26 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               direction={"row"}
             >
-              {arrayForPageNavigator.map((index) => (
-                <Tooltip key={index} title={`Page ${index}`} arrow>
-                  <Box
-                    onClick={() => setCurrentPage(index)}
-                    sx={{
-                      backgroundColor: `${
-                        currentPage >= index
-                          ? theme.palette.text.primary
-                          : theme.palette.text.disabled
-                      }`,
-                      opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
-                      cursor: "pointer",
-                      width: "100%",
-                      borderRadius: "5px",
-                    }}
-                  />
-                </Tooltip>
-              ))}
+              {formatting.showPageNavigator
+                ? arrayForPageNavigator.map((index) => (
+                    <Tooltip key={index} title={`Page ${index}`} arrow>
+                      <Box
+                        onClick={() => setCurrentPage(index)}
+                        sx={{
+                          backgroundColor: `${
+                            currentPage >= index
+                              ? theme.palette.text.primary
+                              : theme.palette.text.disabled
+                          }`,
+                          opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
+                          cursor: "pointer",
+                          width: "100%",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </Tooltip>
+                  ))
+                : null}
             </Stack>
             <Stack
               direction="row"
@@ -1154,29 +1156,31 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               direction={"row"}
             >
-              {arrayForSpineNavigator.map((obj) => (
-                <Tooltip key={obj.label} title={obj.label} arrow>
-                  <Box
-                    onClick={() =>
-                      setSpinePointerAndPreloadImages(
-                        obj.spineStartIndex ?? spinePointer
-                      )
-                    }
-                    sx={{
-                      backgroundColor: `${
-                        spinePointer >= obj.spineStartIndex
-                          ? theme.palette.text.primary
-                          : theme.palette.text.disabled
-                      }`,
-                      opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
-                      cursor: "pointer",
-                      width: "100%",
-                      borderRadius: "5px",
-                      marginBottom: `-3px`,
-                    }}
-                  />
-                </Tooltip>
-              ))}
+              {formatting.showSpineNavigator
+                ? arrayForSpineNavigator.map((obj) => (
+                    <Tooltip key={obj.label} title={obj.label} arrow>
+                      <Box
+                        onClick={() =>
+                          setSpinePointerAndPreloadImages(
+                            obj.spineStartIndex ?? spinePointer
+                          )
+                        }
+                        sx={{
+                          backgroundColor: `${
+                            spinePointer >= obj.spineStartIndex
+                              ? theme.palette.text.primary
+                              : theme.palette.text.disabled
+                          }`,
+                          opacity: theme.palette.mode === "light" ? 0.5 : 0.2,
+                          cursor: "pointer",
+                          width: "100%",
+                          borderRadius: "5px",
+                          marginBottom: `-3px`,
+                        }}
+                      />
+                    </Tooltip>
+                  ))
+                : null}
             </Stack>
           </Stack>
           <Box sx={{ width: pageWidth, visibility: "hidden" }}>
