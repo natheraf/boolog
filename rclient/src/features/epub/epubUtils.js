@@ -115,6 +115,7 @@ export const processEpub = (epubObject) => {
       elementMap.get(item["@_idref"])?.length ?? 0;
     chapterMeta[chapterMeta.length - 1].lengthInSpine += 1;
     wordCountAccumulator += elementMap.get(item["@_idref"])?.length;
+    spineStack[spineStack.length - 1].chapterMetaIndex = chapterMeta.length - 1;
   }
 
   let chapterIndex = 0;

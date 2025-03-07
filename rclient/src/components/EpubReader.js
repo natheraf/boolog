@@ -171,6 +171,29 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const showChapterNameInsteadOfTitle = React.useState(true);
 
+  const getChapterPartWidthInNav = React.useCallback(
+    (index, part) => {
+      let spineIndex = spinePointer;
+      if (part === "previous") {
+        spineIndex =
+          spinePointer - (spine.current[spinePointer].backCount - index);
+      }
+      if (part === "next") {
+        spineIndex = spinePointer + index + 1;
+      }
+      return Math.max(
+        2,
+        Math.ceil(
+          ((spine.current[spineIndex]?.wordCount ?? 1) /
+            (chapterMeta.current[spine.current[spineIndex].chapterMetaIndex]
+              ?.wordCount ?? 1)) *
+            100
+        )
+      );
+    },
+    [spinePointer]
+  );
+
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
       putPreference({ key: "epubGlobalFormatting", value });
@@ -1066,7 +1089,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   overflow: "hidden",
                 }}
                 direction={"row"}
-                spacing={1}
+                spacing={0.3}
               >
                 {arrayForPreviousChapterNavigator.map((index) => (
                   <Tooltip key={index} title={`Part ${index + 1}`} arrow>
@@ -1082,7 +1105,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                         backgroundColor: `${theme.palette.primary.dark}`,
                         opacity: theme.palette.mode === "light" ? 0.4 : 0.2,
                         cursor: "pointer",
-                        width: "100%",
+                        width: `${getChapterPartWidthInNav(
+                          index,
+                          "previous"
+                        )}%`,
                         borderRadius: "5px",
                         position: "relative",
                         top: 3,
@@ -1090,9 +1116,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     />
                   </Tooltip>
                 ))}
-                <Stack sx={{ width: "100%" }} spacing={0} direction={"row"}>
+                <Stack
+                  sx={{ width: `${getChapterPartWidthInNav(spinePointer)}%` }}
+                  spacing={0}
+                  direction={"row"}
+                >
                   {arrayForPageNavigator.map((index) => (
-                    <Tooltip key={index} title={`Page ${index + 1}`} arrow>
+                    <Tooltip key={index} title={`Pg ${index + 1}`} arrow>
                       <Box
                         onClick={() => setCurrentPage(index)}
                         sx={{
@@ -1133,7 +1163,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                         backgroundColor: `${theme.palette.text.disabled}`,
                         opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
                         cursor: "pointer",
-                        width: "100%",
+                        width: `${getChapterPartWidthInNav(index, "next")}%`,
                         borderRadius: "5px",
                         position: "relative",
                         top: 3,
