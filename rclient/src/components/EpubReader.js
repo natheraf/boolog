@@ -704,7 +704,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [formatting, pageWidth]);
 
   const goToAndPreloadImages = React.useCallback(
-    (spineIndex, page) => {
+    (spineIndex, page = 0) => {
       preloadImages(spineIndex);
       setSpinePointer(spineIndex);
       setCurrentPage(page === -1 ? 0 : page);
