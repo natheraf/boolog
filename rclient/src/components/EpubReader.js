@@ -1071,8 +1071,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                         );
                       }}
                       sx={{
-                        backgroundColor: `${theme.palette.text.disabled}`,
-                        opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
+                        backgroundColor: `${theme.palette.primary.dark}`,
+                        opacity: theme.palette.mode === "light" ? 0.4 : 0.2,
                         cursor: "pointer",
                         width: "100%",
                         borderRadius: "5px",
@@ -1089,8 +1089,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                         onClick={() => setCurrentPage(index)}
                         sx={{
                           backgroundColor: `${
-                            currentPage === index
-                              ? theme.palette.secondary.main
+                            currentPage <= index
+                              ? currentPage === index
+                                ? theme.palette.secondary.main
+                                : theme.palette.text.secondary
                               : theme.palette.primary.dark
                           }`,
                           opacity: theme.palette.mode === "light" ? 0.5 : 0.3,
