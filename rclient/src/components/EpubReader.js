@@ -169,6 +169,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const functionsForNextRender = React.useRef([]);
 
+  const showChapterNameInsteadOfTitle = React.useState(true);
+
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
       putPreference({ key: "epubGlobalFormatting", value });
@@ -934,7 +936,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               </IconButton>
             </Tooltip>
             <Typography variant="h6" noWrap>
-              {greaterThanSmall ? epubObject.metadata.title : null}
+              {greaterThanSmall
+                ? spinePointer !== null && showChapterNameInsteadOfTitle
+                  ? spine.current[spinePointer].label
+                  : epubObject.metadata.title
+                : null}
             </Typography>
           </Stack>
           <Stack direction={"row"} spacing={2}>
@@ -1298,7 +1304,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 ))}
               </Stack>
             ) : null}
-            <Tooltip title={"% of Words Seen"} arrow>
+            <Tooltip title={"Words Seen"} arrow>
               <Typography
                 sx={{
                   position: "absolute",
