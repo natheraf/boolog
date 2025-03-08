@@ -25,7 +25,6 @@ const grey = {
 export const Textarea = styled(TextareaAutosize)(
   ({ theme }) => `
   box-sizing: border-box;
-  width: 320px;
   font-size: 1rem;
   font-weight: 500;
   line-height: 1.5;
