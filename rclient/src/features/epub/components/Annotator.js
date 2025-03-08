@@ -102,11 +102,11 @@ export const Annotator = ({ entryId, memos, notes }) => {
     return () =>
       document
         .getElementById("content")
-        .removeEventListener("mouseup", handleGetTextSelection);
+        ?.removeEventListener("mouseup", handleGetTextSelection);
   }, []);
 
   return (
-    <Backdrop open={openAnnotator} onClick={handleCloseAnnotator}>
+    <Backdrop open={openAnnotator}>
       <Menu
         anchorEl={anchorEl}
         open={openAnnotator}
