@@ -88,7 +88,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const images = React.useRef(epubObject.images);
   const chapterMeta = React.useRef(epubObject.chapterMeta);
 
-  const [spinePointer, setSpinePointer] = React.useState(null);
+  const [spinePointer, setSpinePointer] = React.useState(
+    epubObject?.progress?.spine ?? 0
+  );
 
   const visitedSpineIndexes = React.useRef(new Set());
   const [loadedImageURLs, setLoadedImageURLs] = React.useState({});
@@ -174,6 +176,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const functionsForNextRender = React.useRef([]);
 
   const [searchFocused, setSearchFocused] = React.useState(false);
+
+  const timeOutToSetProgress = React.useRef(null);
 
   const getChapterPartWidthInNav = React.useCallback(
     (index, part) => {
@@ -519,6 +523,24 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       : 0;
   }, [formatting, pageWidth]);
 
+  const updateProgressToDb = React.useCallback(
+    (newSpineIndex, newCurrentPage) => {
+      clearTimeout(timeOutToSetProgress.current);
+      timeOutToSetProgress.current = setTimeout(
+        () =>
+          updatePreference({
+            key: entryId,
+            progress: {
+              spine: newSpineIndex ?? spinePointer,
+              part: (newCurrentPage ?? currentPage) / getCurrentTotalPages(),
+            },
+          }),
+        1000
+      );
+    },
+    [currentPage, entryId, getCurrentTotalPages, spinePointer]
+  );
+
   const handleViewOutOfBounds = React.useCallback(() => {
     if (contentElementRef.current !== null) {
       const totalWidth = document.getElementById("content").scrollWidth;
@@ -702,12 +724,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setCurrentPage(0);
       setSpinePointer((prev) => {
         preloadImages(prev + 1);
-        return Math.min(spine.current.length - 1, prev + 1);
+        const value = Math.min(spine.current.length - 1, prev + 1);
+        updateProgressToDb(value, 0);
+        return value;
       });
     } else {
-      setCurrentPage((prev) => prev + 1);
+      setCurrentPage((prev) => {
+        updateProgressToDb(null, prev + 1);
+        return prev + 1;
+      });
     }
-  }, [pageWidth, formatting, currentPage, preloadImages]);
+  }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
   const handlePreviousPage = React.useCallback(() => {
     cleanUpMarkNode();
@@ -725,12 +752,17 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setCurrentPage(totalPages - 1);
       setSpinePointer((prev) => {
         preloadImages(prev - 1);
-        return Math.max(0, prev - 1);
+        const value = Math.max(0, prev - 1);
+        updateProgressToDb(value, totalPages - 1);
+        return value;
       });
     } else {
-      setCurrentPage((prev) => prev - 1);
+      setCurrentPage((prev) => {
+        updateProgressToDb(null, prev - 1);
+        return prev - 1;
+      });
     }
-  }, [currentPage, pageWidth, formatting, preloadImages]);
+  }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
   const turnToLastPage = React.useCallback(() => {
     const totalWidth = document.getElementById("content").scrollWidth;
@@ -749,12 +781,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     (spineIndex, page = 0) => {
       preloadImages(spineIndex);
       setSpinePointer(spineIndex);
-      setCurrentPage(page === -1 ? 0 : page);
       if (page === -1) {
         functionsForNextRender.current.push(turnToLastPage);
       }
+      page = page === -1 ? 0 : page;
+      setCurrentPage(page);
+      updateProgressToDb(spineIndex, page);
     },
-    [preloadImages, turnToLastPage]
+    [preloadImages, turnToLastPage, updateProgressToDb]
   );
 
   const handlePathHref = React.useCallback(
@@ -915,6 +949,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const startIndex = prev ?? 0;
       preloadImages(startIndex);
       return startIndex;
+    });
+    functionsForNextRender.current.push(() => {
+      setCurrentPage(
+        Math.floor(getCurrentTotalPages() * epubObject.progress.part)
+      );
     });
 
     window.addEventListener("resize", updateWindowSize);
