@@ -39,6 +39,36 @@ const putPreferenceHelper = (db, data) =>
     request.onerror = (error) => reject(new Error(error));
   });
 
+/**
+ * Will update the key and values present in data object
+ * @param {object} data
+ * @returns
+ */
+export const updatePreference = (data) =>
+  openDatabase(getUserDB(), appDataDBVersion, (db) =>
+    updatePreferenceHelper(db, data)
+  );
+
+const updatePreferenceHelper = (db, data) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(userPreferencesObjectStore, "readonly");
+    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const request = objectStore.get(data.key);
+    const handleError = (error) => reject(new Error(error));
+    request.onsuccess = (event) => {
+      const oldData = event.target.result;
+      const transaction = db.transaction(
+        userPreferencesObjectStore,
+        "readwrite"
+      );
+      const objectStore = transaction.objectStore(userPreferencesObjectStore);
+      const request = objectStore.put({ ...oldData, ...data });
+      request.onsuccess = resolve;
+      request.onerror = handleError;
+    };
+    request.onerror = handleError;
+  });
+
 export const getPreferenceWithDefault = (data) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
     getPreferenceWithDefaultHelper(db, data)

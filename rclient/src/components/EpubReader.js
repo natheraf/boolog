@@ -19,7 +19,10 @@ import {
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
-import { getPreference, putPreference } from "../api/IndexedDB/userPreferences";
+import {
+  getPreference,
+  updatePreference,
+} from "../api/IndexedDB/userPreferences";
 import { AlertsContext } from "../context/Alerts";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -197,9 +200,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
-      putPreference({ key: "epubGlobalFormatting", formatting: value });
+      updatePreference({ key: "epubGlobalFormatting", formatting: value });
     }
-    putPreference({
+    updatePreference({
       key: entryId,
       formatting: {
         useGlobalFormatting,
@@ -212,7 +215,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     if (newValue) {
       getPreference("epubGlobalFormatting").then((res) => {
         setFormatting(res.formatting);
-        putPreference({
+        updatePreference({
           key: entryId,
           formatting: {
             useGlobalFormatting: newValue,
@@ -221,7 +224,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         });
       });
     } else {
-      putPreference({
+      updatePreference({
         key: entryId,
         formatting: {
           useGlobalFormatting: newValue,
