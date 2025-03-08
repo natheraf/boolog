@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  Backdrop,
   Divider,
   Menu,
   Stack,
@@ -105,99 +106,101 @@ export const Annotator = ({ entryId, memos, notes }) => {
   }, []);
 
   return (
-    <Menu
-      anchorEl={anchorEl}
-      open={openAnnotator}
-      onClose={handleCloseAnnotator}
-      anchorOrigin={{
-        vertical:
-          selectionParentRect && selectionRect
-            ? selectionRect.bottom -
-              selectionParentRect.top -
-              selectionRect.height / 2 -
-              20
-            : -10,
-        horizontal:
-          selectionParentRect && selectionRect
-            ? selectionRect.right -
-              selectionParentRect.left -
-              selectionRect.width / 2
-            : "center",
-      }}
-      transformOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
-    >
-      <Stack
-        sx={{
-          width: `${annotatorWidth}px`,
-          padding: 1,
+    <Backdrop open={openAnnotator} onClick={handleCloseAnnotator}>
+      <Menu
+        anchorEl={anchorEl}
+        open={openAnnotator}
+        onClose={handleCloseAnnotator}
+        anchorOrigin={{
+          vertical:
+            selectionParentRect && selectionRect
+              ? selectionRect.bottom -
+                selectionParentRect.top -
+                selectionRect.height / 2 -
+                20
+              : -10,
+          horizontal:
+            selectionParentRect && selectionRect
+              ? selectionRect.right -
+                selectionParentRect.left -
+                selectionRect.width / 2
+              : "center",
         }}
-        spacing={1}
+        transformOrigin={{
+          vertical: "bottom",
+          horizontal: "center",
+        }}
       >
-        <Typography variant="h6" noWrap>
-          {selectedText}
-        </Typography>
-        <Divider />
-        <SmallTabs
-          variant="fullWidth"
-          value={currentTabValue}
-          onChange={handleOnChangeTab}
-          tabpanelheight={tabPanelHeight}
-        >
-          <HtmlTooltip
-            title={
-              <Stack spacing={1}>
-                <Typography variant="h6">{"Memos"}</Typography>
-                <Typography variant="subtitle2">
-                  {"Memos appear in every occurrence of a word/phrase"}
-                </Typography>
-                <Divider />
-                <Typography>{"Usage"}</Typography>
-                <Typography variant="subtitle2">
-                  {
-                    "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear"
-                  }
-                </Typography>
-              </Stack>
-            }
-            enterDelay={500}
-            placement="top"
-          >
-            <SmallTab
-              icon={<StickyNote2Icon />}
-              iconPosition="end"
-              label="Memo"
-              tabpanelheight={tabPanelHeight}
-            />
-          </HtmlTooltip>
-          <Tooltip
-            title="Notes are added to the current word/phrase"
-            enterDelay={500}
-            placement="top"
-          >
-            <SmallTab
-              icon={<NotesIcon />}
-              iconPosition="end"
-              label="Note"
-              tabpanelheight={tabPanelHeight}
-            />
-          </Tooltip>
-        </SmallTabs>
-        <Textarea
-          value={tabValueMap[currentTabValue] === "memo" ? memo : note}
-          onChange={handleTextAreaOnChange}
-          onKeyDown={(event) => event.stopPropagation()}
+        <Stack
           sx={{
-            [`&:focus`]: { boxShadow: "inherit", borderColor: `inherit` },
-            [`&:hover:focus`]: {
-              borderColor: `inherit`,
-            },
+            width: `${annotatorWidth}px`,
+            padding: 1,
           }}
-          minRows={3}
-        />
-      </Stack>
-    </Menu>
+          spacing={1}
+        >
+          <Typography variant="h6" noWrap>
+            {selectedText}
+          </Typography>
+          <Divider />
+          <SmallTabs
+            variant="fullWidth"
+            value={currentTabValue}
+            onChange={handleOnChangeTab}
+            tabpanelheight={tabPanelHeight}
+          >
+            <HtmlTooltip
+              title={
+                <Stack spacing={1}>
+                  <Typography variant="h6">{"Memos"}</Typography>
+                  <Typography variant="subtitle2">
+                    {"Memos appear in every occurrence of a word/phrase"}
+                  </Typography>
+                  <Divider />
+                  <Typography>{"Usage"}</Typography>
+                  <Typography variant="subtitle2">
+                    {
+                      "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
+                    }
+                  </Typography>
+                </Stack>
+              }
+              enterDelay={500}
+              placement="top"
+            >
+              <SmallTab
+                icon={<StickyNote2Icon />}
+                iconPosition="end"
+                label="Memo"
+                tabpanelheight={tabPanelHeight}
+              />
+            </HtmlTooltip>
+            <Tooltip
+              title="Notes are added to the current word/phrase"
+              enterDelay={500}
+              placement="top"
+            >
+              <SmallTab
+                icon={<NotesIcon />}
+                iconPosition="end"
+                label="Note"
+                tabpanelheight={tabPanelHeight}
+              />
+            </Tooltip>
+          </SmallTabs>
+          <Textarea
+            value={tabValueMap[currentTabValue] === "memo" ? memo : note}
+            onChange={handleTextAreaOnChange}
+            onKeyDown={(event) => event.stopPropagation()}
+            sx={{
+              [`&:focus`]: { boxShadow: "inherit", borderColor: `inherit` },
+              [`&:hover:focus`]: {
+                borderColor: `inherit`,
+              },
+            }}
+            minRows={3}
+          />
+        </Stack>
+      </Menu>
+    </Backdrop>
   );
 };
