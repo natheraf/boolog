@@ -94,12 +94,13 @@ export const BookLog = () => {
             value: globalFormatting,
           },
           progress: { spine: 0, part: 0 },
+          notes: {},
+          memos: {},
         }).then((res) => {
           if (res.formatting.useGlobalFormatting) {
             res.formatting.value = globalFormatting;
           }
-          data.epubObject.formatting = res.formatting;
-          data.epubObject.progress = res.progress;
+          data.epubObject = { ...data.epubObject, ...res };
           setOpenEpubReader(Boolean(data.epubObject));
           setEpub({ object: data.epubObject, entryId: id });
         });
