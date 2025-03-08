@@ -689,15 +689,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       functionsForNextRender.current.forEach((fn) => fn());
       functionsForNextRender.current = [];
       setTotalPagesForNavigator(getCurrentTotalPages());
-    });
-    observer.observe(document.body, config);
-    return () => observer.disconnect();
-  }, [getCurrentTotalPages]);
-
-  // add event listener to resize images
-  React.useEffect(() => {
-    const config = { childList: true, subtree: true };
-    const observer = new MutationObserver((mutationList, observer) => {
       document
         .getElementById("content")
         ?.querySelectorAll("img, svg")
@@ -707,7 +698,22 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     });
     observer.observe(document.body, config);
     return () => observer.disconnect();
-  }, [pageHeight]);
+  }, [getCurrentTotalPages, pageHeight]);
+
+  // add event listener to resize images
+  // React.useEffect(() => {
+  //   const config = { childList: true, subtree: true };
+  //   const observer = new MutationObserver((mutationList, observer) => {
+  //     document
+  //       .getElementById("content")
+  //       ?.querySelectorAll("img, svg")
+  //       .forEach((element) => {
+  //         element.style.maxHeight = `${pageHeight}px`;
+  //       });
+  //   });
+  //   observer.observe(document.body, config);
+  //   return () => observer.disconnect();
+  // }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
     cleanUpMarkNode();
