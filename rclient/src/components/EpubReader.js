@@ -21,7 +21,7 @@ import {
 import { ReaderFormat } from "./ReaderFormat";
 import { getPreference, putPreference } from "../api/IndexedDB/userPreferences";
 import { AlertsContext } from "../context/Alerts";
-
+import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -169,6 +169,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
 
   const functionsForNextRender = React.useRef([]);
+
+  const [searchFocused, setSearchFocused] = React.useState(false);
 
   const getChapterPartWidthInNav = React.useCallback(
     (index, part) => {
@@ -481,11 +483,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   };
 
+  const handleSearchIconClick = () => {
+    setSearchFocused(true);
+  };
+
   const handleSearchOnBlur = () => {
     searchNeedle.current = null;
     searchResultAccumulator.current = [];
     setSpineSearchPointer(null);
     setSearchResult([]);
+    setSearchFocused(false);
   };
 
   const handleSearchOnFocus = () => {
@@ -962,7 +969,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               </IconButton>
             </Tooltip>
             {greaterThanSmall ? (
-              <Stack>
+              <Stack spacing={-0.5}>
                 <Typography variant="subtitle2" noWrap>
                   {epubObject.metadata.title}
                 </Typography>
@@ -975,105 +982,115 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             ) : null}
           </Stack>
           <Stack direction={"row"} spacing={2}>
-            {/**
-             * @todo maybe move search component out
-             */}
-            <Autocomplete
-              value={null}
-              onChange={handleSearchOnChange}
-              onInputChange={handleSearchInputOnChange}
-              onKeyDown={handleSearchOnKeyDown}
-              options={searchResult}
-              onFocus={handleSearchOnFocus}
-              onBlur={handleSearchOnBlur}
-              aria-placeholder={searchNeedle.current}
-              groupBy={(option) =>
-                spine.current?.[option?.spineIndex]?.label ?? "No Chapter"
-              }
-              getOptionLabel={(option) =>
-                option.previewStart + option.needle + option.previewEnd
-              }
-              renderOption={(props, option) => (
-                <Box
-                  component="li"
-                  {...props}
-                  key={[
-                    option.spineIndex,
-                    option.page,
-                    option.textIndex,
-                    option.nodeNumber,
-                  ].join("|")}
-                >
-                  <Stack>
-                    <Typography variant="caption">{`Part ${
-                      option.chapterPartNumber
-                    } Page ${option.page + 1}`}</Typography>
-                    <span>
-                      <span style={{ color: "gray" }}>
-                        {option.previewStart}
+            {searchFocused ? (
+              <Autocomplete
+                value={null}
+                onChange={handleSearchOnChange}
+                onInputChange={handleSearchInputOnChange}
+                onKeyDown={handleSearchOnKeyDown}
+                options={searchResult}
+                onFocus={handleSearchOnFocus}
+                onBlur={handleSearchOnBlur}
+                aria-placeholder={searchNeedle.current}
+                groupBy={(option) =>
+                  spine.current?.[option?.spineIndex]?.label ?? "No Chapter"
+                }
+                getOptionLabel={(option) =>
+                  option.previewStart + option.needle + option.previewEnd
+                }
+                renderOption={(props, option) => (
+                  <Box
+                    component="li"
+                    {...props}
+                    key={[
+                      option.spineIndex,
+                      option.page,
+                      option.textIndex,
+                      option.nodeNumber,
+                    ].join("|")}
+                  >
+                    <Stack>
+                      <Typography variant="caption">{`Part ${
+                        option.chapterPartNumber
+                      } Page ${option.page + 1}`}</Typography>
+                      <span>
+                        <span style={{ color: "gray" }}>
+                          {option.previewStart}
+                        </span>
+                        {option.needle}
+                        <span style={{ color: "gray" }}>
+                          {option.previewEnd}
+                        </span>
                       </span>
-                      {option.needle}
-                      <span style={{ color: "gray" }}>{option.previewEnd}</span>
-                    </span>
-                  </Stack>
-                </Box>
-              )}
-              loading={searchNeedle.current !== null}
-              loadingText={
-                (spineSearchPointer ?? 0) >= (spine.current?.length ?? 0) - 2
-                  ? "Loading results…"
-                  : "Searching…"
-              }
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  placeholder="Search"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {searchNeedle.current !== null ? (
-                          (spineSearchPointer ?? 0) >=
-                          (spine.current?.length ?? 0) - 2 ? (
-                            <CircularProgress
-                              color={"inherit"}
-                              size={20}
-                              disableShrink
-                            />
-                          ) : (
-                            <CircularProgressWithLabel
-                              value={
-                                ((spineSearchPointer ?? 0) /
-                                  (spine.current?.length ?? 0)) *
-                                100
-                              }
-                              color={"inherit"}
-                              size={20}
-                              sx={{ circle: { transition: "none" } }}
-                            />
-                          )
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    ),
-                  }}
+                    </Stack>
+                  </Box>
+                )}
+                loading={searchNeedle.current !== null}
+                loadingText={
+                  (spineSearchPointer ?? 0) >= (spine.current?.length ?? 0) - 2
+                    ? "Loading results…"
+                    : "Searching…"
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    autoFocus
+                    placeholder="Search"
+                    InputProps={{
+                      ...params.InputProps,
+                      endAdornment: (
+                        <>
+                          {searchNeedle.current !== null ? (
+                            (spineSearchPointer ?? 0) >=
+                            (spine.current?.length ?? 0) - 2 ? (
+                              <CircularProgress
+                                color={"inherit"}
+                                size={20}
+                                disableShrink
+                              />
+                            ) : (
+                              <CircularProgressWithLabel
+                                value={
+                                  ((spineSearchPointer ?? 0) /
+                                    (spine.current?.length ?? 0)) *
+                                  100
+                                }
+                                color={"inherit"}
+                                size={20}
+                                sx={{ circle: { transition: "none" } }}
+                              />
+                            )
+                          ) : null}
+                          {params.InputProps.endAdornment}
+                        </>
+                      ),
+                    }}
+                  />
+                )}
+                size="small"
+                disabled={spine.current === null}
+                disableClearable
+                sx={{ width: greaterThanSmall ? "300px" : "180px" }}
+              />
+            ) : (
+              <>
+                <Tooltip title="Search">
+                  <IconButton onClick={handleSearchIconClick}>
+                    <SearchIcon />
+                  </IconButton>
+                </Tooltip>
+                <TableOfContents
+                  toc={epubObject.toc}
+                  handlePathHref={handlePathHref}
                 />
-              )}
-              size="small"
-              disabled={spine.current === null}
-              disableClearable
-              sx={{ width: greaterThanSmall ? "300px" : "180px" }}
-            />
-            <TableOfContents
-              toc={epubObject.toc}
-              handlePathHref={handlePathHref}
-            />
-            <ReaderFormat
-              formatting={formatting}
-              setFormatting={handleSetFormatting}
-              useGlobalFormatting={useGlobalFormatting}
-              setUseGlobalFormatting={setUseGlobalFormattingHelper}
-            />
+                <ReaderFormat
+                  formatting={formatting}
+                  setFormatting={handleSetFormatting}
+                  useGlobalFormatting={useGlobalFormatting}
+                  setUseGlobalFormatting={setUseGlobalFormattingHelper}
+                />
+              </>
+            )}
           </Stack>
         </Toolbar>
       </AppBar>
