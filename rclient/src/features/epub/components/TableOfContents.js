@@ -36,7 +36,10 @@ export const TableOfContents = ({ toc, handlePathHref }) => {
           {toc.map((obj) => (
             <Typography
               key={obj.src}
-              onClick={() => handlePathHref(obj.src)}
+              onClick={() => {
+                handlePathHref(obj.src);
+                handleCloseToc();
+              }}
               sx={{ cursor: "pointer" }}
             >
               {obj.label}
