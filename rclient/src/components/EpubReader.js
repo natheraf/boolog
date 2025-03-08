@@ -31,6 +31,7 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PropTypes from "prop-types";
 import { Loading } from "../features/loading/Loading";
 import { TableOfContents } from "../features/epub/components/TableOfContents";
+import { Annotator } from "../features/epub/components/Annotator";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -819,7 +820,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
-      if (document.activeElement.tagName === "INPUT") {
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
         return;
       }
       if (event.key === "ArrowLeft") {
@@ -1477,6 +1478,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           </Box>
         </Stack>
       )}
+      <Annotator
+        entryId={entryId}
+        memos={epubObject.memos}
+        notes={epubObject.notes}
+      />
     </Dialog>
   );
 };
