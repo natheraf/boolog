@@ -93,7 +93,7 @@ export const BookLog = () => {
             useGlobalFormatting: true,
             value: globalFormatting,
           },
-          progress: { spine: 8, part: 0.5 },
+          progress: { spine: 0, part: 0 },
         }).then((res) => {
           if (res.formatting.useGlobalFormatting) {
             res.formatting.value = globalFormatting;
