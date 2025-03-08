@@ -140,19 +140,19 @@ export const Upload = ({ file, setFile, originalFile }) => {
       </Typography>
       <Typography>
         {`Total Storage: 
-        ${scaleStorageUnites(storageEstimate.quota / 1000)}`}
+        ${scaleStorageUnites(storageEstimate.quota)}`}
       </Typography>
       {storageEstimate ? (
         <LinearProgressWithLabel
           variant="buffer"
           value={
             ((storageEstimate.usage - originalFileSize) /
-              (storageEstimate.quota / 1000)) *
+              storageEstimate.quota) *
             100
           }
           valueBuffer={
             ((storageEstimate.usage - originalFileSize + (file?.size ?? 0)) /
-              (storageEstimate.quota / 1000)) *
+              storageEstimate.quota) *
             100
           }
           sx={{
