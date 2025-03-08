@@ -813,12 +813,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       ? `"${format.fontFamily.family}"`
       : format.fontFamily.value;
     const userFormattingStyle = `
-    ${format.fontSize === "Original" ? "" : `font-size: ${format.fontSize}rem;`}
-    ${
-      format.lineHeight === "Original"
-        ? ""
-        : `line-height: ${format.lineHeight / 10} !important;`
-    }
+      ${
+        format.fontSize === "Original"
+          ? ""
+          : `font-size: ${format.fontSize}rem;`
+      }
+      ${
+        format.lineHeight === "Original"
+          ? ""
+          : `line-height: ${format.lineHeight / 10} !important;`
+      }
       ${
         fontFamily === "inherit" ? "" : `font-family: ${fontFamily} !important;`
       }
