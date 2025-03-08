@@ -197,31 +197,36 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
-      putPreference({ key: "epubGlobalFormatting", value });
+      putPreference({ key: "epubGlobalFormatting", formatting: value });
     }
     putPreference({
       key: entryId,
-      useGlobalFormatting,
-      value,
+      formatting: {
+        useGlobalFormatting,
+        value,
+      },
     });
   };
 
   const setUseGlobalFormattingHelper = (newValue) => {
     if (newValue) {
       getPreference("epubGlobalFormatting").then((res) => {
-        setFormatting(res.value);
-        putFormattingStyleElement(res.value);
+        setFormatting(res.formatting);
         putPreference({
           key: entryId,
-          useGlobalFormatting: newValue,
-          formatting: res.value,
+          formatting: {
+            useGlobalFormatting: newValue,
+            formatting: res.value,
+          },
         });
       });
     } else {
       putPreference({
         key: entryId,
-        useGlobalFormatting: newValue,
-        formatting,
+        formatting: {
+          useGlobalFormatting: newValue,
+          formatting,
+        },
       });
     }
     setUseGlobalFormatting(newValue);

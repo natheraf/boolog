@@ -84,18 +84,20 @@ export const BookLog = () => {
       formatting.pageMargins = Math.max(70, window.innerWidth - 700);
       getPreferenceWithDefault({
         key: "epubGlobalFormatting",
-        value: formatting,
+        formatting,
       }).then((res) => {
-        const globalFormatting = res.value;
+        const globalFormatting = res.formatting;
         getPreferenceWithDefault({
           key: id,
-          useGlobalFormatting: true,
-          value: globalFormatting,
+          formatting: {
+            useGlobalFormatting: true,
+            value: globalFormatting,
+          },
         }).then((res) => {
-          if (res.useGlobalFormatting) {
-            res.value = globalFormatting;
+          if (res.formatting.useGlobalFormatting) {
+            res.formatting.value = globalFormatting;
           }
-          data.epubObject.formatting = res;
+          data.epubObject.formatting = res.formatting;
           setOpenEpubReader(Boolean(data.epubObject));
           setEpub({ object: data.epubObject, entryId: id });
         });
