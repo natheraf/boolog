@@ -224,7 +224,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           key: entryId,
           formatting: {
             useGlobalFormatting: newValue,
-            formatting: res.value,
+            formatting: res.formatting,
           },
         });
       });

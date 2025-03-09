@@ -86,7 +86,7 @@ export const BookLog = () => {
         key: "epubGlobalFormatting",
         formatting,
       }).then((res) => {
-        const globalFormatting = res.value;
+        const globalFormatting = res.formatting;
         getPreferenceWithDefault({
           key: id,
           formatting: {

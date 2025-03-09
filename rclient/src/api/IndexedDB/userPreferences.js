@@ -91,7 +91,7 @@ const getPreferenceWithDefaultHelper = (db, data) =>
         request.onsuccess = resolve(data);
         request.onerror = (error) => reject(new Error(error));
       } else {
-        resolve(value);
+        resolve(data);
       }
     };
     request.onerror = (error) => reject(new Error(error));
