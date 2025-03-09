@@ -88,10 +88,10 @@ const getPreferenceWithDefaultHelper = (db, data) =>
         );
         const objectStore = transaction.objectStore(userPreferencesObjectStore);
         const request = objectStore.add(data);
-        request.onsuccess = resolve(data);
+        request.onsuccess = () => resolve(data);
         request.onerror = (error) => reject(new Error(error));
       } else {
-        resolve(data);
+        resolve(value);
       }
     };
     request.onerror = (error) => reject(new Error(error));
