@@ -45,10 +45,6 @@ const userDataDBOnupgradeNeeded = function (event) {
       const userPreferences = db.createObjectStore(userPreferencesObjectStore, {
         keyPath: "key",
       });
-      userPreferences.put({
-        key: "epubGlobalFormatting",
-        value: defaultFormatting,
-      });
   }
 };
 
