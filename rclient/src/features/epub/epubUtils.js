@@ -41,11 +41,13 @@ export const processEpub = (epubObject) => {
         node.style.objectFit = "scale-down";
         node.style.margin = "auto";
         node.id = node.getAttribute("src");
+        node.setAttribute("ogsrc", node.getAttribute("src"));
         imageIds.push(node.getAttribute("src"));
       } else if (tag === "image") {
         node.style.height = "100%";
         node.style.width = "";
         node.id = node.getAttribute("src");
+        node.setAttribute("ogsrc", node.getAttribute("src"));
         imageIds.push(node.getAttribute("src"));
       } else if (tag === "a") {
         node.style.cursor = "pointer";

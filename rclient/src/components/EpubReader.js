@@ -180,6 +180,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const timeOutToSetProgress = React.useRef(null);
 
+  const [selectedNodeId, setSelectedNoteId] = React.useState(null);
+
   const getChapterPartWidthInNav = React.useCallback(
     (index, part) => {
       let spineIndex = spinePointer;
@@ -370,7 +372,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const handleSearchOnChange = (event, value) => {
-    cleanUpMarkNode();
+    clearSearchMarkNode();
     goToAndPreloadImages(value.spineIndex, value.page);
     setSelectedSearchResult(value);
     handleSearchOnBlur();
@@ -485,7 +487,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [getXPathSearchExpression, selectedSearchResult]);
 
-  const cleanUpMarkNode = () => {
+  const clearSearchMarkNode = () => {
     if (searchResultElementClone.current !== null) {
       searchResultElementClone.current.parentElement.replaceChild(
         searchResultElement.current,
@@ -592,8 +594,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           const tag = node.tagName.toLowerCase();
           if (tag === "img") {
             const src = node
-              .getAttribute("src")
-              ?.substring(node.getAttribute("src").startsWith("../") * 3);
+              .getAttribute("ogsrc")
+              ?.substring(node.getAttribute("ogsrc").startsWith("../") * 3);
             if (!src || !images.current[src]) {
               return;
             }
@@ -610,7 +612,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             node.style.margin = "auto";
           } else if (tag === "image") {
             let src = null;
-            for (const key of ["xlink:href", "href"]) {
+            for (const key of ["xlink:href", "oghref"]) {
               if (node.getAttribute(key) !== null) {
                 src = node.getAttribute(key);
               }
@@ -717,7 +719,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   // }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
-    cleanUpMarkNode();
+    clearSearchMarkNode();
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
       Math.floor(totalWidth / pageWidth) +
@@ -744,7 +746,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
   const handlePreviousPage = React.useCallback(() => {
-    cleanUpMarkNode();
+    clearSearchMarkNode();
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages =
@@ -1485,6 +1487,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         entryId={entryId}
         memos={epubObject.memos}
         notes={epubObject.notes}
+        clearSearchMarkNode={clearSearchMarkNode}
+        spineIndex={spinePointer}
+        noteId={selectedNodeId}
       />
     </Dialog>
   );
