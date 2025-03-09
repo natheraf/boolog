@@ -101,6 +101,7 @@ export const BookLog = () => {
             res.formatting.value = globalFormatting;
           }
           data.epubObject = Object.assign(data.epubObject, res);
+          data.epubObject.formatting.value = res.formatting.value;
           setOpenEpubReader(Boolean(data.epubObject));
           setEpub({ object: data.epubObject, entryId: id });
         });
