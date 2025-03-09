@@ -23,7 +23,7 @@ function App() {
     localStorage.getItem("theme") === "light" ? "light" : "dark"
   );
   const [reduceMotion, setReduceMotion] = React.useState(
-    localStorage.getItem("reduceMotion") !== "false"
+    (localStorage.getItem("reduceMotion") ?? "false") !== "false"
   );
 
   const themeModes = React.useMemo(
