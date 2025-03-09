@@ -536,7 +536,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               part: (newCurrentPage ?? currentPage) / getCurrentTotalPages(),
             },
           }),
-        1000
+        500
       );
     },
     [currentPage, entryId, getCurrentTotalPages, spinePointer]
