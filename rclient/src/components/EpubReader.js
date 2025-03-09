@@ -800,6 +800,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handlePathHref = React.useCallback(
     (path) => {
+      if (window.getSelection().isCollapsed === false) {
+        return;
+      }
       if (path.startsWith("http")) {
         return window.open(path, "_blank");
       }
