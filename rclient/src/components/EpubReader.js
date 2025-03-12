@@ -88,6 +88,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
   const images = React.useRef(epubObject.images);
   const chapterMeta = React.useRef(epubObject.chapterMeta);
+  const notes = React.useRef(epubObject.notes);
   const spineOverride = epubObject.spineOverride;
 
   const [spinePointer, setSpinePointer] = React.useState(
@@ -181,7 +182,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const timeOutToSetProgress = React.useRef(null);
 
-  const [selectedNodeId, setSelectedNoteId] = React.useState(null);
+  const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
+
+  const handleMarkHighlightOnClick = (mark) => {
+    setAnnotatorAnchorEl(mark);
+  };
 
   const getChapterPartWidthInNav = React.useCallback(
     (index, part) => {
@@ -671,17 +676,33 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   React.useEffect(() => {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver((mutationList, observer) => {
-      document
-        .getElementById("content")
-        ?.querySelectorAll("a[linkto]")
-        .forEach(async (node) => {
-          const tag = node.tagName.toLowerCase();
-          if (tag === "a") {
-            node.addEventListener("click", () => {
-              handlePathHref(node.getAttribute("linkto"));
-            });
+      if (mutationList.some((mutation) => mutation.target.id === "content")) {
+        console.log(mutationList);
+        document
+          .getElementById("content")
+          ?.querySelectorAll("a[linkto]")
+          .forEach(async (node) => {
+            const tag = node.tagName.toLowerCase();
+            if (tag === "a") {
+              node.addEventListener("click", () => {
+                handlePathHref(node.getAttribute("linkto"));
+              });
+            }
+          });
+
+        for (const id of Object.keys(notes.current)) {
+          const marks = document.getElementsByClassName(id);
+          const markOnClick = (mark) => (event) => {
+            event.stopPropagation();
+            if (window.getSelection().isCollapsed) {
+              handleMarkHighlightOnClick(mark);
+            }
+          };
+          for (const mark of marks) {
+            mark.addEventListener("click", markOnClick(mark));
           }
-        });
+        }
+      }
     });
     observer.observe(document.body, config);
     return () => observer.disconnect();
@@ -1491,8 +1512,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         notes={epubObject.notes}
         clearSearchMarkNode={clearSearchMarkNode}
         spineIndex={spinePointer}
-        noteId={selectedNodeId}
+        anchorEl={annotatorAnchorEl}
+        setAnchorEl={setAnnotatorAnchorEl}
         spineOverride={spineOverride}
+        key={annotatorAnchorEl?.getAttribute("noteid")}
       />
     </Dialog>
   );
