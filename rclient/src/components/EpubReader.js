@@ -677,7 +677,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver((mutationList, observer) => {
       if (mutationList.some((mutation) => mutation.target.id === "content")) {
-        console.log(mutationList);
         document
           .getElementById("content")
           ?.querySelectorAll("a[linkto]")
