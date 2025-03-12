@@ -96,6 +96,7 @@ export const BookLog = () => {
           progress: { spine: 0, part: 0 },
           notes: {},
           memos: {},
+          spineOverride: {},
         }).then((res) => {
           if (res.formatting.useGlobalFormatting) {
             res.formatting.value = globalFormatting;
