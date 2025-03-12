@@ -458,20 +458,36 @@ export const Annotator = ({
                   onChange={handleHighlightColorChange(false)}
                 >
                   {[
-                    { value: "255, 255, 0", label: "Yellow" },
-                    { value: "255, 0, 0", label: "Red" },
-                    { value: "0, 255, 0", label: "green" },
-                    { value: "0, 0, 255", label: "Blue" },
+                    {
+                      value: "rgba(255, 255, 0, .2)",
+                      buttonColor: "rgba(255, 255, 0, 1)",
+                      label: "Yellow",
+                    },
+                    {
+                      value: "rgba(255, 0, 0, .2)",
+                      buttonColor: "rgba(255, 0, 0, 1)",
+                      label: "Red",
+                    },
+                    {
+                      value: "rgba(0, 255, 0, .2)",
+                      label: "green",
+                      buttonColor: "rgba(0, 255, 0, 1)",
+                    },
+                    {
+                      value: "rgba(0, 0, 255, .2)",
+                      label: "Blue",
+                      buttonColor: "rgba(0, 0, 255, 1)",
+                    },
                   ].map((obj) => (
                     <FormControlLabel
                       key={obj.value}
-                      value={`rgba(${obj.value}, .2)`}
+                      value={obj.value}
                       control={
                         <Radio
                           sx={{
-                            color: `rgb(${obj.value})`,
+                            color: obj.buttonColor,
                             "&.Mui-checked": {
-                              color: `rgb(${obj.value})`,
+                              color: obj.buttonColor,
                             },
                           }}
                         />
