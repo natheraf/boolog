@@ -5,6 +5,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
   Menu,
   Radio,
   RadioGroup,
@@ -23,7 +24,8 @@ import { tooltipClasses } from "@mui/material/Tooltip";
 import { updatePreference } from "../../../api/IndexedDB/userPreferences";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
-import { common } from "@mui/material/colors";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const SmallTabs = styled(Tabs)(({ tabpanelheight }) => ({
   height: tabpanelheight,
@@ -85,6 +87,15 @@ export const Annotator = ({
     notes[anchorEl?.getAttribute("noteid")]?.highlightColor ?? null
   );
 
+  const handleClear = (type) => {
+    if (type === "memo") {
+      setMemo("");
+    } else if (type === "note") {
+      setNote("");
+      setHighlightColor(null);
+    }
+  };
+
   const handleHighlightColorChange = (isTextField) => (event) => {
     if (highlightColor === event.target.value && isTextField !== true) {
       return;
@@ -109,8 +120,10 @@ export const Annotator = ({
     const apostrophes = ["’", "'", "ʼ"];
     for (const char of apostrophes) {
       if (
-        key.lastIndexOf(char) === key.length - 1 ||
-        key.lastIndexOf(char) === key.length - 2
+        (key.lastIndexOf("s") === key.length - 2 &&
+          key.lastIndexOf(char) === key.length - 1) ||
+        (key.lastIndexOf("s") === key.length - 1 &&
+          key.lastIndexOf(char) === key.length - 2)
       ) {
         key = key.substring(0, key.lastIndexOf(char));
       }
@@ -400,16 +413,37 @@ export const Annotator = ({
           }}
           spacing={1}
         >
-          <HtmlTooltip
-            title={<Typography variant="subtitle2">{selectedText}</Typography>}
-            placement="left"
-            enterDelay={100}
-            enterNextDelay={100}
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
           >
-            <Typography variant="h6" noWrap>
-              {selectedText}
-            </Typography>
-          </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                <Typography variant="subtitle2">{selectedText}</Typography>
+              }
+              placement="left"
+              enterDelay={100}
+              enterNextDelay={100}
+            >
+              <Typography variant="h6" noWrap>
+                {selectedText}
+              </Typography>
+            </HtmlTooltip>
+            {(tabValueMap[currentTabValue] === "memo" && memo.length > 0) ||
+            (tabValueMap[currentTabValue] === "note" &&
+              (note.length > 0 || highlightColor)) ? (
+              <IconButton
+                onClick={() => handleClear(tabValueMap[currentTabValue])}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            ) : (
+              <IconButton disabled>
+                <DeleteOutlineIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Stack>
           <Divider />
           <SmallTabs
             variant="fullWidth"
@@ -444,11 +478,25 @@ export const Annotator = ({
                 tabpanelheight={tabPanelHeight}
               />
             </HtmlTooltip>
-            <Tooltip
-              title="Notes are added to the current word/phrase"
+            <HtmlTooltip
+              title={
+                <Stack spacing={1}>
+                  <Typography variant="h6">{"Notes"}</Typography>
+                  <Typography variant="subtitle2">
+                    {"Can be left empty."}
+                  </Typography>
+                  <Divider />
+                  <Typography>{"Highlight"}</Typography>
+                  <Typography variant="subtitle2">
+                    {
+                      "If no highlight color is selected, this note will only be accessible in the Notes tab."
+                    }
+                  </Typography>
+                </Stack>
+              }
+              placement="right"
               enterDelay={300}
               enterNextDelay={300}
-              placement="right"
             >
               <SmallTab
                 icon={<NotesIcon />}
@@ -456,7 +504,7 @@ export const Annotator = ({
                 label="Note"
                 tabpanelheight={tabPanelHeight}
               />
-            </Tooltip>
+            </HtmlTooltip>
           </SmallTabs>
           <Textarea
             value={tabValueMap[currentTabValue] === "memo" ? memo : note}
