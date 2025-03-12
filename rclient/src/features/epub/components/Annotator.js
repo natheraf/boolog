@@ -146,10 +146,9 @@ export const Annotator = ({
       textToMemoKeyFormat.current = formatMemoKey(selectedString);
       setMemo(memos[textToMemoKeyFormat.current] ?? "");
       // if 2 spaces, probably a note
-      setCurrentTabValue((prev) =>
-        prev === 0 &&
+      setCurrentTabValue(
         selectedString.indexOf(" ") > -1 &&
-        selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
+          selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
           ? 1
           : 0
       );
