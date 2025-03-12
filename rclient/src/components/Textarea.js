@@ -33,10 +33,6 @@ export const Textarea = styled(TextareaAutosize)(
   color: ${theme.palette.mode === "dark" ? "white" : grey[900]};
   background: ${theme.palette.mode === "dark" ? "#3a3a3a" : "#fff"};
   resize: vertical;
-  ::placeholder {
-    color: ${grey[300]};
-    opacity: 1; /* Firefox */
-  }
 
   &:hover {
     border-color: white;
