@@ -47,33 +47,40 @@ const HtmlTooltip = styled(({ className, ...props }) => (
   },
 }));
 
+let selectedRange = null;
+
 export const Annotator = ({
   entryId,
   memos,
   notes,
   clearSearchMarkNode,
   spineIndex,
-  noteId,
+  anchorEl,
+  setAnchorEl,
   spineOverride,
 }) => {
   const annotatorHeight = 200;
   const annotatorWidth = 300;
   const tabPanelHeight = 30;
-  const [anchorEl, setAnchorEl] = React.useState(null);
   const [selectionParentRect, setSelectionParentRect] = React.useState(null);
   const [selectionRect, setSelectionRect] = React.useState(null);
-  const [selectedText, setSelectedText] = React.useState(null);
-  const openAnnotator = Boolean(anchorEl);
+  const [selectedText, setSelectedText] = React.useState(
+    notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
+  );
+  const [selectedAnchor, setSelectedAnchor] = React.useState(null);
+  const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
 
   const [currentTabValue, setCurrentTabValue] = React.useState(0);
   const tabValueMap = ["memo", "note"];
 
   const [memo, setMemo] = React.useState("");
-  const [note, setNote] = React.useState("");
-  const [highlightColor, setHighlightColor] = React.useState(null);
-
-  const selectedRange = React.useRef();
+  const [note, setNote] = React.useState(
+    notes[anchorEl?.getAttribute("noteid")]?.note ?? ""
+  );
+  const [highlightColor, setHighlightColor] = React.useState(
+    notes[anchorEl?.getAttribute("noteid")]?.highlightColor ?? null
+  );
 
   const handleHighlightColorChange = (isTextField) => (event) => {
     if (highlightColor === event.target.value && isTextField !== true) {
@@ -104,7 +111,7 @@ export const Annotator = ({
       );
       setSelectionRect(selection.getRangeAt(0).getBoundingClientRect());
       setSelectedText(selectedString);
-      setAnchorEl(selection.anchorNode.parentElement);
+      setSelectedAnchor(selection.anchorNode.parentElement);
       annotatorOpen.current = true;
       setMemo(memos[selectedString] ?? "");
 
@@ -125,39 +132,40 @@ export const Annotator = ({
       range.setStart(range.startContainer, startOffset);
       range.setEnd(range.endContainer, endOffset);
 
-      selectedRange.current = range;
+      selectedRange = range;
     }
   };
 
-  const markNode = (node) => {
+  const markNode = (node, noteId) => {
     if ((node.textContent?.trim()?.length ?? 0) === 0) {
       return;
     }
     if (node.nodeType === Node.TEXT_NODE) {
       const mark = document.createElement("span");
-      mark.className = noteId;
+      mark.classList.add(noteId, "mark");
+      mark.setAttribute("noteid", noteId);
       mark.style.backgroundColor = highlightColor;
       node.parentNode.replaceChild(mark, node);
       mark.appendChild(node);
       return;
     }
     for (const child of node.childNodes) {
-      markNode(child);
+      markNode(child, noteId);
     }
   };
 
-  const injectMarkToNode = (node, index, start, end) => {
+  const injectMarkToNode = (node, noteId, index, start, end) => {
     const length = node.textContent.length;
     if (index + length < start) {
       return length;
     }
     if (start <= index && index + length <= end) {
-      markNode(node);
+      markNode(node, noteId);
       return length;
     }
     if (node.nodeType !== Node.TEXT_NODE) {
       for (const child of [...node.childNodes]) {
-        index += injectMarkToNode(child, index, start, end);
+        index += injectMarkToNode(child, noteId, index, start, end);
         if (index > end) {
           break;
         }
@@ -168,13 +176,13 @@ export const Annotator = ({
       const notMarked = node.splitText(length - (index + length - end));
       node.parentNode.replaceChild(notMarked, node);
       notMarked.parentNode.insertBefore(node, notMarked);
-      markNode(node);
+      markNode(node, noteId);
       notMarked.parentNode.normalize();
     } else if (start >= index && index + length <= end) {
       const marked = node.splitText(start - index);
       node.parentNode.replaceChild(marked, node);
       marked.parentNode.insertBefore(node, marked);
-      markNode(marked);
+      markNode(marked, noteId);
       node.parentNode.normalize();
     } else {
       // between: index > start && end < index + length
@@ -183,56 +191,54 @@ export const Annotator = ({
       node.parentNode.replaceChild(unmarkedEnd, node);
       unmarkedEnd.parentNode.insertBefore(markedBetween, unmarkedEnd);
       markedBetween.parentNode.insertBefore(node, markedBetween);
-      markNode(markedBetween);
+      markNode(markedBetween, noteId);
       node.parentNode.normalize();
     }
     return length;
   };
 
-  const handleInjectingMark = () => {
-    if (
-      selectedRange.current.startContainer ===
-      selectedRange.current.endContainer
-    ) {
+  const handleInjectingMark = (noteId) => {
+    if (selectedRange.startContainer === selectedRange.endContainer) {
       injectMarkToNode(
-        selectedRange.current.startContainer,
+        selectedRange.startContainer,
+        noteId,
         0,
-        selectedRange.current.startOffset,
-        selectedRange.current.endOffset
+        selectedRange.startOffset,
+        selectedRange.endOffset
       );
     } else {
-      let it = selectedRange.current.startContainer;
+      let it = selectedRange.startContainer;
       while (it.nextSibling === null) {
         it = it.parentNode;
       }
       let next = it.nextSibling;
-      injectMarkToNode(it, 0, selectedRange.current.startOffset, Infinity);
+      injectMarkToNode(it, noteId, 0, selectedRange.startOffset, Infinity);
       it = next;
-      while (it !== selectedRange.current.endContainer) {
-        if (it.contains(selectedRange.current.endContainer)) {
+      while (it !== selectedRange.endContainer) {
+        if (it.contains(selectedRange.endContainer)) {
           it = it.firstChild;
         } else {
-          markNode(it);
+          markNode(it, noteId);
           while (it.nextSibling === null) {
             it = it.parentNode;
           }
           it = it.nextSibling;
         }
       }
-      injectMarkToNode(it, 0, 0, selectedRange.current.endOffset);
+      injectMarkToNode(it, noteId, 0, 0, selectedRange.endOffset);
     }
   };
 
   const handleDeleteMark = (markId) => {
     const marks = document.getElementsByClassName(markId);
     const updates = [];
-    marks.forEach((mark) => {
+    for (const mark of marks) {
       const frag = document.createDocumentFragment();
       while (mark.firstChild) {
         frag.appendChild(mark.firstChild);
       }
       updates.push([mark, frag]);
-    });
+    }
     updates.forEach(([mark, frag]) => {
       const parent = mark.parentElement;
       parent.insertBefore(frag, mark);
@@ -240,44 +246,66 @@ export const Annotator = ({
     });
   };
 
+  const handleUpdateHighlight = (noteId) => {
+    const marks = document.getElementsByClassName(noteId);
+    for (const mark of marks) {
+      mark.style.backgroundColor = highlightColor;
+    }
+  };
+
   const handleCloseAnnotator = () => {
-    setAnchorEl(null);
     annotatorOpen.current = false;
     const updatedMemo = (memos[selectedText] ?? "") !== memo;
+    let noteId =
+      selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
+    const updatedHighlight =
+      (notes[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNote =
-      (note[selectedText]?.note ?? "") !== note ||
-      (note[selectedText]?.highlightColor ?? null) !== highlightColor;
+      (notes[noteId]?.note ?? "") !== note || updatedHighlight;
     const updateDB = updatedMemo || updatedNote;
-    if (memo.length > 0) {
-      memos[selectedText] = memo;
-    } else {
-      delete memos[selectedText];
-    }
-    if (note.length > 0 || highlightColor !== null) {
-      noteId = noteId ?? getNewId();
-      notes[noteId] = { note, spineIndex, highlightColor };
-    } else if (noteId) {
-      delete notes[noteId];
-      handleDeleteMark(noteId);
-      noteId = null;
-    }
-
-    if (noteId) {
-      handleInjectingMark();
-    }
-
     if (updatedMemo) {
-      updatePreference({ key: entryId, memos });
-    } else if (updatedNote) {
+      if (memo.length > 0) {
+        memos[selectedText] = memo;
+      } else {
+        delete memos[selectedText];
+      }
+    }
+
+    if (updatedNote) {
+      if (note.length > 0 || highlightColor !== null) {
+        let newNote = !noteId;
+        noteId = noteId ?? getNewId();
+        if (newNote) {
+          handleInjectingMark(noteId);
+        } else if (updatedHighlight) {
+          handleUpdateHighlight(noteId);
+        }
+        notes[noteId] = { note, spineIndex, highlightColor, selectedText };
+      } else if (noteId) {
+        delete notes[noteId];
+        handleDeleteMark(noteId);
+        noteId = null;
+      }
+    }
+
+    const updateData = { key: entryId };
+    if (updatedMemo) {
+      updateData.memos = memos;
+    }
+    if (updatedNote) {
       if (spineOverride.hasOwnProperty(spineIndex) === false) {
         spineOverride[spineIndex] = {};
       }
       spineOverride[spineIndex].element =
         document.getElementById("inner-content").outerHTML;
-      updatePreference({ key: entryId, notes, spineOverride });
+      updateData.notes = notes;
+      updateData.spineOverride = spineOverride;
     }
-
-    setHighlightColor(null);
+    if (updateDB) {
+      updatePreference(updateData);
+    }
+    setAnchorEl(null);
+    setSelectedAnchor(null);
   };
 
   const handleTextAreaOnChange = (event) => {
@@ -301,7 +329,7 @@ export const Annotator = ({
   return (
     <Backdrop open={openAnnotator}>
       <Menu
-        anchorEl={anchorEl}
+        anchorEl={selectedAnchor || anchorEl}
         open={openAnnotator}
         onClose={handleCloseAnnotator}
         anchorOrigin={{
@@ -470,6 +498,7 @@ Annotator.propTypes = {
   notes: PropTypes.object.isRequired,
   clearSearchMarkNode: PropTypes.func.isRequired,
   spineIndex: PropTypes.number.isRequired,
-  noteId: PropTypes.string,
+  anchorEl: PropTypes.object,
+  setAnchorEl: PropTypes.func.isRequired,
   spineOverride: PropTypes.object.isRequired,
 };
