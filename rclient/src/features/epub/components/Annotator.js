@@ -369,6 +369,7 @@ export const Annotator = ({
   return (
     <Backdrop open={openAnnotator}>
       <Menu
+        id="annotator-menu"
         anchorEl={selectedAnchor || anchorEl}
         open={openAnnotator}
         onClose={handleCloseAnnotator}

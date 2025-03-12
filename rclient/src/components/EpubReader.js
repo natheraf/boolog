@@ -846,7 +846,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
-      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+      if (
+        ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
+        document
+          .getElementById("annotator-menu")
+          ?.contains(document.activeElement)
+      ) {
         return;
       }
       if (event.key === "ArrowLeft") {
