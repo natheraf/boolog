@@ -71,7 +71,9 @@ export const Annotator = ({
   const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
 
-  const [currentTabValue, setCurrentTabValue] = React.useState(0);
+  const [currentTabValue, setCurrentTabValue] = React.useState(
+    notes[anchorEl?.getAttribute("noteid")] ? 1 : 0
+  );
   const tabValueMap = ["memo", "note"];
 
   const [memo, setMemo] = React.useState("");
@@ -114,6 +116,14 @@ export const Annotator = ({
       setSelectedAnchor(selection.anchorNode.parentElement);
       annotatorOpen.current = true;
       setMemo(memos[selectedString] ?? "");
+      // if 2 spaces, probably a note
+      setCurrentTabValue((prev) =>
+        prev === 0 &&
+        selectedString.indexOf(" ") > -1 &&
+        selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
+          ? 1
+          : 0
+      );
 
       const range = selection.getRangeAt(0);
       if (range.collapsed) {
