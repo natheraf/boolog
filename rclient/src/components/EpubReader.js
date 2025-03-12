@@ -84,10 +84,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     epubObject.formatting.useGlobalFormatting
   );
 
-  const spine = React.useRef(epubObject.spine);
-  const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
-  const images = React.useRef(epubObject.images);
-  const chapterMeta = React.useRef(epubObject.chapterMeta);
+  const spine = epubObject.spine;
+  const hrefSpineMap = epubObject.spineIndexMap;
+  const images = epubObject.images;
+  const chapterMeta = epubObject.chapterMeta;
+  const spineOverride = epubObject.spineOverride;
 
   const [spinePointer, setSpinePointer] = React.useState(
     epubObject?.progress?.spine ?? 0
@@ -107,20 +108,20 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
   const arrayForPreviousChapterNavigator = React.useMemo(
     () =>
-      spinePointer === null || spinePointer === spine.current.length - 1
+      spinePointer === null || spinePointer === spine.length - 1
         ? []
-        : [...Array(spine.current[spinePointer].backCount).keys()],
+        : [...Array(spine[spinePointer].backCount).keys()],
     [spinePointer]
   );
   const arrayForNextChapterNavigator = React.useMemo(
     () =>
-      spinePointer === null || spinePointer === spine.current.length - 1
+      spinePointer === null || spinePointer === spine.length - 1
         ? []
-        : [...Array(spine.current[spinePointer].frontCount).keys()],
+        : [...Array(spine[spinePointer].frontCount).keys()],
     [spinePointer]
   );
   const spineNavigateHeight = leftOverNavHeight;
-  const arrayForSpineNavigator = React.useMemo(() => chapterMeta.current, []);
+  const arrayForSpineNavigator = React.useMemo(() => chapterMeta, []);
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
@@ -163,14 +164,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [subLoadingText, setSubLoadingText] = React.useState(null);
   const [subLoadingProgress, setSubLoadingProgress] = React.useState(null);
 
-  const bookTotalWords =
-    spine.current[spine.current.length - 1].onGoingWordCount;
+  const bookTotalWords = spine[spine.length - 1].onGoingWordCount;
   const currentContentTotalWords = React.useMemo(
-    () => spine.current[spinePointer]?.wordCount ?? 0,
+    () => spine[spinePointer]?.wordCount ?? 0,
     [spinePointer]
   );
   const totalOnGoingWords = React.useMemo(
-    () => spine.current[spinePointer]?.onGoingWordCount ?? 0,
+    () => spine[spinePointer]?.onGoingWordCount ?? 0,
     [spinePointer]
   );
 
@@ -186,8 +186,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     (index, part) => {
       let spineIndex = spinePointer;
       if (part === "previous") {
-        spineIndex =
-          spinePointer - (spine.current[spinePointer].backCount - index);
+        spineIndex = spinePointer - (spine[spinePointer].backCount - index);
       }
       if (part === "next") {
         spineIndex = spinePointer + index + 1;
@@ -195,9 +194,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       return Math.max(
         2,
         Math.ceil(
-          ((spine.current[spineIndex]?.wordCount ?? 1) /
-            (chapterMeta.current[spine.current[spineIndex].chapterMetaIndex]
-              ?.wordCount ?? 1)) *
+          ((spine[spineIndex]?.wordCount ?? 1) /
+            (chapterMeta[spine[spineIndex].chapterMetaIndex]?.wordCount ?? 1)) *
             100
         )
       );
@@ -328,8 +326,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           page,
           bleeds: fragment.right - fragment.left - (pageWidth + columnGap) > 0,
           nodeNumber,
-          chapterPartNumber:
-            (spine.current[spineSearchPointer]?.backCount ?? 0) + 1,
+          chapterPartNumber: (spine[spineSearchPointer]?.backCount ?? 0) + 1,
         });
 
         nodeNumber += 1;
@@ -344,10 +341,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   ]);
 
   const incrementSearchPointer = React.useCallback(() => {
-    if (
-      spineSearchPointer !== null &&
-      spineSearchPointer + 1 < spine.current.length
-    ) {
+    if (spineSearchPointer !== null && spineSearchPointer + 1 < spine.length) {
       setSpineSearchPointer((prev) => (prev ?? 0) + 1);
     } else {
       searchNeedle.current = null;
@@ -578,17 +572,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       for (const index of [spinePointer - 1, spinePointer, spinePointer + 1]) {
         if (
           index < 0 ||
-          index >= spine.current.length ||
+          index >= spine.length ||
           visitedSpineIndexes.current.has(index)
         ) {
           continue;
         }
         visitedSpineIndexes.current.add(index);
         const parser = new DOMParser();
-        const page = parser.parseFromString(
-          spine.current[index].element,
-          "text/html"
-        );
+        const page = parser.parseFromString(spine[index].element, "text/html");
         const nodes = page?.querySelectorAll("img, image");
         for (const node of nodes) {
           const tag = node.tagName.toLowerCase();
@@ -596,13 +587,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             const src = node
               .getAttribute("ogsrc")
               ?.substring(node.getAttribute("ogsrc").startsWith("../") * 3);
-            if (!src || !images.current[src]) {
+            if (!src || !images[src]) {
               return;
             }
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(images.current[src]);
+              URL.createObjectURL(images[src]);
             node.src = url;
             loadedImages[src] = url;
             if (["DIV", "SECTION"].includes(node.parentElement.tagName)) {
@@ -618,20 +609,20 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }
             }
             src = src?.substring(src.indexOf("/") + 1);
-            if (!src || !images.current[src]) {
+            if (!src || !images[src]) {
               return;
             }
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(images.current[src]);
+              URL.createObjectURL(images[src]);
             loadedImages[src] = url;
             node.setAttribute("href", url);
             node.style.height = "100%";
             node.style.width = "";
           }
         }
-        spine.current[index].element = page.documentElement.outerHTML;
+        spine[index].element = page.documentElement.outerHTML;
       }
       setLoadedImageURLs((prev) => ({ ...prev, ...loadedImages }));
     },
@@ -733,7 +724,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setCurrentPage(0);
       setSpinePointer((prev) => {
         preloadImages(prev + 1);
-        const value = Math.min(spine.current.length - 1, prev + 1);
+        const value = Math.min(spine.length - 1, prev + 1);
         updateProgressToDb(value, 0);
         return value;
       });
@@ -818,7 +809,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         setLinkFragment(path.substring(path.indexOf("#") + 1));
         path = path.substring(0, path.indexOf("#"));
       }
-      goToAndPreloadImages(hrefSpineMap.current[path]);
+      goToAndPreloadImages(hrefSpineMap[path]);
     },
     [goToAndPreloadImages]
   );
@@ -839,7 +830,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   // prob did implementation wrong cause this reruns every page
   React.useEffect(() => {
-    if (spine.current !== null) {
+    if (spine !== null) {
       document.addEventListener("keydown", handleOnKeyDown);
       return () => document.removeEventListener("keydown", handleOnKeyDown);
     }
@@ -1037,9 +1028,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   {epubObject.metadata.title}
                 </Typography>
                 <Typography variant="subtitle1" noWrap>
-                  {spinePointer !== null
-                    ? spine.current[spinePointer].label
-                    : null}
+                  {spinePointer !== null ? spine[spinePointer].label : null}
                 </Typography>
               </Stack>
             ) : null}
@@ -1056,7 +1045,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 onBlur={handleSearchOnBlur}
                 aria-placeholder={searchNeedle.current}
                 groupBy={(option) =>
-                  spine.current?.[option?.spineIndex]?.label ?? "No Chapter"
+                  spine?.[option?.spineIndex]?.label ?? "No Chapter"
                 }
                 getOptionLabel={(option) =>
                   option.previewStart + option.needle + option.previewEnd
@@ -1090,7 +1079,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 )}
                 loading={searchNeedle.current !== null}
                 loadingText={
-                  (spineSearchPointer ?? 0) >= (spine.current?.length ?? 0) - 2
+                  (spineSearchPointer ?? 0) >= (spine?.length ?? 0) - 2
                     ? "Loading results…"
                     : "Searching…"
                 }
@@ -1105,7 +1094,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                         <>
                           {searchNeedle.current !== null ? (
                             (spineSearchPointer ?? 0) >=
-                            (spine.current?.length ?? 0) - 2 ? (
+                            (spine?.length ?? 0) - 2 ? (
                               <CircularProgress
                                 color={"inherit"}
                                 size={20}
@@ -1115,7 +1104,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                               <CircularProgressWithLabel
                                 value={
                                   ((spineSearchPointer ?? 0) /
-                                    (spine.current?.length ?? 0)) *
+                                    (spine?.length ?? 0)) *
                                   100
                                 }
                                 color={"inherit"}
@@ -1131,7 +1120,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   />
                 )}
                 size="small"
-                disabled={spine.current === null}
+                disabled={spine === null}
                 disableClearable
                 sx={{ width: greaterThanSmall ? "300px" : "180px" }}
               />
@@ -1189,7 +1178,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                       onClick={() => {
                         goToAndPreloadImages(
                           spinePointer -
-                            (spine.current[spinePointer].backCount - index),
+                            (spine[spinePointer].backCount - index),
                           -1
                         );
                       }}
@@ -1239,10 +1228,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   <Tooltip
                     key={index}
                     title={`Part ${
-                      spine.current[spinePointer].backCount +
-                      spine.current[spinePointer].frontCount +
+                      spine[spinePointer].backCount +
+                      spine[spinePointer].frontCount +
                       1 -
-                      (spine.current[spinePointer].frontCount - index) +
+                      (spine[spinePointer].frontCount - index) +
                       1
                     }`}
                     arrow
@@ -1341,7 +1330,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   }}
                   dangerouslySetInnerHTML={{
                     __html:
-                      spine.current?.[spinePointer ?? -1]?.element ??
+                      spineOverride?.[spinePointer ?? -1]?.element ??
+                      spine?.[spinePointer ?? -1]?.element ??
                       "something went wrong...<br/> spine is missing",
                   }}
                 />
@@ -1460,7 +1450,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               dangerouslySetInnerHTML={{
                 __html:
-                  spine.current?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
+                  spineOverride?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
+                    ?.element ??
+                  spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
                     ?.element ??
                   "something went wrong...<br/> spine is missing",
               }}
