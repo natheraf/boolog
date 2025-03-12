@@ -489,7 +489,7 @@ export const Annotator = ({
                   <Typography>{"Highlight"}</Typography>
                   <Typography variant="subtitle2">
                     {
-                      "If no highlight color is selected, this note will only be accessible in the Notes tab."
+                      "If no highlight color is selected, the highlight will be transparent."
                     }
                   </Typography>
                 </Stack>
@@ -521,14 +521,7 @@ export const Annotator = ({
           {tabValueMap[currentTabValue] === "note" && (
             <FormControl component={Stack} spacing={1}>
               <Stack>
-                <Tooltip
-                  title="You can only see the note in Notes tab if no highlight is selected"
-                  placement="left"
-                  enterDelay={100}
-                  enterNextDelay={100}
-                >
-                  <FormLabel>{"Highlight Color"}</FormLabel>
-                </Tooltip>
+                <FormLabel>{"Highlight Color"}</FormLabel>
                 <RadioGroup
                   row
                   name="highlight-color-radio-group"
