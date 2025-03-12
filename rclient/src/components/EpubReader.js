@@ -592,7 +592,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         visitedSpineIndexes.current.add(index);
         const parser = new DOMParser();
         const page = parser.parseFromString(
-          spine.current[index].element,
+          spineOverride[index]?.element ?? spine.current[index].element,
           "text/html"
         );
         const nodes = page?.querySelectorAll("img, image");
@@ -637,11 +637,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             node.style.width = "";
           }
         }
-        spine.current[index].element = page.documentElement.outerHTML;
+        if (spineOverride.hasOwnProperty(index)) {
+          spineOverride[index].element = page.documentElement.outerHTML;
+        } else {
+          spine.current[index].element = page.documentElement.outerHTML;
+        }
       }
       setLoadedImageURLs((prev) => ({ ...prev, ...loadedImages }));
     },
-    [loadedImageURLs]
+    [loadedImageURLs, spineOverride]
   );
 
   // handles setting page so fragment is visible
