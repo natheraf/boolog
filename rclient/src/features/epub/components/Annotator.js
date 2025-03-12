@@ -124,6 +124,8 @@ export const Annotator = ({
           ? 1
           : 0
       );
+      setHighlightColor(null);
+      setNote("");
 
       const range = selection.getRangeAt(0);
       if (range.collapsed) {
@@ -236,6 +238,18 @@ export const Annotator = ({
         }
       }
       injectMarkToNode(it, noteId, 0, 0, selectedRange.endOffset);
+    }
+
+    const marks = document.getElementsByClassName(noteId);
+    const markOnClick = (mark) => (event) => {
+      event.stopPropagation();
+      setAnchorEl(null);
+      if (window.getSelection().isCollapsed) {
+        setAnchorEl(mark);
+      }
+    };
+    for (const mark of marks) {
+      mark.addEventListener("click", markOnClick(mark));
     }
   };
 
