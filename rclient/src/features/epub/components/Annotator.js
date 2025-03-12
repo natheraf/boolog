@@ -433,11 +433,13 @@ export const Annotator = ({
             {(tabValueMap[currentTabValue] === "memo" && memo.length > 0) ||
             (tabValueMap[currentTabValue] === "note" &&
               (note.length > 0 || highlightColor)) ? (
-              <IconButton
-                onClick={() => handleClear(tabValueMap[currentTabValue])}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
+              <Tooltip title={"Clear"}>
+                <IconButton
+                  onClick={() => handleClear(tabValueMap[currentTabValue])}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
             ) : (
               <IconButton disabled>
                 <DeleteOutlineIcon fontSize="small" />
