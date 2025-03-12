@@ -67,6 +67,7 @@ export const Annotator = ({
   const [selectedText, setSelectedText] = React.useState(
     notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
   );
+  const textToMemoKeyFormat = React.useRef(null);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
   const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
@@ -103,6 +104,20 @@ export const Annotator = ({
     setCurrentTabValue(value);
   };
 
+  const formatMemoKey = (key) => {
+    key = key.toLowerCase();
+    const apostrophes = ["’", "'", "ʼ"];
+    for (const char of apostrophes) {
+      if (
+        key.lastIndexOf(char) === key.length - 1 ||
+        key.lastIndexOf(char) === key.length - 2
+      ) {
+        key = key.substring(0, key.lastIndexOf(char));
+      }
+    }
+    return key;
+  };
+
   const handleGetTextSelection = () => {
     const selectedString = window.getSelection()?.toString()?.trim();
     if (annotatorOpen.current === false && selectedString?.length > 0) {
@@ -115,7 +130,8 @@ export const Annotator = ({
       setSelectedText(selectedString);
       setSelectedAnchor(selection.anchorNode.parentElement);
       annotatorOpen.current = true;
-      setMemo(memos[selectedString] ?? "");
+      textToMemoKeyFormat.current = formatMemoKey(selectedString);
+      setMemo(memos[textToMemoKeyFormat.current] ?? "");
       // if 2 spaces, probably a note
       setCurrentTabValue((prev) =>
         prev === 0 &&
@@ -279,7 +295,7 @@ export const Annotator = ({
 
   const handleCloseAnnotator = () => {
     annotatorOpen.current = false;
-    const updatedMemo = (memos[selectedText] ?? "") !== memo;
+    const updatedMemo = (memos[textToMemoKeyFormat.current] ?? "") !== memo;
     let noteId =
       selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
     const updatedHighlight =
@@ -289,9 +305,9 @@ export const Annotator = ({
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
-        memos[selectedText] = memo;
+        memos[textToMemoKeyFormat.current] = memo;
       } else {
-        delete memos[selectedText];
+        delete memos[textToMemoKeyFormat.current];
       }
     }
 
