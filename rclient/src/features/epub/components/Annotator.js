@@ -54,6 +54,7 @@ export const Annotator = ({
   clearSearchMarkNode,
   spineIndex,
   noteId,
+  spineOverride,
 }) => {
   const annotatorHeight = 200;
   const annotatorWidth = 300;
@@ -260,11 +261,20 @@ export const Annotator = ({
       handleDeleteMark(noteId);
       noteId = null;
     }
-    // if (updateDB) {
-    //   updatePreference({ key: entryId, memos, notes });
-    // }
+
     if (noteId) {
       handleInjectingMark();
+    }
+
+    if (updatedMemo) {
+      updatePreference({ key: entryId, memos });
+    } else if (updatedNote) {
+      if (spineOverride.hasOwnProperty(spineIndex) === false) {
+        spineOverride[spineIndex] = {};
+      }
+      spineOverride[spineIndex].element =
+        document.getElementById("inner-content").outerHTML;
+      updatePreference({ key: entryId, notes, spineOverride });
     }
 
     setHighlightColor(null);
@@ -461,4 +471,5 @@ Annotator.propTypes = {
   clearSearchMarkNode: PropTypes.func.isRequired,
   spineIndex: PropTypes.number.isRequired,
   noteId: PropTypes.string,
+  spineOverride: PropTypes.object.isRequired,
 };

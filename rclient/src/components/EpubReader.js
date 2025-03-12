@@ -1450,8 +1450,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               dangerouslySetInnerHTML={{
                 __html:
-                  spineOverride?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
-                    ?.element ??
                   spine?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
                     ?.element ??
                   "something went wrong...<br/> spine is missing",
@@ -1482,6 +1480,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         clearSearchMarkNode={clearSearchMarkNode}
         spineIndex={spinePointer}
         noteId={selectedNodeId}
+        spineOverride={spineOverride}
       />
     </Dialog>
   );
