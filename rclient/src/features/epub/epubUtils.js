@@ -219,7 +219,7 @@ export const processEpub = (epubObject) => {
       if (metadata.common.hasOwnProperty("authors") === false) {
         metadata.common.authors = { value: [] };
       }
-      metadata.common.authors.value.push(obj.value);
+      metadata.common.authors.value[(obj["display-seq"] ?? 1) - 1] = obj.value;
       metadata.common[getRelatorsLabelFromIdentifier(obj.role)] = obj;
     }
     for (const value of Object.values(obj)) {
@@ -229,6 +229,9 @@ export const processEpub = (epubObject) => {
     }
   };
   addAllCreators(metadata.creator);
+  metadata.common.authors.value = metadata.common.authors.value.filter(
+    (value) => value !== undefined
+  );
 
   return {
     spine: spineStack,
