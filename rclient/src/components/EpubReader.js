@@ -32,6 +32,7 @@ import PropTypes from "prop-types";
 import { Loading } from "../features/loading/Loading";
 import { TableOfContents } from "../features/epub/components/TableOfContents";
 import { Annotator } from "../features/epub/components/Annotator";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -1153,7 +1154,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                                 sx={{ circle: { transition: "none" } }}
                               />
                             )
-                          ) : null}
+                          ) : (
+                            <Tooltip title={"Press Enter to Search"}>
+                              <KeyboardReturnIcon
+                                fontSize="small"
+                                color="success"
+                              />
+                            </Tooltip>
+                          )}
                           {params.InputProps.endAdornment}
                         </>
                       ),
