@@ -156,18 +156,60 @@ export const processEpub = (epubObject) => {
     onGoingWordCount: wordCountAccumulator,
   });
 
-  const metadata = {
-    title:
-      tocRef.docTitle?.text ??
-      contentRef?.metadata?.["dc:title"]?.["#text"] ??
-      contentRef?.metadata?.["dc:title"] ??
-      "Untitled",
-    artist:
-      tocRef.docAuthor?.text ??
-      contentRef?.metadata?.["dc:creator"]?.["#text"] ??
-      contentRef?.metadata?.["dc:creator"] ??
-      "No Creator",
+  let metadata = {};
+
+  const contentMeta = contentRef?.metadata ?? {};
+  const parseMetaIntoObject = (value) => {
+    const res = {};
+    if (typeof value === "object" && Array.isArray(value)) {
+      for (const obj of value) {
+        res[obj["@_id"]] = parseMetaIntoObject(obj);
+      }
+    } else {
+      const relevantMetaObjects =
+        typeof value === "object" && value["@_id"] !== undefined
+          ? contentMeta.meta?.filter((obj) =>
+              obj["@_refines"]?.endsWith(value["@_id"])
+            )
+          : [];
+      res.value = value["#text"] ?? value;
+      for (const obj of relevantMetaObjects) {
+        res[obj["@_property"]] = obj["#text"];
+      }
+    }
+    return res;
   };
+  for (const rawKey of Object.keys(contentMeta)) {
+    if (rawKey.startsWith("dc:") === false) {
+      continue;
+    }
+    const key = rawKey.substring(rawKey.indexOf(":") + 1);
+    metadata[key] = parseMetaIntoObject(contentMeta[rawKey]);
+  }
+  const otherMetaObjects =
+    contentMeta.meta?.filter(
+      (obj) => obj.hasOwnProperty("@_refines") === false
+    ) ?? [];
+
+  for (const obj of otherMetaObjects) {
+    if (obj.hasOwnProperty("@_property")) {
+      metadata[obj["@_property"]] = parseMetaIntoObject(obj);
+    } else {
+      metadata[obj["@_name"]] = obj["@_content"];
+    }
+  }
+
+  metadata.ncx = {
+    title: tocRef.docTitle?.text,
+    author: tocRef.docAuthor?.text,
+  };
+
+  const ncxHeadMeta = tocRef?.head?.meta ?? [];
+
+  for (const obj of ncxHeadMeta) {
+    const key = obj["@_name"].substring(obj["@_name"].indexOf(":") + 1);
+    metadata.ncx[key] = obj["@_content"];
+  }
 
   return {
     spine: spineStack,
