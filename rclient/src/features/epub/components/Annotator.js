@@ -185,6 +185,8 @@ export const Annotator = ({
       mark.classList.add(noteId, "mark");
       mark.setAttribute("noteid", noteId);
       mark.style.backgroundColor = highlightColor;
+      mark.style.fontSize = "inherit";
+      mark.style.fontWeight = "inherit";
       node.parentNode.replaceChild(mark, node);
       mark.appendChild(node);
       return;
