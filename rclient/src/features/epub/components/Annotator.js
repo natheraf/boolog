@@ -407,6 +407,7 @@ export const Annotator = ({
         }}
         transformOrigin={{
           vertical:
+            selectionRect &&
             selectionRect.top > Math.floor(window.innerHeight / 2)
               ? "bottom"
               : "top",
