@@ -31,6 +31,7 @@ export const Upload = ({ file, setFile, originalFile }) => {
     quota: 0,
   });
   const [originalFileSize, setOriginalFileSize] = React.useState(0);
+  const [dragOver, setDragOver] = React.useState(false);
 
   const handleFileChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -49,6 +50,7 @@ export const Upload = ({ file, setFile, originalFile }) => {
 
   const handleDrop = (event) => {
     event.preventDefault();
+    setDragOver(false);
     if (
       event.dataTransfer.items &&
       event.dataTransfer.items.length > 0 &&
@@ -85,12 +87,29 @@ export const Upload = ({ file, setFile, originalFile }) => {
   React.useEffect(() => {
     updateStorageEstimate();
     setOriginalFileSize(originalFile?.size ?? 0);
+    const uploadBox = document.getElementById("uploadBox");
+    const onDragEnter = (event) => {
+      event.preventDefault();
+      setDragOver(true);
+    };
+    const onDragLeave = (event) => {
+      event.preventDefault();
+      setDragOver(false);
+    };
+    uploadBox.addEventListener("dragenter", onDragEnter);
+    uploadBox.addEventListener("dragleave", onDragLeave);
+
+    return () => {
+      uploadBox.removeEventListener("dragenter", onDragEnter);
+      uploadBox.removeEventListener("dragleave", onDragLeave);
+    };
   }, []);
 
   return (
     <Stack
+      id="uploadBox"
       sx={{
-        border: "1px solid gray",
+        border: dragOver ? "2px dashed white" : "1px solid gray",
         borderRadius: "3px",
         padding: "10px",
         width: "100%",
