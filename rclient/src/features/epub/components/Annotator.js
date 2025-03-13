@@ -388,10 +388,15 @@ export const Annotator = ({
         anchorOrigin={{
           vertical:
             selectionParentRect && selectionRect
-              ? selectionRect.bottom -
-                selectionParentRect.top -
-                selectionRect.height / 2 -
-                20
+              ? selectionRect.top > Math.floor(window.innerHeight / 2)
+                ? selectionRect.bottom -
+                  selectionParentRect.top -
+                  selectionRect.height / 2 -
+                  20
+                : selectionRect.bottom -
+                  selectionParentRect.top -
+                  selectionRect.height / 2 +
+                  20
               : -10,
           horizontal:
             selectionParentRect && selectionRect
@@ -401,7 +406,10 @@ export const Annotator = ({
               : "center",
         }}
         transformOrigin={{
-          vertical: "bottom",
+          vertical:
+            selectionRect.top > Math.floor(window.innerHeight / 2)
+              ? "bottom"
+              : "top",
           horizontal: "center",
         }}
       >
