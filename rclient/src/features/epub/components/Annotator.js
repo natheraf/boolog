@@ -389,7 +389,7 @@ export const Annotator = ({
         onClose={handleCloseAnnotator}
         anchorOrigin={{
           vertical:
-            selectionParentRect && selectionRect
+            !anchorEl && selectedAnchor && selectionParentRect && selectionRect
               ? selectionRect.top > Math.floor(window.innerHeight / 2)
                 ? selectionRect.bottom -
                   selectionParentRect.top -
@@ -399,7 +399,12 @@ export const Annotator = ({
                   selectionParentRect.top -
                   selectionRect.height / 2 +
                   20
-              : -10,
+              : anchorEl
+              ? anchorEl.getBoundingClientRect().top >
+                Math.floor(window.innerHeight / 2)
+                ? -anchorEl.getBoundingClientRect().height / 2
+                : anchorEl.getBoundingClientRect().height
+              : -20,
           horizontal:
             selectionParentRect && selectionRect
               ? selectionRect.right -
@@ -409,8 +414,9 @@ export const Annotator = ({
         }}
         transformOrigin={{
           vertical:
-            selectionRect &&
-            selectionRect.top > Math.floor(window.innerHeight / 2)
+            (anchorEl?.getBoundingClientRect()?.top ??
+              selectionRect?.top ??
+              0) > Math.floor(window.innerHeight / 2)
               ? "bottom"
               : "top",
           horizontal: "center",
