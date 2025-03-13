@@ -4,12 +4,12 @@ import {
 } from "./config";
 import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
-import { deleteFile } from "./Files";
+import { deleteFile, getFile } from "./Files";
 import { addEpub } from "../../features/files/fileUtils";
 import { deletePreference } from "./userPreferences";
 
 /**
- *
+ * @deprecated
  * @param {Array<Object>} actions
  */
 const clientActions = (actions) =>
@@ -51,6 +51,28 @@ export const syncMultipleToCloud = (data) =>
         resolve();
       })
       .catch((error) => reject(new Error(error)));
+  });
+
+export const addBookFromEpub = (file) =>
+  new Promise((resolve, reject) => {
+    addEpub(file).then((res) => {
+      const fileId = res.target.result;
+      getFile(fileId).then((data) => {
+        const metadata = data.epubObject.metadata;
+        const bookObj = {
+          title: metadata.common.title.value,
+          authors: metadata.common.authors.value,
+          publisher: [metadata.publisher.value],
+          words: metadata.common.words.value,
+          status: "Reading",
+          api_source: "Local",
+          xId: metadata.identifier.value,
+          fileId,
+          cover_url: data.epubObject.cover,
+        };
+        addBook(bookObj).then(resolve);
+      });
+    });
   });
 
 const addBook = (obj, localOnly) => {
