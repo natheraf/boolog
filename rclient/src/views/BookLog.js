@@ -1,5 +1,9 @@
 import * as React from "react";
-import { getAllBooks, indexedDBBooksInterface } from "../api/IndexedDB/Books";
+import {
+  addBookFromEpub,
+  getAllBooks,
+  indexedDBBooksInterface,
+} from "../api/IndexedDB/Books";
 import { Tiles } from "../components/Tiles";
 import {
   Accordion,
@@ -74,6 +78,32 @@ export const BookLog = () => {
       variant: "body2",
     },
   ];
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    let file = null;
+    if (
+      event.dataTransfer.items &&
+      event.dataTransfer.items.length > 0 &&
+      event.dataTransfer.items[0].kind === "file"
+    ) {
+      const droppedFile = event.dataTransfer.items[0].getAsFile();
+      file = droppedFile;
+    } else if (
+      event.dataTransfer.files &&
+      event.dataTransfer.files.length > 0
+    ) {
+      const droppedFile = event.dataTransfer.files[0];
+      file = droppedFile;
+    }
+    if (file !== null) {
+      addBookFromEpub(file).then(() => window.location.reload(false));
+    }
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+  };
 
   const handleOpenEpub = (id, fileId) =>
     getFile(fileId).then((data) => {
@@ -255,7 +285,7 @@ export const BookLog = () => {
           key={epub.entryId}
         />
       ) : null}
-      <Stack>
+      <Stack onDrop={handleDrop} onDragOver={handleDragOver}>
         {statuses.map((obj, index) => (
           <Slide
             key={obj.status}
