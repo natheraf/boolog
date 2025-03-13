@@ -316,10 +316,12 @@ export const ReaderFormat = ({
                             </InputAdornment>
                             {fieldState[`${obj.value}Focus`] === true ? (
                               <InputAdornment position="end">
-                                <KeyboardReturnIcon
-                                  fontSize="small"
-                                  color="success"
-                                />
+                                <Tooltip title={"Press Enter to Apply"}>
+                                  <KeyboardReturnIcon
+                                    fontSize="small"
+                                    color="success"
+                                  />
+                                </Tooltip>
                               </InputAdornment>
                             ) : null}
                           </Stack>
