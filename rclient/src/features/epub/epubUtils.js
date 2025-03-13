@@ -1,3 +1,5 @@
+import { getRelatorsLabelFromIdentifier } from "../../api/Local";
+
 function countWords(s) {
   s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space
   s = s.replace(/[ ]{2,}/gi, " "); //2 or more space to 1
@@ -156,8 +158,7 @@ export const processEpub = (epubObject) => {
     onGoingWordCount: wordCountAccumulator,
   });
 
-  let metadata = {};
-
+  const metadata = {};
   const contentMeta = contentRef?.metadata ?? {};
   const parseMetaIntoObject = (value) => {
     const res = {};
@@ -186,11 +187,11 @@ export const processEpub = (epubObject) => {
     const key = rawKey.substring(rawKey.indexOf(":") + 1);
     metadata[key] = parseMetaIntoObject(contentMeta[rawKey]);
   }
+
   const otherMetaObjects =
     contentMeta.meta?.filter(
       (obj) => obj.hasOwnProperty("@_refines") === false
     ) ?? [];
-
   for (const obj of otherMetaObjects) {
     if (obj.hasOwnProperty("@_property")) {
       metadata[obj["@_property"]] = parseMetaIntoObject(obj);
@@ -203,13 +204,31 @@ export const processEpub = (epubObject) => {
     title: tocRef.docTitle?.text,
     author: tocRef.docAuthor?.text,
   };
-
   const ncxHeadMeta = tocRef?.head?.meta ?? [];
-
   for (const obj of ncxHeadMeta) {
     const key = obj["@_name"].substring(obj["@_name"].indexOf(":") + 1);
     metadata.ncx[key] = obj["@_content"];
   }
+  metadata.common = {
+    title: { value: metadata.ncx.title ?? metadata.title?.value ?? "Untitled" },
+    author: { value: tocRef.docAuthor?.text },
+    words: { value: wordCountAccumulator },
+  };
+  const addAllCreators = (obj) => {
+    if (obj.hasOwnProperty("value") && obj.hasOwnProperty("role")) {
+      if (metadata.common.hasOwnProperty("authors") === false) {
+        metadata.common.authors = { value: [] };
+      }
+      metadata.common.authors.value.push(obj.value);
+      metadata.common[getRelatorsLabelFromIdentifier(obj.role)] = obj;
+    }
+    for (const value of Object.values(obj)) {
+      if (typeof value === "object") {
+        addAllCreators(value);
+      }
+    }
+  };
+  addAllCreators(metadata.creator);
 
   return {
     spine: spineStack,
