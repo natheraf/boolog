@@ -1064,9 +1064,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             {greaterThanSmall ? (
               <Stack spacing={-0.5}>
                 <Typography variant="subtitle2" noWrap>
-                  {epubObject.metadata.ncx.title ??
-                    epubObject.metadata.title?.value ??
-                    "Untitled"}
+                  {epubObject.metadata.common.title.value}
                 </Typography>
                 <Typography variant="subtitle1" noWrap>
                   {spinePointer !== null
