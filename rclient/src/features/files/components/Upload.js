@@ -87,7 +87,7 @@ export const Upload = ({ file, setFile, originalFile }) => {
   React.useEffect(() => {
     updateStorageEstimate();
     setOriginalFileSize(originalFile?.size ?? 0);
-    const uploadBox = document.getElementById("uploadBox");
+    const uploadBox = document.getElementById("upload-box");
     const onDragEnter = (event) => {
       event.preventDefault();
       setDragOver(true);
@@ -107,7 +107,7 @@ export const Upload = ({ file, setFile, originalFile }) => {
 
   return (
     <Stack
-      id="uploadBox"
+      id="upload-box"
       sx={{
         border: dragOver ? "2px dashed white" : "1px solid gray",
         borderRadius: "3px",
