@@ -160,6 +160,7 @@ export const Annotator = ({
         range.setEnd(selection.anchorNode, selection.anchorOffset);
         range.setStart(selection.focusNode, selection.focusOffset);
       }
+      selection.removeAllRanges();
 
       let startOffset = range.startOffset;
       while (range.startContainer.textContent[startOffset] === " ") {
