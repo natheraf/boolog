@@ -769,6 +769,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   // }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
+    if (
+      document
+        .getElementById("annotator-menu")
+        ?.contains(document.activeElement)
+    ) {
+      return;
+    }
     clearSearchMarkNode();
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
@@ -796,6 +803,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
   const handlePreviousPage = React.useCallback(() => {
+    if (
+      document
+        .getElementById("annotator-menu")
+        ?.contains(document.activeElement)
+    ) {
+      return;
+    }
     clearSearchMarkNode();
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
@@ -907,12 +921,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const handleOnKeyDown = React.useCallback(
     (event) => {
-      if (
-        ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
-        document
-          .getElementById("annotator-menu")
-          ?.contains(document.activeElement)
-      ) {
+      if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
         return;
       }
       if (event.key === "ArrowLeft") {
