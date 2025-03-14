@@ -9,6 +9,7 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Box,
   Collapse,
   Fade,
   Grid,
@@ -32,6 +33,7 @@ import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
 import { getPreferenceWithDefault } from "../api/IndexedDB/userPreferences";
 import { defaultFormatting } from "../api/Local";
+import { Loading } from "../features/loading/Loading";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -58,6 +60,7 @@ export const BookLog = () => {
   const [openEpubReader, setOpenEpubReader] = React.useState(false);
   const [epub, setEpub] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [isImporting, setIsImporting] = React.useState(false);
 
   const keysData = [
     { key: "title", label: "", variant: "h5" },
@@ -95,6 +98,7 @@ export const BookLog = () => {
       files = event.dataTransfer.files;
     }
     if (files.length > 0) {
+      setIsImporting(true);
       const resolves = [...Array(files.length)];
       const promises = [...Array(files.length)].map(
         (_, index) =>
@@ -270,6 +274,19 @@ export const BookLog = () => {
           <Skeleton variant="rounded" width={"100%"} height={60} />
         </Stack>
       </Fade>
+    );
+  }
+
+  if (isImporting) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "90vh",
+        }}
+      >
+        <Loading loadingText={"Importing"} />
+      </Box>
     );
   }
 
