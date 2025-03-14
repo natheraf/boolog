@@ -150,7 +150,7 @@ export const BookLog = () => {
 
   const actionArea = {
     api: indexedDBBooksInterface,
-    mediaUniqueIdentifier: ["id", "xId"],
+    mediaUniqueIdentifier: ["_id", "xId"],
     orientation: "horizontal",
     inLibrary: true,
     imageOnClick: handleOpenEpub,

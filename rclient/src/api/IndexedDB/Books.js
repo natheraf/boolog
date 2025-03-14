@@ -235,7 +235,7 @@ const setBookHelper = (db, data, key, localOnly) =>
     }
     const objectStore = transaction.objectStore(shelvesObjectStore);
     const request =
-      key === "id"
+      key === "_id"
         ? objectStore.get(data._id ?? -1)
         : objectStore.index(key).get(IDBKeyRange.only(data[key] ?? -1));
     request.onsuccess = (event) => {
@@ -321,7 +321,7 @@ const getBookHelper = (db, key, value) =>
     const objectStore = transaction.objectStore(shelvesObjectStore);
     if (value === undefined) {
       reject(new Error("value cannot be empty or undefined if key isn't"));
-    } else if (key === "id") {
+    } else if (key === "_id") {
       objectStore.get(value).onsuccess = (event) => {
         const data = event.target.result;
         resolve(data);

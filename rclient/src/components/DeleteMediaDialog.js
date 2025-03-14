@@ -46,7 +46,6 @@ export const DeleteMediaDialog = ({
               .deleteBook(mediaObject, actionArea.mediaUniqueIdentifier)
               .then(() => {
                 syncMediaObject();
-                delete dataObject._id;
                 delete dataObject.status;
                 delete dataObject.fileId;
               });

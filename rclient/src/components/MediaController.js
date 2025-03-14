@@ -17,7 +17,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
       setOpenDeleteAlert(true);
     } else {
       mediaObject.status = value;
-      actionArea.api.setBook(mediaObject, "id").then((id) => {
+      actionArea.api.setBook(mediaObject, "_id").then((id) => {
         mediaObject._id = id;
         syncMediaObject();
       });

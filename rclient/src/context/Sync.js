@@ -46,13 +46,13 @@ export const Sync = ({ children }) => {
           ) {
             entriesNeedCloudUpdate.push(book);
           } else if (remoteBooks[book._id]._lastUpdated > book._lastUpdated) {
-            await setBook(remoteBooks[book._id], "id", true);
+            await setBook(remoteBooks[book._id], "_id", true);
           }
           delete remoteBooks[book._id];
         }
         for (const book of Object.values(remoteBooks)) {
           console.log("setting book ", book._id);
-          await setBook(book, "id", true);
+          await setBook(book, "_id", true);
         }
         console.log("updating cloud");
         if (entriesNeedCloudUpdate.length > 0) {
