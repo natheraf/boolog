@@ -93,7 +93,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const spineOverride = epubObject.spineOverride;
 
   const [spinePointer, setSpinePointer] = React.useState(
-    epubObject?.progress?.spine.current ?? 0
+    epubObject?.progress?.spine ?? 0
   );
 
   const visitedSpineIndexes = React.useRef(new Set());
@@ -650,25 +650,25 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
 
   // handles setting page so fragment is visible
-  React.useEffect(() => {
-    if (linkFragment !== null && document.getElementById(linkFragment)) {
-      const content = document
-        .getElementById("content")
-        .getBoundingClientRect();
-      const fragment = document
-        .getElementById(linkFragment)
-        .getBoundingClientRect();
-      if (fragment.top > content.bottom) {
-        return;
-      }
-      const pageDelta = Math.floor(
-        (Math.floor(fragment.left) - Math.floor(content.left)) /
-          Math.floor(pageWidth + columnGap)
-      );
-      setCurrentPage(pageDelta);
-      setLinkFragment(null);
-    }
-  }, [linkFragment, pageWidth]);
+  // React.useEffect(() => {
+  //   if (linkFragment !== null && document.getElementById(linkFragment)) {
+  //     const content = document
+  //       .getElementById("content")
+  //       .getBoundingClientRect();
+  //     const fragment = document
+  //       .getElementById(linkFragment)
+  //       .getBoundingClientRect();
+  //     if (fragment.top > content.bottom) {
+  //       return;
+  //     }
+  //     const pageDelta = Math.floor(
+  //       (Math.floor(fragment.left) - Math.floor(content.left)) /
+  //         Math.floor(pageWidth + columnGap)
+  //     );
+  //     setCurrentPage(pageDelta);
+  //     setLinkFragment(null);
+  //   }
+  // }, [linkFragment, pageWidth]);
 
   const handleClose = () => {
     setOpen(false);
@@ -723,11 +723,32 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         ?.querySelectorAll("img, svg")
         .forEach((element) => {
           element.style.maxHeight = `${pageHeight}px`;
+          element.style.maxWidth = `${pageWidth}px`;
         });
     });
     observer.observe(document.body, config);
     return () => observer.disconnect();
-  }, [getCurrentTotalPages, pageHeight]);
+  }, [getCurrentTotalPages, pageHeight, pageWidth]);
+
+  React.useEffect(() => {
+    if (linkFragment !== null && document.getElementById(linkFragment)) {
+      const content = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      const fragment = document
+        .getElementById(linkFragment)
+        .getBoundingClientRect();
+      if (fragment.top > content.bottom) {
+        return;
+      }
+      const pageDelta = Math.floor(
+        (Math.floor(fragment.left) - Math.floor(content.left)) /
+          Math.floor(pageWidth + columnGap)
+      );
+      setCurrentPage(pageDelta);
+      setLinkFragment(null);
+    }
+  }, [linkFragment, pageWidth]);
 
   // add event listener to resize images.current
   // React.useEffect(() => {
