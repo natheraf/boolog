@@ -1,7 +1,7 @@
 import axios from "axios";
 
 axios.defaults.withCredentials = true;
-const api = `${window.location.protocol}//${window.location.hostname}:4002/api`;
+const api = `${window.location.protocol}//${window.location.hostname}:${process.env.REACT_APP_SERVER_PORT}/api`;
 
 const httpMethodFunctions = new Map([
   ["POST", axios.post],
