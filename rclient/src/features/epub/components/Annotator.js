@@ -160,7 +160,6 @@ export const Annotator = ({
         range.setEnd(selection.anchorNode, selection.anchorOffset);
         range.setStart(selection.focusNode, selection.focusOffset);
       }
-      selection.removeAllRanges();
 
       let startOffset = range.startOffset;
       while (range.startContainer.textContent[startOffset] === " ") {
@@ -385,7 +384,7 @@ export const Annotator = ({
   }, []);
 
   return (
-    <Backdrop open={openAnnotator}>
+    <Backdrop open={openAnnotator} sx={{ userSelect: "none" }}>
       <Menu
         id="annotator-menu"
         anchorEl={selectedAnchor || anchorEl}
