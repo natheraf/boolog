@@ -9,6 +9,9 @@ function countWords(s) {
 
 export const processEpub = (epubObject) => {
   const contentRef = epubObject["opf"].package;
+  if (contentRef.hasOwnProperty("@_unique-identifier") === false) {
+    throw new Error("unique-identifier not found");
+  }
   const tocRef = epubObject["ncx"].ncx;
   const manifestRef = contentRef.manifest.item;
 
@@ -171,8 +174,15 @@ export const processEpub = (epubObject) => {
   const parseMetaIntoObject = (value) => {
     const res = {};
     if (typeof value === "object" && Array.isArray(value)) {
-      for (const obj of value) {
-        res[obj["@_id"]] = parseMetaIntoObject(obj);
+      for (const element of value) {
+        if (typeof element === "object" && element.hasOwnProperty("@_id")) {
+          res[element["@_id"]] = parseMetaIntoObject(element);
+        } else {
+          if (res.hasOwnProperty("noId") === false) {
+            res.noId = [];
+          }
+          res.noId.push(element);
+        }
       }
     } else {
       const relevantMetaObjects =
@@ -227,7 +237,19 @@ export const processEpub = (epubObject) => {
         elementMap.get(metadata.cover)?.href ??
         null,
     },
+    uId: {
+      value:
+        metadata.identifier?.value ??
+        metadata.identifier?.[contentRef["@_unique-identifier"]].value ??
+        metadata.identifier?.noId?.[0] ??
+        null,
+    },
   };
+  if (
+    metadata.common.uId.value === null ||
+    typeof metadata.common.uId.value === "object"
+  )
+    throw new Error("unable to find uId");
   const addAllCreators = (obj) => {
     if (obj.hasOwnProperty("value") && obj.hasOwnProperty("role")) {
       if (metadata.common.hasOwnProperty("authors") === false) {
