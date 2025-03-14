@@ -133,6 +133,12 @@ const addUrlsToLocalBooks = (books) =>
               return resolve();
             }
             getFile(book.fileId).then((data) => {
+              if (
+                book.cover_url.length === 0 ||
+                data.epubObject.images.hasOwnProperty(book.cover_url) === false
+              ) {
+                return resolve();
+              }
               book.cover_url = URL.createObjectURL(
                 data.epubObject.images[book.cover_url]
               );
