@@ -384,7 +384,7 @@ export const Annotator = ({
   }, []);
 
   return (
-    <Backdrop open={openAnnotator} sx={{ userSelect: "none" }}>
+    <Backdrop open={openAnnotator}>
       <Menu
         id="annotator-menu"
         anchorEl={selectedAnchor || anchorEl}
