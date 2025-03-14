@@ -857,9 +857,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         Math.abs(xDiff) > Math.abs(yDiff) &&
         window.getSelection()?.isCollapsed
       ) {
-        if (xDiff > 0) {
+        if (xDiff > 5) {
           handleNextPage();
-        } else {
+        } else if (xDiff < -5) {
           handlePreviousPage();
         }
       }
