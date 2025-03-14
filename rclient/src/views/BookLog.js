@@ -292,7 +292,10 @@ export const BookLog = () => {
 
   return (
     <>
-      <CollapsibleFab setOpenEditor={setOpenEditor} />
+      <CollapsibleFab
+        setOpenEditor={setOpenEditor}
+        setIsImporting={setIsImporting}
+      />
       <CreateBook
         open={openEditor}
         setOpen={setOpenEditor}

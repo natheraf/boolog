@@ -6,12 +6,26 @@ import SearchIcon from "@mui/icons-material/Search";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "@emotion/react";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { addBookFromEpub } from "../api/IndexedDB/Books";
 
-export const CollapsibleFab = ({ setOpenEditor }) => {
+export const CollapsibleFab = ({ setOpenEditor, setIsImporting }) => {
   const theme = useTheme();
   const [openButtons, setOpenButtons] = React.useState(false);
   const containerRef = React.useRef(null);
   const navigate = useNavigate();
+  const inputFile = React.useRef(null);
+  const handleFileChange = (event) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setIsImporting(true);
+      addBookFromEpub(event.target.files[0]).then(() => {
+        window.location.reload(false);
+      });
+    }
+  };
+  const handleEpubImportOnClick = () => {
+    inputFile.current.click();
+  };
 
   const icons = [
     {
@@ -25,6 +39,12 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
       color: "secondary",
       icon: <SearchIcon />,
       onClick: () => navigate("/books/search"),
+    },
+    {
+      label: "Import EPUB",
+      color: "secondary",
+      icon: <FileUploadIcon />,
+      onClick: handleEpubImportOnClick,
     },
   ];
 
@@ -62,6 +82,7 @@ export const CollapsibleFab = ({ setOpenEditor }) => {
             </Slide>
           ))}
         </Stack>
+        <input type="file" ref={inputFile} onChange={handleFileChange} hidden />
         <Tooltip
           title={openButtons ? "Click to Close" : "Add an Entry"}
           placement={"left"}
