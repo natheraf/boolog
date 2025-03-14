@@ -606,13 +606,24 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             const src = node
               .getAttribute("ogsrc")
               ?.substring(node.getAttribute("ogsrc").startsWith("../") * 3);
-            if (!src || !images.current[src]) {
+            if (
+              !src ||
+              (!images.current[src] &&
+                Object.keys(images.current).some((path) =>
+                  path.includes(src)
+                ) === false)
+            ) {
               return;
             }
+            const targetImage =
+              images.current[src] ??
+              images.current[
+                Object.keys(images.current).find((path) => path.includes(src))
+              ];
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(images.current[src]);
+              URL.createObjectURL(targetImage);
             node.src = url;
             loadedImages[src] = url;
             if (["DIV", "SECTION"].includes(node.parentElement.tagName)) {
@@ -628,13 +639,24 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }
             }
             src = src?.substring(src.indexOf("/") + 1);
-            if (!src || !images.current[src]) {
+            if (
+              !src ||
+              (!images.current[src] &&
+                images.current[
+                  Object.keys(images.current).some((path) => path.includes(src))
+                ])
+            ) {
               return;
             }
+            const targetImage =
+              images.current[src] ??
+              images.current[
+                Object.keys(images.current).find((path) => path.includes(src))
+              ];
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(images.current[src]);
+              URL.createObjectURL(targetImage);
             loadedImages[src] = url;
             node.setAttribute("href", url);
             node.style.height = "100%";
