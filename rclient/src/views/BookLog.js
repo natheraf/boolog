@@ -81,23 +81,29 @@ export const BookLog = () => {
 
   const handleDrop = (event) => {
     event.preventDefault();
-    let file = null;
+    let files = [];
     if (
       event.dataTransfer.items &&
       event.dataTransfer.items.length > 0 &&
       event.dataTransfer.items[0].kind === "file"
     ) {
-      const droppedFile = event.dataTransfer.items[0].getAsFile();
-      file = droppedFile;
+      files = event.dataTransfer.items;
     } else if (
       event.dataTransfer.files &&
       event.dataTransfer.files.length > 0
     ) {
-      const droppedFile = event.dataTransfer.files[0];
-      file = droppedFile;
+      files = event.dataTransfer.files;
     }
-    if (file !== null) {
-      addBookFromEpub(file).then(() => window.location.reload(false));
+    if (files.length > 0) {
+      const resolves = [...Array(files.length)];
+      const promises = [...Array(files.length)].map(
+        (_, index) =>
+          new Promise((resolve, reject) => (resolves[index] = resolve))
+      );
+      for (let index = 0; index < files.length; index += 1) {
+        addBookFromEpub(files[index].getAsFile()).then(resolves[index]);
+      }
+      Promise.all(promises).then(() => window.location.reload(false));
     }
   };
 
