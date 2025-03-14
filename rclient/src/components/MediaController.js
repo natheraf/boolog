@@ -14,7 +14,7 @@ export const MediaController = ({ dataObject, actionArea, setDataObject }) => {
 
   const handleStatusOnChange = (event, value) => {
     if (value === null) {
-      setOpenDeleteAlert(true);
+      return;
     } else {
       mediaObject.status = value;
       actionArea.api.setBook(mediaObject, "_id").then((id) => {
