@@ -8,6 +8,7 @@ function countWords(s) {
 } // https://stackoverflow.com/a/18679657
 
 export const processEpub = (epubObject) => {
+  console.log(epubObject);
   const contentRef = epubObject["opf"].package;
   if (contentRef.hasOwnProperty("@_unique-identifier") === false) {
     throw new Error("unique-identifier not found");
@@ -17,9 +18,12 @@ export const processEpub = (epubObject) => {
 
   const elementMap = new Map();
   for (const item of manifestRef) {
+    item["@_href"] = item["@_href"].toUpperCase().startsWith("OEBPS/")
+      ? item["@_href"].substring(6)
+      : item["@_href"];
     const path = item["@_href"];
-    const type = path.substring(item["@_href"].lastIndexOf("." + 1));
-    if (type.indexOf("html") === -1) {
+    const type = path.substring(path.lastIndexOf(".") + 1);
+    if (["htm", "html", "xhtml"].includes(type) === false) {
       elementMap.set(item["@_id"], {
         href: item["@_href"],
       });
@@ -88,6 +92,11 @@ export const processEpub = (epubObject) => {
   const navMap = new Map(); // content -> nav label / chapter name
   const toc = [];
   for (const navPoint of tocRef.navMap.navPoint) {
+    navPoint.content["@_src"] = navPoint.content?.["@_src"]
+      .toUpperCase()
+      .startsWith("OEBPS/")
+      ? navPoint.content?.["@_src"].substring(6)
+      : navPoint.content?.["@_src"];
     const src = navPoint.content?.["@_src"];
     navMap.set(
       src?.substring(
@@ -171,6 +180,10 @@ export const processEpub = (epubObject) => {
 
   const metadata = {};
   const contentMeta = contentRef?.metadata ?? {};
+  contentMeta.meta =
+    Array.isArray(contentMeta.meta) === false
+      ? [contentMeta.meta]
+      : contentMeta.meta;
   const parseMetaIntoObject = (value) => {
     const res = {};
     if (typeof value === "object" && Array.isArray(value)) {
@@ -244,17 +257,16 @@ export const processEpub = (epubObject) => {
         metadata.identifier?.noId?.[0] ??
         null,
     },
+    authors: { value: [] },
   };
   if (
     metadata.common.uId.value === null ||
     typeof metadata.common.uId.value === "object"
-  )
+  ) {
     throw new Error("unable to find uId");
+  }
   const addAllCreators = (obj) => {
     if (obj.hasOwnProperty("value") && obj.hasOwnProperty("role")) {
-      if (metadata.common.hasOwnProperty("authors") === false) {
-        metadata.common.authors = { value: [] };
-      }
       metadata.common.authors.value[(obj["display-seq"] ?? 1) - 1] = obj.value;
       metadata.common[getRelatorsLabelFromIdentifier(obj.role)] = obj;
     }

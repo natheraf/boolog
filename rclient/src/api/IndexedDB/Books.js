@@ -62,7 +62,9 @@ export const addBookFromEpub = (file) =>
         const bookObj = {
           title: metadata.common.title.value,
           authors: metadata.common.authors.value,
-          publisher: [metadata.publisher.value],
+          publisher: metadata.publisher?.value
+            ? [metadata.publisher?.value]
+            : [],
           words: metadata.common.words.value,
           status: "Reading",
           api_source: "Local",

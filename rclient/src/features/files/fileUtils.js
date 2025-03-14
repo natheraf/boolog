@@ -72,6 +72,7 @@ export const convertZipFileToObjectResource = (file) =>
             entry.filename.indexOf(".opf") === entry.filename.length - 4;
 
           const isHTML =
+            entry.filename.indexOf(".htm") === entry.filename.length - 4 ||
             entry.filename.indexOf(".html") === entry.filename.length - 5 ||
             entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
 
@@ -87,9 +88,9 @@ export const convertZipFileToObjectResource = (file) =>
             entry.filename.indexOf(".png") === entry.filename.length - 4 ||
             entry.filename.indexOf(".gif") === entry.filename.length - 4;
 
-          const fileName = entry.filename.substring(
-            entry.filename.indexOf("OEBPS/") + 6
-          );
+          const fileName = entry.filename.toUpperCase().startsWith("OEBPS/")
+            ? entry.filename.substring(6)
+            : entry.filename;
 
           if (isHTML) {
             objectResource.html[fileName] = await convertFileToString(entry);
@@ -98,6 +99,7 @@ export const convertZipFileToObjectResource = (file) =>
             objectResource.css[fileName] = await convertFileToString(entry);
           }
           if (isOPF || isTOC) {
+            console.log(fileName);
             objectResource[fileName.substring(fileName.lastIndexOf(".") + 1)] =
               await convertXMLFileToObject(entry);
           }
