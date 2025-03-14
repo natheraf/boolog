@@ -50,7 +50,7 @@ export const SearchBook = () => {
   const [renderSearchResultsApi, setRenderSearchResultsApi] =
     React.useState(defaultSearchApi);
   const [performNewSearch, setPerformNewSearch] = React.useState(true);
-  const defaultSearch = "The Empty Box and Zeroth Maria";
+  const defaultSearch = "Fahrenheit 451";
   const topResultRef = React.useRef(null);
 
   const handleSearch = React.useCallback(() => {
