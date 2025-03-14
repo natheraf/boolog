@@ -140,25 +140,23 @@ export const Loading = ({
           <Typography variant="h5">
             {loadingText ?? "Loading, please wait..."}
           </Typography>
-          {loadingProgress ? (
-            <LinearProgress
-              sx={{
-                width: "50vw",
-                "& .MuiLinearProgress-bar": {
-                  transition: "none",
-                },
-              }}
-              variant={"determinate"}
-              value={
-                loadingProgress !== null
-                  ? Math.floor(
-                      (loadingProgress?.current ?? 0) /
-                        (loadingProgress?.total ?? 1)
-                    ) * 100
-                  : 0
-              }
-            />
-          ) : null}
+          <LinearProgress
+            sx={{
+              width: "50vw",
+              "& .MuiLinearProgress-bar": {
+                transition: "none",
+              },
+            }}
+            variant={loadingProgress ? "determinate" : "indeterminate"}
+            value={
+              loadingProgress !== null
+                ? Math.floor(
+                    (loadingProgress?.current ?? 0) /
+                      (loadingProgress?.total ?? 1)
+                  ) * 100
+                : 0
+            }
+          />
           {subLoadingText ? (
             <>
               <Typography variant="h6">
