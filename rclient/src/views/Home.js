@@ -17,6 +17,21 @@ export const Home = () => {
       <Button onClick={() => addAlert("success", "success")}>success</Button>
       <Button onClick={() => addAlert("warning", "warning")}>warning</Button>
       <Button onClick={() => addAlert("error", "error")}>error</Button>
+      <Button
+        onClick={() =>
+          indexedDB
+            .databases()
+            .then((databases) =>
+              databases.map((database) =>
+                window.indexedDB.deleteDatabase(database.name)
+              )
+            )
+        }
+        color="error"
+      >
+        If something is broken, click here to nuke local storage. Will reset
+        app.
+      </Button>
       <h1>Home</h1>
       <Button
         onClick={() => {
