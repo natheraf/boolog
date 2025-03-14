@@ -70,6 +70,9 @@ const CircularProgressWithLabel = (props) => {
   );
 };
 
+let firstTouchX = null;
+let firstTouchY = null;
+
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -820,6 +823,35 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
+  const handleTouchStart = (event) => {
+    firstTouchX = event.touches[0].clientX;
+    firstTouchY = event.touches[0].clientY;
+  };
+
+  const handleTouchMove = React.useCallback(
+    (event) => {
+      if (firstTouchX === null || firstTouchY === null) {
+        return;
+      }
+      const xUp = event.touches[0].clientX;
+      const yUp = event.touches[0].clientY;
+
+      const xDiff = firstTouchX - xUp;
+      const yDiff = firstTouchY - yUp;
+
+      if (Math.abs(xDiff) > Math.abs(yDiff)) {
+        if (xDiff > 0) {
+          handleNextPage();
+        } else {
+          handlePreviousPage();
+        }
+      }
+      firstTouchX = null;
+      firstTouchY = null;
+    },
+    [handleNextPage, handlePreviousPage]
+  );
+
   const turnToLastPage = React.useCallback(() => {
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
@@ -998,6 +1030,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
     setLoadedImageURLs({});
   };
+
+  React.useEffect(() => {
+    document.addEventListener("touchstart", handleTouchStart);
+    document.addEventListener("touchmove", handleTouchMove);
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [handleTouchMove]);
 
   // on load
   React.useEffect(() => {

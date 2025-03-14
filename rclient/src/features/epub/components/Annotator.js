@@ -374,10 +374,13 @@ export const Annotator = ({
     document
       .getElementById("content")
       .addEventListener("mouseup", handleGetTextSelection);
-    return () =>
+    document.addEventListener("touchend", handleGetTextSelection);
+    return () => {
       document
         .getElementById("content")
         ?.removeEventListener("mouseup", handleGetTextSelection);
+      document.removeEventListener("touchend", handleGetTextSelection);
+    };
   }, []);
 
   return (
