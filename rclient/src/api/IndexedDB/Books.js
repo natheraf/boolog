@@ -66,9 +66,9 @@ export const addBookFromEpub = (file) =>
           words: metadata.common.words.value,
           status: "Reading",
           api_source: "Local",
-          xId: metadata.identifier.value,
+          xId: metadata.common.uId.value,
           fileId,
-          cover_url: data.epubObject.cover,
+          cover_url: metadata.common.cover.value,
         };
         addBook(bookObj).then(resolve);
       });
@@ -118,6 +118,29 @@ export const getAllBooks = (key, value) => {
   );
 };
 
+const addUrlsToLocalBooks = (books) =>
+  new Promise((resolve, reject) =>
+    Promise.all(
+      books.map(
+        (book) =>
+          new Promise((resolve, reject) => {
+            if (
+              book.api_source !== "Local" ||
+              book.hasOwnProperty("fileId") === false
+            ) {
+              return resolve();
+            }
+            getFile(book.fileId).then((data) => {
+              book.cover_url = URL.createObjectURL(
+                data.epubObject.images[book.cover_url]
+              );
+              resolve();
+            });
+          })
+      )
+    ).then(resolve)
+  );
+
 const getAllBooksHelper = (db, key, value) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(shelvesObjectStore, "readonly");
@@ -131,12 +154,14 @@ const getAllBooksHelper = (db, key, value) =>
     const objectStore = transaction.objectStore(shelvesObjectStore);
     if (key === undefined) {
       objectStore.index("shelf").getAll("books").onsuccess = (event) => {
-        resolve(event.target.result);
+        const books = event.target.result;
+        addUrlsToLocalBooks(books).then(() => resolve(books));
       };
     } else if (value === undefined) {
       reject(new Error("if key is defined, value cannot be undefined"));
     } else {
-      objectStore.index(key).getAll(value).onsuccess = (res) => resolve(res);
+      objectStore.index(key).getAll(value).onsuccess = (books) =>
+        addUrlsToLocalBooks(books).then(() => resolve(books));
     }
   });
 
