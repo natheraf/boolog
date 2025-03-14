@@ -86,6 +86,7 @@ export const Annotator = ({
   const [highlightColor, setHighlightColor] = React.useState(
     notes[anchorEl?.getAttribute("noteid")]?.highlightColor ?? null
   );
+  const oldTouchSelect = React.useRef(null);
 
   const handleClear = (type) => {
     if (type === "memo") {
@@ -370,16 +371,31 @@ export const Annotator = ({
     }
   };
 
+  const handleTouchSelect = () => {
+    if (oldTouchSelect.current) {
+      setTimeout(() => {
+        if (window.getSelection().isCollapsed === false) {
+          handleGetTextSelection();
+        }
+      }, 100);
+      oldTouchSelect.current = null;
+    } else if (window.getSelection().isCollapsed === false) {
+      oldTouchSelect.current = true;
+    } else {
+      oldTouchSelect.current = null;
+    }
+  };
+
   React.useEffect(() => {
     document
       .getElementById("content")
       .addEventListener("mouseup", handleGetTextSelection);
-    document.addEventListener("touchend", handleGetTextSelection);
+    document.addEventListener("touchend", handleTouchSelect);
     return () => {
       document
         .getElementById("content")
         ?.removeEventListener("mouseup", handleGetTextSelection);
-      document.removeEventListener("touchend", handleGetTextSelection);
+      document.removeEventListener("touchend", handleTouchSelect);
     };
   }, []);
 
