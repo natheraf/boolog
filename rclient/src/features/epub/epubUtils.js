@@ -8,7 +8,6 @@ function countWords(s) {
 } // https://stackoverflow.com/a/18679657
 
 export const processEpub = (epubObject) => {
-  console.log(epubObject);
   const contentRef = epubObject["opf"].package;
   if (contentRef.hasOwnProperty("@_unique-identifier") === false) {
     throw new Error("unique-identifier not found");

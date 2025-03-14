@@ -99,7 +99,6 @@ export const convertZipFileToObjectResource = (file) =>
             objectResource.css[fileName] = await convertFileToString(entry);
           }
           if (isOPF || isTOC) {
-            console.log(fileName);
             objectResource[fileName.substring(fileName.lastIndexOf(".") + 1)] =
               await convertXMLFileToObject(entry);
           }
