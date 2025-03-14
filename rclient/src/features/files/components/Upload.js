@@ -72,7 +72,9 @@ export const Upload = ({ file, setFile, originalFile }) => {
   };
 
   const updateStorageEstimate = () => {
-    navigator.storage.estimate().then((res) => setStorageEstimate(res));
+    if (navigator.storage) {
+      navigator.storage.estimate().then((res) => setStorageEstimate(res));
+    }
   };
 
   const scaleStorageUnites = (bytes) => {
