@@ -17,6 +17,14 @@ export const processEpub = (epubObject) => {
     const path = item["@_href"];
     const type = path.substring(item["@_href"].lastIndexOf("." + 1));
     if (type.indexOf("html") === -1) {
+      elementMap.set(item["@_id"], {
+        href: item["@_href"],
+      });
+      if (item.hasOwnProperty("@_properties")) {
+        elementMap.set(item["@_properties"], {
+          href: item["@_href"],
+        });
+      }
       continue;
     }
     if (!epubObject.html[path]) {
@@ -213,6 +221,12 @@ export const processEpub = (epubObject) => {
     title: { value: metadata.ncx.title ?? metadata.title?.value ?? "Untitled" },
     author: { value: tocRef.docAuthor?.text },
     words: { value: wordCountAccumulator },
+    cover: {
+      value:
+        elementMap.get("cover-image")?.href ??
+        elementMap.get(metadata.cover)?.href ??
+        null,
+    },
   };
   const addAllCreators = (obj) => {
     if (obj.hasOwnProperty("value") && obj.hasOwnProperty("role")) {
