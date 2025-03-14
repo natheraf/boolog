@@ -35,6 +35,8 @@ module.exports = (drop) => {
                 db.collection(collectionName).createIndex({ userId: 1 });
               } else if (databasesName === "userAppData") {
                 db.collection(collectionName).createIndex({ userId: 1 });
+              } else if (collectionName === "resources") {
+                db.collection(collectionName).createIndex({ key: 1 });
               }
               console.log(
                 `Successfully dropped all collections in ${collectionName}`
@@ -68,6 +70,7 @@ module.exports = (drop) => {
     },
     { database: "userLists", collections: ["v1"] },
     { database: "userAppData", collections: ["settings"] },
+    { database: "server", collections: ["resources"] },
   ];
 
   const createMissingCollections = () =>
