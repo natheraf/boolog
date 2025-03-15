@@ -68,25 +68,23 @@ export const convertZipFileToObjectResource = (file) =>
       .then(async (res) => {
         const objectResource = { html: {}, images: {}, css: {} };
         for (const entry of res) {
-          const isOPF =
-            entry.filename.indexOf(".opf") === entry.filename.length - 4;
+          const isOPF = entry.filename.endsWith(".opf");
 
           const isHTML =
-            entry.filename.indexOf(".htm") === entry.filename.length - 4 ||
-            entry.filename.indexOf(".html") === entry.filename.length - 5 ||
-            entry.filename.indexOf(".xhtml") === entry.filename.length - 6;
+            entry.filename.endsWith(".htm") ||
+            entry.filename.endsWith(".html") ||
+            entry.filename.endsWith(".xhtml");
 
-          const isTOC =
-            entry.filename.indexOf(".ncx") === entry.filename.length - 4;
+          const isTOC = entry.filename.endsWith(".ncx");
 
-          const isCSS =
-            entry.filename.indexOf(".css") === entry.filename.length - 4;
+          const isCSS = entry.filename.endsWith(".css");
 
           const isImage =
-            entry.filename.indexOf(".jpeg") === entry.filename.length - 5 ||
-            entry.filename.indexOf(".jpg") === entry.filename.length - 4 ||
-            entry.filename.indexOf(".png") === entry.filename.length - 4 ||
-            entry.filename.indexOf(".gif") === entry.filename.length - 4;
+            entry.filename.endsWith(".jpeg") ||
+            entry.filename.endsWith(".jpg") ||
+            entry.filename.endsWith(".png") ||
+            entry.filename.endsWith(".svg") ||
+            entry.filename.endsWith(".gif");
 
           const fileName = entry.filename.toUpperCase().startsWith("OEBPS/")
             ? entry.filename.substring(6)
