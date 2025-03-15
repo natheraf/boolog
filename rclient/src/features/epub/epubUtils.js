@@ -12,7 +12,7 @@ export const processEpub = (epubObject) => {
   if (contentRef.hasOwnProperty("@_unique-identifier") === false) {
     throw new Error("unique-identifier not found");
   }
-  const tocRef = epubObject["ncx"].ncx;
+  const tocRef = epubObject["ncx"]?.ncx ?? {};
   const manifestRef = contentRef.manifest.item;
 
   const elementMap = new Map();
@@ -33,7 +33,11 @@ export const processEpub = (epubObject) => {
       }
       continue;
     }
-    if (!epubObject.html[path]) {
+    if (
+      !epubObject.html[path] ||
+      Object.keys(epubObject.html).some((key) => key.contains(path)) === false
+    ) {
+      console.log(path);
       continue;
     }
 
@@ -90,7 +94,7 @@ export const processEpub = (epubObject) => {
 
   const navMap = new Map(); // content -> nav label / chapter name
   const toc = [];
-  for (const navPoint of tocRef.navMap.navPoint) {
+  for (const navPoint of tocRef.navMap?.navPoint ?? []) {
     navPoint.content["@_src"] = navPoint.content?.["@_src"]
       .toUpperCase()
       .startsWith("OEBPS/")
@@ -113,6 +117,7 @@ export const processEpub = (epubObject) => {
   if (toc[0]?.playOrder !== null) {
     toc.sort((a, b) => a.playOrder - b.playOrder);
   }
+  console.log(elementMap);
 
   let wordCountAccumulator = 0;
   const chapterMeta = [];
@@ -120,6 +125,7 @@ export const processEpub = (epubObject) => {
   const spineMap = {};
   const spineRef = contentRef.spine.itemref;
   for (const item of spineRef) {
+    console.log(item);
     spineMap[elementMap.get(item["@_idref"]).href] = spineStack.length;
     spineStack.push({
       element: elementMap.get(item["@_idref"]).section,
@@ -177,12 +183,12 @@ export const processEpub = (epubObject) => {
     onGoingWordCount: wordCountAccumulator,
   });
 
+  const forceValueAsArray = (obj, key) => {
+    return Array.isArray(obj[key]) === false ? [obj[key]] : obj[key];
+  };
   const metadata = {};
   const contentMeta = contentRef?.metadata ?? {};
-  contentMeta.meta =
-    Array.isArray(contentMeta.meta) === false
-      ? [contentMeta.meta]
-      : contentMeta.meta;
+  contentMeta.meta = forceValueAsArray(contentMeta, "meta");
   const parseMetaIntoObject = (value) => {
     const res = {};
     if (typeof value === "object" && Array.isArray(value)) {
@@ -234,7 +240,9 @@ export const processEpub = (epubObject) => {
     title: tocRef.docTitle?.text,
     author: tocRef.docAuthor?.text,
   };
-  const ncxHeadMeta = tocRef?.head?.meta ?? [];
+  const ncxHeadMeta = !tocRef?.head?.meta
+    ? []
+    : forceValueAsArray(tocRef.head, "meta");
   for (const obj of ncxHeadMeta) {
     const key = obj["@_name"].substring(obj["@_name"].indexOf(":") + 1);
     metadata.ncx[key] = obj["@_content"];
