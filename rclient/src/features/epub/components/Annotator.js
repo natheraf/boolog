@@ -481,7 +481,7 @@ export const Annotator = ({
                   </Typography>
                 </Stack>
               }
-              placement="right"
+              placement="left"
               enterDelay={300}
               enterNextDelay={300}
             >
@@ -510,7 +510,7 @@ export const Annotator = ({
               }
               enterDelay={300}
               enterNextDelay={300}
-              placement="left"
+              placement="right"
             >
               <SmallTab
                 icon={<StickyNote2Icon />}
