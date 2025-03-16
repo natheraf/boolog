@@ -33,6 +33,7 @@ import { Loading } from "../features/loading/Loading";
 import { TableOfContents } from "../features/epub/components/TableOfContents";
 import { Annotator } from "../features/epub/components/Annotator";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import { getEpubValueFromPath } from "../features/epub/epubUtils";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -606,24 +607,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             const src = node
               .getAttribute("ogsrc")
               ?.substring(node.getAttribute("ogsrc").startsWith("../") * 3);
-            if (
-              !src ||
-              (!images.current[src] &&
-                Object.keys(images.current).some((path) =>
-                  path.includes(src)
-                ) === false)
-            ) {
-              return;
-            }
-            const targetImage =
-              images.current[src] ??
-              images.current[
-                Object.keys(images.current).find((path) => path.includes(src))
-              ];
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(targetImage);
+              URL.createObjectURL(getEpubValueFromPath(images.current, src));
             node.src = url;
             loadedImages[src] = url;
             if (["DIV", "SECTION"].includes(node.parentElement.tagName)) {
@@ -633,30 +620,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             node.style.margin = "auto";
           } else if (tag === "image") {
             let src = null;
-            for (const key of ["xlink:href", "oghref"]) {
+            for (const key of ["xlink:href", "oghref", "ogsrc"]) {
               if (node.getAttribute(key) !== null) {
                 src = node.getAttribute(key);
               }
             }
-            src = src?.substring(src.indexOf("/") + 1);
-            if (
-              !src ||
-              (!images.current[src] &&
-                images.current[
-                  Object.keys(images.current).some((path) => path.includes(src))
-                ])
-            ) {
-              return;
-            }
-            const targetImage =
-              images.current[src] ??
-              images.current[
-                Object.keys(images.current).find((path) => path.includes(src))
-              ];
+            src = src?.substring(src.startsWith("../") * 3);
             const url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
-              URL.createObjectURL(targetImage);
+              URL.createObjectURL(getEpubValueFromPath(images.current, src));
             loadedImages[src] = url;
             node.setAttribute("href", url);
             node.style.height = "100%";
@@ -712,7 +685,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           ?.querySelectorAll("a[linkto]")
           .forEach(async (node) => {
             const tag = node.tagName.toLowerCase();
-            if (tag === "a") {
+            if (tag === "a" && node.getAttribute("linkto") !== "null") {
+              node.style.cursor = "pointer";
               node.addEventListener("click", () => {
                 handlePathHref(node.getAttribute("linkto"));
               });
@@ -926,7 +900,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       if (path.startsWith("http")) {
         return window.open(path, "_blank");
       }
-      setCurrentPage(0);
       if (path.startsWith("../")) {
         path = path.substring(3);
       } else if (path.startsWith("/")) {
@@ -934,9 +907,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       }
       if (path.indexOf("#") !== -1) {
         setLinkFragment(path.substring(path.indexOf("#") + 1));
+        if (path.indexOf("#") === 0) {
+          return;
+        }
         path = path.substring(0, path.indexOf("#"));
       }
-      goToAndPreloadImages(hrefSpineMap.current[path]);
+      const spineIndex = getEpubValueFromPath(hrefSpineMap.current, path);
+      if (typeof spineIndex === "number") {
+        setCurrentPage(0);
+        goToAndPreloadImages(getEpubValueFromPath(hrefSpineMap.current, path));
+      }
     },
     [goToAndPreloadImages]
   );
@@ -1089,6 +1069,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       preloadImages(startIndex);
       return startIndex;
     });
+    if (
+      typeof epubObject.progress.part !== "number" ||
+      isNaN(epubObject.progress.part)
+    ) {
+      epubObject.progress.part = 0;
+    }
     functionsForNextRender.current.push(() => {
       setCurrentPage(
         Math.floor(getCurrentTotalPages() * epubObject.progress.part)
