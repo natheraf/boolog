@@ -719,10 +719,20 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setTotalPagesForNavigator(getCurrentTotalPages());
       document
         .getElementById("content")
-        ?.querySelectorAll("img, svg")
+        ?.querySelectorAll("img, svg, image")
         .forEach((element) => {
           element.style.maxHeight = `${pageHeight}px`;
           element.style.maxWidth = `${pageWidth}px`;
+          if (element.tagName.toLowerCase() === "svg") {
+            element.setAttribute(
+              "viewBox",
+              `0, 0, ${pageWidth}, ${pageHeight}`
+            );
+          }
+          if (element.tagName.toLowerCase() === "image") {
+            element.setAttribute("width", `${pageWidth}px`);
+            element.removeAttribute("height");
+          }
         });
     });
     observer.observe(document.body, config);
