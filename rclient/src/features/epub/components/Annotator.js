@@ -49,10 +49,12 @@ export const Annotator = ({
   const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
 
+  const tabValueMap = ["note", "memo"];
   const [currentTabValue, setCurrentTabValue] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")] ? 1 : 0
+    notes[anchorEl?.getAttribute("noteid")]
+      ? tabValueMap.indexOf("note")
+      : tabValueMap.indexOf("memo")
   );
-  const tabValueMap = ["memo", "note"];
 
   const [memo, setMemo] = React.useState("");
   const [note, setNote] = React.useState(
@@ -125,8 +127,8 @@ export const Annotator = ({
       setCurrentTabValue(
         selectedString.indexOf(" ") > -1 &&
           selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
-          ? 1
-          : 0
+          ? tabValueMap.indexOf("note")
+          : tabValueMap.indexOf("memo")
       );
       setHighlightColor(null);
       setNote("");
@@ -466,33 +468,6 @@ export const Annotator = ({
             <HtmlTooltip
               title={
                 <Stack spacing={1}>
-                  <Typography variant="h6">{"Memos"}</Typography>
-                  <Typography variant="subtitle2">
-                    {"Memos appear in every occurrence of a word/phrase"}
-                  </Typography>
-                  <Divider />
-                  <Typography>{"Usage"}</Typography>
-                  <Typography variant="subtitle2">
-                    {
-                      "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
-                    }
-                  </Typography>
-                </Stack>
-              }
-              enterDelay={300}
-              enterNextDelay={300}
-              placement="left"
-            >
-              <SmallTab
-                icon={<StickyNote2Icon />}
-                iconPosition="end"
-                label="Memo"
-                tabpanelheight={tabPanelHeight}
-              />
-            </HtmlTooltip>
-            <HtmlTooltip
-              title={
-                <Stack spacing={1}>
                   <Typography variant="h6">{"Notes"}</Typography>
                   <Typography variant="subtitle2">
                     {"Can be left empty."}
@@ -514,6 +489,33 @@ export const Annotator = ({
                 icon={<NotesIcon />}
                 iconPosition="end"
                 label="Note"
+                tabpanelheight={tabPanelHeight}
+              />
+            </HtmlTooltip>
+            <HtmlTooltip
+              title={
+                <Stack spacing={1}>
+                  <Typography variant="h6">{"Memos"}</Typography>
+                  <Typography variant="subtitle2">
+                    {"Memos appear in every occurrence of a word/phrase"}
+                  </Typography>
+                  <Divider />
+                  <Typography>{"Usage"}</Typography>
+                  <Typography variant="subtitle2">
+                    {
+                      "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
+                    }
+                  </Typography>
+                </Stack>
+              }
+              enterDelay={300}
+              enterNextDelay={300}
+              placement="left"
+            >
+              <SmallTab
+                icon={<StickyNote2Icon />}
+                iconPosition="end"
+                label="Memo"
                 tabpanelheight={tabPanelHeight}
               />
             </HtmlTooltip>
