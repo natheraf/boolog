@@ -34,6 +34,7 @@ import { TableOfContents } from "../features/epub/components/TableOfContents";
 import { Annotator } from "../features/epub/components/Annotator";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
+import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -147,7 +148,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const pageWidth = React.useMemo(() => {
     const value = windowWidth - formatting.pageMargins - columnGap;
     if (value <= 50) {
-      setFormatting((prev) => ({ ...prev, pageMargins: 70 }));
+      setFormatting((prev) => ({ ...prev, pageMargins: 0 }));
     }
     return value;
   }, [formatting.pageMargins, windowWidth]);
@@ -1272,6 +1273,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
+                <AnnotationViewer
+                  spine={spine.current}
+                  notes={epubObject.notes}
+                  memos={epubObject.memos}
+                />
                 <TableOfContents
                   toc={epubObject.toc}
                   handlePathHref={handlePathHref}
