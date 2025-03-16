@@ -13,7 +13,11 @@ import {
 import TocIcon from "@mui/icons-material/Toc";
 import CloseIcon from "@mui/icons-material/Close";
 
-export const TableOfContents = ({ toc, handlePathHref }) => {
+export const TableOfContents = ({
+  toc,
+  handlePathHref,
+  currentSpineIndexLabel,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openToc = Boolean(anchorEl);
 
@@ -52,7 +56,11 @@ export const TableOfContents = ({ toc, handlePathHref }) => {
                 handlePathHref(obj.src);
                 handleCloseToc();
               }}
-              sx={{ cursor: "pointer" }}
+              sx={{
+                cursor: "pointer",
+                fontWeight:
+                  currentSpineIndexLabel === obj.label ? "bold" : "inherit",
+              }}
             >
               {obj.label}
             </Typography>
@@ -66,4 +74,5 @@ export const TableOfContents = ({ toc, handlePathHref }) => {
 TableOfContents.propTypes = {
   toc: PropTypes.array.isRequired,
   handlePathHref: PropTypes.func.isRequired,
+  currentSpineIndexLabel: PropTypes.string,
 };

@@ -1265,6 +1265,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 <TableOfContents
                   toc={epubObject.toc}
                   handlePathHref={handlePathHref}
+                  currentSpineIndexLabel={spine.current[spinePointer].label}
                 />
                 <ReaderFormat
                   formatting={formatting}
