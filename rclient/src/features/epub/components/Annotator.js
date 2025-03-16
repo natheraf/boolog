@@ -10,9 +10,6 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  styled,
-  Tab,
-  Tabs,
   TextField,
   Tooltip,
   Typography,
@@ -20,34 +17,12 @@ import {
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Textarea } from "../../../components/Textarea";
-import { tooltipClasses } from "@mui/material/Tooltip";
 import { updatePreference } from "../../../api/IndexedDB/userPreferences";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-
-const SmallTabs = styled(Tabs)(({ tabpanelheight }) => ({
-  height: tabpanelheight,
-  minHeight: tabpanelheight,
-  ".MuiTabs-indicator": {
-    borderRadius: "5px",
-  },
-}));
-const SmallTab = styled(Tab)(({ tabpanelheight }) => ({
-  height: tabpanelheight,
-  minHeight: tabpanelheight,
-  borderRadius: "5px",
-}));
-const HtmlTooltip = styled(({ className, ...props }) => (
-  <Tooltip {...props} classes={{ popper: className }} />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.background.paper,
-    maxWidth: 220,
-    fontSize: theme.typography.pxToRem(12),
-  },
-}));
+import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 
 let selectedRange = null;
 
