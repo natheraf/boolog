@@ -35,7 +35,7 @@ export const TableOfContents = ({ toc, handlePathHref }) => {
           <Divider />
           {toc.map((obj) => (
             <Typography
-              key={obj.src}
+              key={`${obj.src}-${obj.label}`}
               onClick={() => {
                 handlePathHref(obj.src);
                 handleCloseToc();
