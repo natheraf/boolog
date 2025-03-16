@@ -86,22 +86,39 @@ export const convertZipFileToObjectResource = (file) =>
             entry.filename.endsWith(".svg") ||
             entry.filename.endsWith(".gif");
 
-          const fileName = entry.filename.toUpperCase().startsWith("OEBPS/")
-            ? entry.filename.substring(6)
-            : entry.filename;
+          const fileName = entry.filename.substring(
+            entry.filename.lastIndexOf("/") + 1
+          );
+
+          const handleAddEntry = async (type, parser) => {
+            if (
+              objectResource[type].hasOwnProperty(fileName) &&
+              typeof objectResource[type][fileName] !== "object"
+            ) {
+              objectResource[type][fileName] = {
+                [entry.filename]: objectResource[type][fileName],
+              };
+            }
+            const parseResult = await parser(entry);
+            if (objectResource[type].hasOwnProperty(fileName)) {
+              objectResource[type][fileName][entry.filename] = parseResult;
+            } else {
+              objectResource[type][fileName] = parseResult;
+            }
+          };
 
           if (isHTML) {
-            objectResource.html[fileName] = await convertFileToString(entry);
+            await handleAddEntry("html", convertFileToString);
           }
           if (isCSS) {
-            objectResource.css[fileName] = await convertFileToString(entry);
+            await handleAddEntry("css", convertFileToString);
           }
           if (isOPF || isTOC) {
             objectResource[fileName.substring(fileName.lastIndexOf(".") + 1)] =
               await convertXMLFileToObject(entry);
           }
           if (isImage) {
-            objectResource.images[fileName] = await convertFileToBlob(entry);
+            await handleAddEntry("images", convertFileToBlob);
           }
         }
         resolve(objectResource);

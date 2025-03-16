@@ -7,6 +7,7 @@ import { handleSimpleRequest } from "../Axios";
 import { deleteFile, getFile } from "./Files";
 import { addEpub } from "../../features/files/fileUtils";
 import { deletePreference } from "./userPreferences";
+import { getEpubValueFromPath } from "../../features/epub/epubUtils";
 
 /**
  * @deprecated
@@ -46,10 +47,7 @@ export const syncMultipleToCloud = (data) =>
       },
       "lists/put/multiple"
     )
-      .then((res) => {
-        console.log(res.data);
-        resolve();
-      })
+      .then(resolve)
       .catch((error) => reject(new Error(error)));
   });
 
@@ -133,15 +131,14 @@ const addUrlsToLocalBooks = (books) =>
               return resolve();
             }
             getFile(book.fileId).then((data) => {
-              if (
-                book.cover_url.length === 0 ||
-                data.epubObject.images.hasOwnProperty(book.cover_url) === false
-              ) {
+              if (book.cover_url === null || book.cover_url.length === 0) {
                 return resolve();
               }
-              book.cover_url = URL.createObjectURL(
-                data.epubObject.images[book.cover_url]
+              const cover = getEpubValueFromPath(
+                data.epubObject.images,
+                book.cover_url
               );
+              book.cover_url = URL.createObjectURL(cover);
               resolve();
             });
           })

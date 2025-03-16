@@ -7,6 +7,31 @@ function countWords(s) {
   return s.split(" ").filter((char) => char !== " ").length;
 } // https://stackoverflow.com/a/18679657
 
+export const getEpubValueFromPath = (epubTypeObject, path) => {
+  const fileName = path.substring(path.lastIndexOf("/") + 1);
+  if (
+    epubTypeObject.hasOwnProperty(fileName) &&
+    (typeof epubTypeObject[fileName] !== "object" ||
+      epubTypeObject[fileName]?.type !== undefined)
+  ) {
+    return epubTypeObject[fileName] ?? null;
+  }
+  if (typeof epubTypeObject[fileName] === "object") {
+    return (
+      epubTypeObject[fileName][
+        Object.keys(epubTypeObject[fileName]).find((fullPath) =>
+          fullPath.includes(path)
+        )
+      ] ?? null
+    );
+  }
+  return (
+    epubTypeObject[
+      Object.keys(epubTypeObject).find((fullPath) => fullPath.includes(path))
+    ] ?? null
+  );
+};
+
 export const processEpub = (epubObject) => {
   const contentRef = epubObject["opf"].package;
   if (contentRef.hasOwnProperty("@_unique-identifier") === false) {
@@ -17,33 +42,29 @@ export const processEpub = (epubObject) => {
 
   const elementMap = new Map();
   for (const item of manifestRef) {
-    item["@_href"] = item["@_href"].toUpperCase().startsWith("OEBPS/")
+    const path = item["@_href"].toUpperCase().startsWith("OEBPS/")
       ? item["@_href"].substring(6)
       : item["@_href"];
-    const path = item["@_href"];
-    const type = path.substring(path.lastIndexOf(".") + 1);
+    const fileName = path.substring(path.lastIndexOf("/") + 1);
+    const type = fileName.substring(fileName.lastIndexOf(".") + 1);
     if (["htm", "html", "xhtml"].includes(type) === false) {
       elementMap.set(item["@_id"], {
-        href: item["@_href"],
+        href: path,
       });
       if (item.hasOwnProperty("@_properties")) {
         elementMap.set(item["@_properties"], {
-          href: item["@_href"],
+          href: path,
         });
       }
       continue;
     }
-    if (
-      !epubObject.html[path] ||
-      Object.keys(epubObject.html).some((key) => key.contains(path)) === false
-    ) {
-      console.log(path);
+    if (getEpubValueFromPath(epubObject.html, path) === null) {
       continue;
     }
 
     const parser = new DOMParser();
     const page = parser.parseFromString(
-      epubObject.html[path],
+      getEpubValueFromPath(epubObject.html, path),
       type === "html" ? "text/html" : "application/xhtml+xml"
     );
     const nodes = page.querySelectorAll("img, image, a");
@@ -66,11 +87,16 @@ export const processEpub = (epubObject) => {
       } else if (tag === "image") {
         node.style.height = "100%";
         node.style.width = "";
-        node.id = node.getAttribute("src");
-        node.setAttribute("ogsrc", node.getAttribute("src"));
-        imageIds.push(node.getAttribute("src"));
+        node.getAttribute("src") &&
+          node.setAttribute("ogsrc", node.getAttribute("src"));
+        node.getAttribute("href") &&
+          node.setAttribute("oghref", node.getAttribute("href"));
+        node.id =
+          node.getAttribute("src") ||
+          node.getAttribute("href") ||
+          node.getAttribute("xlink:href");
+        imageIds.push(node.id);
       } else if (tag === "a") {
-        node.style.cursor = "pointer";
         node.setAttribute("linkto", node.getAttribute("href"));
         node.removeAttribute("href");
       }
@@ -117,15 +143,16 @@ export const processEpub = (epubObject) => {
   if (toc[0]?.playOrder !== null) {
     toc.sort((a, b) => a.playOrder - b.playOrder);
   }
-  console.log(elementMap);
 
   let wordCountAccumulator = 0;
   const chapterMeta = [];
   const spineStack = [];
   const spineMap = {};
-  const spineRef = contentRef.spine.itemref;
+  let spineRef = contentRef?.spine?.itemref ?? [];
+  if (typeof spineRef === "object" && Array.isArray(spineRef) === false) {
+    spineRef = [spineRef];
+  }
   for (const item of spineRef) {
-    console.log(item);
     spineMap[elementMap.get(item["@_idref"]).href] = spineStack.length;
     spineStack.push({
       element: elementMap.get(item["@_idref"]).section,
