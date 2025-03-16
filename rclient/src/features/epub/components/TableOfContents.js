@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 import TocIcon from "@mui/icons-material/Toc";
+import CloseIcon from "@mui/icons-material/Close";
 
 export const TableOfContents = ({ toc, handlePathHref }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -31,7 +32,18 @@ export const TableOfContents = ({ toc, handlePathHref }) => {
       </Tooltip>
       <Menu anchorEl={anchorEl} open={openToc} onClose={handleCloseToc}>
         <Stack spacing={2} sx={{ width: "300px", padding: 2 }}>
-          <Typography variant="h6">{"Table Of Contents"}</Typography>
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+          >
+            <Typography noWrap variant="h6">
+              {"Table Of Contents"}
+            </Typography>
+            <IconButton onClick={handleCloseToc} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
           <Divider />
           {toc.map((obj) => (
             <Typography

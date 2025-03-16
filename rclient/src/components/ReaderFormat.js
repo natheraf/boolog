@@ -25,6 +25,7 @@ import TextFormatIcon from "@mui/icons-material/TextFormat";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import CloseIcon from "@mui/icons-material/Close";
 
 export const ReaderFormat = ({
   formatting,
@@ -238,7 +239,19 @@ export const ReaderFormat = ({
           alignItems={"center"}
           sx={{ width: "300px", margin: 2 }}
         >
-          <Typography variant="h5">{"Formatting"}</Typography>
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            sx={{ width: "100%" }}
+          >
+            <Typography noWrap variant="h5">
+              {"Formatting"}
+            </Typography>
+            <IconButton onClick={handleCloseFormatting} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Stack>
           <Paper sx={{ width: "100%", p: 1 }}>
             <Stack spacing={1} alignItems={"center"}>
               <Typography variant="h6">{"Font Family"}</Typography>
