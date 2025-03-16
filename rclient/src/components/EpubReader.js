@@ -1427,7 +1427,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     bottom: 0,
                     margin: "auto",
-                    visibility: formatting.showArrows ? "visible" : "hidden",
+                    visibility:
+                      formatting.showArrows && formatting.pageMargins >= 50
+                        ? "visible"
+                        : "hidden",
                   }}
                   htmlColor={"gray"}
                 />
@@ -1502,7 +1505,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     bottom: 0,
                     margin: "auto",
-                    visibility: formatting.showArrows ? "visible" : "hidden",
+                    visibility:
+                      formatting.showArrows && formatting.pageMargins >= 50
+                        ? "visible"
+                        : "hidden",
                   }}
                   htmlColor={"gray"}
                 />

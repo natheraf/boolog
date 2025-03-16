@@ -47,7 +47,7 @@ export const defaultFormatting = {
   _lineHeightStep: 1,
   pageMargins: 500,
   _pageMarginsStep: 50,
-  _pageMarginsBounds: { min: 70, max: Infinity },
+  _pageMarginsBounds: { min: 0, max: Infinity },
   pagesShown: 1,
   _pagesShownStep: 1,
   _pagesShownBounds: { min: 1, max: Infinity },
