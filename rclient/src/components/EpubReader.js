@@ -845,8 +845,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [pageWidth, formatting, currentPage, preloadImages, updateProgressToDb]);
 
   const handleTouchStart = (event) => {
-    firstTouchX = event.touches[0].clientX;
-    firstTouchY = event.touches[0].clientY;
+    if (document.getElementById("reader-body").contains(event.target)) {
+      firstTouchX = event.touches[0].clientX;
+      firstTouchY = event.touches[0].clientY;
+    }
   };
 
   const handleTouchMove = React.useCallback(
@@ -1279,6 +1281,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   clearSearchMarkNode={clearSearchMarkNode}
                   notes={notes.current}
                   memos={epubObject.memos}
+                  currentSpineIndex={spinePointer}
                 />
                 <TableOfContents
                   toc={epubObject.toc}
@@ -1312,7 +1315,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               : { backgroundColor: formatting.pageColor }),
           }}
         >
-          <Stack>
+          <Stack id="reader-body">
             {formatting.showPageNavigator ? (
               <Stack
                 sx={{
