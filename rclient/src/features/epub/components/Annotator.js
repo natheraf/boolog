@@ -351,9 +351,9 @@ export const Annotator = ({
 
   const handleTextAreaOnChange = (event) => {
     if (tabValueMap[currentTabValue] === "memo") {
-      setMemo(event?.target?.value ?? "");
+      setMemo(event?.target?.value?.trim() ?? "");
     } else if (tabValueMap[currentTabValue] === "note") {
-      setNote(event?.target?.value ?? "");
+      setNote(event?.target?.value?.trim() ?? "");
     }
   };
 
