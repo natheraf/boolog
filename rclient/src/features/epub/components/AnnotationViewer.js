@@ -83,7 +83,7 @@ export const AnnotationViewer = ({
           mutation.target.classList?.contains("note-delete-button")
         )
       ) {
-        currentChapterSubheaderRef.current.scrollIntoView();
+        currentChapterSubheaderRef.current.scrollIntoView({ block: "center" });
         scrollIntoViewObserver.current = null;
         observer.disconnect();
       }
@@ -265,7 +265,7 @@ export const AnnotationViewer = ({
               dense
               disablePadding
             >
-              <Stack spacing={2}>
+              <Stack>
                 {notesAsListArray.map((obj, listArrayIndex) =>
                   obj.type === "listSubheader" ? (
                     <ListSubheader
@@ -274,6 +274,7 @@ export const AnnotationViewer = ({
                       sx={{
                         position: "sticky",
                         top: appBarHeight,
+                        fontWeight: obj.ref === null ? "unset" : "bold",
                       }}
                     >
                       {obj.label}
