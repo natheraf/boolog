@@ -29,10 +29,11 @@ export const AnnotationViewer = ({
   clearSearchMarkNode,
   notes,
   memos,
+  currentSpineIndex,
 }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const tabPanelHeight = 30;
+  const tabPanelHeight = greaterThanSmall ? "100%" : 30;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openAnnotation = Boolean(anchorEl);
   const [currentTabValue, setCurrentTabValue] = React.useState(0);
@@ -42,6 +43,8 @@ export const AnnotationViewer = ({
   const updatedNotes = React.useRef(false);
   const updatedMemos = React.useRef(false);
   const clearedMemos = React.useRef([]);
+  const currentChapterSubheaderRef = React.useRef(null);
+  const scrollIntoViewObserver = React.useRef(null);
 
   const updateNotesAsListArray = () => {
     const res = [];
@@ -54,6 +57,10 @@ export const AnnotationViewer = ({
         res.push({
           type: "listSubheader",
           label: spine[note.spineIndex].label,
+          ref:
+            currentSpineIndex === note.spineIndex
+              ? currentChapterSubheaderRef
+              : null,
         });
       }
       res.push({ type: "listItem", noteId, ...note });
@@ -66,10 +73,28 @@ export const AnnotationViewer = ({
     return Object.entries(memos);
   };
 
+  const scrollToCurrentChapterSubheader = () => {
+    const config = { childList: true, subtree: true };
+    const observer = new MutationObserver((mutationList, observer) => {
+      if (
+        mutationList.some((mutation) =>
+          mutation.target.classList?.contains("note-delete-button")
+        )
+      ) {
+        currentChapterSubheaderRef.current.scrollIntoView();
+        scrollIntoViewObserver.current = null;
+        observer.disconnect();
+      }
+    });
+    scrollIntoViewObserver.current = observer;
+    observer.observe(document.body, config);
+  };
+
   const handleOpenAnnotation = (event) => {
     updatedNotes.current = false;
     updatedMemos.current = false;
     clearedMemos.current = [];
+    scrollToCurrentChapterSubheader();
     setNotesAsListArray(updateNotesAsListArray());
     setMemoAsArray(updateMemosAsArray());
     clearSearchMarkNode();
@@ -90,6 +115,9 @@ export const AnnotationViewer = ({
     }
     if (updatedNotes.current || updatedMemos.current) {
       updatePreference(updatedData);
+    }
+    if (scrollIntoViewObserver.current !== null) {
+      scrollIntoViewObserver.current.disconnect();
     }
     setAnchorEl(null);
   };
@@ -137,7 +165,7 @@ export const AnnotationViewer = ({
           sx={{
             width: greaterThanSmall
               ? `${Math.floor(window.innerWidth / 2)}px`
-              : "300px",
+              : "100%",
           }}
         >
           <Stack
@@ -223,19 +251,15 @@ export const AnnotationViewer = ({
               dense
               disablePadding
             >
-              <Stack>
+              <Stack spacing={2}>
                 {notesAsListArray.map((obj, listArrayIndex) =>
                   obj.type === "listSubheader" ? (
-                    <ListSubheader key={obj.label}>{obj.label}</ListSubheader>
+                    <ListSubheader key={obj.label} ref={obj.ref}>
+                      {obj.label}
+                    </ListSubheader>
                   ) : (
-                    <Box
-                      key={obj.noteId}
-                      sx={{ padding: greaterThanSmall * 1 }}
-                    >
-                      <Paper
-                        elevation={24}
-                        sx={{ padding: greaterThanSmall * 1 }}
-                      >
+                    <Box key={obj.noteId} sx={{ padding: 1 }}>
+                      <Paper elevation={24} sx={{ padding: 1 }}>
                         <ListItem
                           component={Stack}
                           alignItems="flex-start"
@@ -274,6 +298,15 @@ export const AnnotationViewer = ({
                               minRows={1}
                             />
                           </Stack>
+                          <Stack direction="row">
+                            <IconButton
+                              onClick={handleCloseAnnotation}
+                              size="small"
+                              className={"note-delete-button"}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Stack>
                         </ListItem>
                       </Paper>
                     </Box>
@@ -287,7 +320,12 @@ export const AnnotationViewer = ({
                 <Typography variant="h5">{"No Memos"}</Typography>
               ) : (
                 memosAsArray.map(([key, value], memoArrayIndex) => (
-                  <Paper sx={{ padding: 1 }} key={key}>
+                  <Stack
+                    component={Paper}
+                    spacing={1}
+                    sx={{ padding: 1 }}
+                    key={key}
+                  >
                     <Typography variant="h6">
                       {key[0].toUpperCase() + key.substring(1)}
                     </Typography>
@@ -309,7 +347,7 @@ export const AnnotationViewer = ({
                       }}
                       minRows={1}
                     />
-                  </Paper>
+                  </Stack>
                 ))
               )}
             </Stack>
@@ -326,4 +364,5 @@ AnnotationViewer.propTypes = {
   clearSearchMarkNode: PropTypes.func.isRequired,
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
+  currentSpineIndex: PropTypes.number.isRequired,
 };
