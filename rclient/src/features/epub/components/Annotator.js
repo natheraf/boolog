@@ -306,7 +306,7 @@ export const Annotator = ({
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
-        memos[textToMemoKeyFormat.current] = memo.trim();
+        memos[textToMemoKeyFormat.current] = memo;
       } else {
         delete memos[textToMemoKeyFormat.current];
       }
@@ -322,7 +322,7 @@ export const Annotator = ({
           handleUpdateHighlight(noteId);
         }
         notes[noteId] = {
-          note: note.trim(),
+          note: note,
           spineIndex,
           highlightColor,
           selectedText,
