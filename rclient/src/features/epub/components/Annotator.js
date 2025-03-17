@@ -26,6 +26,25 @@ import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 
 let selectedRange = null;
 
+const formatMemoKey = (key) => {
+  if (!key) {
+    return null;
+  }
+  key = key.toLowerCase();
+  const apostrophes = ["’", "'", "ʼ"];
+  for (const char of apostrophes) {
+    if (
+      (key.lastIndexOf("s") === key.length - 2 &&
+        key.lastIndexOf(char) === key.length - 1) ||
+      (key.lastIndexOf("s") === key.length - 1 &&
+        key.lastIndexOf(char) === key.length - 2)
+    ) {
+      key = key.substring(0, key.lastIndexOf(char));
+    }
+  }
+  return key;
+};
+
 export const Annotator = ({
   entryId,
   memos,
@@ -44,7 +63,9 @@ export const Annotator = ({
   const [selectedText, setSelectedText] = React.useState(
     notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
   );
-  const textToMemoKeyFormat = React.useRef(null);
+  const textToMemoKeyFormat = React.useRef(
+    formatMemoKey(notes[anchorEl?.getAttribute("noteid")]?.selectedText)
+  );
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
   const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
@@ -93,22 +114,6 @@ export const Annotator = ({
     setCurrentTabValue(value);
   };
 
-  const formatMemoKey = (key) => {
-    key = key.toLowerCase();
-    const apostrophes = ["’", "'", "ʼ"];
-    for (const char of apostrophes) {
-      if (
-        (key.lastIndexOf("s") === key.length - 2 &&
-          key.lastIndexOf(char) === key.length - 1) ||
-        (key.lastIndexOf("s") === key.length - 1 &&
-          key.lastIndexOf(char) === key.length - 2)
-      ) {
-        key = key.substring(0, key.lastIndexOf(char));
-      }
-    }
-    return key;
-  };
-
   const handleGetTextSelection = () => {
     const selectedString = window.getSelection()?.toString()?.trim();
     if (annotatorOpen.current === false && selectedString?.length > 0) {
@@ -121,6 +126,7 @@ export const Annotator = ({
       setSelectedText(selectedString);
       setSelectedAnchor(selection.anchorNode.parentElement);
       annotatorOpen.current = true;
+      // removes possessive form
       textToMemoKeyFormat.current = formatMemoKey(selectedString);
       setMemo(memos[textToMemoKeyFormat.current] ?? "");
       // if 2 spaces, probably a note
