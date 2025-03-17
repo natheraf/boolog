@@ -1,6 +1,7 @@
 import * as React from "react";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import {
+  AppBar,
   Box,
   Divider,
   IconButton,
@@ -33,7 +34,8 @@ export const AnnotationViewer = ({
 }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const tabPanelHeight = greaterThanSmall ? "100%" : 30;
+  const tabPanelHeight = "100%";
+  const appBarHeight = 58;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openAnnotation = Boolean(anchorEl);
   const [currentTabValue, setCurrentTabValue] = React.useState(0);
@@ -123,6 +125,9 @@ export const AnnotationViewer = ({
   };
 
   const handleOnChangeTab = (event, value) => {
+    if (tabValueMap[value] === "notes") {
+      scrollToCurrentChapterSubheader();
+    }
     setCurrentTabValue(value);
   };
 
@@ -165,83 +170,92 @@ export const AnnotationViewer = ({
           sx={{
             width: greaterThanSmall
               ? `${Math.floor(window.innerWidth / 2)}px`
-              : "100%",
+              : window.innerWidth - 32, // 16 is the menu margin gap from the window on each side
           }}
         >
-          <Stack
-            spacing={1}
-            direction={"row"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-            sx={{ padding: 1 }}
+          <AppBar
+            position="sticky"
+            sx={{
+              marginTop: -1,
+              paddingLeft: 2,
+              paddingRight: 3,
+            }}
           >
-            <Paper sx={{ width: "100%" }}>
-              <SmallTabs
-                variant="fullWidth"
-                value={currentTabValue}
-                onChange={handleOnChangeTab}
-                tabpanelheight={tabPanelHeight}
-              >
-                <HtmlTooltip
-                  title={
-                    <Stack spacing={1}>
-                      <Typography variant="h6">{"Notes"}</Typography>
-                      <Typography variant="subtitle2">
-                        {"Can be left empty."}
-                      </Typography>
-                      <Divider />
-                      <Typography>{"Highlight"}</Typography>
-                      <Typography variant="subtitle2">
-                        {
-                          "If no highlight color is selected, the highlight will be transparent."
-                        }
-                      </Typography>
-                    </Stack>
-                  }
-                  placement="bottom"
-                  enterDelay={300}
-                  enterNextDelay={300}
+            <Stack
+              spacing={1}
+              direction={"row"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+              sx={{ height: appBarHeight }}
+            >
+              <Paper sx={{ width: "100%", overflow: "hidden" }}>
+                <SmallTabs
+                  variant="fullWidth"
+                  value={currentTabValue}
+                  onChange={handleOnChangeTab}
+                  tabpanelheight={tabPanelHeight}
                 >
-                  <SmallTab
-                    icon={<NotesIcon />}
-                    iconPosition="end"
-                    label="Notes"
-                    tabpanelheight={tabPanelHeight}
-                  />
-                </HtmlTooltip>
-                <HtmlTooltip
-                  title={
-                    <Stack spacing={1}>
-                      <Typography variant="h6">{"Memos"}</Typography>
-                      <Typography variant="subtitle2">
-                        {"Memos appear in every occurrence of a word/phrase"}
-                      </Typography>
-                      <Divider />
-                      <Typography>{"Usage"}</Typography>
-                      <Typography variant="subtitle2">
-                        {
-                          "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
-                        }
-                      </Typography>
-                    </Stack>
-                  }
-                  enterDelay={300}
-                  enterNextDelay={300}
-                  placement="bottom"
-                >
-                  <SmallTab
-                    icon={<StickyNote2Icon />}
-                    iconPosition="end"
-                    label="Memos"
-                    tabpanelheight={tabPanelHeight}
-                  />
-                </HtmlTooltip>
-              </SmallTabs>
-            </Paper>
-            <IconButton onClick={handleCloseAnnotation} size="small">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
+                  <HtmlTooltip
+                    title={
+                      <Stack spacing={1}>
+                        <Typography variant="h6">{"Notes"}</Typography>
+                        <Typography variant="subtitle2">
+                          {"Can be left empty."}
+                        </Typography>
+                        <Divider />
+                        <Typography>{"Highlight"}</Typography>
+                        <Typography variant="subtitle2">
+                          {
+                            "If no highlight color is selected, the highlight will be transparent."
+                          }
+                        </Typography>
+                      </Stack>
+                    }
+                    placement="bottom"
+                    enterDelay={300}
+                    enterNextDelay={300}
+                  >
+                    <SmallTab
+                      icon={<NotesIcon />}
+                      iconPosition="end"
+                      label="Notes"
+                      tabpanelheight={tabPanelHeight}
+                    />
+                  </HtmlTooltip>
+                  <HtmlTooltip
+                    title={
+                      <Stack spacing={1}>
+                        <Typography variant="h6">{"Memos"}</Typography>
+                        <Typography variant="subtitle2">
+                          {"Memos appear in every occurrence of a word/phrase"}
+                        </Typography>
+                        <Divider />
+                        <Typography>{"Usage"}</Typography>
+                        <Typography variant="subtitle2">
+                          {
+                            "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
+                          }
+                        </Typography>
+                      </Stack>
+                    }
+                    enterDelay={300}
+                    enterNextDelay={300}
+                    placement="bottom"
+                  >
+                    <SmallTab
+                      icon={<StickyNote2Icon />}
+                      iconPosition="end"
+                      label="Memos"
+                      tabpanelheight={tabPanelHeight}
+                    />
+                  </HtmlTooltip>
+                </SmallTabs>
+              </Paper>
+              <IconButton onClick={handleCloseAnnotation} size="small">
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </AppBar>
           {tabValueMap[currentTabValue] === "notes" ? (
             <List
               sx={{
@@ -254,7 +268,14 @@ export const AnnotationViewer = ({
               <Stack spacing={2}>
                 {notesAsListArray.map((obj, listArrayIndex) =>
                   obj.type === "listSubheader" ? (
-                    <ListSubheader key={obj.label} ref={obj.ref}>
+                    <ListSubheader
+                      key={obj.label}
+                      ref={obj.ref}
+                      sx={{
+                        position: "sticky",
+                        top: appBarHeight,
+                      }}
+                    >
                       {obj.label}
                     </ListSubheader>
                   ) : (
