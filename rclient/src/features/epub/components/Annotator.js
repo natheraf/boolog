@@ -63,9 +63,10 @@ export const Annotator = ({
   const [selectedText, setSelectedText] = React.useState(
     notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
   );
-  const textToMemoKeyFormat = React.useRef(
-    formatMemoKey(notes[anchorEl?.getAttribute("noteid")]?.selectedText)
+  const memoKeyOfHighlight = formatMemoKey(
+    notes[anchorEl?.getAttribute("noteid")]?.selectedText
   );
+  const textToMemoKeyFormat = React.useRef(memoKeyOfHighlight);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
   const openAnnotator = Boolean(anchorEl || selectedAnchor);
   const annotatorOpen = React.useRef(false);
@@ -77,7 +78,9 @@ export const Annotator = ({
       : tabValueMap.indexOf("memo")
   );
 
-  const [memo, setMemo] = React.useState("");
+  const [memo, setMemo] = React.useState(
+    memoKeyOfHighlight ? memos[memoKeyOfHighlight] ?? "" : ""
+  );
   const [note, setNote] = React.useState(
     notes[anchorEl?.getAttribute("noteid")]?.note ?? ""
   );
