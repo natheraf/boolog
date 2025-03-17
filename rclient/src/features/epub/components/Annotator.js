@@ -30,6 +30,7 @@ export const Annotator = ({
   entryId,
   memos,
   notes,
+  setNotes,
   clearSearchMarkNode,
   spineIndex,
   anchorEl,
@@ -42,7 +43,7 @@ export const Annotator = ({
   const [selectionParentRect, setSelectionParentRect] = React.useState(null);
   const [selectionRect, setSelectionRect] = React.useState(null);
   const [selectedText, setSelectedText] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
   );
   const textToMemoKeyFormat = React.useRef(null);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
@@ -51,17 +52,18 @@ export const Annotator = ({
 
   const tabValueMap = ["note", "memo"];
   const [currentTabValue, setCurrentTabValue] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]
       ? tabValueMap.indexOf("note")
       : tabValueMap.indexOf("memo")
   );
 
   const [memo, setMemo] = React.useState("");
   const [note, setNote] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.note ?? ""
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.note ?? ""
   );
   const [highlightColor, setHighlightColor] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.highlightColor ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.highlightColor ??
+      null
   );
   const oldTouchSelect = React.useRef(null);
 
@@ -291,9 +293,9 @@ export const Annotator = ({
     let noteId =
       selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
     const updatedHighlight =
-      (notes[noteId]?.highlightColor ?? null) !== highlightColor;
+      (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNote =
-      (notes[noteId]?.note ?? "") !== note || updatedHighlight;
+      (notes[spineIndex]?.[noteId]?.note ?? "") !== note || updatedHighlight;
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
@@ -312,9 +314,16 @@ export const Annotator = ({
         } else if (updatedHighlight) {
           handleUpdateHighlight(noteId);
         }
-        notes[noteId] = { note, spineIndex, highlightColor, selectedText };
+        if (notes.hasOwnProperty(spineIndex) === false) {
+          notes[spineIndex] = {};
+        }
+        notes[spineIndex][noteId] = {
+          note,
+          highlightColor,
+          selectedText,
+        };
       } else if (noteId) {
-        delete notes[noteId];
+        delete notes[spineIndex][noteId];
         handleDeleteMark(noteId);
         noteId = null;
       }
@@ -336,6 +345,7 @@ export const Annotator = ({
     if (updateDB) {
       updatePreference(updateData);
     }
+    setNotes(notes);
     setAnchorEl(null);
     setSelectedAnchor(null);
   };
@@ -608,6 +618,7 @@ Annotator.propTypes = {
   entryId: PropTypes.string.isRequired,
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
+  setNotes: PropTypes.func.isRequired,
   clearSearchMarkNode: PropTypes.func.isRequired,
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,

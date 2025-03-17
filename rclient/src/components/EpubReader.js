@@ -94,7 +94,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
   const images = React.useRef(epubObject.images);
   const chapterMeta = React.useRef(epubObject.chapterMeta);
-  const notes = React.useRef(epubObject.notes);
+  const [notes, setNotes] = React.useState(epubObject.notes);
   const spineOverride = epubObject.spineOverride;
 
   const [spinePointer, setSpinePointer] = React.useState(
@@ -694,7 +694,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             }
           });
 
-        for (const id of Object.keys(notes.current)) {
+        for (const id of Object.keys(notes[spinePointer] ?? {})) {
           const marks = document.getElementsByClassName(id);
           const markOnClick = (mark) => (event) => {
             event.stopPropagation();
@@ -1275,7 +1275,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 </Tooltip>
                 <AnnotationViewer
                   spine={spine.current}
-                  notes={epubObject.notes}
+                  entryId={entryId}
+                  clearSearchMarkNode={clearSearchMarkNode}
+                  notes={notes}
+                  setNotes={setNotes}
                   memos={epubObject.memos}
                 />
                 <TableOfContents
@@ -1630,7 +1633,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       <Annotator
         entryId={entryId}
         memos={epubObject.memos}
-        notes={epubObject.notes}
+        notes={notes}
+        setNotes={setNotes}
         clearSearchMarkNode={clearSearchMarkNode}
         spineIndex={spinePointer}
         anchorEl={annotatorAnchorEl}
