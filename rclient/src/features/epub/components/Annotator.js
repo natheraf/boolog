@@ -306,7 +306,7 @@ export const Annotator = ({
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
-        memos[textToMemoKeyFormat.current] = memo;
+        memos[textToMemoKeyFormat.current] = memo.trim();
       } else {
         delete memos[textToMemoKeyFormat.current];
       }
@@ -321,7 +321,12 @@ export const Annotator = ({
         } else if (updatedHighlight) {
           handleUpdateHighlight(noteId);
         }
-        notes[noteId] = { note, spineIndex, highlightColor, selectedText };
+        notes[noteId] = {
+          note: note.trim(),
+          spineIndex,
+          highlightColor,
+          selectedText,
+        };
       } else if (noteId) {
         delete notes[noteId];
         handleDeleteMark(noteId);
@@ -351,9 +356,9 @@ export const Annotator = ({
 
   const handleTextAreaOnChange = (event) => {
     if (tabValueMap[currentTabValue] === "memo") {
-      setMemo(event?.target?.value?.trim() ?? "");
+      setMemo(event?.target?.value ?? "");
     } else if (tabValueMap[currentTabValue] === "note") {
-      setNote(event?.target?.value?.trim() ?? "");
+      setNote(event?.target?.value ?? "");
     }
   };
 
