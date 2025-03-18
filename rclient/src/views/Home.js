@@ -11,25 +11,28 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
   const addAlert = React.useContext(AlertsContext).addAlert;
 
+  const nuke = async () => {
+    const databases = await indexedDB.databases();
+    for (const database of databases) {
+      window.indexedDB.deleteDatabase(database.name);
+    }
+
+    window.localStorage.clear();
+
+    await handleSimpleRequest("post", {}, "auth/signout");
+    userInfoContext.refreshAndIsLoggedIn().then(() => window.location.reload());
+  };
+
   return (
     <div>
-      <Button
-        onClick={() =>
-          indexedDB
-            .databases()
-            .then((databases) =>
-              databases.map((database) =>
-                window.indexedDB.deleteDatabase(database.name)
-              )
-            )
-        }
-        color="error"
-      >
-        If something is broken, click here to nuke local storage. Will reset
-        app.
+      <Button onClick={nuke} color="error">
+        If something is broken, click here to nuke local storage. Will logout
+        and reset app.
       </Button>
       <Stack spacing={3}>
-        <Typography variant="h3">Hi, this is an epub reader!</Typography>
+        <Typography variant="h3">
+          Hi, this is an epub reader / reading tracker!
+        </Typography>
         <Typography variant="h5">
           Search only adds books as entries. They don't give you epubs. You can
           add entries to track books you're reading, read, dropped, or finished.
@@ -42,7 +45,9 @@ export const Home = () => {
         <Typography variant="h5">
           To open the epub, click on the picture of the book cover.
         </Typography>
+
         <Divider />
+
         <Typography variant="h3">Epub Reader</Typography>
         <Typography variant="h6">
           To change pages: press on the side, use the arrow keys, or swipe
