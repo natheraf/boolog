@@ -1,13 +1,12 @@
 import * as React from "react";
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   AppBar,
-  Box,
   Divider,
   IconButton,
-  List,
-  ListItem,
-  ListSubheader,
   Menu,
   Paper,
   Stack,
@@ -23,6 +22,8 @@ import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import { updatePreference } from "../../../api/IndexedDB/userPreferences";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const AnnotationViewer = ({
   spine,
@@ -40,7 +41,7 @@ export const AnnotationViewer = ({
   const openAnnotation = Boolean(anchorEl);
   const [currentTabValue, setCurrentTabValue] = React.useState(0);
   const tabValueMap = ["notes", "memos"];
-  const [notesAsListArray, setNotesAsListArray] = React.useState([]);
+  const [notesAsMap, setNotesAsMap] = React.useState({});
   const [memosAsArray, setMemoAsArray] = React.useState([]);
   const updatedNotes = React.useRef(false);
   const updatedMemos = React.useRef(false);
@@ -48,25 +49,20 @@ export const AnnotationViewer = ({
   const currentChapterSubheaderRef = React.useRef(null);
   const scrollIntoViewObserver = React.useRef(null);
 
-  const updateNotesAsListArray = () => {
-    const res = [];
+  const updateNotesAsMap = () => {
+    const res = {};
     const notesAsEntriesSorted = Object.entries(notes).sort(
       (a, b) => a[1].spineIndex - b[1].spineIndex
     );
     let prevSubheader = null;
     for (const [noteId, note] of notesAsEntriesSorted) {
+      const currentLabel = spine[note.spineIndex].label;
       if (prevSubheader !== spine[note.spineIndex].label) {
-        res.push({
-          type: "listSubheader",
-          label: spine[note.spineIndex].label,
-          ref:
-            currentSpineIndex === note.spineIndex
-              ? currentChapterSubheaderRef
-              : null,
-        });
+        res[currentLabel] = [];
       }
-      res.push({ type: "listItem", noteId, ...note });
-      prevSubheader = spine[note.spineIndex].label;
+      note.id = noteId;
+      res[currentLabel].push(note);
+      prevSubheader = currentLabel;
     }
     return res;
   };
@@ -83,7 +79,7 @@ export const AnnotationViewer = ({
           mutation.target.classList?.contains("note-delete-button")
         )
       ) {
-        currentChapterSubheaderRef.current.scrollIntoView({ block: "center" });
+        currentChapterSubheaderRef.current.scrollIntoView();
         scrollIntoViewObserver.current = null;
         observer.disconnect();
       }
@@ -97,7 +93,7 @@ export const AnnotationViewer = ({
     updatedMemos.current = false;
     clearedMemos.current = [];
     scrollToCurrentChapterSubheader();
-    setNotesAsListArray(updateNotesAsListArray());
+    setNotesAsMap(updateNotesAsMap());
     setMemoAsArray(updateMemosAsArray());
     clearSearchMarkNode();
     setAnchorEl(event.currentTarget);
@@ -131,15 +127,17 @@ export const AnnotationViewer = ({
     setCurrentTabValue(value);
   };
 
-  const handleNoteTextAreaOnChange = (noteId, listArrayIndex) => (event) => {
-    setNotesAsListArray((prev) =>
-      prev.map((obj, index) =>
-        index === listArrayIndex ? { ...obj, note: event.target.value } : obj
-      )
-    );
-    notes[noteId].note = event.target.value;
-    updatedNotes.current = true;
-  };
+  const handleNoteTextAreaOnChange =
+    (noteId, chapter, arrayIndex) => (event) => {
+      setNotesAsMap((prev) => ({
+        ...prev,
+        [chapter]: prev[chapter].map((obj, index) =>
+          index === arrayIndex ? { ...obj, note: event.target.value } : obj
+        ),
+      }));
+      notes[noteId].note = event.target.value;
+      updatedNotes.current = true;
+    };
 
   const handleMemoTextAreaOnChange = (key, memoArrayIndex) => (event) => {
     memos[key] = event.target.value;
@@ -257,85 +255,92 @@ export const AnnotationViewer = ({
             </Stack>
           </AppBar>
           {tabValueMap[currentTabValue] === "notes" ? (
-            <List
-              sx={{
-                "& ul": { padding: 0 },
-              }}
-              subheader={<li />}
-              dense
-              disablePadding
-            >
-              <Stack>
-                {notesAsListArray.map((obj, listArrayIndex) =>
-                  obj.type === "listSubheader" ? (
-                    <ListSubheader
-                      key={obj.label}
-                      ref={obj.ref}
+            <Stack>
+              {Object.keys(notesAsMap).map((chapter) => (
+                <Accordion
+                  key={chapter}
+                  ref={
+                    chapter === spine[currentSpineIndex].label
+                      ? currentChapterSubheaderRef
+                      : null
+                  }
+                  defaultExpanded={chapter === spine[currentSpineIndex].label}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography
                       sx={{
-                        position: "sticky",
-                        top: appBarHeight,
-                        fontWeight: obj.ref === null ? "unset" : "bold",
+                        fontWeight:
+                          chapter === spine[currentSpineIndex].label
+                            ? "bold"
+                            : "unset",
                       }}
+                      component="span"
                     >
-                      {obj.label}
-                    </ListSubheader>
-                  ) : (
-                    <Box key={obj.noteId} sx={{ padding: 1 }}>
-                      <Paper elevation={24} sx={{ padding: 1 }}>
-                        <ListItem
-                          component={Stack}
-                          alignItems="flex-start"
-                          spacing={1}
-                          disableGutters
-                        >
-                          <Typography>
-                            <span
-                              style={{
-                                backgroundColor: obj.highlightColor,
-                              }}
-                            >
-                              {obj.selectedText}
-                            </span>
-                          </Typography>
-                          <Stack sx={{ width: "100%" }}>
-                            <Typography variant="h6">Note</Typography>
-                            <Textarea
-                              value={obj.note}
-                              onChange={handleNoteTextAreaOnChange(
-                                obj.noteId,
-                                listArrayIndex
-                              )}
-                              onKeyDown={(event) => {
-                                event.stopPropagation();
-                              }}
-                              sx={{
-                                [`&:focus`]: {
-                                  boxShadow: "inherit",
-                                  borderColor: `inherit`,
-                                },
-                                [`&:hover:focus`]: {
-                                  borderColor: `inherit`,
-                                },
-                              }}
-                              minRows={1}
-                            />
+                      {chapter}
+                    </Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Stack spacing={1}>
+                      {notesAsMap[chapter].map((note, index) => (
+                        <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
+                          <Stack spacing={1}>
+                            <Typography>
+                              <span
+                                style={{
+                                  backgroundColor: note.highlightColor,
+                                }}
+                              >
+                                {note.selectedText}
+                              </span>
+                            </Typography>
+                            <Stack sx={{ width: "100%" }}>
+                              <Typography variant="h6">Note</Typography>
+                              <Textarea
+                                value={note.note}
+                                onChange={handleNoteTextAreaOnChange(
+                                  note.id,
+                                  chapter,
+                                  index
+                                )}
+                                onKeyDown={(event) => {
+                                  event.stopPropagation();
+                                }}
+                                sx={{
+                                  [`&:focus`]: {
+                                    boxShadow: "inherit",
+                                    borderColor: `inherit`,
+                                  },
+                                  [`&:hover:focus`]: {
+                                    borderColor: `inherit`,
+                                  },
+                                }}
+                                minRows={1}
+                              />
+                            </Stack>
+                            <Stack spacing={1} direction="row">
+                              <Tooltip title="Change Color">
+                                <IconButton onClick={() => {}} size="small">
+                                  <BorderColorIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete">
+                                <IconButton
+                                  onClick={() => {}}
+                                  size="small"
+                                  className={"note-delete-button"}
+                                >
+                                  <CloseIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </Stack>
                           </Stack>
-                          <Stack direction="row">
-                            <IconButton
-                              onClick={handleCloseAnnotation}
-                              size="small"
-                              className={"note-delete-button"}
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          </Stack>
-                        </ListItem>
-                      </Paper>
-                    </Box>
-                  )
-                )}
-              </Stack>
-            </List>
+                        </Paper>
+                      ))}
+                    </Stack>
+                  </AccordionDetails>
+                </Accordion>
+              ))}
+            </Stack>
           ) : (
             <Stack spacing={1} sx={{ padding: 1, width: "100%" }}>
               {memosAsArray.length === 0 ? (
