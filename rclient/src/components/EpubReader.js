@@ -190,6 +190,29 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
 
+  const goToClassName = (name) => {
+    if (document.getElementsByClassName(name).length > 0) {
+      const content = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      const fragment = document
+        .getElementsByClassName(name)[0]
+        .getBoundingClientRect();
+      const pageDelta = Math.floor(
+        (Math.floor(fragment.left) - Math.floor(content.left)) /
+          Math.floor(pageWidth + columnGap)
+      );
+      setCurrentPage(pageDelta);
+    }
+  };
+
+  const goToNote = (noteId) => {
+    goToAndPreloadImages(notes.current[noteId].spineIndex);
+    functionsForNextRender.current.push(() => {
+      goToClassName(noteId);
+    });
+  };
+
   const handleMarkHighlightOnClick = (mark) => {
     setAnnotatorAnchorEl(mark);
   };
@@ -648,27 +671,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [loadedImageURLs, spineOverride]
   );
 
-  // handles setting page so fragment is visible
-  // React.useEffect(() => {
-  //   if (linkFragment !== null && document.getElementById(linkFragment)) {
-  //     const content = document
-  //       .getElementById("content")
-  //       .getBoundingClientRect();
-  //     const fragment = document
-  //       .getElementById(linkFragment)
-  //       .getBoundingClientRect();
-  //     if (fragment.top > content.bottom) {
-  //       return;
-  //     }
-  //     const pageDelta = Math.floor(
-  //       (Math.floor(fragment.left) - Math.floor(content.left)) /
-  //         Math.floor(pageWidth + columnGap)
-  //     );
-  //     setCurrentPage(pageDelta);
-  //     setLinkFragment(null);
-  //   }
-  // }, [linkFragment, pageWidth]);
-
   const handleClose = () => {
     setOpen(false);
   };
@@ -759,21 +761,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       setLinkFragment(null);
     }
   }, [linkFragment, pageWidth]);
-
-  // add event listener to resize images.current
-  // React.useEffect(() => {
-  //   const config = { childList: true, subtree: true };
-  //   const observer = new MutationObserver((mutationList, observer) => {
-  //     document
-  //       .getElementById("content")
-  //       ?.querySelectorAll("img, svg")
-  //       .forEach((element) => {
-  //         element.style.maxHeight = `${pageHeight}px`;
-  //       });
-  //   });
-  //   observer.observe(document.body, config);
-  //   return () => observer.disconnect();
-  // }, [pageHeight]);
 
   const handleNextPage = React.useCallback(() => {
     if (
@@ -1282,6 +1269,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   notes={notes.current}
                   memos={epubObject.memos}
                   currentSpineIndex={spinePointer}
+                  goToNote={goToNote}
                 />
                 <TableOfContents
                   toc={epubObject.toc}

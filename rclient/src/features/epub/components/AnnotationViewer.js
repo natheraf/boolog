@@ -22,8 +22,9 @@ import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import { updatePreference } from "../../../api/IndexedDB/userPreferences";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LinkIcon from "@mui/icons-material/Link";
+import PaletteIcon from "@mui/icons-material/Palette";
 
 export const AnnotationViewer = ({
   spine,
@@ -32,6 +33,7 @@ export const AnnotationViewer = ({
   notes,
   memos,
   currentSpineIndex,
+  goToNote,
 }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -48,6 +50,11 @@ export const AnnotationViewer = ({
   const clearedMemos = React.useRef([]);
   const currentChapterSubheaderRef = React.useRef(null);
   const scrollIntoViewObserver = React.useRef(null);
+
+  const handleGoToHighlight = (noteId) => {
+    handleCloseAnnotation();
+    goToNote(noteId);
+  };
 
   const updateNotesAsMap = () => {
     const res = {};
@@ -280,7 +287,7 @@ export const AnnotationViewer = ({
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Stack spacing={1}>
+                    <Stack spacing={2}>
                       {notesAsMap[chapter].map((note, index) => (
                         <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
                           <Stack spacing={1}>
@@ -318,9 +325,17 @@ export const AnnotationViewer = ({
                               />
                             </Stack>
                             <Stack spacing={1} direction="row">
+                              <Tooltip title="Go to location">
+                                <IconButton
+                                  onClick={() => handleGoToHighlight(note.id)}
+                                  size="small"
+                                >
+                                  <LinkIcon />
+                                </IconButton>
+                              </Tooltip>
                               <Tooltip title="Change Color">
                                 <IconButton onClick={() => {}} size="small">
-                                  <BorderColorIcon />
+                                  <PaletteIcon />
                                 </IconButton>
                               </Tooltip>
                               <Tooltip title="Delete">
@@ -392,4 +407,5 @@ AnnotationViewer.propTypes = {
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
   currentSpineIndex: PropTypes.number.isRequired,
+  goToNote: PropTypes.func.isRequired,
 };
