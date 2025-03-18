@@ -86,7 +86,8 @@ export const AnnotationViewer = ({
           mutation.target.classList?.contains("note-delete-button")
         )
       ) {
-        currentChapterSubheaderRef.current.scrollIntoView();
+        currentChapterSubheaderRef.current?.scrollIntoView();
+        currentChapterSubheaderRef.current = null;
         scrollIntoViewObserver.current = null;
         observer.disconnect();
       }
@@ -263,103 +264,118 @@ export const AnnotationViewer = ({
           </AppBar>
           {tabValueMap[currentTabValue] === "notes" ? (
             <Stack>
-              {Object.keys(notesAsMap).map((chapter) => (
-                <Accordion
-                  key={chapter}
-                  ref={
-                    chapter === spine[currentSpineIndex].label
-                      ? currentChapterSubheaderRef
-                      : null
-                  }
-                  defaultExpanded={chapter === spine[currentSpineIndex].label}
+              {Object.keys(notesAsMap).length === 0 ? (
+                <Typography
+                  sx={{ padding: 1, alignSelf: "center" }}
+                  variant="h5"
                 >
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Typography
-                      sx={{
-                        fontWeight:
-                          chapter === spine[currentSpineIndex].label
-                            ? "bold"
-                            : "unset",
-                      }}
-                      component="span"
-                    >
-                      {chapter}
-                    </Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Stack spacing={2}>
-                      {notesAsMap[chapter].map((note, index) => (
-                        <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
-                          <Stack spacing={1}>
-                            <Typography>
-                              <span
-                                style={{
-                                  backgroundColor: note.highlightColor,
-                                }}
-                              >
-                                {note.selectedText}
-                              </span>
-                            </Typography>
-                            <Stack sx={{ width: "100%" }}>
-                              <Typography variant="h6">Note</Typography>
-                              <Textarea
-                                value={note.note}
-                                onChange={handleNoteTextAreaOnChange(
-                                  note.id,
-                                  chapter,
-                                  index
-                                )}
-                                onKeyDown={(event) => {
-                                  event.stopPropagation();
-                                }}
-                                sx={{
-                                  [`&:focus`]: {
-                                    boxShadow: "inherit",
-                                    borderColor: `inherit`,
-                                  },
-                                  [`&:hover:focus`]: {
-                                    borderColor: `inherit`,
-                                  },
-                                }}
-                                minRows={1}
-                              />
-                            </Stack>
-                            <Stack spacing={1} direction="row">
-                              <Tooltip title="Go to location">
-                                <IconButton
-                                  onClick={() => handleGoToHighlight(note.id)}
-                                  size="small"
+                  {"No Notes"}
+                </Typography>
+              ) : (
+                Object.keys(notesAsMap).map((chapter) => (
+                  <Accordion
+                    key={chapter}
+                    ref={
+                      chapter === spine[currentSpineIndex].label
+                        ? currentChapterSubheaderRef
+                        : null
+                    }
+                    defaultExpanded={chapter === spine[currentSpineIndex].label}
+                  >
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography
+                        sx={{
+                          fontWeight:
+                            chapter === spine[currentSpineIndex].label
+                              ? "bold"
+                              : "unset",
+                        }}
+                        component="span"
+                      >
+                        {chapter}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Stack spacing={2}>
+                        {notesAsMap[chapter].map((note, index) => (
+                          <Paper
+                            key={note.id}
+                            elevation={24}
+                            sx={{ padding: 1 }}
+                          >
+                            <Stack spacing={1}>
+                              <Typography>
+                                <span
+                                  style={{
+                                    backgroundColor: note.highlightColor,
+                                  }}
                                 >
-                                  <LinkIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Change Color">
-                                <IconButton onClick={() => {}} size="small">
-                                  <PaletteIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete">
-                                <IconButton
-                                  onClick={() => {}}
-                                  size="small"
-                                  className={"note-delete-button"}
-                                >
-                                  <CloseIcon />
-                                </IconButton>
-                              </Tooltip>
+                                  {note.selectedText}
+                                </span>
+                              </Typography>
+                              <Stack sx={{ width: "100%" }}>
+                                <Typography variant="h6">Note</Typography>
+                                <Textarea
+                                  value={note.note}
+                                  onChange={handleNoteTextAreaOnChange(
+                                    note.id,
+                                    chapter,
+                                    index
+                                  )}
+                                  onKeyDown={(event) => {
+                                    event.stopPropagation();
+                                  }}
+                                  sx={{
+                                    [`&:focus`]: {
+                                      boxShadow: "inherit",
+                                      borderColor: `inherit`,
+                                    },
+                                    [`&:hover:focus`]: {
+                                      borderColor: `inherit`,
+                                    },
+                                  }}
+                                  minRows={1}
+                                />
+                              </Stack>
+                              <Stack spacing={1} direction="row">
+                                <Tooltip title="Go to location">
+                                  <IconButton
+                                    onClick={() => handleGoToHighlight(note.id)}
+                                    size="small"
+                                  >
+                                    <LinkIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Change Color">
+                                  <IconButton onClick={() => {}} size="small">
+                                    <PaletteIcon />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Delete">
+                                  <IconButton
+                                    onClick={() => {}}
+                                    size="small"
+                                    className={"note-delete-button"}
+                                  >
+                                    <CloseIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
                             </Stack>
-                          </Stack>
-                        </Paper>
-                      ))}
-                    </Stack>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
+                          </Paper>
+                        ))}
+                      </Stack>
+                    </AccordionDetails>
+                  </Accordion>
+                ))
+              )}
             </Stack>
           ) : (
             <Stack spacing={1} sx={{ padding: 1, width: "100%" }}>
               {memosAsArray.length === 0 ? (
-                <Typography variant="h5">{"No Memos"}</Typography>
+                <Typography sx={{ alignSelf: "center" }} variant="h5">
+                  {"No Memos"}
+                </Typography>
               ) : (
                 memosAsArray.map(([key, value], memoArrayIndex) => (
                   <Stack
