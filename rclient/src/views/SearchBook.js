@@ -41,7 +41,7 @@ export const SearchBook = () => {
   const [sortHelperText, setSortHelperText] = React.useState(
     "Best Results Descending"
   );
-  const defaultSearchApi = "Open Library";
+  const defaultSearchApi = "Google Books";
   const [apiHelperText, setApiHelperText] = React.useState(defaultSearchApi);
   const [searchSortType, setSearchSortType] = React.useState("relevance");
   const [searchRowsPerPage, setSearchRowsPerPage] = React.useState(5);
