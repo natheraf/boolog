@@ -1,5 +1,14 @@
 import React from "react";
-import { AppBar, Box, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import {
+  AppBar,
+  Box,
+  Grid,
+  IconButton,
+  Stack,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useTheme } from "@mui/material/styles";
@@ -8,6 +17,7 @@ import { handleSimpleRequest } from "../api/Axios";
 import { AlertsContext } from "../context/Alerts";
 import { UserInfoContext } from "../context/UserInfo";
 import { Users } from "./Users";
+import GitHubIcon from "@mui/icons-material/GitHub";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -67,7 +77,18 @@ export const Header = () => {
               <Typography variant="h6">Search</Typography>
             </Link>
           </Stack>
-          <Stack direction="row" alignItems={"center"}>
+          <Stack spacing={2} direction="row" alignItems={"center"}>
+            <Tooltip title="Project Repository">
+              <IconButton
+                onClick={() =>
+                  window
+                    .open("https://github.com/natheraf/boolog", "_blank")
+                    .focus()
+                }
+              >
+                <GitHubIcon />
+              </IconButton>
+            </Tooltip>
             <Users />
           </Stack>
         </Grid>
