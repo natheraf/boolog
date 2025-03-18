@@ -23,6 +23,7 @@ import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
+import { SimpleColorPicker } from "./SimpleColorPicker";
 
 let selectedRange = null;
 
@@ -547,70 +548,12 @@ export const Annotator = ({
             minRows={3}
           />
           {tabValueMap[currentTabValue] === "note" && (
-            <FormControl component={Stack} spacing={1}>
-              <Stack>
-                <FormLabel>{"Highlight Color"}</FormLabel>
-                <RadioGroup
-                  row
-                  name="highlight-color-radio-group"
-                  sx={{ paddingLeft: 1 }}
-                  value={highlightColor}
-                  onChange={handleHighlightColorChange(false)}
-                >
-                  {[
-                    {
-                      value: "rgba(255, 255, 0, .2)",
-                      buttonColor: "rgba(255, 255, 0, 1)",
-                      label: "Yellow",
-                    },
-                    {
-                      value: "rgba(255, 0, 0, .2)",
-                      buttonColor: "rgba(255, 0, 0, 1)",
-                      label: "Red",
-                    },
-                    {
-                      value: "rgba(0, 255, 0, .2)",
-                      label: "green",
-                      buttonColor: "rgba(0, 255, 0, 1)",
-                    },
-                    {
-                      value: "rgba(0, 0, 255, .2)",
-                      label: "Blue",
-                      buttonColor: "rgba(0, 0, 255, 1)",
-                    },
-                  ].map((obj) => (
-                    <FormControlLabel
-                      key={obj.value}
-                      value={obj.value}
-                      control={
-                        <Radio
-                          sx={{
-                            color: obj.buttonColor,
-                            "&.Mui-checked": {
-                              color: obj.buttonColor,
-                            },
-                          }}
-                        />
-                      }
-                      onClick={() => handleHighlightColorClick(obj.value)}
-                    />
-                  ))}
-                </RadioGroup>
-              </Stack>
-              <Stack spacing={1}>
-                <Tooltip
-                  title="Enter a color name, RGB, HEX, or HSL"
-                  placement="left"
-                >
-                  <FormLabel>Custom</FormLabel>
-                </Tooltip>
-                <TextField
-                  value={highlightColor ?? ""}
-                  onChange={handleHighlightColorChange(true)}
-                  size="small"
-                />
-              </Stack>
-            </FormControl>
+            <SimpleColorPicker
+              color={highlightColor}
+              handleRadioOnClick={handleHighlightColorClick}
+              handleRadioChange={handleHighlightColorChange(false)}
+              handleTextFieldChange={handleHighlightColorChange(true)}
+            />
           )}
         </Stack>
       </Menu>
