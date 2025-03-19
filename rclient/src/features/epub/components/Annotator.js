@@ -24,7 +24,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 import { SimpleColorPicker } from "./SimpleColorPicker";
-import { deleteClassOfNodesAndLiftChildren } from "../domUtils";
+import { deleteNodesAndLiftChildren } from "../domUtils";
 
 let selectedRange = null;
 
@@ -273,7 +273,7 @@ export const Annotator = ({
   };
 
   const handleDeleteMark = (markId) =>
-    deleteClassOfNodesAndLiftChildren(document.getElementsByClassName(markId));
+    deleteNodesAndLiftChildren(document.getElementsByClassName(markId));
 
   const handleUpdateHighlight = (noteId) => {
     const marks = document.getElementsByClassName(noteId);
