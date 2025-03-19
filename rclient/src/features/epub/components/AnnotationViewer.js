@@ -144,13 +144,22 @@ export const AnnotationViewer = ({
     setColorPickAnchorEl(event.currentTarget);
   };
 
+  const deleteNote = (note) => {
+    const chapter = spine[note.spineIndex].label;
+    setNotesAsMap((prev) => ({
+      ...prev,
+      [chapter]: prev[chapter].filter((obj) => obj.id !== note.id),
+    }));
+    delete notes[note.id];
+    updatedNotes.current = true;
+  };
+
   const updateNoteMarksOrDelete = (note, deleteMark) => {
     const page = document.createElement("div");
     page.innerHTML = spineOverride[note.spineIndex].element;
     let nodes = page.getElementsByClassName(note.id);
     if (deleteMark) {
-      delete notes[note.id];
-      updatedNotes.current = true;
+      deleteNote(note);
       deleteNodesAndLiftChildren(nodes);
     } else {
       for (const node of nodes) {
