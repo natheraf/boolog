@@ -65,7 +65,7 @@ export const processEpub = (epubObject) => {
     const parser = new DOMParser();
     const page = parser.parseFromString(
       getEpubValueFromPath(epubObject.html, path),
-      type === "html" ? "text/html" : "application/xhtml+xml"
+      "text/html"
     );
     const nodes = page.querySelectorAll("img, image, a");
     if (!nodes) {
