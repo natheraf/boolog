@@ -27,7 +27,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { SimpleColorPicker } from "./SimpleColorPicker";
-import { deleteClassOfNodesAndLiftChildren } from "../domUtils";
+import { deleteNodesAndLiftChildren } from "../domUtils";
 
 export const AnnotationViewer = ({
   spine,
@@ -149,7 +149,9 @@ export const AnnotationViewer = ({
     page.innerHTML = spineOverride[note.spineIndex].element;
     let nodes = page.getElementsByClassName(note.id);
     if (deleteMark) {
-      deleteClassOfNodesAndLiftChildren(nodes);
+      delete notes[note.id];
+      updatedNotes.current = true;
+      deleteNodesAndLiftChildren(nodes);
     } else {
       for (const node of nodes) {
         node.style.backgroundColor = note.highlightColor;
@@ -163,7 +165,7 @@ export const AnnotationViewer = ({
     }
     nodes = document.getElementsByClassName(note.id);
     if (deleteMark) {
-      deleteClassOfNodesAndLiftChildren(nodes);
+      deleteNodesAndLiftChildren(nodes);
     } else {
       for (const node of nodes) {
         node.style.backgroundColor = note.highlightColor;
@@ -518,7 +520,9 @@ export const AnnotationViewer = ({
                                 </Tooltip>
                                 <Tooltip title="Delete">
                                   <IconButton
-                                    onClick={() => {}}
+                                    onClick={() =>
+                                      updateNoteMarksOrDelete(note, true)
+                                    }
                                     size="small"
                                     className={"note-delete-button"}
                                   >

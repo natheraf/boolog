@@ -1,4 +1,4 @@
-export const deleteClassOfNodesAndLiftChildren = (nodes) => {
+export const deleteNodesAndLiftChildren = (nodes) => {
   const updates = [];
   for (const node of nodes) {
     const frag = document.createDocumentFragment();
