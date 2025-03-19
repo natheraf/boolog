@@ -5,6 +5,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   AppBar,
+  Box,
   Divider,
   IconButton,
   Menu,
@@ -25,6 +26,8 @@ import { updatePreference } from "../../../api/IndexedDB/userPreferences";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
+import { SimpleColorPicker } from "./SimpleColorPicker";
+import { deleteClassOfNodesAndLiftChildren } from "../domUtils";
 
 export const AnnotationViewer = ({
   spine,
@@ -34,6 +37,7 @@ export const AnnotationViewer = ({
   memos,
   currentSpineIndex,
   goToNote,
+  spineOverride,
 }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -47,9 +51,149 @@ export const AnnotationViewer = ({
   const [memosAsArray, setMemoAsArray] = React.useState([]);
   const updatedNotes = React.useRef(false);
   const updatedMemos = React.useRef(false);
+  const updatedSpineOverride = React.useRef(false);
   const clearedMemos = React.useRef([]);
   const currentChapterSubheaderRef = React.useRef(null);
   const scrollIntoViewObserver = React.useRef(null);
+  const [colorPickAnchorEl, setColorPickAnchorEl] = React.useState(null);
+  const openColorPicker = Boolean(colorPickAnchorEl);
+  const [dataForColorPicker, setDataForColorPicker] = React.useState(null);
+  const saveTimeOutId = React.useRef(null);
+  const saveCountDownRef = React.useRef(0);
+  const [saveCountDown, setSaveCountDown] = React.useState(0);
+
+  const clearSaveCountDown = () => {
+    clearTimeout(saveTimeOutId.current);
+    setSaveCountDown(0);
+    saveCountDownRef.current = 0;
+    saveTimeOutId.current = null;
+  };
+
+  const handleSave = () => {
+    const updatedData = { key: entryId };
+    if (updatedSpineOverride.current) {
+      updatedData.spineOverride = spineOverride;
+    }
+    if (updatedNotes.current) {
+      updatedData.notes = notes;
+    }
+    if (updatedMemos.current) {
+      for (const keyOfClearedMemo of clearedMemos.current) {
+        if (memos[keyOfClearedMemo]?.trim().length === 0) {
+          delete memos[keyOfClearedMemo];
+        }
+      }
+      updatedData.memos = memos;
+    }
+    if (
+      updatedSpineOverride.current ||
+      updatedNotes.current ||
+      updatedMemos.current
+    ) {
+      updatePreference(updatedData);
+    }
+    updatedNotes.current = false;
+    updatedMemos.current = false;
+    updatedSpineOverride.current = false;
+    clearSaveCountDown();
+  };
+
+  const handleSaveCountDown = () => {
+    if (saveCountDownRef.current <= 1) {
+      handleSave();
+      clearSaveCountDown();
+    } else {
+      setSaveCountDown((prev) => prev - 1);
+      saveCountDownRef.current -= 1;
+      saveTimeOutId.current = setTimeout(handleSaveCountDown, 1000);
+    }
+  };
+
+  const startSaveCountDown = () => {
+    clearTimeout(saveTimeOutId.current);
+    saveCountDownRef.current = 5;
+    setSaveCountDown(5);
+    saveTimeOutId.current = setTimeout(handleSaveCountDown, 1000);
+  };
+
+  const handleColorPickerOnChange = (isTextField) => (event) => {
+    if (
+      dataForColorPicker.highlightColor === event.target.value &&
+      isTextField !== true
+    ) {
+      return;
+    }
+    setDataForColorPicker((prev) => ({
+      ...prev,
+      highlightColor:
+        isTextField && event.target.value === "" ? null : event.target.value,
+    }));
+  };
+
+  const handleColorPickerRadioOnClick = (value) => {
+    if (dataForColorPicker.highlightColor === value) {
+      setDataForColorPicker((prev) => ({
+        ...prev,
+        highlightColor: null,
+      }));
+    }
+  };
+
+  const handleOpenColorPicker = (note, chapter, arrayIndex) => (event) => {
+    setDataForColorPicker({ ...note, chapter, arrayIndex });
+    setColorPickAnchorEl(event.currentTarget);
+  };
+
+  const updateNoteMarksOrDelete = (note, deleteMark) => {
+    const page = document.createElement("div");
+    page.innerHTML = spineOverride[note.spineIndex].element;
+    let nodes = page.getElementsByClassName(note.id);
+    if (deleteMark) {
+      deleteClassOfNodesAndLiftChildren(nodes);
+    } else {
+      for (const node of nodes) {
+        node.style.backgroundColor = note.highlightColor;
+      }
+    }
+    spineOverride[note.spineIndex].element = page.innerHTML;
+    updatedSpineOverride.current = true;
+    startSaveCountDown();
+    if (currentSpineIndex !== note.spineIndex) {
+      return;
+    }
+    nodes = document.getElementsByClassName(note.id);
+    if (deleteMark) {
+      deleteClassOfNodesAndLiftChildren(nodes);
+    } else {
+      for (const node of nodes) {
+        node.style.backgroundColor = note.highlightColor;
+      }
+    }
+  };
+
+  const handleCloseColorPicker = () => {
+    if (
+      notes[dataForColorPicker.id].highlightColor !==
+      dataForColorPicker.highlightColor
+    ) {
+      setNotesAsMap((prev) => ({
+        ...prev,
+        [dataForColorPicker.chapter]: prev[dataForColorPicker.chapter].map(
+          (obj, index) =>
+            index === dataForColorPicker.arrayIndex
+              ? { ...obj, highlightColor: dataForColorPicker.highlightColor }
+              : obj
+        ),
+      }));
+      notes[dataForColorPicker.id].highlightColor =
+        dataForColorPicker.highlightColor;
+
+      updateNoteMarksOrDelete(dataForColorPicker, false);
+      updatedNotes.current = true;
+    }
+    setDataForColorPicker(null);
+    setColorPickAnchorEl(null);
+  };
 
   const handleGoToHighlight = (noteId) => {
     handleCloseAnnotation();
@@ -99,6 +243,7 @@ export const AnnotationViewer = ({
   const handleOpenAnnotation = (event) => {
     updatedNotes.current = false;
     updatedMemos.current = false;
+    updatedSpineOverride.current = false;
     clearedMemos.current = [];
     scrollToCurrentChapterSubheader();
     setNotesAsMap(updateNotesAsMap());
@@ -106,22 +251,10 @@ export const AnnotationViewer = ({
     clearSearchMarkNode();
     setAnchorEl(event.currentTarget);
   };
+
   const handleCloseAnnotation = () => {
-    const updatedData = { key: entryId };
-    if (updatedNotes.current) {
-      updatedData.notes = notes;
-    }
-    if (updatedMemos.current) {
-      for (const keyOfClearedMemo of clearedMemos.current) {
-        if (memos[keyOfClearedMemo]?.trim().length === 0) {
-          delete memos[keyOfClearedMemo];
-        }
-      }
-      updatedData.memos = memos;
-    }
-    if (updatedNotes.current || updatedMemos.current) {
-      updatePreference(updatedData);
-    }
+    handleSave();
+    clearSaveCountDown();
     if (scrollIntoViewObserver.current !== null) {
       scrollIntoViewObserver.current.disconnect();
     }
@@ -145,6 +278,7 @@ export const AnnotationViewer = ({
       }));
       notes[noteId].note = event.target.value;
       updatedNotes.current = true;
+      startSaveCountDown();
     };
 
   const handleMemoTextAreaOnChange = (key, memoArrayIndex) => (event) => {
@@ -158,6 +292,7 @@ export const AnnotationViewer = ({
       clearedMemos.current.push(key);
     }
     updatedMemos.current = true;
+    startSaveCountDown();
   };
 
   return (
@@ -172,6 +307,22 @@ export const AnnotationViewer = ({
         open={openAnnotation}
         onClose={handleCloseAnnotation}
       >
+        <Menu
+          anchorEl={colorPickAnchorEl}
+          open={openColorPicker}
+          onClose={handleCloseColorPicker}
+        >
+          {dataForColorPicker ? (
+            <Box sx={{ padding: 1 }}>
+              <SimpleColorPicker
+                color={dataForColorPicker.highlightColor}
+                handleRadioOnClick={handleColorPickerRadioOnClick}
+                handleRadioChange={handleColorPickerOnChange(false)}
+                handleTextFieldChange={handleColorPickerOnChange(true)}
+              />
+            </Box>
+          ) : null}
+        </Menu>
         <Stack
           sx={{
             width: greaterThanSmall
@@ -261,6 +412,13 @@ export const AnnotationViewer = ({
                 <CloseIcon />
               </IconButton>
             </Stack>
+            <Typography
+              color="GrayText"
+              variant="subtitle2"
+              sx={{ marginTop: -1, alignSelf: "end" }}
+            >
+              {saveCountDown > 0 ? `Saving in ${saveCountDown}` : "Saved"}
+            </Typography>
           </AppBar>
           {tabValueMap[currentTabValue] === "notes" ? (
             <Stack>
@@ -347,7 +505,14 @@ export const AnnotationViewer = ({
                                   </IconButton>
                                 </Tooltip>
                                 <Tooltip title="Change Color">
-                                  <IconButton onClick={() => {}} size="small">
+                                  <IconButton
+                                    onClick={handleOpenColorPicker(
+                                      note,
+                                      chapter,
+                                      index
+                                    )}
+                                    size="small"
+                                  >
                                     <PaletteIcon />
                                   </IconButton>
                                 </Tooltip>
@@ -424,4 +589,5 @@ AnnotationViewer.propTypes = {
   notes: PropTypes.object.isRequired,
   currentSpineIndex: PropTypes.number.isRequired,
   goToNote: PropTypes.func.isRequired,
+  spineOverride: PropTypes.object.isRequired,
 };

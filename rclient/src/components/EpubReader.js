@@ -1270,6 +1270,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   memos={epubObject.memos}
                   currentSpineIndex={spinePointer}
                   goToNote={goToNote}
+                  spineOverride={spineOverride}
                 />
                 <TableOfContents
                   toc={epubObject.toc}
