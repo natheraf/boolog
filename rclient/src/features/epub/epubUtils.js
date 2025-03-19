@@ -112,7 +112,7 @@ export const processEpub = (epubObject) => {
     }
     elementMap.set(item["@_id"], {
       section: element,
-      href: item["@_href"],
+      href: path,
       type,
       length: countWords(body.textContent),
     });
@@ -120,13 +120,14 @@ export const processEpub = (epubObject) => {
 
   const navMap = new Map(); // content -> nav label / chapter name
   const toc = [];
-  for (const navPoint of tocRef.navMap?.navPoint ?? []) {
-    navPoint.content["@_src"] = navPoint.content?.["@_src"]
-      .toUpperCase()
-      .startsWith("OEBPS/")
+  const navPoints =
+    tocRef.navMap?.navPoint?.sort(
+      (a, b) => (a.playOrder ?? 0) - (b.playOrder ?? 0)
+    ) ?? [];
+  for (const navPoint of navPoints) {
+    const src = navPoint.content?.["@_src"].toUpperCase().startsWith("OEBPS/")
       ? navPoint.content?.["@_src"].substring(6)
       : navPoint.content?.["@_src"];
-    const src = navPoint.content?.["@_src"];
     navMap.set(
       src?.substring(
         0,
