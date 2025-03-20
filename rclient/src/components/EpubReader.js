@@ -29,12 +29,12 @@ import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PropTypes from "prop-types";
-import { Loading } from "../features/loading/Loading";
 import { TableOfContents } from "../features/epub/components/TableOfContents";
 import { Annotator } from "../features/epub/components/Annotator";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
 import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -79,7 +79,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const addAlert = React.useContext(AlertsContext).addAlert;
-  const [isLoading, setIsLoading] = React.useState(true);
 
   const contentElementRef = React.useRef(null);
 
@@ -167,10 +166,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const epubStyleIds = React.useRef([]);
 
-  const [loadingText, setLoadingText] = React.useState(null);
-  const [subLoadingText, setSubLoadingText] = React.useState(null);
-  const [subLoadingProgress, setSubLoadingProgress] = React.useState(null);
-
   const bookTotalWords =
     spine.current[spine.current.length - 1].onGoingWordCount;
   const currentContentTotalWords = React.useMemo(
@@ -189,6 +184,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const timeOutToSetProgress = React.useRef(null);
 
   const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
+
+  const [previousSpineIndexAndPage, setPreviousSpineIndexAndPage] =
+    React.useState(null);
+
+  const goBack = () => {
+    setSpinePointer(previousSpineIndexAndPage?.spineIndex ?? spinePointer);
+    setCurrentPage(previousSpineIndexAndPage?.page ?? currentPage);
+    setPreviousSpineIndexAndPage(null);
+  };
 
   const goToClassName = (name) => {
     if (document.getElementsByClassName(name).length > 0) {
@@ -1256,7 +1260,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 sx={{ width: greaterThanSmall ? "300px" : "180px" }}
               />
             ) : (
-              <>
+              <Stack spacing={1} direction={"row"}>
+                {previousSpineIndexAndPage !== null ? (
+                  <Tooltip title="Back">
+                    <IconButton onClick={goBack}>
+                      <ArrowBackIcon />
+                    </IconButton>
+                  </Tooltip>
+                ) : null}
                 <Tooltip title="Search">
                   <IconButton onClick={handleSearchIconClick}>
                     <SearchIcon />
@@ -1283,17 +1294,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   useGlobalFormatting={useGlobalFormatting}
                   setUseGlobalFormatting={setUseGlobalFormattingHelper}
                 />
-              </>
+              </Stack>
             )}
           </Stack>
         </Toolbar>
       </AppBar>
       {spinePointer === null ? (
-        // <Loading
-        //   loadingText={loadingText}
-        //   subLoadingText={subLoadingText}
-        //   subLoadingProcess={subLoadingProgress}
-        // />
         "Loading, please wait..."
       ) : (
         <Stack
