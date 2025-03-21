@@ -75,6 +75,9 @@ const CircularProgressWithLabel = (props) => {
 let firstTouchX = null;
 let firstTouchY = null;
 
+let spineIndexTracker = 0;
+let pageTracker = 0;
+
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -188,10 +191,19 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [previousSpineIndexAndPage, setPreviousSpineIndexAndPage] =
     React.useState(null);
 
+  const setLocationAsPrevious = () => {
+    setPreviousSpineIndexAndPage({
+      spineIndex: spineIndexTracker,
+      page: pageTracker,
+    });
+  };
+
   const goBack = () => {
     setSpinePointer(previousSpineIndexAndPage?.spineIndex ?? spinePointer);
     setCurrentPage(previousSpineIndexAndPage?.page ?? currentPage);
-    setPreviousSpineIndexAndPage(null);
+    setLocationAsPrevious();
+    spineIndexTracker = previousSpineIndexAndPage?.spineIndex ?? spinePointer;
+    pageTracker = previousSpineIndexAndPage?.page ?? currentPage;
   };
 
   const goToClassName = (name) => {
@@ -206,6 +218,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         (Math.floor(fragment.left) - Math.floor(content.left)) /
           Math.floor(pageWidth + columnGap)
       );
+      pageTracker = pageDelta;
       setCurrentPage(pageDelta);
     }
   };
@@ -593,6 +606,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           (totalWidth % pageWidth) / pageWidth > 1 / formatting.pagesShown
         );
       if (currentPage >= totalPages) {
+        pageTracker = totalPages - 1;
         setCurrentPage(totalPages - 1);
       }
     }
@@ -761,6 +775,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         (Math.floor(fragment.left) - Math.floor(content.left)) /
           Math.floor(pageWidth + columnGap)
       );
+      pageTracker = pageDelta;
       setCurrentPage(pageDelta);
       setLinkFragment(null);
     }
@@ -785,8 +800,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           1 / formatting.pagesShown
       );
     if (currentPage >= totalPages - 1) {
+      pageTracker = 0;
       setCurrentPage(0);
       setSpinePointer((prev) => {
+        spineIndexTracker = prev + 1;
         preloadImages(prev + 1);
         const value = Math.min(spine.current.length - 1, prev + 1);
         updateProgressToDb(value, 0);
@@ -794,6 +811,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       });
     } else {
       setCurrentPage((prev) => {
+        pageTracker = prev + 1;
         updateProgressToDb(null, prev + 1);
         return prev + 1;
       });
@@ -820,8 +838,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           1 / formatting.pagesShown
       );
     if (currentPage === 0) {
+      pageTracker = totalPages - 1;
       setCurrentPage(totalPages - 1);
       setSpinePointer((prev) => {
+        spineIndexTracker = prev - 1;
         preloadImages(prev - 1);
         const value = Math.max(0, prev - 1);
         updateProgressToDb(value, totalPages - 1);
@@ -829,6 +849,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       });
     } else {
       setCurrentPage((prev) => {
+        pageTracker = prev - 1;
         updateProgressToDb(null, prev - 1);
         return prev - 1;
       });
@@ -879,17 +900,21 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           pageWidth >
           1 / formatting.pagesShown
       );
+    pageTracker = totalPages - 1;
     setCurrentPage(totalPages - 1);
   }, [formatting, pageWidth]);
 
   const goToAndPreloadImages = React.useCallback(
     (spineIndex, page = 0) => {
+      setLocationAsPrevious();
       preloadImages(spineIndex);
+      spineIndexTracker = spineIndex;
       setSpinePointer(spineIndex);
       if (page === -1) {
         functionsForNextRender.current.push(turnToLastPage);
       }
       page = page === -1 ? 0 : page;
+      pageTracker = page;
       setCurrentPage(page);
       updateProgressToDb(spineIndex, page);
     },
@@ -918,6 +943,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       }
       const spineIndex = getEpubValueFromPath(hrefSpineMap.current, path);
       if (typeof spineIndex === "number") {
+        setLocationAsPrevious();
+        pageTracker = 0;
         setCurrentPage(0);
         goToAndPreloadImages(getEpubValueFromPath(hrefSpineMap.current, path));
       }
@@ -1070,6 +1097,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     putFormattingStyleElement();
     setSpinePointer((prev) => {
       const startIndex = prev ?? 0;
+      spineIndexTracker = startIndex;
       preloadImages(startIndex);
       return startIndex;
     });
@@ -1080,9 +1108,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       epubObject.progress.part = 0;
     }
     functionsForNextRender.current.push(() => {
-      setCurrentPage(
-        Math.floor(getCurrentTotalPages() * epubObject.progress.part)
+      const page = Math.floor(
+        getCurrentTotalPages() * epubObject.progress.part
       );
+      pageTracker = page;
+      setCurrentPage(page);
     });
 
     window.addEventListener("resize", updateWindowSize);
@@ -1353,7 +1383,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   {arrayForPageNavigator.map((index) => (
                     <Tooltip key={index} title={`Pg ${index + 1}`} arrow>
                       <Box
-                        onClick={() => setCurrentPage(index)}
+                        onClick={() => {
+                          pageTracker = index;
+                          setCurrentPage(index);
+                        }}
                         sx={{
                           backgroundColor: `${
                             currentPage <= index
