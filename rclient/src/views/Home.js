@@ -22,14 +22,18 @@ export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
-    "Update 3/18/25 3:55AM": [
-      "Fixed bug where swiping in annotation viewer turns pages.",
-      "Using an accordion for each chapter's notes for a better experience.",
-      "Notes in annotation viewer each have a button to go to where they are located in the book.",
+    "Update 3/21/25 6:35PM": [
+      "Added back button.",
+      "Clicking added keys d and space to turn pages in reader.",
     ],
     "Update 3/19/25 4:18AM": [
       "Annotation viewer saves on countdown. Still saves immediately on close.",
       "Can change the color of each note in annotation viewer with popup.",
+    ],
+    "Update 3/18/25 3:55AM": [
+      "Fixed bug where swiping in annotation viewer turns pages.",
+      "Using an accordion for each chapter's notes for a better experience.",
+      "Notes in annotation viewer each have a button to go to where they are located in the book.",
     ],
   };
 
