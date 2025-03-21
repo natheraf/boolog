@@ -944,7 +944,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const spineIndex = getEpubValueFromPath(hrefSpineMap.current, path);
       if (typeof spineIndex === "number") {
         setLocationAsPrevious();
-        pageTracker = 0;
+        functionsForNextRender.current.push(() => (pageTracker = 0));
         setCurrentPage(0);
         goToAndPreloadImages(getEpubValueFromPath(hrefSpineMap.current, path));
       }
