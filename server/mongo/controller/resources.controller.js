@@ -1,22 +1,8 @@
-const { searchGoogleBooks } = require("../../externalAPI/googleAPI");
-const { googleFontsAPIKey } = require("../config/server.config");
+const {
+  searchGoogleBooks,
+  fetchGoogleFonts,
+} = require("../../externalAPI/googleAPI");
 const { getDatabase } = require("../database");
-
-/**
- *
- * @param {('alpha'|'date'|'popularity'|'style'|'trending')=} [sort=popularity]
- */
-const fetchGoogleFonts = (sort = "popularity") => {
-  const url = `https://www.googleapis.com/webfonts/v1/webfonts?sort=${sort}&key=${googleFontsAPIKey}`;
-  const options = {
-    method: "GET",
-  };
-  return new Promise((resolve, reject) =>
-    fetch(url, options)
-      .then((response) => resolve(response.json()))
-      .catch((error) => reject(Error(error)))
-  );
-};
 
 const getGoogleFonts = () =>
   new Promise((resolve, reject) => {
