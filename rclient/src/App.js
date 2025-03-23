@@ -12,6 +12,7 @@ import { Passwordless } from "./views/login/Passwordless";
 import { Wrappers } from "./context/Wrappers";
 import { VerifyEmailDirections } from "./views/login/VerifyEmailDirections";
 import { Upload } from "./views/Upload";
+import { PrivacyPolicy } from "./views/legal/PrivacyPolicy";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -104,6 +105,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/upload" element={<Upload />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="login">
                   <Route path="" element={<Login />} />
                   <Route
