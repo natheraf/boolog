@@ -957,10 +957,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
         return;
       }
-      event.preventDefault();
       if (event.key === "ArrowLeft") {
         handlePreviousPage();
       } else if (["ArrowRight", " ", "d"].includes(event.key)) {
+        event.preventDefault();
         handleNextPage();
       }
     },
