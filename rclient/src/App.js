@@ -83,6 +83,11 @@ function App() {
     [mode, reduceMotion]
   );
 
+  React.useEffect(() => {
+    document.cookie =
+      "g_state=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  }, []);
+
   return (
     <ThemeContext.Provider value={themeModes}>
       <ThemeProvider theme={theme}>
