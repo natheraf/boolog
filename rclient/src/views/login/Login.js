@@ -205,138 +205,106 @@ export const Login = () => {
   }, []);
 
   return (
-    <Stack
-      sx={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        zIndex: -1,
-        overflow: "hidden",
-        backgroundImage: `url(${bgImage})`,
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        width: "100%",
-        height: "100%",
-      }}
-    >
-      <Stack
-        direction="column"
-        alignItems={"center"}
-        justifyContent={"center"}
-        height="100%"
-      >
-        <Grow in={true}>
-          <Paper
-            sx={{
-              borderRadius: "10px",
-              padding: "3rem",
-              width: { xs: "auto", sm: "450px" },
-            }}
-          >
-            <Stack spacing={3}>
-              <Stack
-                spacing={2}
-                direction="column"
-                alignItems={"center"}
-                justifyContent={"center"}
+    <Box>
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+          overflow: "hidden",
+          backgroundImage: `url(${bgImage})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          width: "100%",
+          height: "100%",
+        }}
+      />
+      <Grow in={true}>
+        <Paper
+          sx={{
+            borderRadius: "10px",
+            padding: "3rem",
+            width: { xs: "auto", sm: "450px" },
+            marginBottom: 1,
+          }}
+        >
+          <Stack spacing={3}>
+            <Stack
+              spacing={2}
+              direction="column"
+              alignItems={"center"}
+              justifyContent={"center"}
+            >
+              <Fade
+                in={showLogin}
+                timeout={1000 * theme.transitions.reduceMotion}
+                sx={!showLogin ? { display: "none" } : {}}
               >
-                <Fade
-                  in={showLogin}
-                  timeout={1000 * theme.transitions.reduceMotion}
-                  sx={!showLogin ? { display: "none" } : {}}
-                >
-                  <Typography variant="h4">Sign in</Typography>
-                </Fade>
-                <Stack
-                  spacing={1}
-                  justifyContent={"center"}
-                  alignItems={"center"}
-                >
-                  <Typography sx={{ textAlign: "center" }}>
-                    Continue with Google + Google Drive Integration
-                  </Typography>
-                  <Box sx={{ position: "relative" }}>
-                    <Box
-                      onClick={handleGoogleSignInWithDriveClick}
-                      sx={{
-                        position: "absolute",
-                        opacity: 0,
-                        width: 260,
-                        height: 50,
-                        left: -10,
-                        top: -4,
-                        zIndex: 1,
-                        cursor: "pointer",
-                      }}
-                    />
-                    <div
-                      className="g_id_signin"
-                      data-type="standard"
-                      data-shape="rectangular"
-                      data-theme="filled_blue"
-                      data-text="signin_with"
-                      data-size="large"
-                      data-logo_alignment="left"
-                    />
-                  </Box>
-                </Stack>
-                <Divider>
-                  <Typography color="gray">or</Typography>
-                </Divider>
-                <Fade
-                  in={!showLogin}
-                  timeout={1000 * theme.transitions.reduceMotion}
-                  sx={showLogin ? { display: "none" } : {}}
-                >
-                  <Typography variant="h4">Sign up</Typography>
-                </Fade>
-                <Collapse
-                  timeout={500 * theme.transitions.reduceMotion}
-                  in={!showLogin}
-                  sx={{ width: "100%" }}
-                >
-                  <TextField
-                    id="signupName"
-                    label="Username"
-                    fullWidth
-                    onFocus={() => setCanSubmitTop(true)}
-                    onBlur={() => setCanSubmitTop(false)}
-                    onKeyDown={keyPress}
-                    InputProps={
-                      greaterThanSmall
-                        ? {
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <PersonIcon
-                                  sx={{
-                                    color:
-                                      theme.palette.inputAdornment.disabled,
-                                  }}
-                                />
-                              </InputAdornment>
-                            ),
-                          }
-                        : {}
-                    }
+                <Typography variant="h4">Sign in</Typography>
+              </Fade>
+              <Stack
+                spacing={1}
+                justifyContent={"center"}
+                alignItems={"center"}
+              >
+                <Typography sx={{ textAlign: "center" }}>
+                  Continue with Google + Google Drive Integration
+                </Typography>
+                <Box sx={{ position: "relative" }}>
+                  <Box
+                    onClick={handleGoogleSignInWithDriveClick}
+                    sx={{
+                      position: "absolute",
+                      opacity: 0,
+                      width: 260,
+                      height: 50,
+                      left: -10,
+                      top: -4,
+                      zIndex: 1,
+                      cursor: "pointer",
+                    }}
                   />
-                </Collapse>
+                  <div
+                    className="g_id_signin"
+                    data-type="standard"
+                    data-shape="rectangular"
+                    data-theme="filled_blue"
+                    data-text="signin_with"
+                    data-size="large"
+                    data-logo_alignment="left"
+                  />
+                </Box>
+              </Stack>
+              <Divider>
+                <Typography color="gray">or</Typography>
+              </Divider>
+              <Fade
+                in={!showLogin}
+                timeout={1000 * theme.transitions.reduceMotion}
+                sx={showLogin ? { display: "none" } : {}}
+              >
+                <Typography variant="h4">Sign up</Typography>
+              </Fade>
+              <Collapse
+                timeout={500 * theme.transitions.reduceMotion}
+                in={!showLogin}
+                sx={{ width: "100%" }}
+              >
                 <TextField
-                  id="loginEmail"
-                  label="Email"
-                  type="email"
+                  id="signupName"
+                  label="Username"
                   fullWidth
                   onFocus={() => setCanSubmitTop(true)}
                   onBlur={() => setCanSubmitTop(false)}
                   onKeyDown={keyPress}
-                  value={controlled.email || ""}
-                  onChange={handleControlledOnChange("email")}
                   InputProps={
                     greaterThanSmall
                       ? {
                           endAdornment: (
                             <InputAdornment position="end">
-                              <EmailIcon
+                              <PersonIcon
                                 sx={{
                                   color: theme.palette.inputAdornment.disabled,
                                 }}
@@ -347,18 +315,106 @@ export const Login = () => {
                       : {}
                   }
                 />
+              </Collapse>
+              <TextField
+                id="loginEmail"
+                label="Email"
+                type="email"
+                fullWidth
+                onFocus={() => setCanSubmitTop(true)}
+                onBlur={() => setCanSubmitTop(false)}
+                onKeyDown={keyPress}
+                value={controlled.email || ""}
+                onChange={handleControlledOnChange("email")}
+                InputProps={
+                  greaterThanSmall
+                    ? {
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <EmailIcon
+                              sx={{
+                                color: theme.palette.inputAdornment.disabled,
+                              }}
+                            />
+                          </InputAdornment>
+                        ),
+                      }
+                    : {}
+                }
+              />
+              <TextField
+                id="loginPassword"
+                label="Password"
+                type={controlled.showPassword ? "text" : "password"}
+                fullWidth
+                onFocus={() => setCanSubmitTop(true)}
+                onBlur={() => setCanSubmitTop(false)}
+                onKeyDown={keyPress}
+                value={controlled.loginPassword || ""}
+                onChange={handleControlledOnChange("loginPassword")}
+                InputProps={{
+                  endAdornment: showLogin ? (
+                    <InputAdornment position="end">
+                      <Tooltip
+                        title={
+                          controlled.showPassword
+                            ? "Hide Password"
+                            : "Show Password"
+                        }
+                      >
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleControlledOnChange("showPassword")}
+                          // onMouseDown={handleMouseChange}
+                          // onMouseUp={handleMouseChange}
+                          sx={{
+                            mr: -1,
+                            color: theme.palette.inputAdornment.enabled,
+                          }}
+                        >
+                          {controlled.showPassword ? (
+                            <VisibilityOff />
+                          ) : (
+                            <VisibilityIcon />
+                          )}
+                        </IconButton>
+                      </Tooltip>
+                    </InputAdornment>
+                  ) : (
+                    <InputAdornment position="end">
+                      <Tooltip title="Random Password">
+                        <IconButton
+                          aria-label="generate random password"
+                          onClick={() => generateRandomPassword(16)}
+                          sx={{
+                            mr: -1,
+                            color: theme.palette.inputAdornment.enabled,
+                          }}
+                        >
+                          <ShuffleIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Collapse
+                timeout={500 * theme.transitions.reduceMotion}
+                in={!showLogin}
+                sx={{ width: "100%" }}
+              >
                 <TextField
-                  id="loginPassword"
-                  label="Password"
+                  id="signupConfirmPassword"
+                  label="Confirm Password"
                   type={controlled.showPassword ? "text" : "password"}
                   fullWidth
                   onFocus={() => setCanSubmitTop(true)}
                   onBlur={() => setCanSubmitTop(false)}
                   onKeyDown={keyPress}
-                  value={controlled.loginPassword || ""}
-                  onChange={handleControlledOnChange("loginPassword")}
+                  value={controlled.signupConfirmPassword || ""}
+                  onChange={handleControlledOnChange("signupConfirmPassword")}
                   InputProps={{
-                    endAdornment: showLogin ? (
+                    endAdornment: (
                       <InputAdornment position="end">
                         <Tooltip
                           title={
@@ -370,8 +426,6 @@ export const Login = () => {
                           <IconButton
                             aria-label="toggle password visibility"
                             onClick={handleControlledOnChange("showPassword")}
-                            // onMouseDown={handleMouseChange}
-                            // onMouseUp={handleMouseChange}
                             sx={{
                               mr: -1,
                               color: theme.palette.inputAdornment.enabled,
@@ -385,221 +439,161 @@ export const Login = () => {
                           </IconButton>
                         </Tooltip>
                       </InputAdornment>
-                    ) : (
-                      <InputAdornment position="end">
-                        <Tooltip title="Random Password">
-                          <IconButton
-                            aria-label="generate random password"
-                            onClick={() => generateRandomPassword(16)}
-                            sx={{
-                              mr: -1,
-                              color: theme.palette.inputAdornment.enabled,
-                            }}
-                          >
-                            <ShuffleIcon />
-                          </IconButton>
-                        </Tooltip>
-                      </InputAdornment>
                     ),
                   }}
                 />
-                <Collapse
-                  timeout={500 * theme.transitions.reduceMotion}
-                  in={!showLogin}
-                  sx={{ width: "100%" }}
-                >
-                  <TextField
-                    id="signupConfirmPassword"
-                    label="Confirm Password"
-                    type={controlled.showPassword ? "text" : "password"}
-                    fullWidth
-                    onFocus={() => setCanSubmitTop(true)}
-                    onBlur={() => setCanSubmitTop(false)}
-                    onKeyDown={keyPress}
-                    value={controlled.signupConfirmPassword || ""}
-                    onChange={handleControlledOnChange("signupConfirmPassword")}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <Tooltip
-                            title={
-                              controlled.showPassword
-                                ? "Hide Password"
-                                : "Show Password"
-                            }
-                          >
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={handleControlledOnChange("showPassword")}
-                              sx={{
-                                mr: -1,
-                                color: theme.palette.inputAdornment.enabled,
-                              }}
-                            >
-                              {controlled.showPassword ? (
-                                <VisibilityOff />
-                              ) : (
-                                <VisibilityIcon />
-                              )}
-                            </IconButton>
-                          </Tooltip>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Collapse>
-                <Fade
-                  in={showLogin}
-                  sx={!showLogin ? { display: "none" } : { width: "100%" }}
-                >
-                  <Stack spacing={2}>
-                    <Button
-                      onClick={handleLogin}
-                      variant="contained"
-                      fullWidth
-                      endIcon={
-                        loading ? (
-                          <CircularProgress color="inherit" size={16} />
-                        ) : canSubmitTop ? (
-                          <KeyboardReturnIcon />
-                        ) : null
-                      }
-                      disabled={loading}
-                    >
-                      Sign In
-                    </Button>
-                    <Button
-                      onClick={() => setShowLogin((prev) => !prev)}
-                      disabled={loading}
-                    >
-                      Sign Up
-                    </Button>
-                  </Stack>
-                </Fade>
-                <Fade
-                  in={!showLogin}
-                  sx={showLogin ? { display: "none" } : { width: "100%" }}
-                >
-                  <Stack spacing={2}>
-                    <Button
-                      onClick={handleSignup}
-                      variant="contained"
-                      endIcon={
-                        loading ? (
-                          <CircularProgress color="inherit" size={16} />
-                        ) : canSubmitTop ? (
-                          <KeyboardReturnIcon />
-                        ) : null
-                      }
-                      disabled={loading}
-                    >
-                      Sign Up
-                    </Button>
-                    <Button
-                      onClick={() => setShowLogin((prev) => !prev)}
-                      disabled={loading}
-                    >
-                      Sign In
-                    </Button>
-                  </Stack>
-                </Fade>
-              </Stack>
-              <Divider>
-                <Typography color="gray">or</Typography>
-              </Divider>
-              <Stack
-                spacing={2}
-                direction="column"
-                alignItems={"center"}
-                justifyContent={"center"}
+              </Collapse>
+              <Fade
+                in={showLogin}
+                sx={!showLogin ? { display: "none" } : { width: "100%" }}
               >
-                <Fade in={true}>
-                  <Stack spacing={3} width="100%">
-                    <Stack
-                      direction="column"
-                      alignItems={"center"}
-                      justifyContent={"center"}
-                    >
-                      <Typography variant="h6">
-                        Passwordless with Email
-                      </Typography>
-                      <Typography variant="subtitle2" color="gray">
-                        No Sign up Necessary
-                      </Typography>
-                    </Stack>
-                    <TextField
-                      id="passwordlessEmail"
-                      label="Email"
-                      type="email"
-                      fullWidth
-                      onFocus={() => setCanSubmitBottom(true)}
-                      onBlur={() => setCanSubmitBottom(false)}
-                      onKeyDown={keyPress}
-                      value={controlled.email || ""}
-                      onChange={handleControlledOnChange("email")}
-                      InputProps={
-                        greaterThanSmall
-                          ? {
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <EmailIcon
-                                    sx={{
-                                      color:
-                                        theme.palette.inputAdornment.disabled,
-                                    }}
-                                  />
-                                </InputAdornment>
-                              ),
-                            }
-                          : {}
-                      }
-                    />
-                    <Button
-                      variant="contained"
-                      onClick={handlePasswordlessLogin}
-                      endIcon={
-                        loading ? (
-                          <CircularProgress color="inherit" size={16} />
-                        ) : canSubmitBottom ? (
-                          <KeyboardReturnIcon />
-                        ) : null
-                      }
-                      disabled={loading}
-                      fullWidth
-                    >
-                      {loading ? "Loading..." : "Send Link"}
-                    </Button>
-                  </Stack>
-                </Fade>
-              </Stack>
-              <Divider>
-                <Typography color="gray">or</Typography>
-              </Divider>
-              <Stack justifyContent={"center"} alignItems={"center"}>
-                <div
-                  id="g_id_onload"
-                  data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
-                  data-auto_prompt="false"
-                  data-context="use"
-                  data-ux_mode="popup"
-                  data-callback={"handleCredentialResponse"}
-                  data-itp_support="true"
-                  data-cancel_on_tap_outside="true"
-                />
-                <div
-                  className="g_id_signin"
-                  data-type="standard"
-                  data-shape="rectangular"
-                  data-theme="filled_blue"
-                  data-text="signin_with"
-                  data-size="large"
-                  data-logo_alignment="left"
-                />
-              </Stack>
+                <Stack spacing={2}>
+                  <Button
+                    onClick={handleLogin}
+                    variant="contained"
+                    fullWidth
+                    endIcon={
+                      loading ? (
+                        <CircularProgress color="inherit" size={16} />
+                      ) : canSubmitTop ? (
+                        <KeyboardReturnIcon />
+                      ) : null
+                    }
+                    disabled={loading}
+                  >
+                    Sign In
+                  </Button>
+                  <Button
+                    onClick={() => setShowLogin((prev) => !prev)}
+                    disabled={loading}
+                  >
+                    Sign Up
+                  </Button>
+                </Stack>
+              </Fade>
+              <Fade
+                in={!showLogin}
+                sx={showLogin ? { display: "none" } : { width: "100%" }}
+              >
+                <Stack spacing={2}>
+                  <Button
+                    onClick={handleSignup}
+                    variant="contained"
+                    endIcon={
+                      loading ? (
+                        <CircularProgress color="inherit" size={16} />
+                      ) : canSubmitTop ? (
+                        <KeyboardReturnIcon />
+                      ) : null
+                    }
+                    disabled={loading}
+                  >
+                    Sign Up
+                  </Button>
+                  <Button
+                    onClick={() => setShowLogin((prev) => !prev)}
+                    disabled={loading}
+                  >
+                    Sign In
+                  </Button>
+                </Stack>
+              </Fade>
             </Stack>
-          </Paper>
-        </Grow>
-      </Stack>
-    </Stack>
+            <Divider>
+              <Typography color="gray">or</Typography>
+            </Divider>
+            <Stack
+              spacing={2}
+              direction="column"
+              alignItems={"center"}
+              justifyContent={"center"}
+            >
+              <Fade in={true}>
+                <Stack spacing={3} width="100%">
+                  <Stack
+                    direction="column"
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                  >
+                    <Typography variant="h6">
+                      Passwordless with Email
+                    </Typography>
+                    <Typography variant="subtitle2" color="gray">
+                      No Sign up Necessary
+                    </Typography>
+                  </Stack>
+                  <TextField
+                    id="passwordlessEmail"
+                    label="Email"
+                    type="email"
+                    fullWidth
+                    onFocus={() => setCanSubmitBottom(true)}
+                    onBlur={() => setCanSubmitBottom(false)}
+                    onKeyDown={keyPress}
+                    value={controlled.email || ""}
+                    onChange={handleControlledOnChange("email")}
+                    InputProps={
+                      greaterThanSmall
+                        ? {
+                            endAdornment: (
+                              <InputAdornment position="end">
+                                <EmailIcon
+                                  sx={{
+                                    color:
+                                      theme.palette.inputAdornment.disabled,
+                                  }}
+                                />
+                              </InputAdornment>
+                            ),
+                          }
+                        : {}
+                    }
+                  />
+                  <Button
+                    variant="contained"
+                    onClick={handlePasswordlessLogin}
+                    endIcon={
+                      loading ? (
+                        <CircularProgress color="inherit" size={16} />
+                      ) : canSubmitBottom ? (
+                        <KeyboardReturnIcon />
+                      ) : null
+                    }
+                    disabled={loading}
+                    fullWidth
+                  >
+                    {loading ? "Loading..." : "Send Link"}
+                  </Button>
+                </Stack>
+              </Fade>
+            </Stack>
+            <Divider>
+              <Typography color="gray">or</Typography>
+            </Divider>
+            <Stack justifyContent={"center"} alignItems={"center"}>
+              <div
+                id="g_id_onload"
+                data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
+                data-auto_prompt="false"
+                data-context="use"
+                data-ux_mode="popup"
+                data-callback={"handleCredentialResponse"}
+                data-itp_support="true"
+                data-cancel_on_tap_outside="true"
+              />
+              <div
+                className="g_id_signin"
+                data-type="standard"
+                data-shape="rectangular"
+                data-theme="filled_blue"
+                data-text="signin_with"
+                data-size="large"
+                data-logo_alignment="left"
+              />
+            </Stack>
+          </Stack>
+        </Paper>
+      </Grow>
+    </Box>
   );
 };
