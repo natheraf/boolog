@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  Box,
   Button,
   Collapse,
   Divider,
@@ -27,6 +28,24 @@ import PersonIcon from "@mui/icons-material/Person";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
 import { UserInfoContext } from "../../context/UserInfo";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import GoogleIcon from "@mui/icons-material/Google";
+import { getGoogleSignInWithDriveURL } from "../../api/GoogleAPI";
+
+function decodeJwtResponse(token) {
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
 
 export const Login = () => {
   const theme = useTheme();
@@ -155,10 +174,34 @@ export const Login = () => {
       .finally(() => setLoading(false));
   };
 
+  const handleGoogleSignInWithDriveClick = () => {
+    getGoogleSignInWithDriveURL().then((signInURL) =>
+      window.open(signInURL, "_self")
+    );
+  };
+
+  const handleGoogleSignInWithDrive = () => {};
+
+  const handleGoogleSignInWithoutDrive = (response) => {
+    const responsePayload = decodeJwtResponse(response.credential);
+    console.log(responsePayload);
+  };
+
+  window.handleCredentialResponse = handleGoogleSignInWithoutDrive;
+
   React.useEffect(() => {
     userInfoContext.refreshAndIsLoggedIn().then((isLoggedIn) => {
       if (isLoggedIn) navigate("/");
     });
+    const googleScript = document.createElement("script");
+    googleScript.src = "https://accounts.google.com/gsi/client";
+    googleScript.async = true;
+    googleScript.id = "google-script";
+    document.head.insertAdjacentElement("afterbegin", googleScript);
+    return () => {
+      window.google?.accounts.id.cancel();
+      document.getElementById("google-script")?.remove();
+    };
   }, []);
 
   return (
@@ -205,6 +248,42 @@ export const Login = () => {
                 >
                   <Typography variant="h4">Sign in</Typography>
                 </Fade>
+                <Stack
+                  spacing={1}
+                  justifyContent={"center"}
+                  alignItems={"center"}
+                >
+                  <Typography sx={{ textAlign: "center" }}>
+                    Continue with Google + Google Drive Integration
+                  </Typography>
+                  <Box sx={{ position: "relative" }}>
+                    <Box
+                      onClick={handleGoogleSignInWithDriveClick}
+                      sx={{
+                        position: "absolute",
+                        opacity: 0,
+                        width: 260,
+                        height: 50,
+                        left: -10,
+                        top: -4,
+                        zIndex: 1,
+                        cursor: "pointer",
+                      }}
+                    />
+                    <div
+                      className="g_id_signin"
+                      data-type="standard"
+                      data-shape="rectangular"
+                      data-theme="filled_blue"
+                      data-text="signin_with"
+                      data-size="large"
+                      data-logo_alignment="left"
+                    />
+                  </Box>
+                </Stack>
+                <Divider>
+                  <Typography color="gray">or</Typography>
+                </Divider>
                 <Fade
                   in={!showLogin}
                   timeout={1000 * theme.transitions.reduceMotion}
@@ -492,6 +571,30 @@ export const Login = () => {
                     </Button>
                   </Stack>
                 </Fade>
+              </Stack>
+              <Divider>
+                <Typography color="gray">or</Typography>
+              </Divider>
+              <Stack justifyContent={"center"} alignItems={"center"}>
+                <div
+                  id="g_id_onload"
+                  data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
+                  data-auto_prompt="false"
+                  data-context="use"
+                  data-ux_mode="popup"
+                  data-callback={"handleCredentialResponse"}
+                  data-itp_support="true"
+                  data-cancel_on_tap_outside="true"
+                />
+                <div
+                  className="g_id_signin"
+                  data-type="standard"
+                  data-shape="rectangular"
+                  data-theme="filled_blue"
+                  data-text="signin_with"
+                  data-size="large"
+                  data-logo_alignment="left"
+                />
               </Stack>
             </Stack>
           </Paper>

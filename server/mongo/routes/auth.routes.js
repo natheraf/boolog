@@ -1,5 +1,6 @@
 const { authJwt, verifySignUp } = require("../middleware");
 const controller = require("../controller/auth.controller");
+const googleAuthAPI = require("../../externalAPI/googleAuth");
 
 module.exports = function (app) {
   app.post(
@@ -45,4 +46,8 @@ module.exports = function (app) {
     [controller.checkPasswordlessCode, controller.signUp],
     controller.signInPasswordless
   );
+
+  app.get("/api/auth/google/get-signin-link", googleAuthAPI.generateAuthURL);
+
+  app.post("/api/auth/google/get-token", googleAuthAPI.retrieveAccessToken);
 };
