@@ -277,7 +277,7 @@ export const Login = () => {
                   />
                 </Box>
               </Stack>
-              <Divider>
+              <Divider flexItem>
                 <Typography color="gray">or</Typography>
               </Divider>
               <Fade
