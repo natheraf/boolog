@@ -276,10 +276,14 @@ exports.signInPasswordless = (req, res) => {
         if (!user) {
           return res.status(401).send({ message: "User not found" });
         }
+        const localUserId =
+          req.body.localUserId ??
+          req.params.localUserId ??
+          req.query.localUserId;
 
         const expiresIn = "7d"; // 7 days
         res.cookie(
-          req.body.localUserId,
+          localUserId,
           jwt.sign({ userId: user._id, userRole: user.role }, config.secret, {
             algorithm: "HS256",
             expiresIn: expiresIn,
@@ -293,7 +297,7 @@ exports.signInPasswordless = (req, res) => {
           }
         );
         res.cookie(
-          `userInfo_${req.body.localUserId}`,
+          `userInfo_${localUserId}`,
           {
             name: user.name,
             email: user.email,
