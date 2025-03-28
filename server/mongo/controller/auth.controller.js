@@ -276,10 +276,7 @@ exports.signInPasswordless = (req, res) => {
         if (!user) {
           return res.status(401).send({ message: "User not found" });
         }
-        const localUserId =
-          req.body.localUserId ??
-          req.params.localUserId ??
-          req.query.localUserId;
+        const localUserId = req.body.localUserId ?? req.query.localUserId;
 
         const expiresIn = "7d"; // 7 days
         res.cookie(
