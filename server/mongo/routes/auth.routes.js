@@ -1,6 +1,7 @@
 const { authJwt, verifySignUp } = require("../middleware");
 const controller = require("../controller/auth.controller");
-const googleAuthAPI = require("../../externalAPI/googleAuth");
+const googleMid = require("../middleware/google");
+const googleAuth = require("../controller/authGoogle.controller");
 
 module.exports = function (app) {
   app.post(
@@ -47,7 +48,18 @@ module.exports = function (app) {
     controller.signInPasswordless
   );
 
-  app.get("/api/auth/google/get-signin-link", googleAuthAPI.generateAuthURL);
+  app.get("/api/auth/google/get-signin-link", googleAuth.sendGoogleAuthLink);
 
-  app.post("/api/auth/google/get-token", googleAuthAPI.retrieveAccessToken);
+  app.post(
+    "/api/auth/google/signin",
+    [
+      googleMid.retrieveAccessToken,
+      googleMid.getUserInfo,
+      authJwt.checkIfAlreadySignedIn,
+      authJwt.creatingAccountVerifyToken,
+      googleMid.setFoundUserFlagAndNewRefreshToken,
+      controller.signUp,
+    ],
+    controller.signInPasswordless
+  );
 };
