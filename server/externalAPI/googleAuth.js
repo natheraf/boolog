@@ -1,7 +1,6 @@
 const { google } = require("googleapis");
-const { bodyMissingRequiredFields } = require("../mongo/middleware/utils");
 
-const getOAuth2Client = (req) => {
+exports.getOAuth2Client = (req) => {
   const host = req.get("host");
   const redirectURL = `${req.protocol}://${
     host.startsWith("localhost")
@@ -15,8 +14,8 @@ const getOAuth2Client = (req) => {
   );
 };
 
-exports.generateAuthURL = (req, res) => {
-  const oauth2Client = getOAuth2Client(req);
+exports.generateAuthURL = (req) => {
+  const oauth2Client = this.getOAuth2Client(req);
   const SCOPES = [
     "https://www.googleapis.com/auth/drive.file",
     "https://www.googleapis.com/auth/userinfo.email",
@@ -27,38 +26,5 @@ exports.generateAuthURL = (req, res) => {
     // If you only need one scope, you can pass it as a string
     scope: SCOPES,
   });
-  res.status(200).send({ url });
-};
-
-exports.retrieveAccessToken = (req, res) => {
-  const missing = bodyMissingRequiredFields(req, ["code"]);
-  if (missing) {
-    return res?.status(400).send(missing);
-  }
-  const oauth2Client = getOAuth2Client(req);
-  oauth2Client
-    .getToken(req.body.code)
-    .then((tokens) => {
-      oauth2Client.setCredentials(tokens.tokens);
-      oauth2Client.on("tokens", (tokens) => {
-        if (tokens.refresh_token) {
-          // store the refresh_token in my database!
-          console.log("refresh token");
-        }
-        console.log("access token");
-      });
-      const drive = google.drive({ version: "v3", auth: oauth2Client });
-      drive.files
-        .list({
-          pageSize: 10,
-          fields: "nextPageToken, files(id, name)",
-        })
-        .then((files) => res.status(200).send({ files }));
-    })
-    .catch((error) => {
-      res.status(400).send({
-        error,
-        message: "Token probably has expired. Please login again.",
-      });
-    });
+  return url;
 };
