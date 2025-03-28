@@ -28,8 +28,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import ShuffleIcon from "@mui/icons-material/Shuffle";
 import { UserInfoContext } from "../../context/UserInfo";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
-import GoogleIcon from "@mui/icons-material/Google";
 import { getGoogleSignInWithDriveURL } from "../../api/GoogleAPI";
+import HelpIcon from "@mui/icons-material/Help";
 
 function decodeJwtResponse(token) {
   const base64Url = token.split(".")[1];
@@ -58,6 +58,7 @@ export const Login = () => {
   const [canSubmitTop, setCanSubmitTop] = React.useState(false);
   const [canSubmitBottom, setCanSubmitBottom] = React.useState(false);
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
+  const [openDriveToolTip, setOpenDriveToolTip] = React.useState(false);
 
   const keyPress = (event) => {
     const enterKey = 13;
@@ -237,41 +238,85 @@ export const Login = () => {
               alignItems={"center"}
               justifyContent={"center"}
             >
-              <Fade
-                in={showLogin}
-                timeout={1000 * theme.transitions.reduceMotion}
-                sx={!showLogin ? { display: "none" } : {}}
-              >
+              {showLogin ? (
                 <Typography variant="h4">Sign in</Typography>
-              </Fade>
+              ) : (
+                <Typography variant="h4">Sign up</Typography>
+              )}
               <Stack
                 spacing={1}
                 justifyContent={"center"}
                 alignItems={"center"}
               >
-                <Typography sx={{ textAlign: "center" }}>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
                   Continue with Google + Google Drive Integration
                 </Typography>
+                <Stack
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  direction={"row"}
+                  spacing={1}
+                >
+                  <Stack
+                    alignItems={"center"}
+                    justifyContent={"center"}
+                    direction={"row"}
+                    spacing={1}
+                  >
+                    <Typography variant="subtitle2" color="gray">
+                      Recommended
+                    </Typography>
+                    <Tooltip
+                      title={
+                        "Sync your EPUBs across devices for free with Drive"
+                      }
+                      placement={"top"}
+                      open={openDriveToolTip}
+                      arrow
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => setOpenDriveToolTip((prev) => !prev)}
+                        onBlur={() => setOpenDriveToolTip(false)}
+                      >
+                        <HelpIcon fontSize="small" htmlColor={"gray"} />
+                      </IconButton>
+                    </Tooltip>
+                  </Stack>
+                  <Typography variant="subtitle2" color="gray">
+                    No Sign up Necessary
+                  </Typography>
+                </Stack>
                 <Box sx={{ position: "relative" }}>
                   <Box
                     onClick={handleGoogleSignInWithDriveClick}
                     sx={{
                       position: "absolute",
                       opacity: 0,
-                      width: 260,
-                      height: 50,
-                      left: -10,
+                      width: 240,
+                      height: 55,
+                      left: -15,
                       top: -4,
                       zIndex: 1,
                       cursor: "pointer",
                     }}
                   />
                   <div
+                    id="g_id_onload"
+                    data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
+                    data-auto_prompt="false"
+                    data-context="use"
+                    data-ux_mode="popup"
+                    data-callback={"handleCredentialResponse"}
+                    data-itp_support="true"
+                    data-cancel_on_tap_outside="true"
+                  />
+                  <div
                     className="g_id_signin"
                     data-type="standard"
                     data-shape="rectangular"
                     data-theme="filled_blue"
-                    data-text="signin_with"
+                    data-text="continue_with"
                     data-size="large"
                     data-logo_alignment="left"
                   />
@@ -280,13 +325,72 @@ export const Login = () => {
               <Divider flexItem>
                 <Typography color="gray">or</Typography>
               </Divider>
-              <Fade
-                in={!showLogin}
-                timeout={1000 * theme.transitions.reduceMotion}
-                sx={showLogin ? { display: "none" } : {}}
+              <Stack
+                spacing={2}
+                direction="column"
+                alignItems={"center"}
+                justifyContent={"center"}
+                sx={{ width: "100%" }}
               >
-                <Typography variant="h4">Sign up</Typography>
-              </Fade>
+                <Fade in={true}>
+                  <Stack spacing={3} sx={{ width: "100%" }}>
+                    <Stack alignItems={"center"} justifyContent={"center"}>
+                      <Typography variant="h6">
+                        Passwordless with Email
+                      </Typography>
+                      <Typography variant="subtitle2" color="gray">
+                        No Sign up Necessary
+                      </Typography>
+                    </Stack>
+                    <TextField
+                      id="passwordlessEmail"
+                      label="Email"
+                      type="email"
+                      fullWidth
+                      onFocus={() => setCanSubmitBottom(true)}
+                      onBlur={() => setCanSubmitBottom(false)}
+                      onKeyDown={keyPress}
+                      value={controlled.email || ""}
+                      onChange={handleControlledOnChange("email")}
+                      InputProps={
+                        greaterThanSmall
+                          ? {
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <EmailIcon
+                                    sx={{
+                                      color:
+                                        theme.palette.inputAdornment.disabled,
+                                    }}
+                                  />
+                                </InputAdornment>
+                              ),
+                            }
+                          : {}
+                      }
+                    />
+                    <Button
+                      variant="contained"
+                      onClick={handlePasswordlessLogin}
+                      endIcon={
+                        loading ? (
+                          <CircularProgress color="inherit" size={16} />
+                        ) : canSubmitBottom ? (
+                          <KeyboardReturnIcon />
+                        ) : null
+                      }
+                      disabled={loading}
+                      fullWidth
+                    >
+                      {loading ? "Loading..." : "Send Link"}
+                    </Button>
+                  </Stack>
+                </Fade>
+              </Stack>
+              <Divider flexItem>
+                <Typography color="gray">or</Typography>
+              </Divider>
+              <Typography variant="h6">Password with Email</Typography>
               <Collapse
                 timeout={500 * theme.transitions.reduceMotion}
                 in={!showLogin}
@@ -498,98 +602,6 @@ export const Login = () => {
                   </Button>
                 </Stack>
               </Fade>
-            </Stack>
-            <Divider>
-              <Typography color="gray">or</Typography>
-            </Divider>
-            <Stack
-              spacing={2}
-              direction="column"
-              alignItems={"center"}
-              justifyContent={"center"}
-            >
-              <Fade in={true}>
-                <Stack spacing={3} width="100%">
-                  <Stack
-                    direction="column"
-                    alignItems={"center"}
-                    justifyContent={"center"}
-                  >
-                    <Typography variant="h6">
-                      Passwordless with Email
-                    </Typography>
-                    <Typography variant="subtitle2" color="gray">
-                      No Sign up Necessary
-                    </Typography>
-                  </Stack>
-                  <TextField
-                    id="passwordlessEmail"
-                    label="Email"
-                    type="email"
-                    fullWidth
-                    onFocus={() => setCanSubmitBottom(true)}
-                    onBlur={() => setCanSubmitBottom(false)}
-                    onKeyDown={keyPress}
-                    value={controlled.email || ""}
-                    onChange={handleControlledOnChange("email")}
-                    InputProps={
-                      greaterThanSmall
-                        ? {
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <EmailIcon
-                                  sx={{
-                                    color:
-                                      theme.palette.inputAdornment.disabled,
-                                  }}
-                                />
-                              </InputAdornment>
-                            ),
-                          }
-                        : {}
-                    }
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={handlePasswordlessLogin}
-                    endIcon={
-                      loading ? (
-                        <CircularProgress color="inherit" size={16} />
-                      ) : canSubmitBottom ? (
-                        <KeyboardReturnIcon />
-                      ) : null
-                    }
-                    disabled={loading}
-                    fullWidth
-                  >
-                    {loading ? "Loading..." : "Send Link"}
-                  </Button>
-                </Stack>
-              </Fade>
-            </Stack>
-            <Divider>
-              <Typography color="gray">or</Typography>
-            </Divider>
-            <Stack justifyContent={"center"} alignItems={"center"}>
-              <div
-                id="g_id_onload"
-                data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
-                data-auto_prompt="false"
-                data-context="use"
-                data-ux_mode="popup"
-                data-callback={"handleCredentialResponse"}
-                data-itp_support="true"
-                data-cancel_on_tap_outside="true"
-              />
-              <div
-                className="g_id_signin"
-                data-type="standard"
-                data-shape="rectangular"
-                data-theme="filled_blue"
-                data-text="signin_with"
-                data-size="large"
-                data-logo_alignment="left"
-              />
             </Stack>
           </Stack>
         </Paper>
