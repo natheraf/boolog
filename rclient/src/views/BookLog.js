@@ -117,6 +117,9 @@ export const BookLog = () => {
 
   const handleOpenEpub = (id, fileId) =>
     getFile(fileId).then((data) => {
+      if (!data) {
+        return addAlert("File not found", "error");
+      }
       const formatting = structuredClone(defaultFormatting);
       Object.keys(formatting).forEach(
         (key) => key.startsWith("_") && delete formatting[key]
