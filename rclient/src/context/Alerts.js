@@ -5,29 +5,34 @@ import { FadingBox } from "../components/FadingBox";
 import { useTheme } from "@emotion/react";
 
 export const AlertsContext = React.createContext({
-  addAlert: () => {},
+  /**
+   *
+   * @param {string | React.Component} children
+   * @param {string} severity use one: "info", "success", "warning", or "error"
+   */
+  addAlert: (children, severity) => {},
 });
 
 export const Alerts = ({ children }) => {
   const theme = useTheme();
-  const [alerts, setAlerts] = new React.useState({});
+  const [alerts, setAlerts] = new React.useState([]);
   const timeout = { ms: 5000, str: "5s" };
   const alertSeverities = ["info", "success", "warning", "error"];
 
   const alertMemo = React.useMemo(
     () => ({
-      addAlert: (children, severity) => {
-        setAlerts((prev) => ({
+      addAlert: (children = "Hello Alerts", severity = "info") => {
+        setAlerts((prev) => [
           ...prev,
-          [children]: {
+          {
             children,
             severity,
             timeOutId: setTimeout(
-              () => setAlerts((prev) => delete prev.children),
+              () => setAlerts((prev) => prev.slice(1)),
               timeout.ms
             ),
           },
-        }));
+        ]);
       },
     }),
     []
@@ -44,7 +49,7 @@ export const Alerts = ({ children }) => {
           zIndex: 1301 /* default zIndex for modal (floating dialog) is 1300 */,
         }}
       >
-        {Object.values(alerts).map((alert) => (
+        {alerts.map((alert) => (
           <FadingBox
             key={alert.timeOutId}
             duration={500}
