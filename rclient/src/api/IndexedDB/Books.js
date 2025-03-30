@@ -131,7 +131,11 @@ const addUrlsToLocalBooks = (books) =>
               return resolve();
             }
             getFile(book.fileId).then((data) => {
-              if (book.cover_url === null || book.cover_url.length === 0) {
+              if (
+                !data ||
+                book.cover_url === null ||
+                book.cover_url.length === 0
+              ) {
                 return resolve();
               }
               const cover = getEpubValueFromPath(
