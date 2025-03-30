@@ -6,7 +6,10 @@ const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
 const { getUserFromEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
-const { bodyMissingRequiredFields } = require("../middleware/utils");
+const {
+  bodyMissingRequiredFields,
+  copyObjectWithSpecificKeys,
+} = require("../middleware/utils");
 const { ObjectId } = require("mongodb");
 
 exports.updateLastWritten = (req, res, next) => {
@@ -68,7 +71,15 @@ exports.signUp = (req, res, next) => {
     return res?.status(400).send(missing);
   }
 
-  const user = {};
+  const user = copyObjectWithSpecificKeys(req.body, [
+    "email",
+    "password",
+    "role",
+    "active",
+    "name",
+    "profilePicture",
+    { objectKey: "google", objectKeys: ["id", "scope", "refreshToken"] },
+  ]);
   userRequiredBody.forEach((key) => (user[key] = req.body[key]));
   if (req.body.password !== null) {
     user.password = bcrypt.hashSync(req.body.password, 10);
@@ -79,12 +90,12 @@ exports.signUp = (req, res, next) => {
         .insertOne(user)
         .then(() => next())
         .catch((error) => {
-          console.log(error);
+          console.log(error.message);
           res.status(500).send(error);
         });
     })
     .catch((error) => {
-      console.log(error);
+      console.log(error.message);
       res.status(500).send(error);
     });
 };
@@ -276,10 +287,11 @@ exports.signInPasswordless = (req, res) => {
         if (!user) {
           return res.status(401).send({ message: "User not found" });
         }
+        const localUserId = req.body.localUserId ?? req.query.localUserId;
 
         const expiresIn = "7d"; // 7 days
         res.cookie(
-          req.body.localUserId,
+          localUserId,
           jwt.sign({ userId: user._id, userRole: user.role }, config.secret, {
             algorithm: "HS256",
             expiresIn: expiresIn,
@@ -293,7 +305,7 @@ exports.signInPasswordless = (req, res) => {
           }
         );
         res.cookie(
-          `userInfo_${req.body.localUserId}`,
+          `userInfo_${localUserId}`,
           {
             name: user.name,
             email: user.email,

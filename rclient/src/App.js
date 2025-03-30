@@ -14,6 +14,7 @@ import { VerifyEmailDirections } from "./views/login/VerifyEmailDirections";
 import { Upload } from "./views/Upload";
 import { PrivacyPolicy } from "./views/legal/PrivacyPolicy";
 import { TermsOfService } from "./views/legal/TermsOfService";
+import { GoogleAuth } from "./views/login/GoogleAuth";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -114,6 +115,7 @@ function App() {
                     path="verify-email-directions"
                     element={<VerifyEmailDirections />}
                   />
+                  <Route path="google-auth" element={<GoogleAuth />} />
                   <Route path="passwordless" element={<Passwordless />} />
                 </Route>
                 <Route path="books">

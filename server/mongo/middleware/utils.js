@@ -57,6 +57,21 @@ const urlQueryMissingRequiredFields = (req, requiredBody) => {
   return false;
 };
 
+const copyObjectWithSpecificKeys = (obj, keys) => {
+  const res = {};
+  for (const key of keys) {
+    if (typeof key === "string" && obj.hasOwnProperty(key)) {
+      res[key] = obj[key];
+    } else if (typeof key === "object" && obj.hasOwnProperty(key.objectKey)) {
+      res[key.objectKey] = copyObjectWithSpecificKeys(
+        obj[key.objectKey],
+        key.objectKeys
+      );
+    }
+  }
+  return res;
+};
+
 const generateRandomCode = (numOfBytes) =>
   require("crypto").randomBytes(numOfBytes).toString("base64url");
 
@@ -66,4 +81,5 @@ module.exports = {
   urlParamsMissingRequiredFields,
   urlQueryMissingRequiredFields,
   generateRandomCode,
+  copyObjectWithSpecificKeys,
 };

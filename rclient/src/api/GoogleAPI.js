@@ -18,3 +18,10 @@ export const getGoogleFonts = () =>
       .then((res) => resolve(res.data.fonts))
       .catch((error) => reject(Error(error)))
   );
+
+export const getGoogleSignInWithDriveURL = () =>
+  new Promise((resolve, reject) =>
+    handleSimpleRequest("GET", {}, "auth/google/get-signin-link")
+      .then((res) => resolve(res.data.url))
+      .catch((error) => reject(Error(error)))
+  );

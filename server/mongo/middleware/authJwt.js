@@ -90,8 +90,8 @@ const checkIfAlreadySignedIn = (req, res, next) => {
     return;
   }
   getUserFromEmail(req.body.email).then((user) => {
+    req.user = user;
     if (user !== null) {
-      req.user = user;
       for (const userId of loggedInUserIds) {
         if (userId === user._id.toString()) {
           return res.status(409).send({
