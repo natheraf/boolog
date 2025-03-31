@@ -78,8 +78,12 @@ exports.getUserInfo = (req, res, next) => {
     });
 };
 
-exports.setFoundUserFlagAndNewRefreshToken = (req, res, next) => {
+exports.setPasswordlessFoundUserFlag = (req, _res, next) => {
   req.passwordlessFoundUser = req.user !== null;
+  next();
+};
+
+exports.storeNewRefreshToken = (req, res, next) => {
   if (
     req.passwordlessFoundUser &&
     req.googleOauth2Client.credentials.refresh_token
