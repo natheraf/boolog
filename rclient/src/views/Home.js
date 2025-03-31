@@ -23,7 +23,7 @@ export const Home = () => {
 
   const updates = {
     "Update 3/21/25 6:35PM": [
-      "Added back button.",
+      "Added back button in reader.",
       "Clicking added keys d and space to turn pages in reader.",
     ],
     "Update 3/19/25 4:18AM": [
