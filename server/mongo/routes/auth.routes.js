@@ -1,7 +1,7 @@
 const { authJwt, verifySignUp } = require("../middleware");
 const controller = require("../controller/auth.controller");
 const googleMid = require("../middleware/google");
-const googleAuth = require("../controller/authGoogle.controller");
+const googleAuth = require("../../externalAPI/google/googleAuth");
 
 module.exports = function (app) {
   app.post(

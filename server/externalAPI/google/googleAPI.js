@@ -1,7 +1,7 @@
 const {
   googleBooksAPIKey,
   googleFontsAPIKey,
-} = require("../mongo/config/server.config");
+} = require("../../externalAPI/google/config");
 
 exports.searchGoogleBooks = (query, pageLimit = 5, page = 1) => {
   const url = `https://www.googleapis.com/books/v1/volumes?${query}&maxResults=${pageLimit}&startIndex=${

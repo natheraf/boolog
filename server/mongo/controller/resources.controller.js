@@ -1,7 +1,7 @@
 const {
   searchGoogleBooks,
   fetchGoogleFonts,
-} = require("../../externalAPI/googleAPI");
+} = require("../../externalAPI/google/googleAPI");
 const { getDatabase } = require("../database");
 
 const getGoogleFonts = () =>

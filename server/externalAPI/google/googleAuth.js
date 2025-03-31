@@ -28,3 +28,6 @@ exports.generateAuthURL = (req) => {
   });
   return url;
 };
+
+exports.sendGoogleAuthLink = (req, res) =>
+  res.status(200).send({ url: this.generateAuthURL(req) });

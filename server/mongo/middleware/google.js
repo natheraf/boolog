@@ -1,5 +1,5 @@
 const { google } = require("googleapis");
-const { getOAuth2Client } = require("../../externalAPI/googleAuth");
+const { getOAuth2Client } = require("../../externalAPI/google/googleAuth");
 const { bodyMissingRequiredFields } = require("./utils");
 const { getDatabase } = require("../database");
 
