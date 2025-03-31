@@ -7,11 +7,17 @@ exports.getOAuth2Client = (req) => {
       ? host.substring(0, host.indexOf(":")) + ":3000"
       : host
   }/login/google-auth`;
-  return new google.auth.OAuth2(
+  const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     redirectURL
   );
+  oauth2Client.on("tokens", (tokens) => {
+    if (tokens.refresh_token) {
+      req.googleNewRefreshToken = tokens.refresh_token;
+    }
+  });
+  return oauth2Client;
 };
 
 exports.generateAuthURL = (req) => {

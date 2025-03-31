@@ -367,3 +367,24 @@ exports.checkPasswordlessCode = (req, res, next) => {
       });
   });
 };
+
+exports.storeNewRefreshToken = (userId, refreshToken) =>
+  new Promise((resolve, reject) =>
+    getDatabase("authentication")
+      .then((db) => {
+        db.collection("loginInfo")
+          .updateOne(
+            { _id: userId },
+            {
+              $set: {
+                "google.refreshToken": refreshToken,
+              },
+            }
+          )
+          .then(resolve);
+      })
+      .catch((error) => {
+        console.log(error.message);
+        res.status(500).send(error);
+      })
+  );

@@ -2,6 +2,7 @@ const { google } = require("googleapis");
 const { getOAuth2Client } = require("../../externalAPI/google/googleAuth");
 const { bodyMissingRequiredFields } = require("./utils");
 const { getDatabase } = require("../database");
+const { storeNewRefreshToken } = require("../controller/auth.controller");
 
 exports.setPasswordlessFoundUser = (req, res, next) => {
   const missing = bodyMissingRequiredFields(req, ["code"]);
@@ -29,18 +30,6 @@ exports.retrieveAccessToken = (req, res, next) => {
         message: "Token probably has expired. Please login again.",
       });
     });
-};
-
-exports.setCredentials = (req, next) => {
-  const oauth2Client = getOAuth2Client(req);
-  oauth2Client.setCredentials(data.tokens);
-  oauth2Client.on("tokens", (tokens) => {
-    if (tokens.refresh_token) {
-      // store the refresh_token in my database!
-      console.log("refresh token");
-    }
-    console.log("access token");
-  });
 };
 
 exports.listFiles = (req, res) => {
@@ -83,7 +72,7 @@ exports.setPasswordlessFoundUserFlag = (req, _res, next) => {
   next();
 };
 
-exports.storeNewRefreshToken = (req, res, next) => {
+exports.storeNewGoogleTokens = (req, res, next) => {
   if (
     req.passwordlessFoundUser &&
     req.googleOauth2Client.credentials.refresh_token
@@ -105,6 +94,10 @@ exports.storeNewRefreshToken = (req, res, next) => {
         console.log(error.message);
         res.status(500).send(error);
       });
+  } else if (req.passwordlessFoundUser && req.googleNewRefreshToken) {
+    storeNewRefreshToken(req.user._id, req.googleNewRefreshToken).then(() =>
+      next()
+    );
   } else {
     next();
   }

@@ -58,7 +58,7 @@ module.exports = function (app) {
       authJwt.checkIfAlreadySignedIn,
       authJwt.creatingAccountVerifyToken,
       googleMid.setPasswordlessFoundUserFlag,
-      googleMid.storeNewRefreshToken,
+      googleMid.storeNewGoogleTokens,
       controller.signUp,
     ],
     controller.signInPasswordless
