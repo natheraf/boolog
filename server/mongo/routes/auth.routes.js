@@ -23,7 +23,7 @@ module.exports = function (app) {
 
   app.post(
     "/api/auth/signin",
-    [authJwt.checkIfAlreadySignedIn],
+    [authJwt.checkIfAlreadySignedInAndGetUser],
     controller.signIn
   );
 
@@ -32,7 +32,7 @@ module.exports = function (app) {
   app.post(
     "/api/auth/passwordless/sendcode",
     [
-      authJwt.checkIfAlreadySignedIn,
+      authJwt.checkIfAlreadySignedInAndGetUser,
       controller.checkPasswordless,
       authJwt.creatingAccountVerifyToken,
       verifySignUp.checkRolesExist,
@@ -55,7 +55,7 @@ module.exports = function (app) {
     [
       googleMid.retrieveAccessToken,
       googleMid.getUserInfo,
-      authJwt.checkIfAlreadySignedIn,
+      authJwt.checkIfAlreadySignedInAndGetUser,
       authJwt.creatingAccountVerifyToken,
       googleMid.setPasswordlessFoundUserFlag,
       googleMid.storeNewGoogleTokens,

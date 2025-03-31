@@ -73,7 +73,7 @@ const creatingAccountVerifyToken = (req, res, next) => {
  * @param {*} res
  * @param {*} next
  */
-const checkIfAlreadySignedIn = (req, res, next) => {
+const checkIfAlreadySignedInAndGetUser = (req, res, next) => {
   const loggedInUserIds = Object.entries(req.signedCookies)
     .filter(([key, value]) => isNaN(key) === false)
     .map(([cookieName, object]) =>
@@ -108,7 +108,7 @@ const authJwt = {
   verifyToken,
   authorizedToCreateUser,
   creatingAccountVerifyToken,
-  checkIfAlreadySignedIn,
+  checkIfAlreadySignedInAndGetUser,
 };
 
 module.exports = authJwt;
