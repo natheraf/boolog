@@ -30,7 +30,10 @@ export const Tiles = ({ objectArray, keysData, actionArea, size }) => {
             // style={{
             //   transformOrigin: "0 0 0",
             // }}
-            timeout={(600 * index + 1000) * theme.transitions.reduceMotion}
+            timeout={
+              Math.min(500 * index + 1000, 10000) *
+              theme.transitions.reduceMotion
+            }
           >
             <Paper sx={{ ...sizeProfiles, p: 1 }}>
               <TileCard

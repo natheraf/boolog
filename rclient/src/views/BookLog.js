@@ -318,7 +318,7 @@ export const BookLog = () => {
         {statuses.map((obj, index) => (
           <Slide
             key={obj.status}
-            timeout={(300 * index + 500) * theme.transitions.reduceMotion}
+            timeout={(100 * index + 300) * theme.transitions.reduceMotion}
             in={true}
           >
             <Accordion
