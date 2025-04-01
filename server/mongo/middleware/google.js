@@ -94,7 +94,7 @@ exports.storeNewGoogleTokens = (req, res, next) => {
         console.log(error.message);
         res.status(500).send(error);
       });
-  } else if (req.passwordlessFoundUser && req.googleNewRefreshToken) {
+  } else if (req.user && req.googleNewRefreshToken) {
     storeNewRefreshToken(req.user._id, req.googleNewRefreshToken).then(() =>
       next()
     );
