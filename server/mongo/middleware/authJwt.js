@@ -104,11 +104,27 @@ const checkIfAlreadySignedInAndGetUser = (req, res, next) => {
   });
 };
 
+const attachUserToRequest = (req, res, next) => {
+  getUser("_id", req.userId)
+    .then((user) => {
+      req.user = user;
+      if (user === null) {
+        res.status(409).send({ message: `User does not exist` });
+      }
+      next();
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send({ message: error.message });
+    });
+};
+
 const authJwt = {
   verifyToken,
   authorizedToCreateUser,
   creatingAccountVerifyToken,
   checkIfAlreadySignedInAndGetUser,
+  attachUserToRequest,
 };
 
 module.exports = authJwt;
