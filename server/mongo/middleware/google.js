@@ -32,16 +32,6 @@ exports.retrieveAccessToken = (req, res, next) => {
     });
 };
 
-exports.listFiles = (req, res) => {
-  const drive = google.drive({ version: "v3", auth: req.googleOauth2Client });
-  drive.files
-    .list({
-      pageSize: 10,
-      fields: "nextPageToken, files(id, name)",
-    })
-    .then((files) => res.status(200).send({ files }));
-};
-
 exports.getUserInfo = (req, res, next) => {
   const oauth2 = google.oauth2({ version: "v2", auth: req.googleOauth2Client });
   oauth2.userinfo
