@@ -4,7 +4,6 @@ const superAdminConfig = require("../config/superAdmin.config");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { getDatabase } = require("../database");
-const { getUserFromEmail } = require("../middleware/verifySignUp");
 const { sendEmailAuthentication } = require("../middleware/mailer");
 const {
   bodyMissingRequiredFields,
@@ -233,7 +232,7 @@ exports.checkPasswordless = async (req, res, next) => {
     return res?.status(400).send(missing);
   }
 
-  const user = req.user ?? (await getUserFromEmail(req.body.email));
+  const user = req.user ?? (await this.getUser("email", req.body.email));
   if (user !== null) {
     getDatabase("authentication").then((db) => {
       db.collection("loginInfo")
@@ -387,4 +386,16 @@ exports.storeNewRefreshToken = (userId, refreshToken) =>
         console.log(error.message);
         res.status(500).send(error);
       })
+  );
+
+exports.getUser = (key, value) =>
+  new Promise((resolve, reject) =>
+    getDatabase("authentication")
+      .then((db) => {
+        const collection = db.collection("loginInfo");
+        collection.findOne({ [key]: value }).then((user) => {
+          resolve(user);
+        });
+      })
+      .catch(reject)
   );

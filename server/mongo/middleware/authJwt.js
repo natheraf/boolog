@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const { ROLES } = require("../database.js");
-const { getUserFromEmail } = require("../middleware/verifySignUp");
+const { getUser } = require("../controller/auth.controller.js");
 
 const verifyToken = (req, res, next) => {
   const token =
@@ -89,7 +89,7 @@ const checkIfAlreadySignedInAndGetUser = (req, res, next) => {
   if (loggedInUserIds.some((element) => typeof element !== "string")) {
     return;
   }
-  getUserFromEmail(req.body.email).then((user) => {
+  getUser("email", req.body.email).then((user) => {
     req.user = user;
     if (user !== null) {
       for (const userId of loggedInUserIds) {
