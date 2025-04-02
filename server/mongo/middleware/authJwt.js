@@ -109,7 +109,7 @@ const attachUserToRequest = (req, res, next) => {
     .then((user) => {
       req.user = user;
       if (user === null) {
-        res.status(409).send({ message: `User does not exist` });
+        return res.status(409).send({ message: `User does not exist` });
       }
       next();
     })
