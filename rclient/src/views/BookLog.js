@@ -148,7 +148,6 @@ export const BookLog = () => {
           });
         }
         file.epubObject = Object.assign(file.epubObject, bookValues);
-        console.log(file.epubObject);
         setOpenEpubReader(true);
         setEpub({ object: file.epubObject, entryId: entry._id });
       });
