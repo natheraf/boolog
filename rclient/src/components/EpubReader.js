@@ -19,10 +19,7 @@ import {
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
-import {
-  getPreference,
-  updatePreference,
-} from "../api/IndexedDB/userPreferences";
+import { getSettings, updateSettings } from "../api/IndexedDB/userPreferences";
 import { AlertsContext } from "../context/Alerts";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -35,6 +32,7 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
 import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { updateBook } from "../api/IndexedDB/Books";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -259,10 +257,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
-      updatePreference({ key: "epubGlobalFormatting", formatting: value });
+      updateSettings({ key: "epubGlobalFormatting", formatting: value });
     }
-    updatePreference({
-      key: entryId,
+    updateBook({
+      _id: entryId,
       formatting: {
         useGlobalFormatting,
         value,
@@ -272,22 +270,22 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const setUseGlobalFormattingHelper = (newValue) => {
     if (newValue) {
-      getPreference("epubGlobalFormatting").then((res) => {
-        setFormatting(res.formatting);
-        updatePreference({
-          key: entryId,
+      getSettings("epubGlobalFormatting").then((res) => {
+        handleSetFormatting(res.formatting);
+        updateBook({
+          _id: entryId,
           formatting: {
             useGlobalFormatting: newValue,
-            formatting: res.formatting,
+            value: res.formatting,
           },
         });
       });
     } else {
-      updatePreference({
-        key: entryId,
+      updateBook({
+        _id: entryId,
         formatting: {
           useGlobalFormatting: newValue,
-          formatting,
+          value: formatting,
         },
       });
     }
@@ -583,8 +581,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       clearTimeout(timeOutToSetProgress.current);
       timeOutToSetProgress.current = setTimeout(
         () =>
-          updatePreference({
-            key: entryId,
+          updateBook({
+            _id: entryId,
             progress: {
               spine: newSpineIndex ?? spinePointer,
               part: (newCurrentPage ?? currentPage) / getCurrentTotalPages(),

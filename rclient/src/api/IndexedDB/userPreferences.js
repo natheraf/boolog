@@ -1,15 +1,15 @@
 import { getUserDB, openDatabase } from "./common";
-import { appDataDBVersion, userPreferencesObjectStore } from "./config";
+import { appDataDBVersion, settingsObjectStore } from "./config";
 
-export const getPreference = (key) =>
+export const getSettings = (key) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    getPreferenceHelper(db, key)
+    getSettingsHelper(db, key)
   );
 
-const getPreferenceHelper = (db, key) =>
+const getSettingsHelper = (db, key) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(userPreferencesObjectStore, "readonly");
-    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const transaction = db.transaction(settingsObjectStore, "readonly");
+    const objectStore = transaction.objectStore(settingsObjectStore);
     const request = objectStore.get(key);
     request.onsuccess = (event) => {
       const value = event.target.result;
@@ -25,15 +25,15 @@ const getPreferenceHelper = (db, key) =>
  * @param {any} data.value
  * @returns
  */
-export const putPreference = (data) =>
+export const putSettings = (data) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    putPreferenceHelper(db, data)
+    putSettingsHelper(db, data)
   );
 
-const putPreferenceHelper = (db, data) =>
+const putSettingsHelper = (db, data) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(userPreferencesObjectStore, "readwrite");
-    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const transaction = db.transaction(settingsObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(settingsObjectStore);
     const request = objectStore.put(data);
     request.onsuccess = (event) => resolve(event);
     request.onerror = (error) => reject(new Error(error));
@@ -44,24 +44,21 @@ const putPreferenceHelper = (db, data) =>
  * @param {object} data
  * @returns
  */
-export const updatePreference = (data) =>
+export const updateSettings = (data) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    updatePreferenceHelper(db, data)
+    updateSettingsHelper(db, data)
   );
 
-const updatePreferenceHelper = (db, data) =>
+const updateSettingsHelper = (db, data) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(userPreferencesObjectStore, "readonly");
-    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const transaction = db.transaction(settingsObjectStore, "readonly");
+    const objectStore = transaction.objectStore(settingsObjectStore);
     const request = objectStore.get(data.key);
     const handleError = (error) => reject(new Error(error));
     request.onsuccess = (event) => {
       const oldData = event.target.result;
-      const transaction = db.transaction(
-        userPreferencesObjectStore,
-        "readwrite"
-      );
-      const objectStore = transaction.objectStore(userPreferencesObjectStore);
+      const transaction = db.transaction(settingsObjectStore, "readwrite");
+      const objectStore = transaction.objectStore(settingsObjectStore);
       const request = objectStore.put({ ...oldData, ...data });
       request.onsuccess = resolve;
       request.onerror = handleError;
@@ -69,24 +66,21 @@ const updatePreferenceHelper = (db, data) =>
     request.onerror = handleError;
   });
 
-export const getPreferenceWithDefault = (data) =>
+export const getSettingsWithDefault = (data) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    getPreferenceWithDefaultHelper(db, data)
+    getSettingsWithDefaultHelper(db, data)
   );
 
-const getPreferenceWithDefaultHelper = (db, data) =>
+const getSettingsWithDefaultHelper = (db, data) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(userPreferencesObjectStore, "readonly");
-    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const transaction = db.transaction(settingsObjectStore, "readonly");
+    const objectStore = transaction.objectStore(settingsObjectStore);
     const request = objectStore.get(data.key);
     request.onsuccess = (event) => {
       const value = event.target.result;
       if (value === undefined) {
-        const transaction = db.transaction(
-          userPreferencesObjectStore,
-          "readwrite"
-        );
-        const objectStore = transaction.objectStore(userPreferencesObjectStore);
+        const transaction = db.transaction(settingsObjectStore, "readwrite");
+        const objectStore = transaction.objectStore(settingsObjectStore);
         const request = objectStore.add(data);
         request.onsuccess = () => resolve(data);
         request.onerror = (error) => reject(new Error(error));
@@ -97,15 +91,15 @@ const getPreferenceWithDefaultHelper = (db, data) =>
     request.onerror = (error) => reject(new Error(error));
   });
 
-export const deletePreference = (id) =>
+export const deleteSettings = (id) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    deletePreferenceHelper(db, id)
+    deleteSettingsHelper(db, id)
   );
 
-const deletePreferenceHelper = (db, id) =>
+const deleteSettingsHelper = (db, id) =>
   new Promise((resolve, reject) => {
-    const transaction = db.transaction(userPreferencesObjectStore, "readwrite");
-    const objectStore = transaction.objectStore(userPreferencesObjectStore);
+    const transaction = db.transaction(settingsObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(settingsObjectStore);
     try {
       const request = objectStore.delete(id);
       request.onsuccess = resolve;

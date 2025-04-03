@@ -6,7 +6,6 @@ import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
 import { deleteFile, getFile } from "./Files";
 import { addEpub } from "../../features/files/fileUtils";
-import { deletePreference } from "./userPreferences";
 import { getEpubValueFromPath } from "../../features/epub/epubUtils";
 
 /**
@@ -357,21 +356,46 @@ const deleteBookHelper = (db, obj, uid, localOnly) =>
     }
     request.onsuccess = (event) => {
       const data = event.target.result;
-      deleteFile(data.fileId).then(() =>
-        deletePreference(data._id).then(() => {
-          const transaction = db.transaction(shelvesObjectStore, "readwrite");
-          const objectStore = transaction.objectStore(shelvesObjectStore);
-          const request = objectStore.delete(data._id);
-          request.onsuccess = () => {
-            if (localOnly !== true) {
-              data.deleted = true;
-              syncMultipleToCloud([data]);
-            }
-            resolve();
-          };
-        })
-      );
+      deleteFile(data.fileId).then(() => {
+        const transaction = db.transaction(shelvesObjectStore, "readwrite");
+        const objectStore = transaction.objectStore(shelvesObjectStore);
+        const request = objectStore.delete(data._id);
+        request.onsuccess = () => {
+          if (localOnly !== true) {
+            data.deleted = true;
+            syncMultipleToCloud([data]);
+          }
+          resolve();
+        };
+      });
     };
+  });
+
+/**
+ * Will update the key and values present in data object
+ * @param {object} data
+ * @returns
+ */
+export const updateBook = (data) =>
+  openDatabase(getUserDB(), userDataDBVersion, (db) =>
+    updateBookHelper(db, data)
+  );
+
+const updateBookHelper = (db, data) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
+    const objectStore = transaction.objectStore(shelvesObjectStore);
+    const request = objectStore.get(data._id);
+    const handleError = (error) => reject(new Error(error));
+    request.onsuccess = (event) => {
+      const oldData = event.target.result;
+      const transaction = db.transaction(shelvesObjectStore, "readwrite");
+      const objectStore = transaction.objectStore(shelvesObjectStore);
+      const request = objectStore.put({ ...oldData, ...data });
+      request.onsuccess = resolve;
+      request.onerror = handleError;
+    };
+    request.onerror = handleError;
   });
 
 /**
