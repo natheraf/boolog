@@ -27,6 +27,7 @@ app.use(function (req, res, next) {
 /**
  * Define all our routes into express app.
  */
+require("./mongo/routes/google.routes")(app);
 require("./mongo/routes/auth.routes")(app);
 require("./mongo/routes/lists.routes")(app);
 require("./mongo/routes/settings.routes")(app);
