@@ -3,6 +3,7 @@ import {
   addBookFromEpub,
   getAllBooks,
   indexedDBBooksInterface,
+  updateBook,
 } from "../api/IndexedDB/Books";
 import { Tiles } from "../components/Tiles";
 import {
@@ -31,7 +32,7 @@ import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
 import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
-import { getPreferenceWithDefault } from "../api/IndexedDB/userPreferences";
+import { getSettingsWithDefault } from "../api/IndexedDB/userPreferences";
 import { defaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 
@@ -115,9 +116,9 @@ export const BookLog = () => {
     event.preventDefault();
   };
 
-  const handleOpenEpub = (id, fileId) =>
-    getFile(fileId).then((data) => {
-      if (!data) {
+  const handleOpenEpub = (entry) =>
+    getFile(entry.fileId).then((file) => {
+      if (!file) {
         return addAlert("File not found", "error");
       }
       const formatting = structuredClone(defaultFormatting);
@@ -125,29 +126,31 @@ export const BookLog = () => {
         (key) => key.startsWith("_") && delete formatting[key]
       );
       formatting.pageMargins = Math.max(0, window.innerWidth - 700);
-      getPreferenceWithDefault({
+      getSettingsWithDefault({
         key: "epubGlobalFormatting",
         formatting,
       }).then((res) => {
         const globalFormatting = res.formatting;
-        getPreferenceWithDefault({
-          key: id,
-          formatting: {
+        const bookValues = {
+          formatting: entry.formatting ?? {
             useGlobalFormatting: true,
             value: globalFormatting,
           },
-          progress: { spine: 0, part: 0 },
-          notes: {},
-          memos: {},
-          spineOverride: {},
-        }).then((res) => {
-          if (res.formatting.useGlobalFormatting) {
-            res.formatting.value = globalFormatting;
-          }
-          data.epubObject = Object.assign(data.epubObject, res);
-          setOpenEpubReader(Boolean(data.epubObject));
-          setEpub({ object: data.epubObject, entryId: id });
-        });
+          progress: entry.progress ?? { spine: 0, part: 0 },
+          notes: entry.notes ?? {},
+          memos: entry.memos ?? {},
+          spineOverride: entry.spineOverride ?? {},
+        };
+        if (!entry.formatting) {
+          updateBook({
+            _id: entry._id,
+            ...bookValues,
+          });
+        }
+        file.epubObject = Object.assign(file.epubObject, bookValues);
+        console.log(file.epubObject);
+        setOpenEpubReader(true);
+        setEpub({ object: file.epubObject, entryId: entry._id });
       });
     });
 

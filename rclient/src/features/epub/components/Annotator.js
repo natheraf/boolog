@@ -2,22 +2,15 @@ import * as React from "react";
 import {
   Backdrop,
   Divider,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
   IconButton,
   Menu,
-  Radio,
-  RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Textarea } from "../../../components/Textarea";
-import { updatePreference } from "../../../api/IndexedDB/userPreferences";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -25,6 +18,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 import { SimpleColorPicker } from "./SimpleColorPicker";
 import { deleteNodesAndLiftChildren } from "../domUtils";
+import { updateBook } from "../../../api/IndexedDB/Books";
 
 let selectedRange = null;
 
@@ -322,7 +316,7 @@ export const Annotator = ({
       }
     }
 
-    const updateData = { key: entryId };
+    const updateData = { _id: entryId };
     if (updatedMemo) {
       updateData.memos = memos;
     }
@@ -336,7 +330,7 @@ export const Annotator = ({
       updateData.spineOverride = spineOverride;
     }
     if (updateDB) {
-      updatePreference(updateData);
+      updateBook(updateData);
     }
     setAnchorEl(null);
     setSelectedAnchor(null);

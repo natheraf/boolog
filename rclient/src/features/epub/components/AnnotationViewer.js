@@ -22,12 +22,12 @@ import PropTypes from "prop-types";
 import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { updatePreference } from "../../../api/IndexedDB/userPreferences";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { SimpleColorPicker } from "./SimpleColorPicker";
 import { deleteNodesAndLiftChildren } from "../domUtils";
+import { updateBook } from "../../../api/IndexedDB/Books";
 
 export const AnnotationViewer = ({
   spine,
@@ -70,7 +70,7 @@ export const AnnotationViewer = ({
   };
 
   const handleSave = () => {
-    const updatedData = { key: entryId };
+    const updatedData = { _id: entryId };
     if (updatedSpineOverride.current) {
       updatedData.spineOverride = spineOverride;
     }
@@ -90,7 +90,7 @@ export const AnnotationViewer = ({
       updatedNotes.current ||
       updatedMemos.current
     ) {
-      updatePreference(updatedData);
+      updateBook(updatedData);
     }
     updatedNotes.current = false;
     updatedMemos.current = false;
