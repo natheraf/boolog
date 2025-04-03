@@ -393,9 +393,13 @@ exports.getUser = (key, value) =>
     getDatabase("authentication")
       .then((db) => {
         const collection = db.collection("loginInfo");
-        collection.findOne({ [key]: value }).then((user) => {
-          resolve(user);
-        });
+        collection
+          .findOne({
+            [key]: key === "_id" ? ObjectId.createFromHexString(value) : value,
+          })
+          .then((user) => {
+            resolve(user);
+          });
       })
       .catch(reject)
   );
