@@ -22,7 +22,7 @@ import PropTypes from "prop-types";
 import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { updatePreference } from "../../../api/IndexedDB/userPreferences";
+import { updateEpubData } from "../../../api/IndexedDB/epubData";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -90,7 +90,7 @@ export const AnnotationViewer = ({
       updatedNotes.current ||
       updatedMemos.current
     ) {
-      updatePreference(updatedData);
+      updateEpubData(updatedData);
     }
     updatedNotes.current = false;
     updatedMemos.current = false;

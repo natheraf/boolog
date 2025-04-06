@@ -3,5 +3,5 @@ module.exports = {
   appDataDBVersion: 1,
   shelvesObjectStore: "v1",
   filesObjectStore: "files",
-  userPreferencesObjectStore: "userPreferences",
+  epubDataObjectStore: "epubData",
 };

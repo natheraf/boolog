@@ -2,7 +2,7 @@ import { defaultFormatting, userTemplates } from "../Local";
 import {
   filesObjectStore,
   shelvesObjectStore,
-  userPreferencesObjectStore,
+  epubDataObjectStore,
 } from "./config";
 
 const connect = (name, version) => {
@@ -42,7 +42,7 @@ const userDataDBOnupgradeNeeded = function (event) {
         keyPath: "_id",
       });
 
-      const userPreferences = db.createObjectStore(userPreferencesObjectStore, {
+      const epubData = db.createObjectStore(epubDataObjectStore, {
         keyPath: "key",
       });
   }
