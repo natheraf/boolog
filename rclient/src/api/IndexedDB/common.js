@@ -1,8 +1,8 @@
 import { defaultFormatting, userTemplates } from "../Local";
 import {
   filesObjectStore,
+  metadataObjectStore,
   shelvesObjectStore,
-  userPreferencesObjectStore,
 } from "./config";
 
 const connect = (name, version) => {
@@ -42,7 +42,7 @@ const userDataDBOnupgradeNeeded = function (event) {
         keyPath: "_id",
       });
 
-      const userPreferences = db.createObjectStore(userPreferencesObjectStore, {
+      const metadata = db.createObjectStore(metadataObjectStore, {
         keyPath: "key",
       });
   }

@@ -31,7 +31,7 @@ import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
 import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
-import { getPreferenceWithDefault } from "../api/IndexedDB/userPreferences";
+import { getMetadataWithDefault } from "../api/IndexedDB/metadata";
 import { defaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 
@@ -125,12 +125,12 @@ export const BookLog = () => {
         (key) => key.startsWith("_") && delete formatting[key]
       );
       formatting.pageMargins = Math.max(0, window.innerWidth - 700);
-      getPreferenceWithDefault({
+      getMetadataWithDefault({
         key: "epubGlobalFormatting",
         formatting,
       }).then((res) => {
         const globalFormatting = res.formatting;
-        getPreferenceWithDefault({
+        getMetadataWithDefault({
           key: id,
           formatting: {
             useGlobalFormatting: true,

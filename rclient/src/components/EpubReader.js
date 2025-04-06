@@ -19,10 +19,7 @@ import {
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
-import {
-  getPreference,
-  updatePreference,
-} from "../api/IndexedDB/userPreferences";
+import { getMetadata, updateMetadata } from "../api/IndexedDB/metadata";
 import { AlertsContext } from "../context/Alerts";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -259,9 +256,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value) => {
     if (useGlobalFormatting) {
-      updatePreference({ key: "epubGlobalFormatting", formatting: value });
+      updateMetadata({ key: "epubGlobalFormatting", formatting: value });
     }
-    updatePreference({
+    updateMetadata({
       key: entryId,
       formatting: {
         useGlobalFormatting,
@@ -272,9 +269,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const setUseGlobalFormattingHelper = (newValue) => {
     if (newValue) {
-      getPreference("epubGlobalFormatting").then((res) => {
+      getMetadata("epubGlobalFormatting").then((res) => {
         setFormatting(res.formatting);
-        updatePreference({
+        updateMetadata({
           key: entryId,
           formatting: {
             useGlobalFormatting: newValue,
@@ -283,7 +280,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         });
       });
     } else {
-      updatePreference({
+      updateMetadata({
         key: entryId,
         formatting: {
           useGlobalFormatting: newValue,
@@ -583,7 +580,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       clearTimeout(timeOutToSetProgress.current);
       timeOutToSetProgress.current = setTimeout(
         () =>
-          updatePreference({
+          updateMetadata({
             key: entryId,
             progress: {
               spine: newSpineIndex ?? spinePointer,

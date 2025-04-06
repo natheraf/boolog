@@ -17,7 +17,7 @@ import {
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Textarea } from "../../../components/Textarea";
-import { updatePreference } from "../../../api/IndexedDB/userPreferences";
+import { updateMetadata } from "../../../api/IndexedDB/metadata";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -336,7 +336,7 @@ export const Annotator = ({
       updateData.spineOverride = spineOverride;
     }
     if (updateDB) {
-      updatePreference(updateData);
+      updateMetadata(updateData);
     }
     setAnchorEl(null);
     setSelectedAnchor(null);
