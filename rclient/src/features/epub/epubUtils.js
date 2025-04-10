@@ -40,6 +40,7 @@ export const processEpub = (epubObject) => {
   const tocRef = epubObject["ncx"]?.ncx ?? {};
   const manifestRef = contentRef.manifest.item;
 
+  let nodeIndex = 0;
   const elementMap = new Map();
   for (const item of manifestRef) {
     const path = item["@_href"].toUpperCase().startsWith("OEBPS/")
@@ -67,11 +68,18 @@ export const processEpub = (epubObject) => {
       getEpubValueFromPath(epubObject.html, path),
       type === "xhtml" ? "application/xhtml+xml" : "text/html"
     );
+
+    const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      textNode.parentElement.setAttribute("nodeid", nodeIndex);
+      nodeIndex += 1;
+    }
+
     const nodes = page.querySelectorAll("img, image, a");
     if (!nodes) {
       continue;
     }
-    const imageIds = [];
     for (const node of nodes) {
       const tag = node.tagName.toLowerCase();
       if (tag === "img") {
@@ -83,7 +91,6 @@ export const processEpub = (epubObject) => {
         node.style.margin = "auto";
         node.id = node.getAttribute("src");
         node.setAttribute("ogsrc", node.getAttribute("src"));
-        imageIds.push(node.getAttribute("src"));
       } else if (tag === "image") {
         node.style.height = "100%";
         node.style.width = "";
@@ -95,7 +102,6 @@ export const processEpub = (epubObject) => {
           node.getAttribute("src") ||
           node.getAttribute("href") ||
           node.getAttribute("xlink:href");
-        imageIds.push(node.id);
       } else if (tag === "a") {
         node.setAttribute("linkto", node.getAttribute("href"));
         node.removeAttribute("href");
