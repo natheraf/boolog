@@ -124,6 +124,12 @@ export const Annotator = ({
     if (annotatorOpen.current === false && selectedString?.length > 0) {
       clearSearchMarkNode();
       const selection = window.getSelection();
+      if (
+        !selection.anchorNode.parentElement.getAttribute("nodeid") ||
+        !selection.focusNode.parentElement.getAttribute("nodeid")
+      ) {
+        return;
+      }
       setSelectionParentRect(
         selection.anchorNode.parentElement.getBoundingClientRect()
       );
