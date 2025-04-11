@@ -32,6 +32,7 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
 import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { handleInjectingMark } from "../features/epub/domUtils";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -94,7 +95,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const images = React.useRef(epubObject.images);
   const chapterMeta = React.useRef(epubObject.chapterMeta);
   const notes = React.useRef(epubObject.notes);
-  const spineOverride = epubObject.spineOverride;
+  const highlights = React.useRef(epubObject.highlights);
 
   const [spinePointer, setSpinePointer] = React.useState(
     epubObject?.progress?.spine ?? 0
@@ -220,11 +221,18 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   };
 
+  const addFunctionsAfterRender = (fn, runAtRenderNumber) => {
+    while (functionsForNextRender.current.length < runAtRenderNumber) {
+      functionsForNextRender.current.push([]);
+    }
+    functionsForNextRender.current[runAtRenderNumber - 1].push(fn);
+  };
+
   const goToNote = (noteId) => {
     goToAndPreloadImages(notes.current[noteId].spineIndex);
-    functionsForNextRender.current.push(() => {
+    addFunctionsAfterRender(() => {
       goToClassName(noteId);
-    });
+    }, 1);
   };
 
   const handleMarkHighlightOnClick = (mark) => {
@@ -636,7 +644,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         visitedSpineIndexes.current.add(index);
         const parser = new DOMParser();
         const page = parser.parseFromString(
-          spineOverride[index]?.element ?? spine.current[index].element,
+          spine.current[index].element,
           "text/html"
         );
         const nodes = page?.querySelectorAll("img, image");
@@ -675,15 +683,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             node.style.width = "";
           }
         }
-        if (spineOverride.hasOwnProperty(index)) {
-          spineOverride[index].element = page.documentElement.outerHTML;
-        } else {
-          spine.current[index].element = page.documentElement.outerHTML;
-        }
+        spine.current[index].element = page.documentElement.outerHTML;
       }
       setLoadedImageURLs((prev) => ({ ...prev, ...loadedImages }));
     },
-    [loadedImageURLs, spineOverride]
+    [loadedImageURLs]
   );
 
   const handleClose = () => {
@@ -711,6 +715,27 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             }
           });
 
+        const highlightsSorted = Object.entries(
+          highlights.current[spineIndexTracker] ?? {}
+        ).sort(
+          (a, b) =>
+            notes.current[a[0]].dateCreated - notes.current[b[0]].dateCreated
+        );
+        for (const [noteId, value] of highlightsSorted) {
+          const selectedRange = structuredClone(value);
+          selectedRange.startContainer = document.querySelector(
+            `[nodeId="${selectedRange.startContainerId}"]`
+          );
+          selectedRange.endContainer = document.querySelector(
+            `[nodeId="${selectedRange.endContainerId}"]`
+          );
+          handleInjectingMark(
+            noteId,
+            selectedRange,
+            notes.current[noteId].highlightColor
+          );
+        }
+
         for (const id of Object.keys(notes.current)) {
           const marks = document.getElementsByClassName(id);
           const markOnClick = (mark) => (event) => {
@@ -732,8 +757,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   React.useEffect(() => {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver((mutationList, observer) => {
-      functionsForNextRender.current.forEach((fn) => fn());
-      functionsForNextRender.current = [];
+      if (functionsForNextRender.current.length > 0) {
+        functionsForNextRender.current.shift().forEach((fn) => fn());
+      }
       setTotalPagesForNavigator(getCurrentTotalPages());
       document
         .getElementById("content")
@@ -908,7 +934,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       spineIndexTracker = spineIndex;
       setSpinePointer(spineIndex);
       if (page === -1) {
-        functionsForNextRender.current.push(turnToLastPage);
+        addFunctionsAfterRender(turnToLastPage, 1);
       }
       page = page === -1 ? 0 : page;
       pageTracker = page;
@@ -941,7 +967,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const spineIndex = getEpubValueFromPath(hrefSpineMap.current, path);
       if (typeof spineIndex === "number") {
         setLocationAsPrevious();
-        functionsForNextRender.current.push(() => (pageTracker = 0));
+        addFunctionsAfterRender(() => (pageTracker = 0), 1);
         setCurrentPage(0);
         goToAndPreloadImages(getEpubValueFromPath(hrefSpineMap.current, path));
       }
@@ -1105,13 +1131,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     ) {
       epubObject.progress.part = 0;
     }
-    functionsForNextRender.current.push(() => {
+    addFunctionsAfterRender(() => {
       const page = Math.floor(
         getCurrentTotalPages() * epubObject.progress.part
       );
       pageTracker = page;
       setCurrentPage(page);
-    });
+    }, 1);
 
     window.addEventListener("resize", updateWindowSize);
 
@@ -1301,7 +1327,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
-                <AnnotationViewer
+                {/* <AnnotationViewer
                   spine={spine.current}
                   entryId={entryId}
                   clearSearchMarkNode={clearSearchMarkNode}
@@ -1309,8 +1335,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   memos={epubObject.memos}
                   currentSpineIndex={spinePointer}
                   goToNote={goToNote}
-                  spineOverride={spineOverride}
-                />
+                /> */}
                 <TableOfContents
                   toc={epubObject.toc}
                   handlePathHref={handlePathHref}
@@ -1512,7 +1537,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   }}
                   dangerouslySetInnerHTML={{
                     __html:
-                      spineOverride?.[spinePointer ?? -1]?.element ??
                       spine.current?.[spinePointer ?? -1]?.element ??
                       "something went wrong...<br/> spine.current is missing",
                   }}
@@ -1662,11 +1686,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         entryId={entryId}
         memos={epubObject.memos}
         notes={notes.current}
+        highlights={highlights.current}
         clearSearchMarkNode={clearSearchMarkNode}
         spineIndex={spinePointer}
         anchorEl={annotatorAnchorEl}
         setAnchorEl={setAnnotatorAnchorEl}
-        spineOverride={spineOverride}
         key={annotatorAnchorEl?.getAttribute("noteid")}
       />
     </Dialog>
