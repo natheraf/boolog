@@ -1,3 +1,27 @@
+const removeEventListenerMap = new Map();
+
+export const addListener = (node, type, fn) => {
+  node.addEventListener(type, fn);
+  const nodeId = node.getAttribute("nodeid");
+  const key = `${nodeId}|${type}`;
+  if (removeEventListenerMap.has(key) === false) {
+    removeEventListenerMap.set(key, []);
+  }
+  removeEventListenerMap
+    .get(key)
+    .push(() => node.removeEventListener(type, fn));
+};
+
+export const removeListener = (node, type) => {
+  const nodeId = node.getAttribute("nodeid");
+  const key = `${nodeId}|${type}`;
+  if (removeEventListenerMap.has(key) === false) {
+    return;
+  }
+  removeEventListenerMap.get(key).forEach((fn) => fn());
+  removeEventListenerMap.delete(key);
+};
+
 export const deleteNodesAndLiftChildren = (nodes) => {
   const updates = [];
   for (const node of nodes) {
@@ -12,6 +36,13 @@ export const deleteNodesAndLiftChildren = (nodes) => {
     parent.insertBefore(frag, node);
     parent.removeChild(node);
   });
+};
+
+export const disableHighlightNodes = (nodes) => {
+  for (const node of nodes) {
+    node.style.backgroundColor = "rgba(0, 0, 0, 0)";
+    removeListener(node, "click");
+  }
 };
 
 const markNode = (node, noteId, highlightColor) => {
