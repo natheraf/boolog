@@ -162,10 +162,10 @@ export const AnnotationViewer = ({
       notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor !==
       dataForColorPicker.highlightColor
     ) {
+      const chapter = spine[dataForColorPicker.spineIndex];
       setNotesAsMap((prev) => {
-        prev[spine[dataForColorPicker.spineIndex].label][
-          dataForColorPicker.noteId
-        ].highlightColor = dataForColorPicker.highlightColor;
+        prev[chapter][dataForColorPicker.noteId].highlightColor =
+          dataForColorPicker.highlightColor;
         return prev;
       });
       notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor =
@@ -256,8 +256,9 @@ export const AnnotationViewer = ({
   };
 
   const handleNoteTextAreaOnChange = (note, noteId) => (event) => {
+    const chapter = spine[note.spineIndex].label;
     setNotesAsMap((prev) => {
-      prev[note.spineIndex][noteId].note = event.target.value;
+      prev[chapter][noteId].note = event.target.value;
       return prev;
     });
     notes[currentSpineIndex][noteId].note = event.target.value;
