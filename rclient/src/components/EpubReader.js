@@ -1691,7 +1691,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         spineIndex={spinePointer}
         anchorEl={annotatorAnchorEl}
         setAnchorEl={setAnnotatorAnchorEl}
-        key={annotatorAnchorEl?.getAttribute("noteid")}
+        key={annotatorAnchorEl?.getAttribute("nodeid")}
       />
     </Dialog>
   );

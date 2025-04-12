@@ -64,10 +64,10 @@ export const Annotator = ({
   const [selectionParentRect, setSelectionParentRect] = React.useState(null);
   const [selectionRect, setSelectionRect] = React.useState(null);
   const [selectedText, setSelectedText] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.selectedText ?? null
   );
   const memoKeyOfHighlight = formatMemoKey(
-    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.selectedText
+    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.selectedText
   );
   const textToMemoKeyFormat = React.useRef(memoKeyOfHighlight);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
@@ -76,7 +76,7 @@ export const Annotator = ({
 
   const tabValueMap = ["note", "memo"];
   const [currentTabValue, setCurrentTabValue] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]
+    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]
       ? tabValueMap.indexOf("note")
       : tabValueMap.indexOf("memo")
   );
@@ -85,10 +85,10 @@ export const Annotator = ({
     memoKeyOfHighlight ? memos[memoKeyOfHighlight] ?? "" : ""
   );
   const [note, setNote] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.note ?? ""
+    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.note ?? ""
   );
   const [highlightColor, setHighlightColor] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.highlightColor ??
+    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.highlightColor ??
       null
   );
   const oldTouchSelect = React.useRef(null);
@@ -227,7 +227,7 @@ export const Annotator = ({
     annotatorOpen.current = false;
     const updatedMemo = (memos[textToMemoKeyFormat.current] ?? "") !== memo;
     let noteId =
-      selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
+      selectedAnchor === null ? anchorEl?.getAttribute("nodeid") : null;
     const updatedNoteHighlight =
       (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNoteText = (notes[spineIndex]?.[noteId]?.note ?? "") !== note;

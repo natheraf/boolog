@@ -30,7 +30,6 @@ const markNode = (node, noteId, highlightColor) => {
   if (node.nodeType === Node.TEXT_NODE) {
     const mark = document.createElement("span");
     mark.classList.add(noteId, "mark");
-    mark.setAttribute("noteid", noteId);
     mark.setAttribute("nodeid", noteId);
     mark.style.backgroundColor = highlightColor;
     mark.style.fontSize = "inherit";
