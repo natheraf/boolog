@@ -138,7 +138,6 @@ export const BookLog = () => {
           },
           progress: { spine: 0, part: 0 },
           notes: {},
-          highlights: {},
           memos: {},
           spineOverride: {},
         }).then((res) => {
