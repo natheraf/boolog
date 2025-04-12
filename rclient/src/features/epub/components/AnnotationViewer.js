@@ -162,7 +162,7 @@ export const AnnotationViewer = ({
       notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor !==
       dataForColorPicker.highlightColor
     ) {
-      const chapter = spine[dataForColorPicker.spineIndex];
+      const chapter = spine[dataForColorPicker.spineIndex].label;
       setNotesAsMap((prev) => {
         prev[chapter][dataForColorPicker.noteId].highlightColor =
           dataForColorPicker.highlightColor;
