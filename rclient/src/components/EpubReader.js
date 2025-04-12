@@ -33,6 +33,7 @@ import { getEpubValueFromPath } from "../features/epub/epubUtils";
 import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { handleInjectingMark } from "../features/epub/domUtils";
+import { addListener } from "../features/listenerManager";
 
 // refactor to use one ver with CreateBook.js:35 DialogSlideUpTransition()
 const DialogSlideUpTransition = React.forwardRef(function Transition(
@@ -95,7 +96,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const images = React.useRef(epubObject.images);
   const chapterMeta = React.useRef(epubObject.chapterMeta);
   const notes = React.useRef(epubObject.notes);
-  const highlights = React.useRef(epubObject.highlights);
 
   const [spinePointer, setSpinePointer] = React.useState(
     epubObject?.progress?.spine ?? 0
@@ -228,8 +228,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     functionsForNextRender.current[runAtRenderNumber - 1].push(fn);
   };
 
-  const goToNote = (noteId) => {
-    goToAndPreloadImages(notes.current[noteId].spineIndex);
+  const goToNote = (spineIndex, noteId) => {
+    goToAndPreloadImages(spineIndex);
     addFunctionsAfterRender(() => {
       goToClassName(noteId);
     }, 1);
@@ -715,29 +715,30 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             }
           });
 
-        const highlightsSorted = Object.entries(
-          highlights.current[spineIndexTracker] ?? {}
-        ).sort(
-          (a, b) =>
-            notes.current[a[0]].dateCreated - notes.current[b[0]].dateCreated
-        );
-        for (const [noteId, value] of highlightsSorted) {
-          const selectedRange = structuredClone(value);
-          selectedRange.startContainer = document.querySelector(
-            `[nodeId="${selectedRange.startContainerId}"]`
+        const notesSorted = Object.entries(
+          notes.current[spineIndexTracker] ?? {}
+        ).sort((a, b) => a[1].dateCreated - b[1].dateCreated);
+        for (const [noteId, entry] of notesSorted) {
+          const selectedRange = structuredClone(entry.selectedRangeIndexed);
+          const startParentContainer = document.querySelector(
+            `[nodeId="${selectedRange.startParentContainerId}"]`
           );
-          selectedRange.endContainer = document.querySelector(
-            `[nodeId="${selectedRange.endContainerId}"]`
+          const endParentContainer = document.querySelector(
+            `[nodeId="${selectedRange.endParentContainerId}"]`
           );
+          selectedRange.startContainer =
+            startParentContainer.childNodes[selectedRange.parentStartIndex];
+          selectedRange.endContainer =
+            endParentContainer.childNodes[selectedRange.parentEndIndex];
           handleInjectingMark(
             noteId,
             selectedRange,
-            notes.current[noteId].highlightColor
+            entry.deleted ? "rgba(0, 0, 0, 0)" : entry.highlightColor
           );
-        }
-
-        for (const id of Object.keys(notes.current)) {
-          const marks = document.getElementsByClassName(id);
+          if (entry.deleted) {
+            continue;
+          }
+          const marks = document.getElementsByClassName(noteId);
           const markOnClick = (mark) => (event) => {
             event.stopPropagation();
             if (window.getSelection().isCollapsed) {
@@ -745,7 +746,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             }
           };
           for (const mark of marks) {
-            mark.addEventListener("click", markOnClick(mark));
+            addListener(mark, "click", markOnClick(mark));
           }
         }
       }
@@ -1327,7 +1328,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     <SearchIcon />
                   </IconButton>
                 </Tooltip>
-                {/* <AnnotationViewer
+                <AnnotationViewer
                   spine={spine.current}
                   entryId={entryId}
                   clearSearchMarkNode={clearSearchMarkNode}
@@ -1335,7 +1336,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   memos={epubObject.memos}
                   currentSpineIndex={spinePointer}
                   goToNote={goToNote}
-                /> */}
+                />
                 <TableOfContents
                   toc={epubObject.toc}
                   handlePathHref={handlePathHref}
@@ -1686,7 +1687,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         entryId={entryId}
         memos={epubObject.memos}
         notes={notes.current}
-        highlights={highlights.current}
         clearSearchMarkNode={clearSearchMarkNode}
         spineIndex={spinePointer}
         anchorEl={annotatorAnchorEl}

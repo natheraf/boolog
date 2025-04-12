@@ -24,10 +24,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 import { SimpleColorPicker } from "./SimpleColorPicker";
-import { deleteNodesAndLiftChildren, handleInjectingMark } from "../domUtils";
+import { disableHighlightNodes, handleInjectingMark } from "../domUtils";
+import { addListener } from "../../listenerManager";
 
 let selectedRange = null;
-let selectedObject = null;
+let selectedRangeIndexed = null;
 
 const formatMemoKey = (key) => {
   if (!key) {
@@ -52,7 +53,6 @@ export const Annotator = ({
   entryId,
   memos,
   notes,
-  highlights,
   clearSearchMarkNode,
   spineIndex,
   anchorEl,
@@ -64,10 +64,10 @@ export const Annotator = ({
   const [selectionParentRect, setSelectionParentRect] = React.useState(null);
   const [selectionRect, setSelectionRect] = React.useState(null);
   const [selectedText, setSelectedText] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.selectedText ?? null
   );
   const memoKeyOfHighlight = formatMemoKey(
-    notes[anchorEl?.getAttribute("noteid")]?.selectedText
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.selectedText
   );
   const textToMemoKeyFormat = React.useRef(memoKeyOfHighlight);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
@@ -76,7 +76,7 @@ export const Annotator = ({
 
   const tabValueMap = ["note", "memo"];
   const [currentTabValue, setCurrentTabValue] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]
       ? tabValueMap.indexOf("note")
       : tabValueMap.indexOf("memo")
   );
@@ -85,10 +85,11 @@ export const Annotator = ({
     memoKeyOfHighlight ? memos[memoKeyOfHighlight] ?? "" : ""
   );
   const [note, setNote] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.note ?? ""
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.note ?? ""
   );
   const [highlightColor, setHighlightColor] = React.useState(
-    notes[anchorEl?.getAttribute("noteid")]?.highlightColor ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute("noteid")]?.highlightColor ??
+      null
   );
   const oldTouchSelect = React.useRef(null);
 
@@ -169,11 +170,28 @@ export const Annotator = ({
       range.setStart(range.startContainer, startOffset);
       range.setEnd(range.endContainer, endOffset);
 
-      selectedObject = {
-        startContainerId:
-          range.startContainer.parentElement.getAttribute("nodeid"),
+      const startContainerParent = range.startContainer.parentElement;
+      const endContainerParent = range.endContainer.parentElement;
+      let parentStartIndex = 0;
+      for (const child of startContainerParent.childNodes) {
+        if (child.contains(range.startContainer)) {
+          break;
+        }
+        parentStartIndex += 1;
+      }
+      let parentEndIndex = 0;
+      for (const child of endContainerParent.childNodes) {
+        if (child.contains(range.endContainer)) {
+          break;
+        }
+        parentEndIndex += 1;
+      }
+      selectedRangeIndexed = {
+        startParentContainerId: startContainerParent.getAttribute("nodeid"),
+        parentStartIndex,
         startOffset,
-        endContainerId: range.endContainer.parentElement.getAttribute("nodeid"),
+        endParentContainerId: endContainerParent.getAttribute("nodeid"),
+        parentEndIndex,
         endOffset,
       };
       selectedRange = range;
@@ -191,12 +209,12 @@ export const Annotator = ({
       }
     };
     for (const mark of marks) {
-      mark.addEventListener("click", markOnClick(mark));
+      addListener(mark, "click", markOnClick(mark));
     }
   };
 
   const handleDeleteMark = (markId) =>
-    deleteNodesAndLiftChildren(document.getElementsByClassName(markId));
+    disableHighlightNodes(document.getElementsByClassName(markId));
 
   const handleUpdateHighlight = (noteId) => {
     const marks = document.getElementsByClassName(noteId);
@@ -211,9 +229,9 @@ export const Annotator = ({
     let noteId =
       selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
     const updatedHighlight =
-      (notes[noteId]?.highlightColor ?? null) !== highlightColor;
+      (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNote =
-      (notes[noteId]?.note ?? "") !== note || updatedHighlight;
+      (notes[spineIndex]?.[noteId]?.note ?? "") !== note || updatedHighlight;
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
@@ -233,24 +251,22 @@ export const Annotator = ({
         } else if (updatedHighlight) {
           handleUpdateHighlight(noteId);
         }
-        notes[noteId] = {
+        if (notes.hasOwnProperty(spineIndex) === false) {
+          notes[spineIndex] = {};
+        }
+        notes[spineIndex][noteId] = {
           note: note,
           spineIndex,
           highlightColor,
           selectedText,
           dateCreated: Date.now(),
+          selectedRangeIndexed,
         };
-        if (highlights.hasOwnProperty(spineIndex) === false) {
-          highlights[spineIndex] = {};
-        }
-        highlights[spineIndex][noteId] = selectedObject;
       } else if (noteId) {
-        delete notes[noteId];
+        notes[spineIndex][noteId].deleted = true;
         handleDeleteMark(noteId);
         noteId = null;
-        highlights[spineIndex][noteId].delete = true;
       }
-      updateData.highlights = highlights;
       updateData.notes = notes;
     }
 
@@ -400,7 +416,7 @@ export const Annotator = ({
                   <Typography>{"Highlight"}</Typography>
                   <Typography variant="subtitle2">
                     {
-                      "If no highlight color is selected, the highlight will be transparent."
+                      "If no highlight color is selected and a note is written, the highlight will be transparent."
                     }
                   </Typography>
                 </Stack>
@@ -474,7 +490,6 @@ Annotator.propTypes = {
   entryId: PropTypes.string.isRequired,
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
-  highlights: PropTypes.object.isRequired,
   clearSearchMarkNode: PropTypes.func.isRequired,
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
