@@ -228,10 +228,10 @@ export const Annotator = ({
     const updatedMemo = (memos[textToMemoKeyFormat.current] ?? "") !== memo;
     let noteId =
       selectedAnchor === null ? anchorEl?.getAttribute("noteid") : null;
-    const updatedHighlight =
+    const updatedNoteHighlight =
       (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
-    const updatedNote =
-      (notes[spineIndex]?.[noteId]?.note ?? "") !== note || updatedHighlight;
+    const updatedNoteText = (notes[spineIndex]?.[noteId]?.note ?? "") !== note;
+    const updatedNote = updatedNoteText || updatedNoteHighlight;
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length > 0) {
@@ -248,20 +248,26 @@ export const Annotator = ({
         noteId = noteId ?? getNewId();
         if (newNote) {
           handleInjectingMarkAndClickListener(noteId);
-        } else if (updatedHighlight) {
-          handleUpdateHighlight(noteId);
+          if (notes.hasOwnProperty(spineIndex) === false) {
+            notes[spineIndex] = {};
+          }
+          notes[spineIndex][noteId] = {
+            note: note,
+            spineIndex,
+            highlightColor,
+            selectedText,
+            dateCreated: Date.now(),
+            selectedRangeIndexed,
+          };
+        } else {
+          if (updatedNoteHighlight) {
+            handleUpdateHighlight(noteId);
+            notes[spineIndex][noteId].highlightColor = highlightColor;
+          }
+          if (updatedNoteText) {
+            notes[spineIndex][noteId].note = note;
+          }
         }
-        if (notes.hasOwnProperty(spineIndex) === false) {
-          notes[spineIndex] = {};
-        }
-        notes[spineIndex][noteId] = {
-          note: note,
-          spineIndex,
-          highlightColor,
-          selectedText,
-          dateCreated: Date.now(),
-          selectedRangeIndexed,
-        };
       } else if (noteId) {
         notes[spineIndex][noteId].deleted = true;
         handleDeleteMark(noteId);
