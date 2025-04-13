@@ -1,4 +1,4 @@
-Simple book tracking web app
+ereader web app
 
 Node
 Express
