@@ -58,16 +58,18 @@ export const Annotator = ({
   anchorEl,
   setAnchorEl,
 }) => {
+  const noteIdAttribute = "noteid";
   const annotatorHeight = 200;
   const annotatorWidth = 300;
   const tabPanelHeight = 30;
   const [selectionParentRect, setSelectionParentRect] = React.useState(null);
   const [selectionRect, setSelectionRect] = React.useState(null);
   const [selectedText, setSelectedText] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.selectedText ?? null
+    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]
+      ?.selectedText ?? null
   );
   const memoKeyOfHighlight = formatMemoKey(
-    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.selectedText
+    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.selectedText
   );
   const textToMemoKeyFormat = React.useRef(memoKeyOfHighlight);
   const [selectedAnchor, setSelectedAnchor] = React.useState(null);
@@ -76,7 +78,7 @@ export const Annotator = ({
 
   const tabValueMap = ["note", "memo"];
   const [currentTabValue, setCurrentTabValue] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]
+    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]
       ? tabValueMap.indexOf("note")
       : tabValueMap.indexOf("memo")
   );
@@ -85,11 +87,11 @@ export const Annotator = ({
     memoKeyOfHighlight ? memos[memoKeyOfHighlight] ?? "" : ""
   );
   const [note, setNote] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.note ?? ""
+    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.note ?? ""
   );
   const [highlightColor, setHighlightColor] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute("nodeid")]?.highlightColor ??
-      null
+    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]
+      ?.highlightColor ?? null
   );
   const oldTouchSelect = React.useRef(null);
 
@@ -188,9 +190,11 @@ export const Annotator = ({
       }
       selectedRangeIndexed = {
         startParentContainerId: startContainerParent.getAttribute("nodeid"),
+        startParentNoteId: startContainerParent.getAttribute("noteid"),
         parentStartIndex,
         startOffset,
         endParentContainerId: endContainerParent.getAttribute("nodeid"),
+        endParentNoteId: endContainerParent.getAttribute("noteid"),
         parentEndIndex,
         endOffset,
       };
@@ -214,7 +218,11 @@ export const Annotator = ({
   };
 
   const handleDeleteMark = (markId) =>
-    disableHighlightNodes(document.getElementsByClassName(markId));
+    disableHighlightNodes(
+      markId,
+      notes[spineIndex],
+      document.getElementsByClassName(markId)
+    );
 
   const handleUpdateHighlight = (noteId) => {
     const marks = document.getElementsByClassName(noteId);
@@ -227,7 +235,7 @@ export const Annotator = ({
     annotatorOpen.current = false;
     const updatedMemo = (memos[textToMemoKeyFormat.current] ?? "") !== memo;
     let noteId =
-      selectedAnchor === null ? anchorEl?.getAttribute("nodeid") : null;
+      selectedAnchor === null ? anchorEl?.getAttribute(noteIdAttribute) : null;
     const updatedNoteHighlight =
       (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNoteText = (notes[spineIndex]?.[noteId]?.note ?? "") !== note;
