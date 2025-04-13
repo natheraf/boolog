@@ -180,10 +180,11 @@ export const handleInjectingMark = (noteId, selectedRange, highlightColor) => {
     );
   } else {
     let it = selectedRange.startContainer;
-    while (it.nextSibling === null) {
-      it = it.parentNode;
+    let next = it;
+    while (next.nextSibling === null) {
+      next = next.parentNode;
     }
-    let next = it.nextSibling;
+    next = next.nextSibling;
     injectMarkToNode(
       it,
       noteId,
