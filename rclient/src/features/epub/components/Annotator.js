@@ -129,8 +129,10 @@ export const Annotator = ({
       clearSearchMarkNode();
       const selection = window.getSelection();
       if (
-        !selection.anchorNode.parentElement.getAttribute("nodeid") ||
-        !selection.focusNode.parentElement.getAttribute("nodeid")
+        (!selection.anchorNode.parentElement.getAttribute("nodeid") &&
+          !selection.anchorNode.parentElement.classList.contains("mark")) ||
+        (!selection.focusNode.parentElement.getAttribute("nodeid") &&
+          !selection.focusNode.parentElement.classList.contains("mark"))
       ) {
         return;
       }
@@ -172,31 +174,48 @@ export const Annotator = ({
       range.setStart(range.startContainer, startOffset);
       range.setEnd(range.endContainer, endOffset);
 
-      const startContainerParent = range.startContainer.parentElement;
-      const endContainerParent = range.endContainer.parentElement;
-      let parentStartIndex = 0;
-      for (const child of startContainerParent.childNodes) {
-        if (child.contains(range.startContainer)) {
+      const startNode = range.startContainer;
+      const endNode = range.endContainer;
+      let startContainerParent = startNode.parentElement;
+      while (startContainerParent.classList.contains("epub-node") === false) {
+        startContainerParent = startContainerParent.parentElement;
+      }
+      let endContainerParent = endNode.parentElement;
+      while (endContainerParent.classList.contains("epub-node") === false) {
+        endContainerParent = endContainerParent.parentElement;
+      }
+
+      let startOffsetFromParent = startOffset;
+      let walker = document.createTreeWalker(
+        startContainerParent,
+        NodeFilter.SHOW_TEXT
+      );
+      while (walker.nextNode()) {
+        const textNode = walker.currentNode;
+        if (startNode.contains(textNode)) {
           break;
         }
-        parentStartIndex += 1;
+        startOffsetFromParent += textNode.textContent.length;
       }
-      let parentEndIndex = 0;
-      for (const child of endContainerParent.childNodes) {
-        if (child.contains(range.endContainer)) {
+
+      let endOffsetFromParent = endOffset;
+      walker = document.createTreeWalker(
+        endContainerParent,
+        NodeFilter.SHOW_TEXT
+      );
+      while (walker.nextNode()) {
+        const textNode = walker.currentNode;
+        if (endNode.contains(textNode)) {
           break;
         }
-        parentEndIndex += 1;
+        endOffsetFromParent += textNode.textContent.length;
       }
+
       selectedRangeIndexed = {
-        startParentContainerId: startContainerParent.getAttribute("nodeid"),
-        startParentNoteId: startContainerParent.getAttribute("noteid"),
-        parentStartIndex,
-        startOffset,
-        endParentContainerId: endContainerParent.getAttribute("nodeid"),
-        endParentNoteId: endContainerParent.getAttribute("noteid"),
-        parentEndIndex,
-        endOffset,
+        startContainerId: startContainerParent.getAttribute("nodeid"),
+        startOffset: startOffsetFromParent,
+        endContainerId: endContainerParent.getAttribute("nodeid"),
+        endOffset: endOffsetFromParent,
       };
       selectedRange = range;
     }
@@ -218,11 +237,7 @@ export const Annotator = ({
   };
 
   const handleDeleteMark = (markId) =>
-    disableHighlightNodes(
-      markId,
-      notes[spineIndex],
-      document.getElementsByClassName(markId)
-    );
+    disableHighlightNodes(document.getElementsByClassName(markId));
 
   const handleUpdateHighlight = (noteId) => {
     const marks = document.getElementsByClassName(noteId);
@@ -277,7 +292,7 @@ export const Annotator = ({
           }
         }
       } else if (noteId) {
-        notes[spineIndex][noteId].deleted = true;
+        delete notes[spineIndex][noteId];
         handleDeleteMark(noteId);
         noteId = null;
       }

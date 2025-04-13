@@ -148,7 +148,8 @@ export const AnnotationViewer = ({
     const nodes = document.getElementsByClassName(noteId);
     if (deleteMark) {
       deleteNote(note, noteId);
-      disableHighlightNodes(noteId, notes[currentSpineIndex], nodes);
+      disableHighlightNodes(nodes);
+      delete notes[currentSpineIndex][noteId];
     } else {
       for (const node of nodes) {
         node.style.backgroundColor = note.highlightColor;

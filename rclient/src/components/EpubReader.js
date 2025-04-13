@@ -715,29 +715,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             }
           });
 
-        const notesSorted = Object.entries(
-          notes.current[spineIndexTracker] ?? {}
-        ).sort((a, b) => a[1].dateCreated - b[1].dateCreated);
-        for (const [noteId, entry] of notesSorted) {
+        const spineIndexNotes = notes.current[spineIndexTracker] ?? [];
+        for (const [noteId, entry] of Object.entries(spineIndexNotes)) {
           const selectedRange = structuredClone(entry.selectedRangeIndexed);
-          const startParentContainer = document.querySelector(
-            `[nodeId="${selectedRange.startParentContainerId}"]`
+          selectedRange.startContainer = document.querySelector(
+            `[nodeId="${selectedRange.startContainerId}"]`
           );
-          const endParentContainer = document.querySelector(
-            `[nodeId="${selectedRange.endParentContainerId}"]`
+          selectedRange.endContainer = document.querySelector(
+            `[nodeId="${selectedRange.endContainerId}"]`
           );
-          selectedRange.startContainer =
-            startParentContainer.childNodes[selectedRange.parentStartIndex];
-          selectedRange.endContainer =
-            endParentContainer.childNodes[selectedRange.parentEndIndex];
-          handleInjectingMark(
-            noteId,
-            selectedRange,
-            entry.deleted ? "rgba(0, 0, 0, 0)" : entry.highlightColor
-          );
-          if (entry.deleted) {
-            continue;
-          }
+          handleInjectingMark(noteId, selectedRange, entry.highlightColor);
           const marks = document.getElementsByClassName(noteId);
           const markOnClick = (mark) => (event) => {
             event.stopPropagation();
