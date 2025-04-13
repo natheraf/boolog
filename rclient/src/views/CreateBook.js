@@ -38,13 +38,7 @@ import DoneIcon from "@mui/icons-material/Done";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import CircularProgress from "@mui/material/CircularProgress";
-
-const DialogSlideUpTransition = React.forwardRef(function Transition(
-  props,
-  ref
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+import { DialogSlideUpTransition } from "../features/CustomComponents";
 
 export const CreateBook = ({
   open,
