@@ -71,8 +71,9 @@ export const processEpub = (epubObject) => {
 
     const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
-      const textNode = walker.currentNode;
-      textNode.parentElement.setAttribute("nodeid", nodeIndex);
+      const epubElement = walker.currentNode.parentElement;
+      epubElement.setAttribute("nodeid", nodeIndex);
+      epubElement.classList.add("epub-node");
       nodeIndex += 1;
     }
 
