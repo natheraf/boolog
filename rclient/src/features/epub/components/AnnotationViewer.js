@@ -140,7 +140,7 @@ export const AnnotationViewer = ({
       delete prev[chapter][noteId];
       return prev;
     });
-    notes[currentSpineIndex][noteId].deleted = true;
+    delete notes[currentSpineIndex][noteId];
     updatedNotes.current = true;
   };
 
@@ -149,7 +149,6 @@ export const AnnotationViewer = ({
     if (deleteMark) {
       deleteNote(note, noteId);
       disableHighlightNodes(nodes);
-      delete notes[currentSpineIndex][noteId];
     } else {
       for (const node of nodes) {
         node.style.backgroundColor = note.highlightColor;
