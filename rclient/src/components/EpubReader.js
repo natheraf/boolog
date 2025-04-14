@@ -585,6 +585,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [currentPage, formatting, pageWidth]);
 
+  /**
+   * handles page shrinking out of bounds
+   */
   React.useEffect(() => {
     if (contentElementRef.current !== null) {
       const resizeObserver = new ResizeObserver(handleViewOutOfBounds);
@@ -710,6 +713,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return () => observer.disconnect();
   }, []);
 
+  /**
+   * resizes images
+   */
   React.useEffect(() => {
     const config = { childList: true, subtree: true };
     const observer = new MutationObserver((mutationList, observer) => {
