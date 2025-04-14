@@ -24,9 +24,6 @@ export const disableHighlightNodes = (nodes) => {
 
 export const handleInjectingMark = (noteId, selectedRange, highlightColor) => {
   const markNode = (node, noteId, highlightColor) => {
-    if ((node.textContent?.trim()?.length ?? 0) === 0) {
-      return;
-    }
     if (node.nodeType === Node.TEXT_NODE) {
       const mark = document.createElement("span");
       mark.classList.add(noteId, "mark");
