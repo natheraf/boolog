@@ -406,6 +406,30 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     handleSearchOnBlur();
   };
 
+  const goToLinkFragment = React.useCallback(() => {
+    if (
+      linkFragment.current !== null &&
+      document.getElementById(linkFragment.current)
+    ) {
+      console.log("test");
+      const content = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      const fragment = document
+        .getElementById(linkFragment.current)
+        .getBoundingClientRect();
+      if (fragment.top > content.bottom) {
+        return;
+      }
+      const pageDelta = Math.floor(
+        (Math.floor(fragment.left) - Math.floor(content.left)) /
+          Math.floor(pageWidth + columnGap)
+      );
+      pageTracker = pageDelta;
+      setCurrentPage(pageDelta);
+    }
+  }, [pageWidth]);
+
   React.useEffect(() => {
     if (selectedSearchResult !== null) {
       const xPathExpression = getXPathSearchExpression(
@@ -508,12 +532,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         }
         if (markId !== null && document.getElementById(markId)) {
           linkFragment.current = markId;
+          addFunctionsAfterRender(() => goToLinkFragment(), 1);
         }
         break;
       }
       setSelectedSearchResult(null);
     }
-  }, [getXPathSearchExpression, selectedSearchResult]);
+  }, [getXPathSearchExpression, goToLinkFragment, selectedSearchResult]);
 
   const clearSearchMarkNode = () => {
     if (searchResultElementClone.current !== null) {
@@ -778,29 +803,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     observer.observe(document.body, config);
     return () => observer.disconnect();
   }, [getCurrentTotalPages, pageHeight, pageWidth]);
-
-  const goToLinkFragment = React.useCallback(() => {
-    if (
-      linkFragment.current !== null &&
-      document.getElementById(linkFragment.current)
-    ) {
-      const content = document
-        .getElementById("content")
-        .getBoundingClientRect();
-      const fragment = document
-        .getElementById(linkFragment.current)
-        .getBoundingClientRect();
-      if (fragment.top > content.bottom) {
-        return;
-      }
-      const pageDelta = Math.floor(
-        (Math.floor(fragment.left) - Math.floor(content.left)) /
-          Math.floor(pageWidth + columnGap)
-      );
-      pageTracker = pageDelta;
-      setCurrentPage(pageDelta);
-    }
-  }, [pageWidth]);
 
   const handleNextPage = React.useCallback(() => {
     if (
