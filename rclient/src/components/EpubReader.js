@@ -123,8 +123,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return value;
   }, [formatting.pageMargins, windowWidth]);
 
-  const linkFragment = React.useRef(null);
-
   const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
   const searchNeedle = React.useRef(null);
   const searchResultAccumulator = React.useRef([]);
@@ -406,29 +404,29 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     handleSearchOnBlur();
   };
 
-  const goToLinkFragment = React.useCallback(() => {
-    if (
-      linkFragment.current !== null &&
-      document.getElementById(linkFragment.current)
-    ) {
-      console.log("test");
-      const content = document
-        .getElementById("content")
-        .getBoundingClientRect();
-      const fragment = document
-        .getElementById(linkFragment.current)
-        .getBoundingClientRect();
-      if (fragment.top > content.bottom) {
-        return;
+  const goToLinkFragment = React.useCallback(
+    (linkFragment) => {
+      if (linkFragment !== null && document.getElementById(linkFragment)) {
+        const content = document
+          .getElementById("content")
+          .getBoundingClientRect();
+        const fragment = document
+          .getElementById(linkFragment)
+          .getBoundingClientRect();
+        if (fragment.top > content.bottom) {
+          return;
+        }
+        const pageDelta = Math.floor(
+          (Math.floor(fragment.left) - Math.floor(content.left)) /
+            Math.floor(pageWidth + columnGap)
+        );
+        console.log(pageDelta);
+        pageTracker = pageDelta;
+        setCurrentPage(pageDelta);
       }
-      const pageDelta = Math.floor(
-        (Math.floor(fragment.left) - Math.floor(content.left)) /
-          Math.floor(pageWidth + columnGap)
-      );
-      pageTracker = pageDelta;
-      setCurrentPage(pageDelta);
-    }
-  }, [pageWidth]);
+    },
+    [pageWidth]
+  );
 
   React.useEffect(() => {
     if (selectedSearchResult !== null) {
@@ -531,8 +529,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           }
         }
         if (markId !== null && document.getElementById(markId)) {
-          linkFragment.current = markId;
-          addFunctionsAfterRender(() => goToLinkFragment(), 1);
+          addFunctionsAfterRender(() => {
+            setTimeout(() => goToLinkFragment(markId), 0);
+          }, 1);
+          functionsWhenImagesInMemory.current.push(() =>
+            goToLinkFragment(markId)
+          );
         }
         break;
       }
@@ -957,11 +959,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       } else if (path.startsWith("/")) {
         path = path.substring(1);
       }
+      let linkFragment;
       if (path.indexOf("#") !== -1) {
-        linkFragment.current = path.substring(path.indexOf("#") + 1);
-        functionsWhenImagesInMemory.current.push(() => goToLinkFragment());
+        linkFragment = path.substring(path.indexOf("#") + 1);
+        functionsWhenImagesInMemory.current.push(() =>
+          goToLinkFragment(linkFragment)
+        );
         if (path.indexOf("#") === 0) {
-          return goToLinkFragment();
+          return goToLinkFragment(linkFragment);
         }
       }
       const spineIndex = getEpubValueFromPath(
@@ -970,11 +975,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       );
       if (typeof spineIndex === "number") {
         setLocationAsPrevious();
-        if (spineIndex === spineIndexTracker) {
-          return goToLinkFragment();
-        } else if (visitedSpineIndexes.current.has(spineIndex)) {
+        if (linkFragment && spineIndex === spineIndexTracker) {
+          return goToLinkFragment(linkFragment);
+        } else if (
+          linkFragment &&
+          visitedSpineIndexes.current.has(spineIndex)
+        ) {
           addFunctionsAfterRender(() => {
-            setTimeout(goToLinkFragment, 0);
+            setTimeout(() => goToLinkFragment(linkFragment), 0);
           }, 1);
         }
         addFunctionsAfterRender(() => (pageTracker = 0), 1);
