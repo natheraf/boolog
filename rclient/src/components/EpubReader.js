@@ -45,6 +45,8 @@ let firstTouchY = null;
 let spineIndexTracker = 0;
 let pageTracker = 0;
 
+let imagesInMemory = new Set();
+
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
@@ -121,7 +123,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return value;
   }, [formatting.pageMargins, windowWidth]);
 
-  const [linkFragment, setLinkFragment] = React.useState(null);
+  const linkFragment = React.useRef(null);
 
   const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
   const searchNeedle = React.useRef(null);
@@ -147,6 +149,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
 
   const functionsForNextRender = React.useRef([]);
+  const functionsWhenImagesInMemory = React.useRef([]);
 
   const [searchFocused, setSearchFocused] = React.useState(false);
 
@@ -504,7 +507,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           }
         }
         if (markId !== null && document.getElementById(markId)) {
-          setLinkFragment(markId);
+          linkFragment.current = markId;
         }
         break;
       }
@@ -604,6 +607,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const preloadImages = React.useCallback(
     (spinePointer) => {
       const loadedImages = {};
+      if (!visitedSpineIndexes.current.has(spinePointer)) {
+        imagesInMemory = new Set();
+      }
       for (const index of [spinePointer - 1, spinePointer, spinePointer + 1]) {
         if (
           index < 0 ||
@@ -621,11 +627,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         const nodes = page?.querySelectorAll("img, image");
         for (const node of nodes) {
           const tag = node.tagName.toLowerCase();
+          let url;
           if (tag === "img") {
             const src = node
               .getAttribute("ogsrc")
               ?.substring(node.getAttribute("ogsrc").startsWith("../") * 3);
-            const url =
+            url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
               URL.createObjectURL(getEpubValueFromPath(images.current, src));
@@ -644,7 +651,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }
             }
             src = src?.substring(src.startsWith("../") * 3);
-            const url =
+            url =
               loadedImages[src] ??
               loadedImageURLs[src] ??
               URL.createObjectURL(getEpubValueFromPath(images.current, src));
@@ -652,6 +659,9 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             node.setAttribute("href", url);
             node.style.height = "100%";
             node.style.width = "";
+          }
+          if (index === spinePointer) {
+            imagesInMemory.add(url);
           }
         }
         spine.current[index].element = page.documentElement.outerHTML;
@@ -714,6 +724,30 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, []);
 
   /**
+   * observes src attribute changes to help with flagging loaded images so we turn to the correct page
+   */
+  React.useEffect(() => {
+    const config = {
+      attributes: true,
+      attributeFilter: ["src"],
+      subtree: true,
+    };
+    const observer = new MutationObserver((mutationList, observer) => {
+      for (const mutation of mutationList) {
+        imagesInMemory.delete(mutation.target.src);
+      }
+      if (imagesInMemory.size === 0) {
+        setTimeout(() => {
+          functionsWhenImagesInMemory.current.forEach((fn) => fn());
+          functionsWhenImagesInMemory.current = [];
+        }, 10);
+      }
+    });
+    observer.observe(document.body, config);
+    return () => observer.disconnect();
+  }, []);
+
+  /**
    * resizes images
    */
   React.useEffect(() => {
@@ -745,13 +779,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return () => observer.disconnect();
   }, [getCurrentTotalPages, pageHeight, pageWidth]);
 
-  React.useEffect(() => {
-    if (linkFragment !== null && document.getElementById(linkFragment)) {
+  const goToLinkFragment = React.useCallback(() => {
+    if (
+      linkFragment.current !== null &&
+      document.getElementById(linkFragment.current)
+    ) {
       const content = document
         .getElementById("content")
         .getBoundingClientRect();
       const fragment = document
-        .getElementById(linkFragment)
+        .getElementById(linkFragment.current)
         .getBoundingClientRect();
       if (fragment.top > content.bottom) {
         return;
@@ -762,9 +799,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       );
       pageTracker = pageDelta;
       setCurrentPage(pageDelta);
-      setLinkFragment(null);
     }
-  }, [linkFragment, pageWidth]);
+  }, [pageWidth]);
 
   const handleNextPage = React.useCallback(() => {
     if (
@@ -920,20 +956,30 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         path = path.substring(1);
       }
       if (path.indexOf("#") !== -1) {
-        setLinkFragment(path.substring(path.indexOf("#") + 1));
+        linkFragment.current = path.substring(path.indexOf("#") + 1);
+        functionsWhenImagesInMemory.current.push(() => goToLinkFragment());
         if (path.indexOf("#") === 0) {
-          return;
+          return goToLinkFragment();
         }
-        path = path.substring(0, path.indexOf("#"));
       }
-      const spineIndex = getEpubValueFromPath(hrefSpineMap.current, path);
+      const spineIndex = getEpubValueFromPath(
+        hrefSpineMap.current,
+        path.indexOf("#") === -1 ? path : path.substring(0, path.indexOf("#"))
+      );
       if (typeof spineIndex === "number") {
         setLocationAsPrevious();
+        if (spineIndex === spineIndexTracker) {
+          return goToLinkFragment();
+        } else if (visitedSpineIndexes.current.has(spineIndex)) {
+          addFunctionsAfterRender(() => {
+            setTimeout(goToLinkFragment, 0);
+          }, 1);
+        }
         addFunctionsAfterRender(() => (pageTracker = 0), 1);
-        goToAndPreloadImages(getEpubValueFromPath(hrefSpineMap.current, path));
+        goToAndPreloadImages(spineIndex);
       }
     },
-    [goToAndPreloadImages]
+    [goToAndPreloadImages, goToLinkFragment]
   );
 
   const handleOnKeyDown = React.useCallback(
@@ -1084,6 +1130,15 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const startIndex = prev ?? 0;
       spineIndexTracker = startIndex;
       preloadImages(startIndex);
+      addFunctionsAfterRender(() => {
+        functionsWhenImagesInMemory.current.push(() => {
+          const page = Math.floor(
+            getCurrentTotalPages() * epubObject.progress.part
+          );
+          pageTracker = page;
+          setCurrentPage(page);
+        });
+      }, 1);
       return startIndex;
     });
     if (
@@ -1092,13 +1147,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     ) {
       epubObject.progress.part = 0;
     }
-    addFunctionsAfterRender(() => {
-      const page = Math.floor(
-        getCurrentTotalPages() * epubObject.progress.part
-      );
-      pageTracker = page;
-      setCurrentPage(page);
-    }, 1);
 
     window.addEventListener("resize", updateWindowSize);
 
