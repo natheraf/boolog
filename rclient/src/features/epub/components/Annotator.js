@@ -111,8 +111,6 @@ export const Annotator = ({
     if (highlightColor === event.target.value && isTextField !== true) {
       return;
     }
-    if (document.getElementsByClassName("temporary-mark").length > 0) {
-    }
     const value =
       isTextField && event.target.value === "" ? null : event.target.value;
     const noteId =
