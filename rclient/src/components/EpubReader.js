@@ -1173,7 +1173,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       const startIndex = prev ?? 0;
       spineIndexTracker = startIndex;
       preloadImages(startIndex);
-      addFunctionsAfterRender(() => {
+      if (imagesInMemory.size === 0) {
+        const page = Math.floor(
+          getCurrentTotalPages() * epubObject.progress.part
+        );
+        pageTracker = page;
+        setCurrentPage(page);
+      } else {
         functionsWhenImagesInMemory.current.push(() => {
           const page = Math.floor(
             getCurrentTotalPages() * epubObject.progress.part
@@ -1181,7 +1187,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           pageTracker = page;
           setCurrentPage(page);
         });
-      }, 1);
+      }
       return startIndex;
     });
     if (
