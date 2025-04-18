@@ -207,7 +207,7 @@ export const AnnotationViewer = ({
   };
 
   const updateMemosAsArray = () => {
-    return Object.entries(memos);
+    return Object.entries(memos).sort((a, b) => a[0].localeCompare(b[0]));
   };
 
   const scrollToCurrentChapterSubheader = () => {
