@@ -59,7 +59,10 @@ export const Annotator = ({
   setAnchorEl,
 }) => {
   const theme = useTheme();
-  const defaultHighlightColor = theme.palette.secondary.dark;
+  const defaultHighlightColor =
+    theme.palette.mode === "dark"
+      ? theme.palette.secondary.dark
+      : theme.palette.secondary.light;
   const noteIdAttribute = "noteid";
   const annotatorHeight = 200;
   const annotatorWidth = 300;
