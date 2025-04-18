@@ -196,8 +196,6 @@ export const Annotator = ({
       range.setStart(range.startContainer, startOffset);
       range.setEnd(range.endContainer, endOffset);
 
-      handleInjectingMark(null, range, defaultHighlightColor, "temporary-mark");
-
       const startNode = range.startContainer;
       const endNode = range.endContainer;
       let startContainerParent = startNode.parentElement;
@@ -235,6 +233,8 @@ export const Annotator = ({
         endOffsetFromParent += textNode.textContent.length;
       }
 
+      handleInjectingMark(null, range, defaultHighlightColor, "temporary-mark");
+
       selectedRangeIndexed = {
         startContainerId: startContainerParent.getAttribute("nodeid"),
         startOffset: startOffsetFromParent,
@@ -247,7 +247,7 @@ export const Annotator = ({
 
   const handleTemporaryMarksAndAddingClickListeners = (noteId) => {
     changeTemporaryMarksToPermanent(
-      document.getElementsByClassName("temporary-mark"),
+      [...document.getElementsByClassName("temporary-mark")],
       noteId
     );
     const marks = document.getElementsByClassName(noteId);
