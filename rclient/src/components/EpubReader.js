@@ -751,14 +751,30 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             "mark"
           );
           const marks = document.getElementsByClassName(noteId);
-          const markOnClick = (mark) => (event) => {
+          const markOnClick = (noteId) => (event) => {
             event.stopPropagation();
+            const marks = document.getElementsByClassName(noteId);
+            let start = 0;
+            while (marks[start].textContent.length === 0) {
+              start += 1;
+            }
+            let end = marks.length - 1;
+            while (marks[end].textContent.length === 0) {
+              end -= 1;
+            }
+            let markToAnchor = marks[end];
+            if (
+              marks[start].getBoundingClientRect().top >
+              Math.floor(window.innerHeight / 2)
+            ) {
+              markToAnchor = marks[start];
+            }
             if (window.getSelection().isCollapsed) {
-              handleMarkHighlightOnClick(mark);
+              handleMarkHighlightOnClick(markToAnchor);
             }
           };
           for (const mark of marks) {
-            addListener(mark, "click", markOnClick(mark));
+            addListener(mark, "click", markOnClick(noteId));
           }
         }
       }

@@ -251,11 +251,17 @@ export const Annotator = ({
       noteId
     );
     const marks = document.getElementsByClassName(noteId);
+    let markToAnchor = marks[marks.length - 1];
+    if (
+      marks[0].getBoundingClientRect().top > Math.floor(window.innerHeight / 2)
+    ) {
+      markToAnchor = marks[0];
+    }
     const markOnClick = (mark) => (event) => {
       event.stopPropagation();
       setAnchorEl(null);
       if (window.getSelection().isCollapsed) {
-        setAnchorEl(mark);
+        setAnchorEl(markToAnchor);
       }
     };
     for (const mark of marks) {
@@ -392,15 +398,15 @@ export const Annotator = ({
               : anchorEl
               ? anchorEl.getBoundingClientRect().top >
                 Math.floor(window.innerHeight / 2)
-                ? -anchorEl.getBoundingClientRect().height / 2
-                : anchorEl.getBoundingClientRect().height
+                ? -10
+                : anchorEl.getBoundingClientRect().height + 10
               : -20,
           horizontal:
             selectionParentRect && selectionRect
               ? selectionRect.right -
                 selectionParentRect.left -
                 selectionRect.width / 2
-              : "center",
+              : (anchorEl?.getBoundingClientRect().width ?? 0) / 2,
         }}
         transformOrigin={{
           vertical:
