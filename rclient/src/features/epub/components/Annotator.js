@@ -386,12 +386,9 @@ export const Annotator = ({
               ? selectionRect.top > Math.floor(window.innerHeight / 2)
                 ? selectionRect.bottom -
                   selectionParentRect.top -
-                  selectionRect.height / 2 -
-                  20
-                : selectionRect.bottom -
-                  selectionParentRect.top -
-                  selectionRect.height / 2 +
-                  20
+                  selectionRect.height -
+                  10
+                : selectionRect.bottom - selectionParentRect.top + 10
               : anchorEl
               ? anchorEl.getBoundingClientRect().top >
                 Math.floor(window.innerHeight / 2)
