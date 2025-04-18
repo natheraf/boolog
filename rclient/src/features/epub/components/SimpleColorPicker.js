@@ -2,6 +2,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  IconButton,
   Radio,
   RadioGroup,
   Stack,
@@ -9,6 +10,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import PropTypes from "prop-types";
+import HelpIcon from "@mui/icons-material/Help";
 
 export const SimpleColorPicker = ({
   color,
@@ -70,6 +72,19 @@ export const SimpleColorPicker = ({
       <Stack spacing={1}>
         <Tooltip title="Enter a color name, RGB, HEX, or HSL" placement="left">
           <FormLabel>Custom</FormLabel>
+          <IconButton
+            size="small"
+            onClick={() =>
+              window
+                .open(
+                  "https://developer.mozilla.org/en-US/docs/Web/CSS/background-color",
+                  "_blank"
+                )
+                .focus()
+            }
+          >
+            <HelpIcon fontSize="small" htmlColor={"gray"} />
+          </IconButton>
         </Tooltip>
         <TextField
           value={color ?? ""}
