@@ -199,9 +199,13 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const goToNote = (spineIndex, noteId) => {
     goToAndPreloadImages(spineIndex);
-    addFunctionsAfterRender(() => {
-      goToClassName(noteId);
-    }, 1);
+    if (visitedSpineIndexes.current.has(spineIndex)) {
+      addFunctionsAfterRender(() => {
+        setTimeout(() => goToClassName(noteId), 0);
+      }, 1);
+    } else {
+      functionsWhenImagesInMemory.current.push(() => goToClassName(noteId));
+    }
   };
 
   const handleMarkHighlightOnClick = (mark) => {
