@@ -24,8 +24,16 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 import { SimpleColorPicker } from "./SimpleColorPicker";
-import { disableHighlightNodes, handleInjectingMark } from "../domUtils";
+import {
+  changeStyleValue,
+  changeTemporaryMarksToPermanent,
+  disableHighlightNodes,
+  handleInjectingMark,
+} from "../domUtils";
 import { addListener } from "../../listenerManager";
+import { useTheme } from "@emotion/react";
+
+const defaultHighlightColor = `rgba(255, 255, 255, .2)`;
 
 let selectedRange = null;
 let selectedRangeIndexed = null;
@@ -53,11 +61,12 @@ export const Annotator = ({
   entryId,
   memos,
   notes,
-  clearSearchMarkNode,
+  clearTemporaryMarks,
   spineIndex,
   anchorEl,
   setAnchorEl,
 }) => {
+  const theme = useTheme();
   const noteIdAttribute = "noteid";
   const annotatorHeight = 200;
   const annotatorWidth = 300;
@@ -94,6 +103,7 @@ export const Annotator = ({
       ?.highlightColor ?? null
   );
   const oldTouchSelect = React.useRef(null);
+  const textAreaRef = React.useRef(null);
 
   const handleClear = (type) => {
     if (type === "memo") {
@@ -108,9 +118,20 @@ export const Annotator = ({
     if (highlightColor === event.target.value && isTextField !== true) {
       return;
     }
-    setHighlightColor(
-      isTextField && event.target.value === "" ? null : event.target.value
+    if (document.getElementsByClassName("temporary-mark").length > 0) {
+    }
+    const value =
+      isTextField && event.target.value === "" ? null : event.target.value;
+    const noteId =
+      selectedAnchor === null ? anchorEl?.getAttribute(noteIdAttribute) : null;
+    changeStyleValue(
+      document.getElementsByClassName(
+        noteId === null ? "temporary-mark" : noteId
+      ),
+      "backgroundColor",
+      value ?? defaultHighlightColor
     );
+    setHighlightColor(value);
   };
 
   const handleHighlightColorClick = (value) => {
@@ -120,13 +141,22 @@ export const Annotator = ({
   };
 
   const handleOnChangeTab = (event, value) => {
+    setTimeout(() => {
+      if (textAreaRef.current) {
+        textAreaRef.current.focus();
+        textAreaRef.current.setSelectionRange(
+          textAreaRef.current.value.length,
+          textAreaRef.current.value.length
+        );
+      }
+    });
     setCurrentTabValue(value);
   };
 
   const handleGetTextSelection = () => {
     const selectedString = window.getSelection()?.toString()?.trim();
     if (annotatorOpen.current === false && selectedString?.length > 0) {
-      clearSearchMarkNode();
+      clearTemporaryMarks();
       const selection = window.getSelection();
       if (
         (!selection.anchorNode.parentElement.getAttribute("nodeid") &&
@@ -147,7 +177,8 @@ export const Annotator = ({
       textToMemoKeyFormat.current = formatMemoKey(selectedString);
       setMemo(memos[textToMemoKeyFormat.current] ?? "");
       // if 2 spaces, probably a note
-      setCurrentTabValue(
+      handleOnChangeTab(
+        null,
         selectedString.indexOf(" ") > -1 &&
           selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
           ? tabValueMap.indexOf("note")
@@ -173,6 +204,8 @@ export const Annotator = ({
 
       range.setStart(range.startContainer, startOffset);
       range.setEnd(range.endContainer, endOffset);
+
+      handleInjectingMark(null, range, defaultHighlightColor, "temporary-mark");
 
       const startNode = range.startContainer;
       const endNode = range.endContainer;
@@ -221,8 +254,11 @@ export const Annotator = ({
     }
   };
 
-  const handleInjectingMarkAndClickListener = (noteId) => {
-    handleInjectingMark(noteId, selectedRange, highlightColor);
+  const handleTemporaryMarksAndAddingClickListeners = (noteId) => {
+    changeTemporaryMarksToPermanent(
+      document.getElementsByClassName("temporary-mark"),
+      noteId
+    );
     const marks = document.getElementsByClassName(noteId);
     const markOnClick = (mark) => (event) => {
       event.stopPropagation();
@@ -270,7 +306,7 @@ export const Annotator = ({
         let newNote = !noteId;
         noteId = noteId ?? getNewId();
         if (newNote) {
-          handleInjectingMarkAndClickListener(noteId);
+          handleTemporaryMarksAndAddingClickListeners(noteId);
           if (notes.hasOwnProperty(spineIndex) === false) {
             notes[spineIndex] = {};
           }
@@ -307,6 +343,7 @@ export const Annotator = ({
     }
     setAnchorEl(null);
     setSelectedAnchor(null);
+    clearTemporaryMarks();
   };
 
   const handleTextAreaOnChange = (event) => {
@@ -490,6 +527,7 @@ export const Annotator = ({
             </HtmlTooltip>
           </SmallTabs>
           <Textarea
+            ref={textAreaRef}
             value={tabValueMap[currentTabValue] === "memo" ? memo : note}
             onChange={handleTextAreaOnChange}
             onKeyDown={(event) => event.stopPropagation()}
@@ -519,7 +557,7 @@ Annotator.propTypes = {
   entryId: PropTypes.string.isRequired,
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
-  clearSearchMarkNode: PropTypes.func.isRequired,
+  clearTemporaryMarks: PropTypes.func.isRequired,
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,
