@@ -26,6 +26,7 @@ import {
 } from "../domUtils";
 import { addListener } from "../../listenerManager";
 import { useTheme } from "@emotion/react";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
 
 let selectedRange = null;
 let selectedRangeIndexed = null;
@@ -446,6 +447,13 @@ export const Annotator = ({
                 {selectedText}
               </Typography>
             </HtmlTooltip>
+            <Tooltip title={"Copy"}>
+              <IconButton
+                onClick={() => navigator.clipboard.writeText(selectedText)}
+              >
+                <CopyAllIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
             {(tabValueMap[currentTabValue] === "memo" && memo.length > 0) ||
             (tabValueMap[currentTabValue] === "note" &&
               (note.length > 0 || highlightColor)) ? (
