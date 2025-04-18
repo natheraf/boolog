@@ -447,28 +447,30 @@ export const Annotator = ({
                 {selectedText}
               </Typography>
             </HtmlTooltip>
-            <Tooltip title={"Copy"}>
-              <IconButton
-                onClick={() => navigator.clipboard.writeText(selectedText)}
-              >
-                <CopyAllIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            {(tabValueMap[currentTabValue] === "memo" && memo.length > 0) ||
-            (tabValueMap[currentTabValue] === "note" &&
-              (note.length > 0 || highlightColor)) ? (
-              <Tooltip title={"Clear"}>
+            <Stack direction={"row"} alignItems={"center"}>
+              <Tooltip title={"Copy"}>
                 <IconButton
-                  onClick={() => handleClear(tabValueMap[currentTabValue])}
+                  onClick={() => navigator.clipboard.writeText(selectedText)}
                 >
-                  <DeleteIcon fontSize="small" />
+                  <CopyAllIcon fontSize="small" />
                 </IconButton>
               </Tooltip>
-            ) : (
-              <IconButton disabled>
-                <DeleteOutlineIcon fontSize="small" />
-              </IconButton>
-            )}
+              {(tabValueMap[currentTabValue] === "memo" && memo.length > 0) ||
+              (tabValueMap[currentTabValue] === "note" &&
+                (note.length > 0 || highlightColor)) ? (
+                <Tooltip title={"Clear"}>
+                  <IconButton
+                    onClick={() => handleClear(tabValueMap[currentTabValue])}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+              ) : (
+                <IconButton disabled>
+                  <DeleteOutlineIcon fontSize="small" />
+                </IconButton>
+              )}
+            </Stack>
           </Stack>
           <Divider />
           <SmallTabs
