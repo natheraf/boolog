@@ -2,15 +2,9 @@ import * as React from "react";
 import {
   Backdrop,
   Divider,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
   IconButton,
   Menu,
-  Radio,
-  RadioGroup,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -32,8 +26,6 @@ import {
 } from "../domUtils";
 import { addListener } from "../../listenerManager";
 import { useTheme } from "@emotion/react";
-
-const defaultHighlightColor = `rgba(255, 255, 255, .2)`;
 
 let selectedRange = null;
 let selectedRangeIndexed = null;
@@ -67,6 +59,7 @@ export const Annotator = ({
   setAnchorEl,
 }) => {
   const theme = useTheme();
+  const defaultHighlightColor = theme.palette.secondary.dark;
   const noteIdAttribute = "noteid";
   const annotatorHeight = 200;
   const annotatorWidth = 300;
