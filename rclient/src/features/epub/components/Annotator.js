@@ -270,6 +270,9 @@ export const Annotator = ({
       }
     };
     for (const mark of marks) {
+      if (highlightColor === null) {
+        mark.style.backgroundColor = null;
+      }
       addListener(mark, "click", markOnClick(mark));
     }
   };
