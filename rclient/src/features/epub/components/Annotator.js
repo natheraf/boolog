@@ -90,7 +90,7 @@ export const Annotator = ({
   );
 
   const [memo, setMemo] = React.useState(
-    memoKeyOfHighlight ? memos[memoKeyOfHighlight] ?? "" : ""
+    memoKeyOfHighlight ? memos[memoKeyOfHighlight]?.memo ?? "" : ""
   );
   const [note, setNote] = React.useState(
     notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.note ?? ""
@@ -170,7 +170,7 @@ export const Annotator = ({
       annotatorOpen.current = true;
       // removes possessive form
       textToMemoKeyFormat.current = formatMemoKey(selectedString);
-      setMemo(memos[textToMemoKeyFormat.current] ?? "");
+      setMemo(memos[textToMemoKeyFormat.current]?.memo ?? "");
       // if 2 spaces, probably a note
       handleOnChangeTab(
         null,
@@ -286,7 +286,8 @@ export const Annotator = ({
 
   const handleCloseAnnotator = () => {
     annotatorOpen.current = false;
-    const updatedMemo = (memos[textToMemoKeyFormat.current] ?? "") !== memo;
+    const updatedMemo =
+      (memos[textToMemoKeyFormat.current]?.memo ?? "") !== memo;
     let noteId =
       selectedAnchor === null ? anchorEl?.getAttribute(noteIdAttribute) : null;
     const updatedNoteHighlight =
@@ -295,10 +296,18 @@ export const Annotator = ({
     const updatedNote = updatedNoteText || updatedNoteHighlight;
     const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
-      if (memo.length > 0) {
-        memos[textToMemoKeyFormat.current] = memo;
-      } else {
+      if (memo.length === 0) {
         delete memos[textToMemoKeyFormat.current];
+      } else if (memos.hasOwnProperty(textToMemoKeyFormat.current)) {
+        memos[textToMemoKeyFormat.current].memo = memo;
+        memos[textToMemoKeyFormat.current].dateModified = new Date().toJSON();
+      } else {
+        const date = new Date().toJSON();
+        memos[textToMemoKeyFormat.current] = {
+          memo,
+          dateCreated: date,
+          dateModified: date,
+        };
       }
     }
 

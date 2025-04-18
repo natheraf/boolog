@@ -267,11 +267,15 @@ export const AnnotationViewer = ({
   };
 
   const handleMemoTextAreaOnChange = (key, memoArrayIndex) => (event) => {
-    memos[key] = event.target.value;
+    memos[key].memo = event.target.value;
+    memos[key].dateModified = new Date().toJSON();
     setMemoAsArray((prev) =>
-      prev.map((entry, index) =>
-        index === memoArrayIndex ? [key, event.target.value] : entry
-      )
+      prev.map(([key, entry], index) => {
+        if (index === memoArrayIndex) {
+          entry.memo = event.target.value;
+        }
+        return [key, entry];
+      })
     );
     if (event.target.value.trim().length === 0) {
       clearedMemos.current.push(key);
@@ -542,7 +546,7 @@ export const AnnotationViewer = ({
                   {"No Memos"}
                 </Typography>
               ) : (
-                memosAsArray.map(([key, value], memoArrayIndex) => (
+                memosAsArray.map(([key, entry], memoArrayIndex) => (
                   <Stack
                     component={Paper}
                     spacing={1}
@@ -552,8 +556,28 @@ export const AnnotationViewer = ({
                     <Typography variant="h6">
                       {key[0].toUpperCase() + key.substring(1)}
                     </Typography>
+                    <Tooltip
+                      enterDelay={300}
+                      enterNextDelay={300}
+                      placement={"top"}
+                      title={`Created: ${new Date(
+                        entry.dateCreated
+                      ).toLocaleString(undefined, {
+                        timeStyle: "short",
+                        dateStyle: "short",
+                      })}`}
+                    >
+                      <Typography variant="subtitle2" color="gray">
+                        {`Modified: ${new Date(
+                          entry.dateModified
+                        ).toLocaleString(undefined, {
+                          timeStyle: "short",
+                          dateStyle: "short",
+                        })}`}
+                      </Typography>
+                    </Tooltip>
                     <Textarea
-                      value={value}
+                      value={entry.memo}
                       onChange={handleMemoTextAreaOnChange(key, memoArrayIndex)}
                       onKeyDown={(event) => {
                         event.stopPropagation();
