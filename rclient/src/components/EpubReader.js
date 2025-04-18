@@ -32,7 +32,10 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
 import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { handleInjectingMark } from "../features/epub/domUtils";
+import {
+  deleteNodesAndLiftChildren,
+  handleInjectingMark,
+} from "../features/epub/domUtils";
 import { addListener } from "../features/listenerManager";
 import {
   DialogSlideUpTransition,
@@ -402,7 +405,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const handleSearchOnChange = (event, value) => {
-    clearSearchMarkNode();
+    clearTemporaryMarks();
     goToAndPreloadImages(value.spineIndex, value.page);
     setSelectedSearchResult(value);
     handleSearchOnBlur();
@@ -546,7 +549,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   }, [getXPathSearchExpression, goToLinkFragment, selectedSearchResult]);
 
-  const clearSearchMarkNode = () => {
+  const clearTemporaryMarks = () => {
     if (searchResultElementClone.current !== null) {
       searchResultElementClone.current.parentElement.replaceChild(
         searchResultElement.current,
@@ -554,6 +557,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       );
       searchResultElement.current = null;
       searchResultElementClone.current = null;
+    }
+    if (document.getElementsByClassName("temporary-mark").length > 0) {
+      deleteNodesAndLiftChildren(
+        document.getElementsByClassName("temporary-mark")
+      );
     }
   };
 
@@ -736,7 +744,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           selectedRange.endContainer = document.querySelector(
             `[nodeId="${selectedRange.endContainerId}"]`
           );
-          handleInjectingMark(noteId, selectedRange, entry.highlightColor);
+          handleInjectingMark(
+            noteId,
+            selectedRange,
+            entry.highlightColor,
+            "mark"
+          );
           const marks = document.getElementsByClassName(noteId);
           const markOnClick = (mark) => (event) => {
             event.stopPropagation();
@@ -818,7 +831,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     ) {
       return;
     }
-    clearSearchMarkNode();
+    clearTemporaryMarks();
     const totalWidth = document.getElementById("content").scrollWidth;
     const totalPages =
       Math.floor(totalWidth / pageWidth) +
@@ -855,7 +868,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     ) {
       return;
     }
-    clearSearchMarkNode();
+    clearTemporaryMarks();
     const previousTotalWidth =
       document.getElementById("previous-content").scrollWidth;
     const totalPages =
@@ -1353,7 +1366,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 <AnnotationViewer
                   spine={spine.current}
                   entryId={entryId}
-                  clearSearchMarkNode={clearSearchMarkNode}
+                  clearTemporaryMarks={clearTemporaryMarks}
                   notes={notes.current}
                   memos={epubObject.memos}
                   currentSpineIndex={spinePointer}
@@ -1709,7 +1722,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         entryId={entryId}
         memos={epubObject.memos}
         notes={notes.current}
-        clearSearchMarkNode={clearSearchMarkNode}
+        clearTemporaryMarks={clearTemporaryMarks}
         spineIndex={spinePointer}
         anchorEl={annotatorAnchorEl}
         setAnchorEl={setAnnotatorAnchorEl}

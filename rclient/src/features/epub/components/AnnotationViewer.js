@@ -32,7 +32,7 @@ import { disableHighlightNodes } from "../domUtils";
 export const AnnotationViewer = ({
   spine,
   entryId,
-  clearSearchMarkNode,
+  clearTemporaryMarks,
   notes,
   memos,
   currentSpineIndex,
@@ -235,7 +235,7 @@ export const AnnotationViewer = ({
     scrollToCurrentChapterSubheader();
     setNotesAsMap(updateNotesAsMap());
     setMemoAsArray(updateMemosAsArray());
-    clearSearchMarkNode();
+    clearTemporaryMarks();
     setAnchorEl(event.currentTarget);
   };
 
@@ -584,7 +584,7 @@ export const AnnotationViewer = ({
 AnnotationViewer.propTypes = {
   spine: PropTypes.array.isRequired,
   entryId: PropTypes.string.isRequired,
-  clearSearchMarkNode: PropTypes.func.isRequired,
+  clearTemporaryMarks: PropTypes.func.isRequired,
   memos: PropTypes.object.isRequired,
   notes: PropTypes.object.isRequired,
   currentSpineIndex: PropTypes.number.isRequired,
