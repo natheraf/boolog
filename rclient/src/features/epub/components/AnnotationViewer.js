@@ -74,7 +74,7 @@ export const AnnotationViewer = ({
     }
     if (updatedMemos.current) {
       for (const keyOfClearedMemo of clearedMemos.current) {
-        if (memos[keyOfClearedMemo]?.trim().length === 0) {
+        if (memos[keyOfClearedMemo]?.memo?.trim().length === 0) {
           delete memos[keyOfClearedMemo];
         }
       }
