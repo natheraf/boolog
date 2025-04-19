@@ -865,6 +865,7 @@ export const AnnotationViewer = ({
                       : memoSort
                   }
                   sx={{ height: 30 }}
+                  size="small"
                 >
                   {sortSelectEntries.map((entry) =>
                     entry.type === "group_label" ? (
