@@ -319,6 +319,7 @@ export const Annotator = ({
       if (note.length > 0 || highlightColor !== null) {
         let newNote = !noteId;
         noteId = noteId ?? getNewId();
+        const date = new Date().toJSON();
         if (newNote) {
           handleTemporaryMarksAndAddingClickListeners(noteId);
           if (notes.hasOwnProperty(spineIndex) === false) {
@@ -329,10 +330,12 @@ export const Annotator = ({
             spineIndex,
             highlightColor,
             selectedText,
-            dateCreated: Date.now(),
+            dateCreated: date,
+            dateModified: date,
             selectedRangeIndexed,
           };
         } else {
+          notes[spineIndex][noteId].dateModified = date;
           if (updatedNoteHighlight) {
             handleUpdateHighlight(noteId);
             notes[spineIndex][noteId].highlightColor = highlightColor;
