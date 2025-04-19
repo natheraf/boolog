@@ -8,8 +8,11 @@ import {
   Box,
   Divider,
   IconButton,
+  ListSubheader,
   Menu,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Tooltip,
   Typography,
@@ -80,6 +83,120 @@ export const AnnotationViewer = ({
   const saveTimeOutId = React.useRef(null);
   const saveCountDownRef = React.useRef(0);
   const [saveCountDown, setSaveCountDown] = React.useState(0);
+  const [memoSort, setMemoSort] = React.useState("alphabetical_inc");
+  const [noteSort, setNoteSort] = React.useState(
+    "date_modified_with_chapters_dec"
+  );
+  const noteSortingWithChapters = noteSort.includes("with_chapters");
+
+  const deleteNotesHelper = (chapter, arrayIndex) => {
+    if (noteSortingWithChapters) {
+      setNotesAsMap((prev) => ({
+        ...prev,
+        [chapter]: prev[chapter].filter((_obj, index) => index !== arrayIndex),
+      }));
+    } else {
+      setNotesAsMap((prev) =>
+        prev.filter((_obj, index) => index !== arrayIndex)
+      );
+    }
+  };
+
+  const setNoteValueHelper = (chapter, arrayIndex, key, value) => {
+    if (noteSortingWithChapters) {
+      setNotesAsMap((prev) => ({
+        ...prev,
+        [chapter]: prev[chapter].map((obj, index) =>
+          index === arrayIndex ? { ...obj, [key]: value } : obj
+        ),
+      }));
+    } else {
+      setNotesAsMap((prev) =>
+        prev.map((obj, index) =>
+          index === arrayIndex ? { ...obj, [key]: value } : obj
+        )
+      );
+    }
+  };
+
+  const sortSelectEntries =
+    tabValueMap[currentTabValue] === "notes"
+      ? [
+          { type: "group_label", label: "With Chapters" },
+          {
+            type: "value",
+            label: "New Modified ↓",
+            value: "date_modified_with_chapters_dec",
+          },
+          {
+            type: "value",
+            label: "Old Modified ↑",
+            value: "date_modified_with_chapters_inc",
+          },
+          {
+            type: "value",
+            label: "New Created ↓",
+            value: "date_created_with_chapters_dec",
+          },
+          {
+            type: "value",
+            label: "Old Created ↑",
+            value: "date_created_with_chapters_inc",
+          },
+          { type: "group_label", label: "Without Chapters" },
+          {
+            type: "value",
+            label: "New Modified ↓",
+            value: "date_modified_without_chapters_dec",
+          },
+          {
+            type: "value",
+            label: "Old Modified ↑",
+            value: "date_modified_without_chapters_inc",
+          },
+          {
+            type: "value",
+            label: "New Created ↓",
+            value: "date_created_without_chapters_dec",
+          },
+          {
+            type: "value",
+            label: "Old Created ↑",
+            value: "date_created_without_chapters_inc",
+          },
+        ]
+      : [
+          {
+            type: "value",
+            label: "Alphabetical ↑",
+            value: "alphabetical_inc",
+          },
+          {
+            type: "value",
+            label: "Alphabetical ↓",
+            value: "alphabetical_dec",
+          },
+          {
+            type: "value",
+            label: "New Modified ↓",
+            value: "date_modified_dec",
+          },
+          {
+            type: "value",
+            label: "Old Modified ↑",
+            value: "date_modified_inc",
+          },
+          {
+            type: "value",
+            label: "New Created ↓",
+            value: "date_created_dec",
+          },
+          {
+            type: "value",
+            label: "Old Created ↑",
+            value: "date_created_inc",
+          },
+        ];
 
   const clearSaveCountDown = () => {
     clearTimeout(saveTimeOutId.current);
@@ -150,26 +267,27 @@ export const AnnotationViewer = ({
     }
   };
 
-  const handleOpenColorPicker = (note, noteId) => (event) => {
-    setDataForColorPicker({ ...note, noteId });
+  const handleOpenColorPicker = (note, noteId, arrayIndex) => (event) => {
+    setDataForColorPicker({ ...note, noteId, arrayIndex });
     setColorPickAnchorEl(event.currentTarget);
   };
 
-  const deleteNote = (note, noteId) => {
+  const deleteNote = (note, noteId, arrayIndex) => {
     const chapter = spine[note.spineIndex].label;
-    setNotesAsMap((prev) => {
-      const newObject = structuredClone(prev);
-      delete newObject[chapter][noteId];
-      return newObject;
-    });
-    delete notes[currentSpineIndex][noteId];
+    deleteNotesHelper(chapter, arrayIndex);
+    delete notes[note.spineIndex][noteId];
     updatedNotes.current = true;
   };
 
-  const updateNoteMarksOrDeleteInDOM = (note, noteId, deleteMark) => {
+  const updateNoteMarksOrDeleteInDOM = (
+    note,
+    noteId,
+    deleteMark,
+    arrayIndex
+  ) => {
     const nodes = document.getElementsByClassName(noteId);
     if (deleteMark) {
-      deleteNote(note, noteId);
+      deleteNote(note, noteId, arrayIndex);
       disableHighlightNodes(nodes);
     } else {
       for (const node of nodes) {
@@ -181,20 +299,22 @@ export const AnnotationViewer = ({
 
   const handleCloseColorPicker = () => {
     if (
-      notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor !==
-      dataForColorPicker.highlightColor
+      notes[dataForColorPicker.spineIndex][dataForColorPicker.noteId]
+        .highlightColor !== dataForColorPicker.highlightColor
     ) {
       const chapter = spine[dataForColorPicker.spineIndex].label;
-      setNotesAsMap((prev) => {
-        const newObject = structuredClone(prev);
-        newObject[chapter][dataForColorPicker.noteId].highlightColor =
-          dataForColorPicker.highlightColor;
-        return newObject;
-      });
-      notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor =
-        dataForColorPicker.highlightColor;
-      notes[currentSpineIndex][dataForColorPicker.noteId].dateModified =
-        new Date().toJSON();
+      setNoteValueHelper(
+        chapter,
+        dataForColorPicker.arrayIndex,
+        "highlightColor",
+        dataForColorPicker.highlightColor
+      );
+      notes[dataForColorPicker.spineIndex][
+        dataForColorPicker.noteId
+      ].highlightColor = dataForColorPicker.highlightColor;
+      notes[dataForColorPicker.spineIndex][
+        dataForColorPicker.noteId
+      ].dateModified = new Date().toJSON();
 
       updateNoteMarksOrDeleteInDOM(
         dataForColorPicker,
@@ -212,27 +332,98 @@ export const AnnotationViewer = ({
     goToNote(spineIndex, noteId);
   };
 
-  const updateNotesAsMap = () => {
-    const res = {};
-    let prevSubheader = null;
-    for (const chapterNodes of Object.values(notes)) {
-      for (const [noteId, note] of Object.entries(chapterNodes)) {
-        if (note.deleted) {
-          continue;
+  const updateNotesAsMap = (noteSort) => {
+    const noteSortingWithChapters = noteSort.includes("with_chapters");
+    if (noteSortingWithChapters) {
+      const res = {};
+      let prevSubheader = null;
+      for (const chapterNodes of Object.values(notes)) {
+        for (const [noteId, note] of Object.entries(chapterNodes)) {
+          if (note.deleted) {
+            continue;
+          }
+          const currentLabel = spine[note.spineIndex].label;
+          if (prevSubheader !== spine[note.spineIndex].label) {
+            res[currentLabel] = [];
+          }
+          prevSubheader = currentLabel;
+          note.id = noteId;
+          res[currentLabel].push(note);
         }
-        const currentLabel = spine[note.spineIndex].label;
-        if (prevSubheader !== spine[note.spineIndex].label) {
-          res[currentLabel] = {};
-        }
-        prevSubheader = currentLabel;
-        res[currentLabel][noteId] = note;
       }
+      if (noteSort.includes("date_modified_with_chapters")) {
+        Object.values(res).forEach((list) =>
+          list.sort((a, b) =>
+            noteSort.includes("dec")
+              ? Date.parse(b.dateModified) - Date.parse(a.dateModified)
+              : Date.parse(a.dateModified) - Date.parse(b.dateModified)
+          )
+        );
+      } else if (noteSort.includes("date_created_with_chapters")) {
+        Object.values(res).forEach((list) =>
+          list.sort((a, b) =>
+            noteSort.includes("dec")
+              ? Date.parse(b.dateCreated) - Date.parse(a.dateCreated)
+              : Date.parse(a.dateCreated) - Date.parse(b.dateCreated)
+          )
+        );
+      }
+      return res;
+    } else if (!noteSortingWithChapters) {
+      const res = [];
+      let prevSubheader = null;
+      for (const chapterNodes of Object.values(notes)) {
+        for (const [noteId, note] of Object.entries(chapterNodes)) {
+          if (note.deleted) {
+            continue;
+          }
+          const currentLabel = spine[note.spineIndex].label;
+          if (prevSubheader !== spine[note.spineIndex].label) {
+            res[currentLabel] = [];
+          }
+          prevSubheader = currentLabel;
+          note.id = noteId;
+          note.chapterLabel = currentLabel;
+          res.push(note);
+        }
+      }
+      if (noteSort.includes("date_modified_without_chapters")) {
+        res.sort((a, b) =>
+          noteSort.includes("dec")
+            ? Date.parse(b.dateModified) - Date.parse(a.dateModified)
+            : Date.parse(a.dateModified) - Date.parse(b.dateModified)
+        );
+      } else if (noteSort.includes("date_created_without_chapters")) {
+        res.sort((a, b) =>
+          noteSort.includes("dec")
+            ? Date.parse(b.dateCreated) - Date.parse(a.dateCreated)
+            : Date.parse(a.dateCreated) - Date.parse(b.dateCreated)
+        );
+      }
+      return res;
     }
-    return res;
   };
 
   const updateMemosAsArray = () => {
-    return Object.entries(memos).sort((a, b) => a[0].localeCompare(b[0]));
+    if (memoSort.includes("alphabetical")) {
+      return Object.entries(memos).sort((a, b) =>
+        memoSort.includes("inc")
+          ? a[0].localeCompare(b[0])
+          : b[0].localeCompare(a[0])
+      );
+    } else if (memoSort.includes("date_modified")) {
+      return Object.entries(memos).sort((a, b) =>
+        memoSort.includes("dec")
+          ? Date.parse(b[1].dateModified) - Date.parse(a[1].dateModified)
+          : Date.parse(a[1].dateModified) - Date.parse(b[1].dateModified)
+      );
+    } else if (memoSort.includes("date_created")) {
+      return Object.entries(memos).sort((a, b) =>
+        memoSort.includes("dec")
+          ? Date.parse(b[1].dateCreated) - Date.parse(a[1].dateCreated)
+          : Date.parse(a[1].dateCreated) - Date.parse(b[1].dateCreated)
+      );
+    }
   };
 
   const scrollToCurrentChapterSubheader = () => {
@@ -253,12 +444,14 @@ export const AnnotationViewer = ({
     observer.observe(document.body, config);
   };
 
+  const setNotes = (noteSort) => setNotesAsMap(updateNotesAsMap(noteSort));
+
   const handleOpenAnnotation = (event) => {
     updatedNotes.current = false;
     updatedMemos.current = false;
     clearedMemos.current = [];
     scrollToCurrentChapterSubheader();
-    setNotesAsMap(updateNotesAsMap());
+    setNotes(noteSort);
     setMemoAsArray(updateMemosAsArray());
     clearTemporaryMarks();
     setAnchorEl(event.currentTarget);
@@ -280,15 +473,11 @@ export const AnnotationViewer = ({
     setCurrentTabValue(value);
   };
 
-  const handleNoteTextAreaOnChange = (note, noteId) => (event) => {
+  const handleNoteTextAreaOnChange = (note, noteId, arrayIndex) => (event) => {
     const chapter = spine[note.spineIndex].label;
-    setNotesAsMap((prev) => {
-      const newObject = structuredClone(prev);
-      newObject[chapter][noteId].note = event.target.value;
-      return newObject;
-    });
-    notes[currentSpineIndex][noteId].note = event.target.value;
-    notes[currentSpineIndex][noteId].dateModified = new Date().toJSON();
+    setNoteValueHelper(chapter, arrayIndex, "note", event.target.value);
+    notes[note.spineIndex][noteId].note = event.target.value;
+    notes[note.spineIndex][noteId].dateModified = new Date().toJSON();
     updatedNotes.current = true;
     startSaveCountDown();
   };
@@ -310,6 +499,236 @@ export const AnnotationViewer = ({
     updatedMemos.current = true;
     startSaveCountDown();
   };
+
+  const handleSortChange = (event) => {
+    const value = event.target.value;
+    if (tabValueMap[currentTabValue] === "notes") {
+      setNoteSort(value);
+      setNotes(value);
+    } else if (tabValueMap[currentTabValue] === "memos") {
+      setMemoSort(value);
+      if (value.includes("alphabetical")) {
+        setMemoAsArray((prev) => {
+          const newArray = structuredClone(prev);
+          newArray.sort((a, b) =>
+            value.includes("inc")
+              ? a[0].localeCompare(b[0])
+              : b[0].localeCompare(a[0])
+          );
+          return newArray;
+        });
+      } else if (value.includes("date_modified")) {
+        setMemoAsArray((prev) => {
+          const newArray = structuredClone(prev);
+          newArray.sort((a, b) =>
+            value.includes("dec")
+              ? Date.parse(b[1].dateModified) - Date.parse(a[1].dateModified)
+              : Date.parse(a[1].dateModified) - Date.parse(b[1].dateModified)
+          );
+          return newArray;
+        });
+      } else if (value.includes("date_created")) {
+        setMemoAsArray((prev) => {
+          const newArray = structuredClone(prev);
+          newArray.sort((a, b) =>
+            value.includes("dec")
+              ? Date.parse(b[1].dateCreated) - Date.parse(a[1].dateCreated)
+              : Date.parse(a[1].dateCreated) - Date.parse(b[1].dateCreated)
+          );
+          return newArray;
+        });
+      }
+    }
+  };
+
+  const notesWithGroups = () =>
+    Object.entries(Array.isArray(notesAsMap) ? {} : notesAsMap).map(
+      ([chapterName, chapterNotes]) => (
+        <Accordion
+          key={chapterName}
+          ref={
+            chapterName === spine[currentSpineIndex].label
+              ? currentChapterSubheaderRef
+              : null
+          }
+          defaultExpanded={chapterName === spine[currentSpineIndex].label}
+        >
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography
+              sx={{
+                fontWeight:
+                  chapterName === spine[currentSpineIndex].label
+                    ? "bold"
+                    : "unset",
+              }}
+              component="span"
+            >
+              {chapterName}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2}>
+              {chapterNotes.map((note, arrayIndex) => (
+                <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
+                  <Stack spacing={1}>
+                    <LastModified entry={note} />
+                    <Typography>
+                      <span
+                        style={{
+                          backgroundColor: note.highlightColor,
+                        }}
+                      >
+                        {note.selectedText}
+                      </span>
+                    </Typography>
+                    <Stack sx={{ width: "100%" }}>
+                      <Typography variant="body">Note</Typography>
+                      <Textarea
+                        value={note.note}
+                        onChange={handleNoteTextAreaOnChange(
+                          note,
+                          note.id,
+                          arrayIndex
+                        )}
+                        onKeyDown={(event) => {
+                          event.stopPropagation();
+                        }}
+                        sx={{
+                          [`&:focus`]: {
+                            boxShadow: "inherit",
+                            borderColor: `inherit`,
+                          },
+                          [`&:hover:focus`]: {
+                            borderColor: `inherit`,
+                          },
+                        }}
+                        minRows={1}
+                      />
+                    </Stack>
+                    <Stack spacing={1} direction="row">
+                      <Tooltip title="Go to location">
+                        <IconButton
+                          onClick={() =>
+                            handleGoToHighlight(note.spineIndex, note.id)
+                          }
+                          size="small"
+                        >
+                          <LinkIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Change Color">
+                        <IconButton
+                          onClick={handleOpenColorPicker(
+                            note,
+                            note.id,
+                            arrayIndex
+                          )}
+                          size="small"
+                        >
+                          <PaletteIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete">
+                        <IconButton
+                          onClick={() =>
+                            updateNoteMarksOrDeleteInDOM(
+                              note,
+                              note.id,
+                              true,
+                              arrayIndex
+                            )
+                          }
+                          size="small"
+                          className={"note-delete-button"}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              ))}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      )
+    );
+
+  const notesWithoutGroups = () => (
+    <Stack spacing={2} sx={{ padding: 2 }}>
+      {(Array.isArray(notesAsMap) ? notesAsMap : []).map((note, arrayIndex) => (
+        <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
+          <Stack spacing={1}>
+            <LastModified entry={note} />
+            <Typography variant="h6">{note.chapterLabel}</Typography>
+            <Typography>
+              <span
+                style={{
+                  backgroundColor: note.highlightColor,
+                }}
+              >
+                {note.selectedText}
+              </span>
+            </Typography>
+            <Stack sx={{ width: "100%" }}>
+              <Typography variant="body">Note</Typography>
+              <Textarea
+                value={note.note}
+                onChange={handleNoteTextAreaOnChange(note, note.id, arrayIndex)}
+                onKeyDown={(event) => {
+                  event.stopPropagation();
+                }}
+                sx={{
+                  [`&:focus`]: {
+                    boxShadow: "inherit",
+                    borderColor: `inherit`,
+                  },
+                  [`&:hover:focus`]: {
+                    borderColor: `inherit`,
+                  },
+                }}
+                minRows={1}
+              />
+            </Stack>
+            <Stack spacing={1} direction="row">
+              <Tooltip title="Go to location">
+                <IconButton
+                  onClick={() => handleGoToHighlight(note.spineIndex, note.id)}
+                  size="small"
+                >
+                  <LinkIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Change Color">
+                <IconButton
+                  onClick={handleOpenColorPicker(note, note.id, arrayIndex)}
+                  size="small"
+                >
+                  <PaletteIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Delete">
+                <IconButton
+                  onClick={() =>
+                    updateNoteMarksOrDeleteInDOM(
+                      note,
+                      note.id,
+                      true,
+                      arrayIndex
+                    )
+                  }
+                  size="small"
+                  className={"note-delete-button"}
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Stack>
+        </Paper>
+      ))}
+    </Stack>
+  );
 
   return (
     <>
@@ -350,8 +769,8 @@ export const AnnotationViewer = ({
             position="sticky"
             sx={{
               marginTop: -1,
-              paddingLeft: 2,
-              paddingRight: 3,
+              paddingLeft: 1,
+              paddingRight: 1,
             }}
           >
             <Stack
@@ -424,17 +843,46 @@ export const AnnotationViewer = ({
                   </HtmlTooltip>
                 </SmallTabs>
               </Paper>
-              <IconButton onClick={handleCloseAnnotation} size="small">
-                <CloseIcon />
-              </IconButton>
+              <Tooltip title={"Save & Close"}>
+                <IconButton onClick={handleCloseAnnotation} size="small">
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
             </Stack>
-            <Typography
-              color="GrayText"
-              variant="subtitle2"
-              sx={{ marginTop: -1, alignSelf: "end" }}
+            <Stack
+              justifyContent={"space-between"}
+              alignItems={"center"}
+              direction="row"
+              sx={{ marginBottom: 0.5 }}
             >
-              {saveCountDown > 0 ? `Saving in ${saveCountDown}` : "Saved"}
-            </Typography>
+              <Stack alignItems={"center"} direction={"row"} spacing={1}>
+                <Typography>Sort:</Typography>
+                <Select
+                  onChange={handleSortChange}
+                  value={
+                    tabValueMap[currentTabValue] === "notes"
+                      ? noteSort
+                      : memoSort
+                  }
+                  sx={{ height: 30 }}
+                >
+                  {sortSelectEntries.map((entry) =>
+                    entry.type === "group_label" ? (
+                      <ListSubheader key={entry.label}>
+                        {entry.label}
+                      </ListSubheader>
+                    ) : (
+                      <MenuItem key={entry.value} value={entry.value}>
+                        {entry.label}
+                      </MenuItem>
+                    )
+                  )}
+                </Select>
+              </Stack>
+              <Typography color="GrayText" variant="subtitle2">
+                {saveCountDown > 0 ? `Saving in ${saveCountDown}` : "Saved"}
+              </Typography>
+            </Stack>
           </AppBar>
           {tabValueMap[currentTabValue] === "notes" ? (
             <Stack>
@@ -445,126 +893,10 @@ export const AnnotationViewer = ({
                 >
                   {"No Notes"}
                 </Typography>
+              ) : noteSortingWithChapters ? (
+                notesWithGroups()
               ) : (
-                Object.entries(notesAsMap).map(
-                  ([chapterName, chapterNotes]) => (
-                    <Accordion
-                      key={chapterName}
-                      ref={
-                        chapterName === spine[currentSpineIndex].label
-                          ? currentChapterSubheaderRef
-                          : null
-                      }
-                      defaultExpanded={
-                        chapterName === spine[currentSpineIndex].label
-                      }
-                    >
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography
-                          sx={{
-                            fontWeight:
-                              chapterName === spine[currentSpineIndex].label
-                                ? "bold"
-                                : "unset",
-                          }}
-                          component="span"
-                        >
-                          {chapterName}
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Stack spacing={2}>
-                          {Object.entries(chapterNotes).map(
-                            ([noteId, note]) => (
-                              <Paper
-                                key={noteId}
-                                elevation={24}
-                                sx={{ padding: 1 }}
-                              >
-                                <Stack spacing={1}>
-                                  <LastModified entry={note} />
-                                  <Typography>
-                                    <span
-                                      style={{
-                                        backgroundColor: note.highlightColor,
-                                      }}
-                                    >
-                                      {note.selectedText}
-                                    </span>
-                                  </Typography>
-                                  <Stack sx={{ width: "100%" }}>
-                                    <Typography variant="h6">Note</Typography>
-                                    <Textarea
-                                      value={note.note}
-                                      onChange={handleNoteTextAreaOnChange(
-                                        note,
-                                        noteId
-                                      )}
-                                      onKeyDown={(event) => {
-                                        event.stopPropagation();
-                                      }}
-                                      sx={{
-                                        [`&:focus`]: {
-                                          boxShadow: "inherit",
-                                          borderColor: `inherit`,
-                                        },
-                                        [`&:hover:focus`]: {
-                                          borderColor: `inherit`,
-                                        },
-                                      }}
-                                      minRows={1}
-                                    />
-                                  </Stack>
-                                  <Stack spacing={1} direction="row">
-                                    <Tooltip title="Go to location">
-                                      <IconButton
-                                        onClick={() =>
-                                          handleGoToHighlight(
-                                            note.spineIndex,
-                                            noteId
-                                          )
-                                        }
-                                        size="small"
-                                      >
-                                        <LinkIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Change Color">
-                                      <IconButton
-                                        onClick={handleOpenColorPicker(
-                                          note,
-                                          noteId
-                                        )}
-                                        size="small"
-                                      >
-                                        <PaletteIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                    <Tooltip title="Delete">
-                                      <IconButton
-                                        onClick={() =>
-                                          updateNoteMarksOrDeleteInDOM(
-                                            note,
-                                            noteId,
-                                            true
-                                          )
-                                        }
-                                        size="small"
-                                        className={"note-delete-button"}
-                                      >
-                                        <CloseIcon />
-                                      </IconButton>
-                                    </Tooltip>
-                                  </Stack>
-                                </Stack>
-                              </Paper>
-                            )
-                          )}
-                        </Stack>
-                      </AccordionDetails>
-                    </Accordion>
-                  )
-                )
+                notesWithoutGroups()
               )}
             </Stack>
           ) : (
