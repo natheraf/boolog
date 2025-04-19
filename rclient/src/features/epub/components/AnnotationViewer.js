@@ -29,6 +29,27 @@ import PaletteIcon from "@mui/icons-material/Palette";
 import { SimpleColorPicker } from "./SimpleColorPicker";
 import { disableHighlightNodes } from "../domUtils";
 
+const LastModified = ({ entry }) => {
+  return (
+    <Tooltip
+      enterDelay={300}
+      enterNextDelay={300}
+      placement={"top"}
+      title={`Created: ${new Date(entry.dateCreated).toLocaleString(undefined, {
+        timeStyle: "short",
+        dateStyle: "short",
+      })}`}
+    >
+      <Typography variant="subtitle2" color="gray">
+        {`Modified: ${new Date(entry.dateModified).toLocaleString(undefined, {
+          timeStyle: "short",
+          dateStyle: "short",
+        })}`}
+      </Typography>
+    </Tooltip>
+  );
+};
+
 export const AnnotationViewer = ({
   spine,
   entryId,
@@ -137,8 +158,9 @@ export const AnnotationViewer = ({
   const deleteNote = (note, noteId) => {
     const chapter = spine[note.spineIndex].label;
     setNotesAsMap((prev) => {
-      delete prev[chapter][noteId];
-      return prev;
+      const newObject = structuredClone(prev);
+      delete newObject[chapter][noteId];
+      return newObject;
     });
     delete notes[currentSpineIndex][noteId];
     updatedNotes.current = true;
@@ -164,12 +186,15 @@ export const AnnotationViewer = ({
     ) {
       const chapter = spine[dataForColorPicker.spineIndex].label;
       setNotesAsMap((prev) => {
-        prev[chapter][dataForColorPicker.noteId].highlightColor =
+        const newObject = structuredClone(prev);
+        newObject[chapter][dataForColorPicker.noteId].highlightColor =
           dataForColorPicker.highlightColor;
-        return prev;
+        return newObject;
       });
       notes[currentSpineIndex][dataForColorPicker.noteId].highlightColor =
         dataForColorPicker.highlightColor;
+      notes[currentSpineIndex][dataForColorPicker.noteId].dateModified =
+        new Date().toJSON();
 
       updateNoteMarksOrDeleteInDOM(
         dataForColorPicker,
@@ -258,10 +283,12 @@ export const AnnotationViewer = ({
   const handleNoteTextAreaOnChange = (note, noteId) => (event) => {
     const chapter = spine[note.spineIndex].label;
     setNotesAsMap((prev) => {
-      prev[chapter][noteId].note = event.target.value;
-      return prev;
+      const newObject = structuredClone(prev);
+      newObject[chapter][noteId].note = event.target.value;
+      return newObject;
     });
     notes[currentSpineIndex][noteId].note = event.target.value;
+    notes[currentSpineIndex][noteId].dateModified = new Date().toJSON();
     updatedNotes.current = true;
     startSaveCountDown();
   };
@@ -455,6 +482,7 @@ export const AnnotationViewer = ({
                                 sx={{ padding: 1 }}
                               >
                                 <Stack spacing={1}>
+                                  <LastModified entry={note} />
                                   <Typography>
                                     <span
                                       style={{
@@ -556,26 +584,7 @@ export const AnnotationViewer = ({
                     <Typography variant="h6">
                       {key[0].toUpperCase() + key.substring(1)}
                     </Typography>
-                    <Tooltip
-                      enterDelay={300}
-                      enterNextDelay={300}
-                      placement={"top"}
-                      title={`Created: ${new Date(
-                        entry.dateCreated
-                      ).toLocaleString(undefined, {
-                        timeStyle: "short",
-                        dateStyle: "short",
-                      })}`}
-                    >
-                      <Typography variant="subtitle2" color="gray">
-                        {`Modified: ${new Date(
-                          entry.dateModified
-                        ).toLocaleString(undefined, {
-                          timeStyle: "short",
-                          dateStyle: "short",
-                        })}`}
-                      </Typography>
-                    </Tooltip>
+                    <LastModified entry={entry} />
                     <Textarea
                       value={entry.memo}
                       onChange={handleMemoTextAreaOnChange(key, memoArrayIndex)}
@@ -613,4 +622,8 @@ AnnotationViewer.propTypes = {
   notes: PropTypes.object.isRequired,
   currentSpineIndex: PropTypes.number.isRequired,
   goToNote: PropTypes.func.isRequired,
+};
+
+LastModified.propTypes = {
+  entry: PropTypes.object.isRequired,
 };
