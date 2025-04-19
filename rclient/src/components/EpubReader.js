@@ -1687,9 +1687,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               <Typography
                 sx={{
                   position: "absolute",
-                  bottom: `${spineNavigateHeight}px`,
-                  right: "3px",
+                  bottom: `27px`,
+                  right: "2px",
+                  height: "0px",
+                  opacity: 0.3,
                 }}
+                variant="subtitle2"
               >
                 {Math.ceil(
                   (((currentContentTotalWords / totalPagesForNavigator) *
