@@ -188,10 +188,7 @@ export const Annotator = ({
         range.setStart(selection.focusNode, selection.focusOffset);
       }
       // handles case where there are 2 BR elements at the end of highlight
-      if (
-        range.commonAncestorContainer === range.endContainer &&
-        range.endContainer instanceof HTMLElement
-      ) {
+      if (range.endContainer instanceof HTMLElement) {
         range.setEnd(
           range.endContainer.lastChild,
           range.endContainer.lastChild.textContent.length
