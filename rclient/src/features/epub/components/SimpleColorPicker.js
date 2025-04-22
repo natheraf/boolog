@@ -71,20 +71,22 @@ export const SimpleColorPicker = ({
       </Stack>
       <Stack spacing={1}>
         <Tooltip title="Enter a color name, RGB, HEX, or HSL" placement="left">
-          <FormLabel>Custom</FormLabel>
-          <IconButton
-            size="small"
-            onClick={() =>
-              window
-                .open(
-                  "https://developer.mozilla.org/en-US/docs/Web/CSS/background-color",
-                  "_blank"
-                )
-                .focus()
-            }
-          >
-            <HelpIcon fontSize="small" htmlColor={"gray"} />
-          </IconButton>
+          <Stack alignItems="center" direction={"row"}>
+            <FormLabel>Custom</FormLabel>
+            <IconButton
+              size="small"
+              onClick={() =>
+                window
+                  .open(
+                    "https://developer.mozilla.org/en-US/docs/Web/CSS/background-color",
+                    "_blank"
+                  )
+                  .focus()
+              }
+            >
+              <HelpIcon fontSize="small" htmlColor={"gray"} />
+            </IconButton>
+          </Stack>
         </Tooltip>
         <TextField
           value={color ?? ""}
