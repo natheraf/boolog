@@ -769,7 +769,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             ) {
               markToAnchor = marks[start];
             }
-            if (window.getSelection().isCollapsed) {
+            if (window.getSelection().rangeCount > 0) {
               handleMarkHighlightOnClick(markToAnchor);
             }
           };
