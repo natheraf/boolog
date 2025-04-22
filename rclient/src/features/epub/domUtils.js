@@ -192,7 +192,6 @@ export const handleInjectingMarkToEpubNodes = (
     endContainer: endResult.textNode,
     endOffset: endResult.offset,
   };
-  console.log(selectedRange);
   handleInjectingMarkToTextNodes(
     noteId,
     selectedRange,
