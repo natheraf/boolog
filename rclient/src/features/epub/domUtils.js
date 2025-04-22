@@ -36,7 +36,7 @@ export const changeTemporaryMarksToPermanent = (nodes, noteId) => {
   }
 };
 
-export const handleInjectingMark = (
+export const handleInjectingMarkToTextNodes = (
   noteId,
   selectedRange,
   highlightColor,
@@ -157,4 +157,46 @@ export const handleInjectingMark = (
     }
     injectMarkToNode(it, noteId, 0, 0, selectedRange.endOffset, highlightColor);
   }
+};
+
+const getTextNodeAtOffset = (node, offset) => {
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode()) {
+    const textNode = walker.currentNode;
+    const length = textNode.textContent.length;
+    if (offset <= length) {
+      return { textNode, offset };
+    }
+    offset -= length;
+  }
+  return null;
+};
+
+export const handleInjectingMarkToEpubNodes = (
+  noteId,
+  selectedRange,
+  highlightColor,
+  markClassName
+) => {
+  const startResult = getTextNodeAtOffset(
+    selectedRange.startContainer,
+    selectedRange.startOffset
+  );
+  const endResult = getTextNodeAtOffset(
+    selectedRange.endContainer,
+    selectedRange.endOffset
+  );
+  selectedRange = {
+    startContainer: startResult.textNode,
+    startOffset: startResult.offset,
+    endContainer: endResult.textNode,
+    endOffset: endResult.offset,
+  };
+  console.log(selectedRange);
+  handleInjectingMarkToTextNodes(
+    noteId,
+    selectedRange,
+    highlightColor,
+    markClassName
+  );
 };

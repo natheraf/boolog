@@ -34,7 +34,7 @@ import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   deleteNodesAndLiftChildren,
-  handleInjectingMark,
+  handleInjectingMarkToEpubNodes,
 } from "../features/epub/domUtils";
 import { addListener } from "../features/listenerManager";
 import {
@@ -744,7 +744,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           selectedRange.endContainer = document.querySelector(
             `[nodeId="${selectedRange.endContainerId}"]`
           );
-          handleInjectingMark(
+          handleInjectingMarkToEpubNodes(
             noteId,
             selectedRange,
             entry.highlightColor,

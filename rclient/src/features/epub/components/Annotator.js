@@ -22,7 +22,7 @@ import {
   changeStyleValue,
   changeTemporaryMarksToPermanent,
   disableHighlightNodes,
-  handleInjectingMark,
+  handleInjectingMarkToTextNodes,
 } from "../domUtils";
 import { addListener } from "../../listenerManager";
 import { useTheme } from "@emotion/react";
@@ -238,7 +238,12 @@ export const Annotator = ({
         endOffsetFromParent += textNode.textContent.length;
       }
 
-      handleInjectingMark(null, range, defaultHighlightColor, "temporary-mark");
+      handleInjectingMarkToTextNodes(
+        null,
+        range,
+        defaultHighlightColor,
+        "temporary-mark"
+      );
 
       selectedRangeIndexed = {
         startContainerId: startContainerParent.getAttribute("nodeid"),
