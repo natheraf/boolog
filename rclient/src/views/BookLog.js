@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   addBookFromEpub,
+  addUrlsToLocalBooks,
   getAllBooks,
   indexedDBBooksInterface,
 } from "../api/IndexedDB/Books";
@@ -198,20 +199,22 @@ export const BookLog = () => {
 
   React.useEffect(() => {
     getAllBooks()
-      .then((res) => {
-        const obj = {
-          Reading: { items: [], total_items: 0 },
-          Paused: { items: [], total_items: 0 },
-          Planning: { items: [], total_items: 0 },
-          Dropped: { items: [], total_items: 0 },
-          Finished: { items: [], total_items: 0 },
-        };
-        for (const item of res) {
-          obj[item.status].items.push(item);
-        }
-        setLibrary(obj);
-        setIsLoading(false);
-      })
+      .then((res) =>
+        addUrlsToLocalBooks(res).then(() => {
+          const obj = {
+            Reading: { items: [], total_items: 0 },
+            Paused: { items: [], total_items: 0 },
+            Planning: { items: [], total_items: 0 },
+            Dropped: { items: [], total_items: 0 },
+            Finished: { items: [], total_items: 0 },
+          };
+          for (const item of res) {
+            obj[item.status].items.push(item);
+          }
+          setLibrary(obj);
+          setIsLoading(false);
+        })
+      )
       .catch((error) => {
         console.log(error);
         addAlert(

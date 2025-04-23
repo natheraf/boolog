@@ -118,7 +118,7 @@ export const getAllBooks = (key, value) => {
   );
 };
 
-const addUrlsToLocalBooks = (books) =>
+export const addUrlsToLocalBooks = (books) =>
   new Promise((resolve, reject) =>
     Promise.all(
       books.map(
@@ -162,15 +162,13 @@ const getAllBooksHelper = (db, key, value) =>
     };
     const objectStore = transaction.objectStore(shelvesObjectStore);
     if (key === undefined) {
-      objectStore.index("shelf").getAll("books").onsuccess = (event) => {
-        const books = event.target.result;
-        addUrlsToLocalBooks(books).then(() => resolve(books));
-      };
+      objectStore.index("shelf").getAll("books").onsuccess = (event) =>
+        resolve(event.target.result);
     } else if (value === undefined) {
       reject(new Error("if key is defined, value cannot be undefined"));
     } else {
       objectStore.index(key).getAll(value).onsuccess = (books) =>
-        addUrlsToLocalBooks(books).then(() => resolve(books));
+        resolve(books);
     }
   });
 
