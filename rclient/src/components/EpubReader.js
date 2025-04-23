@@ -237,14 +237,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [spinePointer]
   );
 
-  const updateFormattingOnDB = (value) => {
-    if (useGlobalFormatting) {
+  const updateFormattingOnDB = (value, newUseGlobalFormatting) => {
+    if (newUseGlobalFormatting) {
       updateEpubData({ key: "epubGlobalFormatting", formatting: value });
     }
     updateEpubData({
       key: entryId,
       formatting: {
-        useGlobalFormatting,
+        useGlobalFormatting: newUseGlobalFormatting,
         value,
       },
     });
@@ -253,21 +253,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const setUseGlobalFormattingHelper = (newValue) => {
     if (newValue) {
       getEpubData("epubGlobalFormatting").then((res) => {
-        setFormatting(res.formatting);
-        updateEpubData({
-          key: entryId,
-          formatting: {
-            useGlobalFormatting: newValue,
-            formatting: res.formatting,
-          },
-        });
+        handleSetFormatting(res.formatting, newValue);
       });
     } else {
       updateEpubData({
         key: entryId,
         formatting: {
           useGlobalFormatting: newValue,
-          formatting,
+          value: formatting,
         },
       });
     }
@@ -1115,7 +1108,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
-  const handleSetFormatting = (newFormatting) => {
+  const handleSetFormatting = (
+    newFormatting,
+    newUseGlobalFormatting = useGlobalFormatting
+  ) => {
     const turnedOffNav =
       (formatting.showPageNavigator &&
         newFormatting.showPageNavigator === false) ||
@@ -1131,7 +1127,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     } else if (turnedOnNav) {
       setDialogContentHeight((prev) => prev - pageNavigateHeight);
     }
-    updateFormattingOnDB(newFormatting);
+    updateFormattingOnDB(newFormatting, newUseGlobalFormatting);
     setFormatting(newFormatting);
     putFormattingStyleElement(newFormatting);
   };
