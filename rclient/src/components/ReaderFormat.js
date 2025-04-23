@@ -237,7 +237,7 @@ export const ReaderFormat = ({
         <Stack
           spacing={2}
           alignItems={"center"}
-          sx={{ width: "300px", margin: 2 }}
+          sx={{ width: "300px", padding: 2 }}
         >
           <Stack
             direction={"row"}
