@@ -200,7 +200,7 @@ export const BookLog = () => {
   React.useEffect(() => {
     getAllBooks()
       .then((res) =>
-        addUrlsToLocalBooks(res).then(() => {
+        addUrlsToLocalBooks(res).then((res) => {
           const obj = {
             Reading: { items: [], total_items: 0 },
             Paused: { items: [], total_items: 0 },

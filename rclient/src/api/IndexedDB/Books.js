@@ -147,7 +147,7 @@ export const addUrlsToLocalBooks = (books) =>
             });
           })
       )
-    ).then(resolve)
+    ).then(() => resolve(books))
   );
 
 const getAllBooksHelper = (db, key, value) =>
