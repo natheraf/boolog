@@ -889,7 +889,11 @@ export const AnnotationViewer = ({
             <Stack>
               {Object.keys(notesAsMap).length === 0 ? (
                 <Typography
-                  sx={{ padding: 1, alignSelf: "center" }}
+                  sx={{
+                    padding: 1,
+                    marginTop: 1,
+                    alignSelf: "center",
+                  }}
                   variant="h5"
                 >
                   {"No Notes"}
@@ -903,7 +907,10 @@ export const AnnotationViewer = ({
           ) : (
             <Stack spacing={1} sx={{ padding: 1, width: "100%" }}>
               {memosAsArray.length === 0 ? (
-                <Typography sx={{ alignSelf: "center" }} variant="h5">
+                <Typography
+                  sx={{ paddingTop: 1, alignSelf: "center" }}
+                  variant="h5"
+                >
                   {"No Memos"}
                 </Typography>
               ) : (
