@@ -97,7 +97,7 @@ export const ReaderFormat = ({
     ...formatting,
     fontSizeFocus: false,
     lineHeightFocus: false,
-    pageMarginsFocus: false,
+    pageWidthFocus: false,
     pagesShownFocus: false,
     fontFamilyOpen: false,
     fontWeightFocus: false,
@@ -285,8 +285,8 @@ export const ReaderFormat = ({
             { title: "Font Size", value: "fontSize", endText: "rem" },
             { title: "Font Weight", value: "fontWeight", endText: "abs" },
             {
-              title: "Page Width Margins",
-              value: "pageMargins",
+              title: "Page Width",
+              value: "pageWidth",
               endText: "px",
             },
             {

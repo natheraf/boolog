@@ -119,12 +119,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [dialogContentHeight, formatting.pageHeightMargins]
   );
   const pageWidth = React.useMemo(() => {
-    const value = windowWidth - formatting.pageMargins - columnGap;
-    if (value <= 50) {
-      setFormatting((prev) => ({ ...prev, pageMargins: 0 }));
+    if (formatting.pageWidth > windowWidth) {
+      setFormatting((prev) => ({ ...prev, pageWidth: windowWidth }));
     }
-    return value;
-  }, [formatting.pageMargins, windowWidth]);
+    return formatting.pageWidth;
+  }, [formatting.pageWidth, windowWidth]);
 
   const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
   const searchNeedle = React.useRef(null);
@@ -1547,7 +1546,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     bottom: 0,
                     margin: "auto",
                     visibility:
-                      formatting.showArrows && formatting.pageMargins >= 50
+                      formatting.showArrows &&
+                      windowWidth - formatting.pageWidth >= 100
                         ? "visible"
                         : "hidden",
                   }}
@@ -1624,7 +1624,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     bottom: 0,
                     margin: "auto",
                     visibility:
-                      formatting.showArrows && formatting.pageMargins >= 50
+                      formatting.showArrows &&
+                      windowWidth - formatting.pageWidth >= 100
                         ? "visible"
                         : "hidden",
                   }}
