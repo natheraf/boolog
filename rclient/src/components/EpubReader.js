@@ -427,7 +427,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           (Math.floor(fragment.left) - Math.floor(content.left)) /
             Math.floor(pageWidth + columnGap)
         );
-        console.log(pageDelta);
         pageTracker = pageDelta;
         setCurrentPage(pageDelta);
       }
