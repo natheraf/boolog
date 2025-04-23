@@ -84,7 +84,7 @@ exports.putMultiple = (req, res) => {
                 type: "warning",
                 message: "Missing cloud entry. Created one.",
               });
-            } else if (true) {
+            } else if (databaseEntry._lastUpdated < objectLastSynced) {
               db.collection("v1")
                 .replaceOne({ _id: databaseEntry._id }, entry)
                 .then(() => {
