@@ -305,7 +305,7 @@ export const BookLog = () => {
         setDataObject={() => {}}
         syncMediaObject={() => window.location.reload()}
       />
-      {epub ? (
+      {epub && openEpubReader ? (
         <EpubReader
           open={openEpubReader}
           setOpen={setOpenEpubReader}
