@@ -30,7 +30,7 @@ app.use(function (req, res, next) {
 require("./mongo/routes/google.routes")(app);
 require("./mongo/routes/auth.routes")(app);
 require("./mongo/routes/lists.routes")(app);
-require("./mongo/routes/settings.routes")(app);
+require("./mongo/routes/generic.routes")(app);
 require("./mongo/routes/resources.routes")(app);
 app.use("/jsdoc-front", express.static("../rclient/jsdoc/out"));
 app.use("/jsdoc-back", express.static("../server/jsdoc/out"));

@@ -5,7 +5,7 @@ const generic = require("../middleware/generic");
 
 module.exports = function (app) {
   app.post(
-    "/api/settings/set/multiple",
+    "/api/generic/set/multiple",
     [
       authJwt.verifyToken,
       authController.checkUserIdExists,
@@ -15,7 +15,7 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/api/settings/get/one",
+    "/api/generic/get/one",
     [
       authJwt.verifyToken,
       authController.checkUserIdExists,
@@ -25,7 +25,7 @@ module.exports = function (app) {
   );
 
   app.get(
-    "/api/settings/get/all",
+    "/api/generic/get/all",
     [
       authJwt.verifyToken,
       authController.checkUserIdExists,
