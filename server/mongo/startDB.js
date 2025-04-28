@@ -69,7 +69,7 @@ module.exports = (drop) => {
       collections: ["loginEmailCodes", "loginInfo"],
     },
     { database: "userLists", collections: ["v1"] },
-    { database: "userAppData", collections: ["settings"] },
+    { database: "userAppData", collections: ["settings", "epubData"] },
     { database: "server", collections: ["resources"] },
   ];
 
