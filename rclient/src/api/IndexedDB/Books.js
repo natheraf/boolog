@@ -172,6 +172,31 @@ const getAllBooksHelper = (db, key, value) =>
     }
   });
 
+export const updateBook = (data, localOnly) =>
+  openDatabase(getUserDB(), userDataDBVersion, (db) =>
+    updateBookHelper(db, data, localOnly)
+  );
+
+const updateBookHelper = (db, data, localOnly) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(shelvesObjectStore, "readonly");
+    const onError = (event) => {
+      console.error("Transaction Error", event);
+      reject(new Error(event));
+    };
+    const objectStore = transaction.objectStore(shelvesObjectStore);
+    const request = objectStore.get(data._id);
+    request.onerror = onError;
+    request.onsuccess = (event) => {
+      const oldData = event.target.result;
+      const transaction = db.transaction(shelvesObjectStore, "readwrite");
+      const objectStore = transaction.objectStore(shelvesObjectStore);
+      const request = objectStore.put({ ...oldData, ...data });
+      request.onerror = onError;
+      request.onsuccess = resolve;
+    };
+  });
+
 /**
  *
  * @param {Object} data
