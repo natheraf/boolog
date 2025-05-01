@@ -139,7 +139,7 @@ const getEpubDataWithDefaultInDotNotationHelper = (
       }
       Promise.all(promises).then((values) => {
         resolve(
-          fillInObject(dotNotationArrayToStandard(values), defaultObject)
+          Object.assign(defaultObject, dotNotationArrayToStandard(values))
         );
       });
     });
