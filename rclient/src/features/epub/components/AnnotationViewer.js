@@ -25,10 +25,7 @@ import PropTypes from "prop-types";
 import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import {
-  deleteEpubData,
-  updateEpubData,
-} from "../../../api/IndexedDB/epubData";
+import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -213,7 +210,7 @@ export const AnnotationViewer = ({
         if (note.delete) {
           deleteEpubData(note);
         } else {
-          updateEpubData(note);
+          putEpubData(note);
         }
       }
     }
@@ -223,7 +220,7 @@ export const AnnotationViewer = ({
           delete memos[memo.selectedText];
           deleteEpubData(memo);
         } else {
-          updateEpubData(memo);
+          putEpubData(memo);
         }
       }
     }

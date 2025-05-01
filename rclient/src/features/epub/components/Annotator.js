@@ -11,10 +11,7 @@ import {
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Textarea } from "../../../components/Textarea";
-import {
-  deleteEpubData,
-  updateEpubData,
-} from "../../../api/IndexedDB/epubData";
+import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -331,7 +328,7 @@ export const Annotator = ({
             selectedText: textToMemoKeyFormat.current,
           };
         }
-        updateEpubData(memos[textToMemoKeyFormat.current]);
+        putEpubData(memos[textToMemoKeyFormat.current]);
       }
     }
 
@@ -366,7 +363,7 @@ export const Annotator = ({
             notes[spineIndex][noteId].note = note;
           }
         }
-        updateEpubData(notes[spineIndex][noteId]);
+        putEpubData(notes[spineIndex][noteId]);
       } else if (noteId) {
         deleteEpubData(notes[spineIndex][noteId]);
         delete notes[spineIndex][noteId];
