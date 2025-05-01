@@ -75,7 +75,9 @@ const copyObjectWithSpecificKeys = (obj, keys) => {
 const generateRandomCode = (numOfBytes) =>
   require("crypto").randomBytes(numOfBytes).toString("base64url");
 
-export const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
+const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
+
+const localizeCloudId = (id) => id.substring(25);
 
 module.exports = {
   arrayToComplexListString,
@@ -84,4 +86,6 @@ module.exports = {
   urlQueryMissingRequiredFields,
   generateRandomCode,
   copyObjectWithSpecificKeys,
+  getCloudId,
+  localizeCloudId,
 };
