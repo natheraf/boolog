@@ -75,6 +75,8 @@ const copyObjectWithSpecificKeys = (obj, keys) => {
 const generateRandomCode = (numOfBytes) =>
   require("crypto").randomBytes(numOfBytes).toString("base64url");
 
+export const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
+
 module.exports = {
   arrayToComplexListString,
   bodyMissingRequiredFields,

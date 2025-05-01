@@ -3,9 +3,8 @@ const {
   bodyMissingRequiredFields,
   arrayToComplexListString,
   urlQueryMissingRequiredFields,
+  getCloudId,
 } = require("../middleware/utils");
-
-const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
 
 /**
  * Creates, updates, or deletes entries
