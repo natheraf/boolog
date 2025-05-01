@@ -45,6 +45,7 @@ const userDataDBOnupgradeNeeded = function (event) {
       const epubData = db.createObjectStore(epubDataObjectStore, {
         keyPath: "key",
       });
+      epubData.createIndex("entryId", "entryId");
   }
 };
 

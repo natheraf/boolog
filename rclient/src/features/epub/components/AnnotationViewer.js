@@ -25,7 +25,10 @@ import PropTypes from "prop-types";
 import { Textarea } from "../../../components/Textarea";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { updateEpubData } from "../../../api/IndexedDB/epubData";
+import {
+  deleteEpubData,
+  updateEpubData,
+} from "../../../api/IndexedDB/epubData";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -72,9 +75,8 @@ export const AnnotationViewer = ({
   const tabValueMap = ["notes", "memos"];
   const [notesAsMap, setNotesAsMap] = React.useState({});
   const [memosAsArray, setMemoAsArray] = React.useState([]);
-  const updatedNotes = React.useRef(false);
-  const updatedMemos = React.useRef(false);
-  const clearedMemos = React.useRef([]);
+  const updatedNotes = React.useRef(new Set());
+  const updatedMemos = React.useRef(new Set());
   const currentChapterSubheaderRef = React.useRef(null);
   const scrollIntoViewObserver = React.useRef(null);
   const [colorPickAnchorEl, setColorPickAnchorEl] = React.useState(null);
@@ -206,23 +208,27 @@ export const AnnotationViewer = ({
   };
 
   const handleSave = () => {
-    const updatedData = { key: entryId };
-    if (updatedNotes.current) {
-      updatedData.notes = notes;
-    }
-    if (updatedMemos.current) {
-      for (const keyOfClearedMemo of clearedMemos.current) {
-        if (memos[keyOfClearedMemo]?.memo?.trim().length === 0) {
-          delete memos[keyOfClearedMemo];
+    if (updatedNotes.current.size > 0) {
+      for (const note of updatedNotes.current) {
+        if (note.delete) {
+          deleteEpubData(note);
+        } else {
+          updateEpubData(note);
         }
       }
-      updatedData.memos = memos;
     }
-    if (updatedNotes.current || updatedMemos.current) {
-      updateEpubData(updatedData);
+    if (updatedMemos.current.size > 0) {
+      for (const memo of updatedMemos.current) {
+        if (memo.memo?.trim().length === 0) {
+          delete memos[memo.selectedText];
+          deleteEpubData(memo);
+        } else {
+          updateEpubData(memo);
+        }
+      }
     }
-    updatedNotes.current = false;
-    updatedMemos.current = false;
+    updatedNotes.current.clear();
+    updatedMemos.current.clear();
     clearSaveCountDown();
   };
 
@@ -275,8 +281,9 @@ export const AnnotationViewer = ({
   const deleteNote = (note, noteId, arrayIndex) => {
     const chapter = spine[note.spineIndex].label;
     deleteNotesHelper(chapter, arrayIndex);
+    notes[note.spineIndex][noteId].delete = true;
+    updatedNotes.current.add(notes[note.spineIndex][noteId]);
     delete notes[note.spineIndex][noteId];
-    updatedNotes.current = true;
   };
 
   const updateNoteMarksOrDeleteInDOM = (
@@ -298,10 +305,9 @@ export const AnnotationViewer = ({
   };
 
   const handleCloseColorPicker = () => {
-    if (
-      notes[dataForColorPicker.spineIndex][dataForColorPicker.noteId]
-        .highlightColor !== dataForColorPicker.highlightColor
-    ) {
+    const note =
+      notes[dataForColorPicker.spineIndex][dataForColorPicker.noteId];
+    if (note.highlightColor !== dataForColorPicker.highlightColor) {
       const chapter = spine[dataForColorPicker.spineIndex].label;
       setNoteValueHelper(
         chapter,
@@ -309,19 +315,15 @@ export const AnnotationViewer = ({
         "highlightColor",
         dataForColorPicker.highlightColor
       );
-      notes[dataForColorPicker.spineIndex][
-        dataForColorPicker.noteId
-      ].highlightColor = dataForColorPicker.highlightColor;
-      notes[dataForColorPicker.spineIndex][
-        dataForColorPicker.noteId
-      ].dateModified = new Date().toJSON();
+      note.highlightColor = dataForColorPicker.highlightColor;
+      note.dateModified = new Date().toJSON();
 
       updateNoteMarksOrDeleteInDOM(
         dataForColorPicker,
         dataForColorPicker.noteId,
         false
       );
-      updatedNotes.current = true;
+      updatedNotes.current.add(note);
     }
     setDataForColorPicker(null);
     setColorPickAnchorEl(null);
@@ -447,9 +449,8 @@ export const AnnotationViewer = ({
   const setNotes = (noteSort) => setNotesAsMap(updateNotesAsMap(noteSort));
 
   const handleOpenAnnotation = (event) => {
-    updatedNotes.current = false;
-    updatedMemos.current = false;
-    clearedMemos.current = [];
+    updatedNotes.current.clear();
+    updatedMemos.current.clear();
     scrollToCurrentChapterSubheader();
     setNotes(noteSort);
     setMemoAsArray(updateMemosAsArray());
@@ -478,7 +479,7 @@ export const AnnotationViewer = ({
     setNoteValueHelper(chapter, arrayIndex, "note", event.target.value);
     notes[note.spineIndex][noteId].note = event.target.value;
     notes[note.spineIndex][noteId].dateModified = new Date().toJSON();
-    updatedNotes.current = true;
+    updatedNotes.current.add(notes[note.spineIndex][noteId]);
     startSaveCountDown();
   };
 
@@ -493,10 +494,7 @@ export const AnnotationViewer = ({
         return [key, entry];
       })
     );
-    if (event.target.value.trim().length === 0) {
-      clearedMemos.current.push(key);
-    }
-    updatedMemos.current = true;
+    updatedMemos.current.add(memos[key]);
     startSaveCountDown();
   };
 

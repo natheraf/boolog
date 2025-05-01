@@ -11,7 +11,10 @@ import {
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import NotesIcon from "@mui/icons-material/Notes";
 import { Textarea } from "../../../components/Textarea";
-import { updateEpubData } from "../../../api/IndexedDB/epubData";
+import {
+  deleteEpubData,
+  updateEpubData,
+} from "../../../api/IndexedDB/epubData";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -309,24 +312,29 @@ export const Annotator = ({
       (notes[spineIndex]?.[noteId]?.highlightColor ?? null) !== highlightColor;
     const updatedNoteText = (notes[spineIndex]?.[noteId]?.note ?? "") !== note;
     const updatedNote = updatedNoteText || updatedNoteHighlight;
-    const updateDB = updatedMemo || updatedNote;
     if (updatedMemo) {
       if (memo.length === 0) {
+        deleteEpubData(memos[textToMemoKeyFormat.current]);
         delete memos[textToMemoKeyFormat.current];
-      } else if (memos.hasOwnProperty(textToMemoKeyFormat.current)) {
-        memos[textToMemoKeyFormat.current].memo = memo;
-        memos[textToMemoKeyFormat.current].dateModified = new Date().toJSON();
       } else {
-        const date = new Date().toJSON();
-        memos[textToMemoKeyFormat.current] = {
-          memo,
-          dateCreated: date,
-          dateModified: date,
-        };
+        if (memos.hasOwnProperty(textToMemoKeyFormat.current)) {
+          memos[textToMemoKeyFormat.current].memo = memo;
+          memos[textToMemoKeyFormat.current].dateModified = new Date().toJSON();
+        } else {
+          const date = new Date().toJSON();
+          memos[textToMemoKeyFormat.current] = {
+            key: `${entryId}.memos.${textToMemoKeyFormat.current}`,
+            entryId,
+            memo,
+            dateCreated: date,
+            dateModified: date,
+            selectedText: textToMemoKeyFormat.current,
+          };
+        }
+        updateEpubData(memos[textToMemoKeyFormat.current]);
       }
     }
 
-    const updateData = { key: entryId };
     if (updatedNote) {
       if (note.length > 0 || highlightColor !== null) {
         let newNote = !noteId;
@@ -338,6 +346,8 @@ export const Annotator = ({
             notes[spineIndex] = {};
           }
           notes[spineIndex][noteId] = {
+            key: `${entryId}.notes.${spineIndex}.${noteId}`,
+            entryId,
             note: note,
             spineIndex,
             highlightColor,
@@ -356,20 +366,15 @@ export const Annotator = ({
             notes[spineIndex][noteId].note = note;
           }
         }
+        updateEpubData(notes[spineIndex][noteId]);
       } else if (noteId) {
+        deleteEpubData(notes[spineIndex][noteId]);
         delete notes[spineIndex][noteId];
         handleDeleteMark(noteId);
         noteId = null;
       }
-      updateData.notes = notes;
     }
 
-    if (updatedMemo) {
-      updateData.memos = memos;
-    }
-    if (updateDB) {
-      updateEpubData(updateData);
-    }
     setAnchorEl(null);
     setSelectedAnchor(null);
     clearTemporaryMarks();

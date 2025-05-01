@@ -19,7 +19,11 @@ import {
 } from "@mui/material";
 
 import { ReaderFormat } from "./ReaderFormat";
-import { getEpubData, updateEpubData } from "../api/IndexedDB/epubData";
+import {
+  getEpubData,
+  updateEpubData,
+  updateEpubDataInDotNotation,
+} from "../api/IndexedDB/epubData";
 import { AlertsContext } from "../context/Alerts";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
@@ -241,7 +245,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     if (newUseGlobalFormatting) {
       updateEpubData({ key: "epubGlobalFormatting", formatting: value });
     }
-    updateEpubData({
+    updateEpubDataInDotNotation({
       key: entryId,
       formatting: {
         useGlobalFormatting: newUseGlobalFormatting,
@@ -256,7 +260,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         handleSetFormatting(res.formatting, newValue);
       });
     } else {
-      updateEpubData({
+      updateEpubDataInDotNotation({
         key: entryId,
         formatting: {
           useGlobalFormatting: newValue,
@@ -589,7 +593,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       clearTimeout(timeOutToSetProgress.current);
       timeOutToSetProgress.current = setTimeout(
         () =>
-          updateEpubData({
+          updateEpubDataInDotNotation({
             key: entryId,
             progress: {
               spine: newSpineIndex ?? spinePointer,

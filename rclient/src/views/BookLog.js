@@ -32,7 +32,10 @@ import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
 import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
-import { getEpubDataWithDefault } from "../api/IndexedDB/epubData";
+import {
+  getEpubDataWithDefault,
+  getEpubDataWithDefaultInDotNotation,
+} from "../api/IndexedDB/epubData";
 import { defaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 
@@ -131,7 +134,7 @@ export const BookLog = () => {
         formatting,
       }).then((res) => {
         const globalFormatting = res.formatting;
-        getEpubDataWithDefault({
+        getEpubDataWithDefaultInDotNotation(id, {
           key: id,
           formatting: {
             useGlobalFormatting: true,
@@ -140,7 +143,6 @@ export const BookLog = () => {
           progress: { spine: 0, part: 0 },
           notes: {},
           memos: {},
-          spineOverride: {},
         }).then((res) => {
           if (res.formatting.useGlobalFormatting) {
             res.formatting.value = globalFormatting;
