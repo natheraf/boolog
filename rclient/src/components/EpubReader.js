@@ -21,7 +21,7 @@ import {
 import { ReaderFormat } from "./ReaderFormat";
 import {
   getEpubData,
-  updateEpubData,
+  putEpubData,
   updateEpubDataInDotNotation,
 } from "../api/IndexedDB/epubData";
 import { AlertsContext } from "../context/Alerts";
@@ -243,7 +243,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value, newUseGlobalFormatting) => {
     if (newUseGlobalFormatting) {
-      updateEpubData({ key: "epubGlobalFormatting", formatting: value });
+      putEpubData({ key: "epubGlobalFormatting", formatting: value });
     }
     updateEpubDataInDotNotation({
       key: entryId,
