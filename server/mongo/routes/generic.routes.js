@@ -5,13 +5,13 @@ const generic = require("../middleware/generic");
 
 module.exports = function (app) {
   app.post(
-    "/api/generic/set/multiple",
+    "/api/generic/put/multiple",
     [
       authJwt.verifyToken,
       authController.checkUserIdExists,
       generic.checkDatabaseAndCollection,
     ],
-    controller.updateMultiple
+    controller.putMultiple
   );
 
   app.get(
