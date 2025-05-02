@@ -44,7 +44,7 @@ exports.putMultiple = (req, res) => {
       if (entry.deleted === true) {
         db.collection("v1")
           .deleteOne({
-            _id: getCloudId(req.userId, entry),
+            _id: getCloudId(req.userId, entry._id),
           })
           .then((res) => {
             if (res.deleteCount === 1) {
@@ -62,10 +62,10 @@ exports.putMultiple = (req, res) => {
         resolves[index]();
       } else {
         db.collection("v1")
-          .findOne({ _id: getCloudId(req.userId, entry) })
+          .findOne({ _id: getCloudId(req.userId, entry._id) })
           .then((databaseEntry) => {
             const localId = entry._id;
-            entry._id = getCloudId(req.userId, entry);
+            entry._id = getCloudId(req.userId, entry._id);
             entry._userId = req.userId;
             const objectLastSynced = entry._lastUpdated;
             if (databaseEntry === null) {

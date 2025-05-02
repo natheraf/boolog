@@ -75,7 +75,7 @@ const copyObjectWithSpecificKeys = (obj, keys) => {
 const generateRandomCode = (numOfBytes) =>
   require("crypto").randomBytes(numOfBytes).toString("base64url");
 
-const getCloudId = (userId, obj) => `${userId}_${obj._id}`;
+const getCloudId = (userId, id) => `${userId}_${id}`;
 
 const localizeCloudId = (id) => id.substring(25);
 
