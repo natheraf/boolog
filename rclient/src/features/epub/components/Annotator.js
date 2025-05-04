@@ -318,9 +318,10 @@ export const Annotator = ({
           memos[textToMemoKeyFormat.current].memo = memo;
           memos[textToMemoKeyFormat.current].dateModified = new Date().toJSON();
         } else {
+          const memoId = getNewId();
           const date = new Date().toJSON();
           memos[textToMemoKeyFormat.current] = {
-            key: `${entryId}.memos.${textToMemoKeyFormat.current}`,
+            key: `${entryId}.memos.${memoId}`,
             entryId,
             memo,
             dateCreated: date,

@@ -109,39 +109,16 @@ const getEpubDataWithDefaultInDotNotationHelper = (
 ) =>
   new Promise((resolve, reject) => {
     getIndexedDBDotNotationEpubData(entryId).then((values) => {
-      const resolves = [...Array(values.length)];
-      const promises = [...Array(values.length)].map(
-        (_, index) =>
-          new Promise((resolve, reject) => (resolves[index] = resolve))
+      const res = Object.assign(
+        defaultObject,
+        dotNotationArrayToStandard(values)
       );
-      const onError = (error) => reject(new Error(error));
-      for (let index = 0; index < values.length; index += 1) {
-        const [key, value] = [values[index].key, values[index]];
-        const transaction = db.transaction(epubDataObjectStore, "readonly");
-        const objectStore = transaction.objectStore(epubDataObjectStore);
-        const request = objectStore.get(key);
-        request.onerror = onError;
-        request.onsuccess = (event) => {
-          const result = event.target.result;
-          if (result === undefined) {
-            const transaction = db.transaction(
-              epubDataObjectStore,
-              "readwrite"
-            );
-            const objectStore = transaction.objectStore(epubDataObjectStore);
-            const request = objectStore.put(value);
-            resolves[index](value);
-            request.onerror = onError;
-          } else {
-            resolves[index](result);
-          }
-        };
+      const memos = res.memos;
+      for (const [key, memo] of Object.entries(memos)) {
+        delete memos[key];
+        memos[memo.selectedText] = memo;
       }
-      Promise.all(promises).then((values) => {
-        resolve(
-          Object.assign(defaultObject, dotNotationArrayToStandard(values))
-        );
-      });
+      resolve(res);
     });
   });
 
