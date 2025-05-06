@@ -143,6 +143,38 @@ export const Home = () => {
           </Accordion>
         ))}
       </Stack>
+      {/* <Button
+        onClick={() =>
+          handleSimpleRequest(
+            "post",
+            {
+              database: "userAppData",
+              collection: "epubData",
+              data: [
+                {
+                  dateCreated: "2025-05-02T18:16:06.610Z",
+                  dateModified: "2025-05-02T18:16:06.610Z",
+                  entryId: "1746045537241_7grb",
+                  highlightColor: "rgba(255, 255, 0, .2)",
+                  key: "notes.6.1746209766610_yrbn",
+                  note: "",
+                  selectedRangeIndexed: {
+                    startContainerId: "151",
+                    startOffset: 0,
+                    endContainerId: "151",
+                    endOffset: 24,
+                  },
+                  selectedText: "Urano Motosu loved books",
+                  spineIndex: 6,
+                },
+              ],
+            },
+            "generic/update/multiple"
+          ).then((result) => console.log(result))
+        }
+      >
+        test update
+      </Button> */}
       {/* <div>
         <Button onClick={() => addAlert("info", "info")}>info</Button>
         <Button onClick={() => addAlert("success", "success")}>success</Button>

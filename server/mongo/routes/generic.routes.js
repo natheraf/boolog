@@ -14,6 +14,16 @@ module.exports = function (app) {
     controller.putMultiple
   );
 
+  app.post(
+    "/api/generic/update/multiple",
+    [
+      authJwt.verifyToken,
+      authController.checkUserIdExists,
+      generic.checkDatabaseAndCollection,
+    ],
+    controller.updateMultiple
+  );
+
   app.get(
     "/api/generic/get/one",
     [

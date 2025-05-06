@@ -1,19 +1,36 @@
-const { urlQueryMissingRequiredFields } = require("./utils");
+const {
+  urlQueryMissingRequiredFields,
+  bodyMissingRequiredFields,
+} = require("./utils");
 
 const allowedGenericAPIAccess = { userAppData: ["epubData", "settings"] };
 
 const checkDatabaseAndCollection = (req, res, next) => {
-  const userRequiredBody = ["database", "collection"];
-  const missing = urlQueryMissingRequiredFields(req, userRequiredBody);
-  if (missing) {
-    return res?.status(400).send(missing);
+  if (req.method === "GET") {
+    const userRequiredBody = ["database", "collection"];
+    const missing = urlQueryMissingRequiredFields(req, userRequiredBody);
+    if (missing) {
+      return res?.status(400).send(missing);
+    }
+    req.database = req.query.database;
+    delete req.query.database;
+    req.collection = req.query.collection;
+    delete req.query.collection;
+  } else {
+    const userRequiredBody = ["database", "collection"];
+    const missing = bodyMissingRequiredFields(req, userRequiredBody);
+    if (missing) {
+      return res?.status(400).send(missing);
+    }
+    req.database = req.body.database;
+    delete req.body.database;
+    req.collection = req.body.collection;
+    delete req.body.collection;
   }
 
-  const databaseName = req.query.database;
-  const collectionName = req.query.collection;
   if (
-    allowedGenericAPIAccess.hasOwnProperty(databaseName) === false ||
-    allowedGenericAPIAccess[databaseName].includes(collectionName) === false
+    allowedGenericAPIAccess.hasOwnProperty(req.database) === false ||
+    allowedGenericAPIAccess[req.database].includes(req.collection) === false
   ) {
     return res
       .status(404)
