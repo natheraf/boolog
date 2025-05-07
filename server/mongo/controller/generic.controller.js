@@ -15,11 +15,28 @@ exports.updateMultiple = (req, res) => {
 
   const entries = req.body.data;
   getDatabase(req.database).then(async (db) => {
+    const log = [];
     for (const entry of entries) {
       const id = getCloudId(req.userId, entry.entryId);
       delete entry.entryId;
       const key = entry.key;
       delete entry.key;
+      if (entry.deleted === true) {
+        try {
+          await db.collection(req.collection).deleteOne({
+            _id: id,
+          });
+        } catch (error) {
+          // most likely entry does not exists in cloud
+          log.push({
+            entryId: id,
+            type: "error",
+            message: "unable to delete cloud entry, cloudId is missing",
+            errorObject: error,
+          });
+        }
+        continue;
+      }
       await db.collection(req.collection).updateOne(
         { _id: id },
         {
@@ -33,7 +50,7 @@ exports.updateMultiple = (req, res) => {
         { upsert: true }
       );
     }
-    res.status(200).send({ message: `updated ${entries.length} objects` });
+    res.status(200).send({ message: `updated ${entries.length} objects`, log });
   });
 };
 
