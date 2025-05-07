@@ -175,6 +175,12 @@ const getAllBooksHelper = (db, key, value) =>
     }
   });
 
+/**
+ * @deprecated
+ * @param {object} data
+ * @param {boolean} localOnly
+ * @returns
+ */
 export const updateBook = (data, localOnly) =>
   openDatabase(getUserDB(), userDataDBVersion, (db) =>
     updateBookHelper(db, data, localOnly)
