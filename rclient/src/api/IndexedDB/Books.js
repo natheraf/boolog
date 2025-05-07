@@ -87,6 +87,9 @@ const addBookHelper = (db, obj, localOnly) =>
     const objectStore = transaction.objectStore(shelvesObjectStore);
     obj.shelf = "books";
     obj._id = obj._id ?? getNewId();
+    if (localOnly !== true) {
+      obj._lastUpdated = Date.now();
+    }
     const request = objectStore.add(obj);
     request.onsuccess = (event) => {
       if (localOnly) {
