@@ -764,7 +764,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             ) {
               markToAnchor = marks[start];
             }
-            if (window.getSelection().rangeCount > 0) {
+            if (window.getSelection().rangeCount === 1) {
               handleMarkHighlightOnClick(markToAnchor);
             }
           };

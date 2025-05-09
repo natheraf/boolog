@@ -189,6 +189,7 @@ export const Annotator = ({
         range.setEnd(selection.anchorNode, selection.anchorOffset);
         range.setStart(selection.focusNode, selection.focusOffset);
       }
+      selection.empty();
 
       // fix bug if element ends with br or user double click and highlights to the end of element
       if (range.endContainer instanceof HTMLElement) {
