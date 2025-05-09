@@ -200,6 +200,14 @@ export const handleInjectingMarkToEpubNodes = (
   );
 };
 
+export const getFirstTextNode = (node) => {
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  if (walker.nextNode()) {
+    return walker.currentNode;
+  }
+  return null;
+};
+
 export const getLastTextNode = (node) => {
   const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
   let lastNode = null;

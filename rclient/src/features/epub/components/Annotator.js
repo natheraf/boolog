@@ -22,6 +22,7 @@ import {
   changeStyleValue,
   changeTemporaryMarksToPermanent,
   disableHighlightNodes,
+  getFirstTextNode,
   getLastTextNode,
   handleInjectingMarkToTextNodes,
 } from "../domUtils";
@@ -190,8 +191,16 @@ export const Annotator = ({
       }
 
       if (range.endContainer instanceof HTMLElement) {
-        const lastNode = getLastTextNode(range.endContainer);
-        range.setEnd(lastNode, lastNode.length);
+        if (
+          range.endContainer !== range.startContainer &&
+          range.endContainer.contains(range.startContainer)
+        ) {
+          const lastNode = getLastTextNode(range.endContainer);
+          range.setEnd(lastNode, lastNode.length);
+        } else {
+          const firstNode = getFirstTextNode(range.endContainer);
+          range.setEnd(firstNode, 0);
+        }
       }
 
       let startOffset = range.startOffset;
