@@ -199,3 +199,12 @@ export const handleInjectingMarkToEpubNodes = (
     markClassName
   );
 };
+
+export const getLastTextNode = (node) => {
+  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+  let lastNode = null;
+  while (walker.nextNode()) {
+    lastNode = walker.currentNode;
+  }
+  return lastNode;
+};

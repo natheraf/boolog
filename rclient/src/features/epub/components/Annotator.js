@@ -22,6 +22,7 @@ import {
   changeStyleValue,
   changeTemporaryMarksToPermanent,
   disableHighlightNodes,
+  getLastTextNode,
   handleInjectingMarkToTextNodes,
 } from "../domUtils";
 import { addListener } from "../../listenerManager";
@@ -187,14 +188,11 @@ export const Annotator = ({
         range.setEnd(selection.anchorNode, selection.anchorOffset);
         range.setStart(selection.focusNode, selection.focusOffset);
       }
-      // handles case where there are 2 BR elements at the end of highlight
+
       if (range.endContainer instanceof HTMLElement) {
-        range.setEnd(
-          range.endContainer.lastChild,
-          range.endContainer.lastChild.textContent.length
-        );
+        const lastNode = getLastTextNode(range.endContainer);
+        range.setEnd(lastNode, lastNode.length);
       }
-      selection.empty();
 
       let startOffset = range.startOffset;
       while (range.startContainer.textContent[startOffset] === " ") {
