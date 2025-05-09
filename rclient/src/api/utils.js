@@ -67,14 +67,18 @@ export const dotNotationArrayToStandard = (array) => {
           : remainingKey.indexOf(".");
       const nextKey = remainingKey.substring(0, dotIndex);
       remainingKey = remainingKey.substring(dotIndex + 1);
-      if (remainingKey.length === 0) {
+      if (remainingKey.length > 0) {
+        if (it.hasOwnProperty(nextKey) === false) {
+          it[nextKey] = {};
+        }
+        it = it[nextKey];
+        continue;
+      }
+      if (typeof value === "object" && value.hasOwnProperty(nextKey)) {
+        it[nextKey] = value[nextKey];
+      } else {
         it[nextKey] = value;
-        break;
       }
-      if (it.hasOwnProperty(nextKey) === false) {
-        it[nextKey] = {};
-      }
-      it = it[nextKey];
     }
   }
   return res;
