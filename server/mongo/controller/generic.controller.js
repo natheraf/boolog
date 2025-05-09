@@ -6,7 +6,47 @@ const {
   getCloudId,
 } = require("../middleware/utils");
 
-exports.updateMultiple = (req, res) => {
+const updateMultiple = (req, res) => {
+  const userRequiredBody = ["data"];
+  const missing = bodyMissingRequiredFields(req, userRequiredBody);
+  if (missing) {
+    return res?.status(400).send(missing);
+  }
+
+  const entries = req.body.data;
+  getDatabase(req.database).then(async (db) => {
+    const log = [];
+    for (const entry of entries) {
+      const id = getCloudId(req.userId, entry.key);
+      if (entry.deleted) {
+        try {
+          await db.collection(req.collection).deleteOne({ _id: id });
+        } catch (error) {
+          log.push({
+            key,
+            type: "error",
+            message: "unable to delete cloud entry, cloudId is missing",
+            errorObject: error,
+          });
+        }
+        continue;
+      }
+      await db.collection(req.collection).updateOne(
+        { _id: id },
+        {
+          $set: entry,
+          $setOnInsert: {
+            userId: req.userId,
+          },
+        },
+        { upsert: true }
+      );
+    }
+    res.status(200).send({ message: `updated ${entries.length} objects`, log });
+  });
+};
+
+const dotNotationMultiple = (req, res) => {
   const userRequiredBody = ["data"];
   const missing = bodyMissingRequiredFields(req, userRequiredBody);
   if (missing) {
@@ -21,27 +61,23 @@ exports.updateMultiple = (req, res) => {
       delete entry.entryId;
       const key = entry.key;
       delete entry.key;
-      if (entry.deleted === true) {
-        try {
-          await db.collection(req.collection).deleteOne({
-            _id: id,
-          });
-        } catch (error) {
-          // most likely entry does not exists in cloud
-          log.push({
-            entryId: id,
-            type: "error",
-            message: "unable to delete cloud entry, cloudId is missing",
-            errorObject: error,
-          });
-        }
+      if (entry.deleted) {
+        await db.collection(req.collection).updateOne(
+          { _id: id },
+          {
+            $unset: {
+              [key]: null,
+            },
+          }
+        );
         continue;
       }
+      const last = key.substring(key.lastIndexOf(".") + 1);
       await db.collection(req.collection).updateOne(
         { _id: id },
         {
           $set: {
-            [key]: entry,
+            [key]: entry.hasOwnProperty(last) ? entry[last] : entry,
           },
           $setOnInsert: {
             userId: req.userId,
@@ -54,7 +90,7 @@ exports.updateMultiple = (req, res) => {
   });
 };
 
-exports.putMultiple = (req, res) => {
+const putMultiple = (req, res) => {
   const userRequiredBody = ["data"];
   const missing = bodyMissingRequiredFields(req, userRequiredBody);
   if (missing) {
@@ -82,7 +118,7 @@ exports.putMultiple = (req, res) => {
   });
 };
 
-exports.getOne = (req, res) => {
+const getOne = (req, res) => {
   const missing = urlQueryMissingRequiredFields(req, [
     "key",
     "database",
@@ -111,7 +147,7 @@ exports.getOne = (req, res) => {
   });
 };
 
-exports.getAll = (req, res) => {
+const getAll = (req, res) => {
   getDatabase(req.database).then((db) => {
     const data = db
       .collection(req.collection)
@@ -126,3 +162,13 @@ exports.getAll = (req, res) => {
     });
   });
 };
+
+const generic = {
+  getAll,
+  getOne,
+  putMultiple,
+  dotNotationMultiple,
+  updateMultiple,
+};
+
+module.exports = generic;

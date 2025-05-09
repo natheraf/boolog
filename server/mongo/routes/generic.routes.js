@@ -15,6 +15,16 @@ module.exports = function (app) {
   );
 
   app.post(
+    "/api/generic/dotNotation/multiple",
+    [
+      authJwt.verifyToken,
+      authController.checkUserIdExists,
+      generic.checkDatabaseAndCollection,
+    ],
+    controller.dotNotationMultiple
+  );
+
+  app.post(
     "/api/generic/update/multiple",
     [
       authJwt.verifyToken,
