@@ -243,7 +243,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const updateFormattingOnDB = (value, newUseGlobalFormatting) => {
     if (newUseGlobalFormatting) {
-      putEpubData({ key: "epubGlobalFormatting", formatting: value });
+      putEpubData({ key: "epubGlobalFormatting", formatting: value }, true);
     }
     updateEpubDataInDotNotation({
       key: entryId,

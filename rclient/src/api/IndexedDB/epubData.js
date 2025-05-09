@@ -1,8 +1,5 @@
-import {
-  dotNotationArrayToStandard,
-  getLevelDotNotation,
-  fillInObject,
-} from "../utils";
+import { handleSimpleRequest } from "../Axios";
+import { dotNotationArrayToStandard, getLevelDotNotation } from "../utils";
 import { getUserDB, openDatabase } from "./common";
 import { appDataDBVersion, epubDataObjectStore } from "./config";
 
@@ -11,6 +8,35 @@ export const epubDotNotationDepth = {
   memos: 1,
   notes: 2,
 };
+
+const syncMultipleToCloud = (data, dotNotation) =>
+  new Promise((resolve, reject) => {
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      return resolve();
+    }
+    handleSimpleRequest(
+      "POST",
+      {
+        database: "userAppData",
+        collection: "epubData",
+        data,
+      },
+      dotNotation ? "generic/dotNotation/multiple" : "generic/update/multiple"
+    )
+      .then(resolve)
+      .catch((error) => reject(new Error(error)));
+  });
+
+const syncDotNotationToCloud = (data) =>
+  syncMultipleToCloud(
+    structuredClone(data).map((entry) => {
+      entry.key = entry.key.substring(
+        entry.key.indexOf(".", entry.key.indexOf(entry.entryId)) + 1
+      );
+      return entry;
+    }),
+    true
+  );
 
 export const deleteEpubData = (data, localOnly) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
@@ -22,23 +48,37 @@ const deleteEpubDataHelper = (db, data, localOnly) =>
     const transaction = db.transaction(epubDataObjectStore, "readwrite");
     const objectStore = transaction.objectStore(epubDataObjectStore);
     const request = objectStore.delete(data.key);
-    request.onerror = (error) => reject(new Error(error));
-    request.onsuccess = () => {
-      // if (localOnly !== true) {
-      //   syncMultipleToCloud([data]);
-      // }
-      resolve();
+    const onError = (error) => reject(new Error(error));
+    request.onerror = onError;
+    request.onsuccess = (event) => {
+      const lastUpdatedData = {
+        entryId: data.entryId,
+        key: `${data.entryId}._lastUpdated`,
+        _lastUpdated: Date.now(),
+      };
+      const request = objectStore.put(lastUpdatedData);
+      request.onerror = onError;
+      request.onsuccess = () => {
+        if (localOnly === true) {
+          return resolve();
+        }
+        data.deleted = true;
+        syncDotNotationToCloud([data, lastUpdatedData]).then(resolve);
+      };
     };
   });
 
-export const updateEpubDataInDotNotation = (object) => {
+export const updateEpubDataInDotNotation = (object, localOnly) => {
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    updateEpubDataInDotNotationHelper(db, object)
+    updateEpubDataInDotNotationHelper(db, object, localOnly)
   );
 };
 
-const updateEpubDataInDotNotationHelper = (db, object) =>
+const updateEpubDataInDotNotationHelper = (db, object, localOnly) =>
   new Promise((resolve, reject) => {
+    if (localOnly !== true) {
+      object._lastUpdated = Date.now();
+    }
     const dotNotation = getEpubDataIndexedDBDotNotation(object);
     const values = Object.values(dotNotation);
     const resolves = [...Array(values.length)];
@@ -56,7 +96,12 @@ const updateEpubDataInDotNotationHelper = (db, object) =>
       request.onerror = onError;
       request.onsuccess = (event) => resolves[index](event.target.result);
     }
-    Promise.allSettled(promises).then(resolve);
+    Promise.allSettled(promises).then(() => {
+      if (localOnly !== true) {
+        syncDotNotationToCloud(values);
+      }
+      resolve();
+    });
   });
 
 export const getEpubDataIndexedDBDotNotation = (object) => {
@@ -65,7 +110,7 @@ export const getEpubDataIndexedDBDotNotation = (object) => {
   const dotNotation = getLevelDotNotation(object, epubDotNotationDepth, root);
   for (const [key, value] of Object.entries(dotNotation)) {
     if (typeof value !== "object") {
-      dotNotation[key] = { value };
+      dotNotation[key] = { [key.substring(key.lastIndexOf(".") + 1)]: value };
     }
     dotNotation[key].key = key;
     dotNotation[key].entryId = root;
@@ -142,22 +187,47 @@ const getEpubDataHelper = (db, key) =>
 /**
  *
  * @param {object} data
- * @param {string} data.key
- * @param {any} data.value
+ * @param {boolean} globalEpubData
+ * @param {boolean} localOnly
  * @returns
  */
-export const putEpubData = (data) =>
+export const putEpubData = (data, globalEpubData, localOnly) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
-    putEpubDataHelper(db, data)
+    putEpubDataHelper(db, data, globalEpubData, localOnly)
   );
 
-const putEpubDataHelper = (db, data) =>
+const putEpubDataHelper = (db, data, globalEpubData, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(epubDataObjectStore, "readwrite");
     const objectStore = transaction.objectStore(epubDataObjectStore);
+    const onError = (error) => reject(new Error(error));
+    if (globalEpubData) {
+      data._lastUpdated = Date.now();
+    }
     const request = objectStore.put(data);
-    request.onsuccess = (event) => resolve(event);
-    request.onerror = (error) => reject(new Error(error));
+    request.onerror = onError;
+    request.onsuccess = (event) => {
+      if (globalEpubData) {
+        if (localOnly !== true) {
+          syncMultipleToCloud([data], false);
+        }
+        return;
+      }
+
+      const lastUpdatedData = {
+        entryId: data.entryId,
+        key: `${data.entryId}._lastUpdated`,
+        _lastUpdated: Date.now(),
+      };
+      const request = objectStore.put(lastUpdatedData);
+      request.onerror = onError;
+      request.onsuccess = () => {
+        if (localOnly !== true) {
+          syncDotNotationToCloud([data, lastUpdatedData]);
+        }
+        resolve(event);
+      };
+    };
   });
 
 /**
@@ -202,6 +272,7 @@ const getEpubDataWithDefaultHelper = (db, data) =>
       if (value === undefined) {
         const transaction = db.transaction(epubDataObjectStore, "readwrite");
         const objectStore = transaction.objectStore(epubDataObjectStore);
+        data._lastUpdated = Date.now();
         const request = objectStore.add(data);
         request.onsuccess = () => resolve(data);
         request.onerror = (error) => reject(new Error(error));
