@@ -32,12 +32,14 @@ const updateMultiple = (req, res) => {
         }
         continue;
       }
+      delete entry.key;
+      delete entry.entryId;
       await db.collection(req.collection).updateOne(
         { _id: id },
         {
           $set: entry,
           $setOnInsert: {
-            userId: req.userId,
+            _userId: req.userId,
           },
         },
         { upsert: true }
@@ -81,7 +83,7 @@ const dotNotationMultiple = (req, res) => {
             [key]: entry.hasOwnProperty(last) ? entry[last] : entry,
           },
           $setOnInsert: {
-            userId: req.userId,
+            _userId: req.userId,
           },
         },
         { upsert: true }
@@ -104,7 +106,7 @@ const putMultiple = (req, res) => {
       entry._id = ObjectId.createFromHexString(
         getCloudId(req.userId, entry._id)
       );
-      entry.userId = req.userId;
+      entry._userId = req.userId;
       await db.collection(req.collection).replaceOne(
         {
           _id: entry._id,
@@ -139,7 +141,7 @@ const getOne = (req, res) => {
           });
         }
         delete data._id;
-        delete data.userId;
+        delete data._userId;
         res.status(200).send({
           message: "item found",
           data,
@@ -152,13 +154,14 @@ const getAll = (req, res) => {
   getDatabase(req.database).then(async (db) => {
     const data = await db
       .collection(req.collection)
-      .find({ userId: req.userId })
+      .find({ _userId: req.userId })
       .toArray();
     data.forEach((entry) => {
       delete entry._userId;
       entry._id = localizeCloudId(entry._id);
     });
     res.status(200).send({
+      epubData: data,
       message: `${data.length} found`,
     });
   });
