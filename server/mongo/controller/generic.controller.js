@@ -4,6 +4,7 @@ const {
   bodyMissingRequiredFields,
   urlQueryMissingRequiredFields,
   getCloudId,
+  localizeCloudId,
 } = require("../middleware/utils");
 
 const updateMultiple = (req, res) => {
@@ -148,8 +149,8 @@ const getOne = (req, res) => {
 };
 
 const getAll = (req, res) => {
-  getDatabase(req.database).then((db) => {
-    const data = db
+  getDatabase(req.database).then(async (db) => {
+    const data = await db
       .collection(req.collection)
       .find({ userId: req.userId })
       .toArray();
