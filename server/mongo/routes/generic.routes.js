@@ -10,6 +10,7 @@ module.exports = function (app) {
       authJwt.verifyToken,
       authController.checkUserIdExists,
       generic.checkDatabaseAndCollection,
+      authController.updateLastWritten,
     ],
     controller.putMultiple
   );
@@ -20,6 +21,7 @@ module.exports = function (app) {
       authJwt.verifyToken,
       authController.checkUserIdExists,
       generic.checkDatabaseAndCollection,
+      authController.updateLastWritten,
     ],
     controller.dotNotationMultiple
   );
@@ -30,6 +32,7 @@ module.exports = function (app) {
       authJwt.verifyToken,
       authController.checkUserIdExists,
       generic.checkDatabaseAndCollection,
+      authController.updateLastWritten,
     ],
     controller.updateMultiple
   );
