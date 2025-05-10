@@ -46,6 +46,7 @@ const userDataDBOnupgradeNeeded = function (event) {
         keyPath: "key",
       });
       epubData.createIndex("entryId", "entryId");
+      epubData.createIndex("_lastUpdated", "_lastUpdated");
   }
 };
 
