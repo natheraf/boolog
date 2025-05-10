@@ -1,6 +1,10 @@
-export const getMongoDBDotNotation = (object) =>
-  getLevelDotNotation(object, Infinity);
-
+/**
+ *
+ * @param {object} object
+ * @param {object} notationDepth
+ * @param {string} root
+ * @returns
+ */
 export const getLevelDotNotation = (object, notationDepth, root) => {
   const res = {};
   const path = [];
@@ -54,10 +58,13 @@ export const dotNotationToStandard = (object) => {
   return res;
 };
 
-export const dotNotationArrayToStandard = (array) => {
+export const dotNotationArrayToStandard = (array, deleteKey) => {
   const res = {};
   for (const value of array) {
     const key = value.key;
+    if (deleteKey) {
+      delete value.key;
+    }
     let remainingKey = key.substring(key.indexOf(".") + 1);
     let it = res;
     while (remainingKey.length > 0) {
@@ -105,4 +112,16 @@ export const fillInObject = (object, target) => {
   };
   dfs(object, target);
   return object;
+};
+
+/**
+ * @param {object[]} array
+ * @returns
+ */
+export const arrayToMap = (array, key) => {
+  const map = new Map();
+  for (const entry of array) {
+    map.set(entry[key], entry);
+  }
+  return map;
 };

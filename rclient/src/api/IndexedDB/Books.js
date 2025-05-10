@@ -6,7 +6,7 @@ import { openDatabase, getUserDB, getNewId } from "./common";
 import { handleSimpleRequest } from "../Axios";
 import { deleteFile, getFile } from "./Files";
 import { addEpub } from "../../features/files/fileUtils";
-import { deleteEpubData } from "./epubData";
+import { deleteAllEpubDataOfKey } from "./epubData";
 import { getEpubValueFromPath } from "../../features/epub/epubUtils";
 
 /**
@@ -390,7 +390,7 @@ const deleteBookHelper = (db, obj, uid, localOnly) =>
     request.onsuccess = (event) => {
       const data = event.target.result;
       deleteFile(data.fileId).then(() =>
-        deleteEpubData(data._id).then(() => {
+        deleteAllEpubDataOfKey({ entryId: data._id }).then(() => {
           const transaction = db.transaction(shelvesObjectStore, "readwrite");
           const objectStore = transaction.objectStore(shelvesObjectStore);
           const request = objectStore.delete(data._id);

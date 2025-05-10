@@ -9,7 +9,9 @@ export const epubDotNotationDepth = {
   notes: 2,
 };
 
-const syncMultipleToCloud = (data, dotNotation) =>
+const globalEpubDataKeys = ["epubGlobalFormatting"];
+
+export const syncMultipleToCloud = (data, dotNotation) =>
   new Promise((resolve, reject) => {
     if (localStorage.getItem("isLoggedIn") !== "true") {
       return resolve();
@@ -37,6 +39,17 @@ const syncDotNotationToCloud = (data) =>
     }),
     true
   );
+
+const dotNotationEpubObjectsArrayToStandard = (array) => {
+  if (array.length === 0) {
+    return {};
+  }
+  const rootKey = array[0].entryId;
+  array.forEach((object) => delete object.entryId);
+  const res = dotNotationArrayToStandard(array, true);
+  res.key = rootKey;
+  return res;
+};
 
 export const deleteEpubData = (data, localOnly) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
@@ -68,11 +81,57 @@ const deleteEpubDataHelper = (db, data, localOnly) =>
     };
   });
 
-export const updateEpubDataInDotNotation = (object, localOnly) => {
+export const deleteAllEpubDataOfKey = (data, localOnly) =>
+  openDatabase(getUserDB(), appDataDBVersion, (db) =>
+    deleteAllEpubDataOfKeyHelper(db, data, localOnly)
+  );
+
+const deleteAllEpubDataOfKeyHelper = (db, data, localOnly) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(epubDataObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(epubDataObjectStore);
+    let request;
+    if (globalEpubDataKeys.includes(data.key)) {
+      if (localOnly !== true) {
+        syncMultipleToCloud([{ deleted: true, key: data.key }]);
+      }
+      request = objectStore.openCursor(data.key);
+    } else {
+      if (localOnly !== true) {
+        syncMultipleToCloud([
+          { deleted: true, key: data.entryId, entryId: data.entryId },
+        ]);
+      }
+      const index = objectStore.index("entryId");
+      request = index.openCursor(data.entryId);
+    }
+    const onError = (error) => reject(new Error(error));
+    request.onerror = onError;
+    request.onsuccess = (event) => {
+      const cursor = event.target.result;
+      if (cursor) {
+        const deleteRequest = cursor.delete();
+        deleteRequest.onerror = onError;
+        deleteRequest.onsuccess = () => cursor.continue();
+      } else {
+        resolve();
+      }
+    };
+  });
+
+export const putCloudEpubData = async (object, localOnly) => {
+  if (globalEpubDataKeys.includes(object.key)) {
+    await putEpubData(object, true, localOnly);
+  } else {
+    await deleteAllEpubDataOfKey(object, localOnly);
+    await updateEpubDataInDotNotation(object, localOnly);
+  }
+};
+
+export const updateEpubDataInDotNotation = (object, localOnly) =>
   openDatabase(getUserDB(), appDataDBVersion, (db) =>
     updateEpubDataInDotNotationHelper(db, object, localOnly)
   );
-};
 
 const updateEpubDataInDotNotationHelper = (db, object, localOnly) =>
   new Promise((resolve, reject) => {
@@ -282,3 +341,40 @@ const getEpubDataWithDefaultHelper = (db, data) =>
     };
     request.onerror = (error) => reject(new Error(error));
   });
+
+/**
+ * destructive
+ * @param {object} data
+ * @returns {object} same object as passed in
+ */
+export const localizeCloudEpubData = (data) => {
+  data.key = data._id;
+  delete data._id;
+  return data;
+};
+
+export const getAllEpubDataWithLastUpdated = () =>
+  openDatabase(getUserDB(), appDataDBVersion, (db) =>
+    getAllEpubDataWithLastUpdatedHelper(db)
+  );
+
+const getAllEpubDataWithLastUpdatedHelper = (db) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(epubDataObjectStore, "readonly");
+    const objectStore = transaction.objectStore(epubDataObjectStore);
+    const index = objectStore.index("_lastUpdated");
+    const request = index.getAll();
+    const onError = (error) => reject(new Error(error));
+    request.onsuccess = (event) => resolve(event.target.result);
+    request.onerror = onError;
+  });
+
+export const getWholeEpubData = async (key) => {
+  if (globalEpubDataKeys.includes(key)) {
+    return await getEpubData(key);
+  } else {
+    return dotNotationEpubObjectsArrayToStandard(
+      await getIndexedDBDotNotationEpubData(key)
+    );
+  }
+};
