@@ -151,9 +151,10 @@ export const Loading = ({
             value={
               loadingProgress !== null
                 ? Math.floor(
-                    (loadingProgress?.current ?? 0) /
-                      (loadingProgress?.total ?? 1)
-                  ) * 100
+                    ((loadingProgress?.current ?? 0) /
+                      (loadingProgress?.total ?? 1)) *
+                      100
+                  )
                 : 0
             }
           />
