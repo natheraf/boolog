@@ -34,7 +34,9 @@ export const handleSimpleRequest = (httpMethod, object, route, query = {}) => {
       .get(httpMethod)(`${api}/${route}${queryString}`, object)
       .then((res) => resolve(res))
       .catch((error) => {
-        return reject(Error(error?.response?.data?.message));
+        return error instanceof Error
+          ? reject(error)
+          : new Error("unknown error");
       })
   );
 };
