@@ -3,9 +3,8 @@ import { handleDataFormRequest, handleSimpleRequest } from "./Axios";
 
 /**
  *
- * @param {object} object
- * @param {string} object._id file id
- * @param {Blob} object.blob blob
+ * @param {object} object fileObject
+ * @return {Promise}
  */
 export const sendOne = (object) => {
   delete object.epubObject;
