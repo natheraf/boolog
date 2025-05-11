@@ -457,34 +457,6 @@ export const ReaderFormat = ({
                   labelPlacement="top"
                 />
               </Stack>
-              <Stack direction={"row"}>
-                <FormControlLabel
-                  control={<Switch />}
-                  checked={formatting.showPageNavigator}
-                  onChange={handleCheckedOnChange("showPageNavigator")}
-                  label="Show Pages on Top"
-                  slotProps={{
-                    typography: {
-                      variant: "subtitle2",
-                      sx: { textAlign: "center" },
-                    },
-                  }}
-                  labelPlacement="top"
-                />
-                <FormControlLabel
-                  control={<Switch />}
-                  checked={formatting.showSpineNavigator}
-                  onChange={handleCheckedOnChange("showSpineNavigator")}
-                  label="Show Chapters on Bottom"
-                  slotProps={{
-                    typography: {
-                      variant: "subtitle2",
-                      sx: { textAlign: "center" },
-                    },
-                  }}
-                  labelPlacement="top"
-                />
-              </Stack>
               <FormControlLabel
                 control={<Switch />}
                 checked={useGlobalFormatting}
@@ -494,6 +466,34 @@ export const ReaderFormat = ({
               />
             </Stack>
           </Paper>
+          <Stack direction={"row"}>
+            <FormControlLabel
+              control={<Switch />}
+              checked={formatting.showPageNavigator}
+              onChange={handleCheckedOnChange("showPageNavigator")}
+              label="Show Pages on Top"
+              slotProps={{
+                typography: {
+                  variant: "subtitle2",
+                  sx: { textAlign: "center" },
+                },
+              }}
+              labelPlacement="top"
+            />
+            <FormControlLabel
+              control={<Switch />}
+              checked={formatting.showSpineNavigator}
+              onChange={handleCheckedOnChange("showSpineNavigator")}
+              label="Show Chapters on Bottom"
+              slotProps={{
+                typography: {
+                  variant: "subtitle2",
+                  sx: { textAlign: "center" },
+                },
+              }}
+              labelPlacement="top"
+            />
+          </Stack>
         </Stack>
       </Menu>
     </Box>
