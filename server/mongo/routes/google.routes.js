@@ -14,8 +14,8 @@ const googleDriveScope = "https://www.googleapis.com/auth/drive.file";
 
 module.exports = function (app) {
   /**
-   * Required "files" object array in body.
-   * Each file is an object with
+   * Required "file" object in body.
+   * file is an object with
    *  blob: being the file itself
    *  _id: the file id
    *
@@ -52,7 +52,7 @@ module.exports = function (app) {
   );
 
   /**
-   * Required "fileDriveId" string array in body.
+   * Required "fileDriveId" string in query.
    */
   app.get(
     "/api/drive/get/one",
@@ -69,7 +69,7 @@ module.exports = function (app) {
   );
 
   /**
-   * Required "fileDriveId" string array in body.
+   * Required "fileDriveId" string in body.
    */
   app.post(
     "/api/drive/delete/one",
