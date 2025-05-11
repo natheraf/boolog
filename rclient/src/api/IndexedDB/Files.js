@@ -1,5 +1,6 @@
 import { filesObjectStore, userDBVersion } from "./config";
 import { openDatabase, getNewId, getUserDB } from "./common";
+import { sendOne } from "../drive";
 
 export const addFile = (data) =>
   openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, data));
@@ -8,11 +9,16 @@ const addFileHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(filesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(filesObjectStore);
+    let localOnly = true;
     if (data.hasOwnProperty("_id") === false) {
+      localOnly = false;
       data._id = getNewId();
     }
     const request = objectStore.add(data);
-    request.onsuccess = (event) => {
+    request.onsuccess = async (event) => {
+      if (localOnly === false) {
+        await sendOne(data);
+      }
       console.log("added file!");
       resolve(event);
     };

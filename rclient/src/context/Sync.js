@@ -59,8 +59,8 @@ export const Sync = ({ children }) => {
           for (const localFile of localFiles) {
             if (driveFileIds.has(localFile._id) === false) {
               await sendOneToDrive(localFile);
-              driveFileIds.delete(localFile._id);
             }
+            driveFileIds.delete(localFile._id);
           }
           for (const [fileId, driveFileId] of driveFileIds.entries()) {
             await getOneFromDrive(driveFileId, fileId);
