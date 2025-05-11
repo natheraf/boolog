@@ -26,6 +26,8 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import CloseIcon from "@mui/icons-material/Close";
+import CloudIcon from "@mui/icons-material/Cloud";
+import { UserInfoContext } from "../context/UserInfo";
 
 export const ReaderFormat = ({
   formatting,
@@ -73,6 +75,9 @@ export const ReaderFormat = ({
     () => fontFamilies.concat(googleFonts),
     [fontFamilies, googleFonts]
   );
+
+  const userInfoContext = React.useContext(UserInfoContext);
+  const isLoggedIn = React.useRef(userInfoContext.isLoggedIn());
 
   const handleCheckedOnChange = (key) => (event) => {
     const checked = event.target.checked;
@@ -222,6 +227,9 @@ export const ReaderFormat = ({
     });
   }, []);
 
+  const DynamicCloudIcon = () =>
+    isLoggedIn.current ? <CloudIcon htmlColor="gray" fontSize="small" /> : null;
+
   return (
     <Box>
       <Tooltip title="Format">
@@ -254,7 +262,10 @@ export const ReaderFormat = ({
           </Stack>
           <Paper sx={{ width: "100%", p: 1 }}>
             <Stack spacing={1} alignItems={"center"}>
-              <Typography variant="h6">{"Font Family"}</Typography>
+              <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                <Typography variant="h6">{"Font Family"}</Typography>
+                <DynamicCloudIcon />
+              </Stack>
               <Tooltip
                 title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
                 placement="top"
@@ -362,7 +373,10 @@ export const ReaderFormat = ({
           ))}
           <Paper sx={{ width: "100%", p: 1 }}>
             <Stack spacing={1} alignItems={"center"}>
-              <Typography variant="h6">{"Justify"}</Typography>
+              <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                <Typography variant="h6">{"Justify"}</Typography>
+                <DynamicCloudIcon />
+              </Stack>
               <Select
                 value={formatting.textAlign.value}
                 onChange={handleOnChangeSelect("textAlign")}
@@ -383,7 +397,10 @@ export const ReaderFormat = ({
           ].map((obj) => (
             <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
               <Stack spacing={1} alignItems={"center"}>
-                <Typography variant="h6">{obj.title}</Typography>
+                <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                  <Typography variant="h6">{obj.title}</Typography>
+                  <DynamicCloudIcon />
+                </Stack>
                 <Tooltip
                   title="Enter a color name, RGB, HEX, or HSL"
                   open={fieldState[`${obj.value}Focus`] ?? false}
@@ -414,59 +431,69 @@ export const ReaderFormat = ({
               </Stack>
             </Paper>
           ))}
-          <Stack direction={"row"}>
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showArrows}
-              onChange={handleCheckedOnChange("showArrows")}
-              label="Show Arrows"
-              slotProps={{ typography: { variant: "subtitle2" } }}
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showDividers}
-              onChange={handleCheckedOnChange("showDividers")}
-              label="Show Edges"
-              slotProps={{ typography: { variant: "subtitle2" } }}
-              labelPlacement="top"
-            />
-          </Stack>
-          <Stack direction={"row"}>
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showPageNavigator}
-              onChange={handleCheckedOnChange("showPageNavigator")}
-              label="Show Pages on Top"
-              slotProps={{
-                typography: {
-                  variant: "subtitle2",
-                  sx: { textAlign: "center" },
-                },
-              }}
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showSpineNavigator}
-              onChange={handleCheckedOnChange("showSpineNavigator")}
-              label="Show Chapters on Bottom"
-              slotProps={{
-                typography: {
-                  variant: "subtitle2",
-                  sx: { textAlign: "center" },
-                },
-              }}
-              labelPlacement="top"
-            />
-          </Stack>
-          <FormControlLabel
-            control={<Switch />}
-            checked={useGlobalFormatting}
-            onChange={handleCheckedOnChange("useGlobal")}
-            label="Use Global"
-            labelPlacement="start"
-          />
+          <Paper>
+            <Stack
+              spacing={2}
+              alignItems={"center"}
+              justifyContent={"center"}
+              sx={{ padding: 1 }}
+            >
+              <DynamicCloudIcon />
+              <Stack direction={"row"}>
+                <FormControlLabel
+                  control={<Switch />}
+                  checked={formatting.showArrows}
+                  onChange={handleCheckedOnChange("showArrows")}
+                  label="Show Arrows"
+                  slotProps={{ typography: { variant: "subtitle2" } }}
+                  labelPlacement="top"
+                />
+                <FormControlLabel
+                  control={<Switch />}
+                  checked={formatting.showDividers}
+                  onChange={handleCheckedOnChange("showDividers")}
+                  label="Show Edges"
+                  slotProps={{ typography: { variant: "subtitle2" } }}
+                  labelPlacement="top"
+                />
+              </Stack>
+              <Stack direction={"row"}>
+                <FormControlLabel
+                  control={<Switch />}
+                  checked={formatting.showPageNavigator}
+                  onChange={handleCheckedOnChange("showPageNavigator")}
+                  label="Show Pages on Top"
+                  slotProps={{
+                    typography: {
+                      variant: "subtitle2",
+                      sx: { textAlign: "center" },
+                    },
+                  }}
+                  labelPlacement="top"
+                />
+                <FormControlLabel
+                  control={<Switch />}
+                  checked={formatting.showSpineNavigator}
+                  onChange={handleCheckedOnChange("showSpineNavigator")}
+                  label="Show Chapters on Bottom"
+                  slotProps={{
+                    typography: {
+                      variant: "subtitle2",
+                      sx: { textAlign: "center" },
+                    },
+                  }}
+                  labelPlacement="top"
+                />
+              </Stack>
+              <FormControlLabel
+                control={<Switch />}
+                checked={useGlobalFormatting}
+                onChange={handleCheckedOnChange("useGlobal")}
+                label="Use Global"
+                labelPlacement="start"
+              />
+            </Stack>
+          </Paper>
         </Stack>
       </Menu>
     </Box>
