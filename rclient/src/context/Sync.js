@@ -26,6 +26,9 @@ import {
 import { Loading } from "../features/loading/Loading";
 import { Box } from "@mui/material";
 
+// strict mode workaround
+let ranOnce = false;
+
 export const Sync = ({ children }) => {
   const userInfoContext = React.useContext(UserInfoContext);
   const [isLoading, setIsLoading] = React.useState(
@@ -33,6 +36,10 @@ export const Sync = ({ children }) => {
   );
 
   React.useEffect(() => {
+    if (ranOnce) {
+      return;
+    }
+    ranOnce = true;
     if (userInfoContext.isLoggedIn()) {
       const resolves = [...Array(3)];
       const promises = [...Array(3)].map(
