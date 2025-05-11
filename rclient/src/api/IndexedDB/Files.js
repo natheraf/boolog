@@ -69,3 +69,16 @@ const deleteFileHelper = (db, id) =>
       }
     }
   });
+
+export const getAllFiles = () =>
+  openDatabase(getUserDB(), userDBVersion, (db) => getAllFilesHelper(db));
+
+const getAllFilesHelper = (db) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction(filesObjectStore, "readwrite");
+    const objectStore = transaction.objectStore(filesObjectStore);
+    const request = objectStore.getAll();
+    const onError = (error) => reject(new Error(error));
+    request.onerror = onError;
+    request.onsuccess = (event) => resolve(event.target.result);
+  });
