@@ -18,6 +18,13 @@ import {
   syncMultipleToCloud as syncMultipleEpubDataToCloud,
 } from "../api/IndexedDB/epubData";
 import { arrayToMap } from "../api/utils";
+import { getAllFiles } from "../api/IndexedDB/Files";
+import {
+  getOne as getOneFromDrive,
+  sendOne as sendOneToDrive,
+} from "../api/drive";
+import { Loading } from "../features/loading/Loading";
+import { Box } from "@mui/material";
 
 export const Sync = ({ children }) => {
   const userInfoContext = React.useContext(UserInfoContext);
@@ -33,8 +40,24 @@ export const Sync = ({ children }) => {
           new Promise((resolve, _reject) => (resolves[index] = resolve))
       );
       handleSimpleRequest("GET", {}, "drive/list/all")
-        .then((driveList) => {
-          driveList = driveList.data.list;
+        .then(async (driveList) => {
+          driveList = driveList.data.list.files;
+          const driveFileIds = new Map(
+            driveList.map((driveFile) => [
+              driveFile.appProperties.boologId,
+              driveFile.id,
+            ])
+          );
+          const localFiles = await getAllFiles();
+          for (const localFile of localFiles) {
+            if (driveFileIds.has(localFile._id) === false) {
+              await sendOneToDrive(localFile);
+              driveFileIds.delete(localFile._id);
+            }
+          }
+          for (const [fileId, driveFileId] of driveFileIds.entries()) {
+            await getOneFromDrive(driveFileId, fileId);
+          }
         })
         .catch((error) => {
           if (
@@ -51,56 +74,58 @@ export const Sync = ({ children }) => {
       handleSimpleRequest("GET", {}, "generic/get/all", {
         database: "userAppData",
         collection: "epubData",
-      }).then(async (epubData) => {
-        const lastCloudWritten = epubData.data.lastWritten;
-        const remoteEpubData = arrayToMap(
-          epubData.data.epubData.map(localizeCloudEpubData),
-          "key"
-        );
-        const lastUpdatedTimestamps = await getAllEpubDataWithLastUpdated();
-        const entriesNeedCloudUpdate = [];
-        for (const localEntry of lastUpdatedTimestamps) {
-          const key = localEntry.entryId ?? localEntry.key;
-          if (
-            remoteEpubData.has(key) === false &&
-            lastCloudWritten >= localEntry._lastUpdated
-          ) {
-            console.log(localEntry, lastCloudWritten);
-            await deleteAllEpubDataOfKey(localEntry, true);
-          } else if (
-            remoteEpubData.has(key) === false ||
-            remoteEpubData.get(key)._lastUpdated < localEntry._lastUpdated
-          ) {
-            entriesNeedCloudUpdate.push(localEntry);
-          } else if (
-            remoteEpubData.get(key)._lastUpdated > localEntry._lastUpdated
-          ) {
-            await putCloudEpubData(remoteEpubData.get(key), true);
-          }
-          remoteEpubData.delete(key);
-        }
-        for (const remoteEntry of remoteEpubData.values()) {
-          console.log("adding remote epub data to local db", remoteEntry);
-          await putCloudEpubData(remoteEntry, true);
-        }
-        const epubDataNeedCloudUpdate = [];
-        for (const localEntry of entriesNeedCloudUpdate) {
-          const key = localEntry.entryId ?? localEntry.key;
-          console.log(`added ${key} cloud update list`);
-          epubDataNeedCloudUpdate.push(await getWholeEpubData(key));
-        }
-        if (epubDataNeedCloudUpdate.length > 0) {
-          console.log(
-            `updating ${epubDataNeedCloudUpdate.length} epub data to the cloud`
+      })
+        .then(async (epubData) => {
+          const lastCloudWritten = epubData.data.lastWritten;
+          const remoteEpubData = arrayToMap(
+            epubData.data.epubData.map(localizeCloudEpubData),
+            "key"
           );
-          await syncMultipleEpubDataToCloud(epubDataNeedCloudUpdate);
-        }
-        console.log("finished epub data sync");
-        resolves[1]();
-      });
+          const lastUpdatedTimestamps = await getAllEpubDataWithLastUpdated();
+          const entriesNeedCloudUpdate = [];
+          for (const localEntry of lastUpdatedTimestamps) {
+            const key = localEntry.entryId ?? localEntry.key;
+            if (
+              remoteEpubData.has(key) === false &&
+              lastCloudWritten >= localEntry._lastUpdated
+            ) {
+              console.log(localEntry, lastCloudWritten);
+              await deleteAllEpubDataOfKey(localEntry, true);
+            } else if (
+              remoteEpubData.has(key) === false ||
+              remoteEpubData.get(key)._lastUpdated < localEntry._lastUpdated
+            ) {
+              entriesNeedCloudUpdate.push(localEntry);
+            } else if (
+              remoteEpubData.get(key)._lastUpdated > localEntry._lastUpdated
+            ) {
+              await putCloudEpubData(remoteEpubData.get(key), true);
+            }
+            remoteEpubData.delete(key);
+          }
+          for (const remoteEntry of remoteEpubData.values()) {
+            console.log("adding remote epub data to local db", remoteEntry);
+            await putCloudEpubData(remoteEntry, true);
+          }
+          const epubDataNeedCloudUpdate = [];
+          for (const localEntry of entriesNeedCloudUpdate) {
+            const key = localEntry.entryId ?? localEntry.key;
+            console.log(`added ${key} cloud update list`);
+            epubDataNeedCloudUpdate.push(await getWholeEpubData(key));
+          }
+          if (epubDataNeedCloudUpdate.length > 0) {
+            console.log(
+              `updating ${epubDataNeedCloudUpdate.length} epub data to the cloud`
+            );
+            await syncMultipleEpubDataToCloud(epubDataNeedCloudUpdate);
+          }
+          console.log("finished epub data sync");
+        })
+        .catch((error) => console.error(error))
+        .finally(() => resolves[1]());
 
-      handleSimpleRequest("GET", {}, "lists/get/all").then(
-        async (shelvesData) => {
+      handleSimpleRequest("GET", {}, "lists/get/all")
+        .then(async (shelvesData) => {
           const remoteShelves = shelvesData.data.response.shelves;
           const lastSync = (await getCurrentUser()).lastSynced;
           const lastCloudWritten = shelvesData.data.response.lastWritten;
@@ -140,9 +165,9 @@ export const Sync = ({ children }) => {
             await syncMultipleBooksToCloud(entriesNeedCloudUpdate);
           }
           console.log("finished books sync");
-          resolves[2]();
-        }
-      );
+        })
+        .catch((error) => console.error(error))
+        .finally(() => resolves[2]());
 
       Promise.all(promises).then(async () => {
         await updateLastSynced(Date.now());
@@ -152,7 +177,16 @@ export const Sync = ({ children }) => {
   }, []);
 
   if (isLoading) {
-    return;
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "90vh",
+        }}
+      >
+        <Loading loadingText={"Syncing"} />
+      </Box>
+    );
   }
 
   return children;

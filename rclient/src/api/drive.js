@@ -1,5 +1,5 @@
+import { addEpub } from "../features/files/fileUtils";
 import { handleDataFormRequest, handleSimpleRequest } from "./Axios";
-import { addBookFromEpub } from "./IndexedDB/Books";
 
 /**
  *
@@ -8,9 +8,8 @@ import { addBookFromEpub } from "./IndexedDB/Books";
  * @param {Blob} object.blob blob
  */
 export const sendOne = (object) => {
-  handleDataFormRequest("POST", object, "drive/put/one")
-    .then((res) => console.log(res))
-    .catch((error) => console.error(error));
+  delete object.epubObject;
+  return handleDataFormRequest("POST", object, "drive/put/one");
 };
 
 export const deleteFile = (fileDriveId) => {
@@ -25,15 +24,18 @@ export const listFiles = () => {
     .catch((error) => console.error(error));
 };
 
-export const getOne = (fileDriveId) => {
-  handleSimpleRequest("GET", { responseType: "blob" }, "drive/get/one", {
-    fileDriveId,
-  })
-    .then((res) => {
-      const file = new File([res.data], "file", {
-        type: res.data.type,
-      });
-      addBookFromEpub(file);
+export const getOne = (fileDriveId, fileId) =>
+  new Promise((resolve, reject) =>
+    handleSimpleRequest("GET", { responseType: "blob" }, "drive/get/one", {
+      fileDriveId,
     })
-    .catch((error) => console.error(error));
-};
+      .then((res) => {
+        const file = new File([res.data], "file", {
+          type: res.data.type,
+        });
+        addEpub(file, fileId).then(resolve);
+      })
+      .catch((error) =>
+        error instanceof Error ? reject(error) : new Error("unknown error")
+      )
+  );

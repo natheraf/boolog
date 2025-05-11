@@ -156,7 +156,7 @@ export const convertObjectToXML = (object) => {
   return xmlDataStr;
 };
 
-export const addEpub = (file) =>
+export const addEpub = (file, fileId) =>
   new Promise((resolve, reject) => {
     if (!file || file?.type !== "application/epub+zip") {
       console.log(`Cannot add file: Missing file or not an epub`);
@@ -165,6 +165,9 @@ export const addEpub = (file) =>
     convertZipFileToObjectResource(file).then((object) => {
       const epubObject = processEpub(object);
       const data = { blob: file, epubObject };
+      if (fileId !== undefined) {
+        data._id = fileId;
+      }
       addFile(data).then(resolve);
     });
   });

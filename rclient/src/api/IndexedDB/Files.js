@@ -8,7 +8,9 @@ const addFileHelper = (db, data) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(filesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(filesObjectStore);
-    data._id = getNewId();
+    if (data.hasOwnProperty("_id") === false) {
+      data._id = getNewId();
+    }
     const request = objectStore.add(data);
     request.onsuccess = (event) => {
       console.log("added file!");
