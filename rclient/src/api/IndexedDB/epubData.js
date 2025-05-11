@@ -1,4 +1,5 @@
 import { handleSimpleRequest } from "../Axios";
+import { defaultFormatting } from "../Local";
 import { dotNotationArrayToStandard, getLevelDotNotation } from "../utils";
 import { getUserDB, openDatabase } from "./common";
 import { appDataDBVersion, epubDataObjectStore } from "./config";
@@ -11,10 +12,38 @@ export const epubDotNotationDepth = {
 
 const globalEpubDataKeys = ["epubGlobalFormatting"];
 
+const formattingCloudSyncWhitelist = [
+  "fontFamily",
+  "textAlign",
+  "textColor",
+  "pageColor",
+  "showArrows",
+  "showDividers",
+];
+
+/**
+ * destructive
+ * @param {object} obj target
+ * @param {string[]} whitelist key whitelist
+ */
+const filterObject = (obj, whitelist) =>
+  Object.keys(obj).forEach((key) =>
+    whitelist.includes(key) === false ? delete obj[key] : null
+  );
+
 export const syncMultipleToCloud = (data, dotNotation) =>
   new Promise((resolve, reject) => {
+    data = structuredClone(data);
     if (localStorage.getItem("isLoggedIn") !== "true") {
       return resolve();
+    }
+    for (const entry of data) {
+      if (entry.key === "epubGlobalFormatting" || entry.key === "formatting") {
+        filterObject(
+          entry.key === "epubGlobalFormatting" ? entry.formatting : entry.value,
+          formattingCloudSyncWhitelist
+        );
+      }
     }
     handleSimpleRequest(
       "POST",
@@ -120,11 +149,43 @@ const deleteAllEpubDataOfKeyHelper = (db, data, localOnly) =>
   });
 
 export const putCloudEpubData = async (object, localOnly) => {
+  if (
+    object.key === "epubGlobalFormatting" ||
+    object.hasOwnProperty("formatting")
+  ) {
+    const globalEpubData =
+      (await getEpubData("epubGlobalFormatting")) ??
+      structuredClone(defaultFormatting);
+    Object.keys(globalEpubData).forEach(
+      (key) => key.startsWith("_") && delete globalEpubData[key]
+    );
+    const oldEpubData =
+      (await getEpubData(
+        object.key === "epubGlobalFormatting"
+          ? "epubGlobalFormatting"
+          : `${object.key}.formatting`
+      )) ?? null;
+    if (object.key === "epubGlobalFormatting") {
+      object.formatting = {
+        ...globalEpubData,
+        ...oldEpubData,
+        ...object.formatting,
+      };
+    } else {
+      object.formatting.value = {
+        ...globalEpubData,
+        ...oldEpubData,
+        ...object.formatting.value,
+      };
+    }
+  }
   if (globalEpubDataKeys.includes(object.key)) {
-    await putEpubData(object, true, localOnly);
+    return putEpubData(object, true, localOnly);
   } else {
-    await deleteAllEpubDataOfKey(object, localOnly);
-    await updateEpubDataInDotNotation(object, localOnly);
+    return Promise.all([
+      deleteAllEpubDataOfKey(object, localOnly),
+      updateEpubDataInDotNotation(object, localOnly),
+    ]);
   }
 };
 
@@ -151,7 +212,6 @@ const updateEpubDataInDotNotationHelper = (db, object, localOnly) =>
       const transaction = db.transaction(epubDataObjectStore, "readwrite");
       const objectStore = transaction.objectStore(epubDataObjectStore);
       const request = objectStore.put(value);
-      resolves[index](value);
       request.onerror = onError;
       request.onsuccess = (event) => resolves[index](event.target.result);
     }
@@ -260,17 +320,18 @@ const putEpubDataHelper = (db, data, globalEpubData, localOnly) =>
     const transaction = db.transaction(epubDataObjectStore, "readwrite");
     const objectStore = transaction.objectStore(epubDataObjectStore);
     const onError = (error) => reject(new Error(error));
-    if (globalEpubData) {
+    if (globalEpubData && localOnly !== true) {
       data._lastUpdated = Date.now();
     }
     const request = objectStore.put(data);
     request.onerror = onError;
     request.onsuccess = (event) => {
+      if (localOnly === true) {
+        return resolve(event.target.result);
+      }
       if (globalEpubData) {
-        if (localOnly !== true) {
-          syncMultipleToCloud([data], false);
-        }
-        return;
+        syncMultipleToCloud([data], false);
+        return resolve(event.target.result);
       }
 
       const lastUpdatedData = {
@@ -281,10 +342,8 @@ const putEpubDataHelper = (db, data, globalEpubData, localOnly) =>
       const request = objectStore.put(lastUpdatedData);
       request.onerror = onError;
       request.onsuccess = () => {
-        if (localOnly !== true) {
-          syncDotNotationToCloud([data, lastUpdatedData]);
-        }
-        resolve(event);
+        syncDotNotationToCloud([data, lastUpdatedData]);
+        resolve(event.target.result);
       };
     };
   });
