@@ -153,28 +153,30 @@ export const putCloudEpubData = async (object, localOnly) => {
     object.key === "epubGlobalFormatting" ||
     object.hasOwnProperty("formatting")
   ) {
-    const globalEpubData =
-      (await getEpubData("epubGlobalFormatting")) ??
+    const globalEpubFormatting =
+      (await getEpubData("epubGlobalFormatting"))?.formatting ??
       structuredClone(defaultFormatting);
-    Object.keys(globalEpubData).forEach(
-      (key) => key.startsWith("_") && delete globalEpubData[key]
+    Object.keys(globalEpubFormatting).forEach(
+      (key) => key.startsWith("_") && delete globalEpubFormatting[key]
     );
-    const oldEpubData =
-      (await getEpubData(
-        object.key === "epubGlobalFormatting"
-          ? "epubGlobalFormatting"
-          : `${object.key}.formatting`
-      )) ?? null;
+    const oldEpubFormatting =
+      (
+        await getEpubData(
+          object.key === "epubGlobalFormatting"
+            ? "epubGlobalFormatting"
+            : `${object.key}.formatting`
+        )
+      )?.value ?? null;
     if (object.key === "epubGlobalFormatting") {
       object.formatting = {
-        ...globalEpubData,
-        ...oldEpubData,
+        ...globalEpubFormatting,
+        ...oldEpubFormatting,
         ...object.formatting,
       };
     } else {
       object.formatting.value = {
-        ...globalEpubData,
-        ...oldEpubData,
+        ...globalEpubFormatting,
+        ...oldEpubFormatting,
         ...object.formatting.value,
       };
     }
