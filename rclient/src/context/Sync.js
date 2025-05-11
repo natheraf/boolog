@@ -21,6 +21,7 @@ import { arrayToMap } from "../api/utils";
 import { getAllFiles } from "../api/IndexedDB/Files";
 import {
   getOne as getOneFromDrive,
+  listFiles,
   sendOne as sendOneToDrive,
 } from "../api/drive";
 import { Loading } from "../features/loading/Loading";
@@ -46,7 +47,7 @@ export const Sync = ({ children }) => {
         (_e, index) =>
           new Promise((resolve, _reject) => (resolves[index] = resolve))
       );
-      handleSimpleRequest("GET", {}, "drive/list/all")
+      listFiles()
         .then(async (driveList) => {
           driveList = driveList.data.list.files;
           const driveFileIds = new Map(
@@ -65,6 +66,7 @@ export const Sync = ({ children }) => {
           for (const [fileId, driveFileId] of driveFileIds.entries()) {
             await getOneFromDrive(driveFileId, fileId);
           }
+          console.log("finish drive sync");
         })
         .catch((error) => {
           if (
