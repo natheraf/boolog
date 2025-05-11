@@ -161,6 +161,7 @@ const getAll = (req, res) => {
       entry._id = localizeCloudId(entry._id);
     });
     res.status(200).send({
+      lastWritten: req.lastWritten ?? -1,
       epubData: data,
       message: `${data.length} found`,
     });
