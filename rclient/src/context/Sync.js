@@ -35,6 +35,11 @@ export const Sync = ({ children }) => {
   const [isLoading, setIsLoading] = React.useState(
     userInfoContext.isLoggedIn()
   );
+  const [loadingProgress, setLoadingProgress] = React.useState([
+    { label: "Syncing Drive Files...", finished: false },
+    { label: "Syncing Epub Data...", finished: false },
+    { label: "Syncing Books Data...", finished: false },
+  ]);
 
   React.useEffect(() => {
     if (ranOnce) {
@@ -78,7 +83,12 @@ export const Sync = ({ children }) => {
             throw error;
           }
         })
-        .finally(() => resolves[0]());
+        .finally(() => {
+          setLoadingProgress((prev) =>
+            prev.map((e, index) => (index === 0 ? { ...e, finished: true } : e))
+          );
+          resolves[0]();
+        });
 
       handleSimpleRequest("GET", {}, "generic/get/all", {
         database: "userAppData",
@@ -131,7 +141,12 @@ export const Sync = ({ children }) => {
           console.log("finished epub data sync");
         })
         .catch((error) => console.error(error))
-        .finally(() => resolves[1]());
+        .finally(() => {
+          setLoadingProgress((prev) =>
+            prev.map((e, index) => (index === 1 ? { ...e, finished: true } : e))
+          );
+          resolves[1]();
+        });
 
       handleSimpleRequest("GET", {}, "lists/get/all")
         .then(async (shelvesData) => {
@@ -176,7 +191,12 @@ export const Sync = ({ children }) => {
           console.log("finished books sync");
         })
         .catch((error) => console.error(error))
-        .finally(() => resolves[2]());
+        .finally(() => {
+          setLoadingProgress((prev) =>
+            prev.map((e, index) => (index === 2 ? { ...e, finished: true } : e))
+          );
+          resolves[2]();
+        });
 
       Promise.all(promises).then(async () => {
         await updateLastSynced(Date.now());
@@ -193,7 +213,17 @@ export const Sync = ({ children }) => {
           height: "90vh",
         }}
       >
-        <Loading loadingText={"Syncing"} />
+        <Loading
+          loadingText={"Syncing"}
+          loadingProgress={{
+            current: loadingProgress.filter((e) => e.finished).length,
+            total: 3,
+          }}
+          subLoadingText={loadingProgress
+            .filter((e) => e.finished === false)
+            .map((e) => e.label)
+            .join("\n")}
+        />
       </Box>
     );
   }
