@@ -1,6 +1,6 @@
 import { filesObjectStore, userDBVersion } from "./config";
 import { openDatabase, getNewId, getUserDB } from "./common";
-import { sendOne } from "../drive";
+import { sendOne, deleteFile as deleteDriveFile } from "../drive";
 
 export const addFile = (data) =>
   openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, data));
@@ -55,23 +55,34 @@ export const exportFile = (id) =>
     tempLink.click();
   });
 
-export const deleteFile = (id) =>
-  openDatabase(getUserDB(), userDBVersion, (db) => deleteFileHelper(db, id));
+export const deleteFile = (id, localOnly) =>
+  openDatabase(getUserDB(), userDBVersion, (db) =>
+    deleteFileHelper(db, id, localOnly)
+  );
 
-const deleteFileHelper = (db, id) =>
+const deleteFileHelper = (db, id, localOnly) =>
   new Promise((resolve, reject) => {
     const transaction = db.transaction(filesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(filesObjectStore);
+    const onDeletedLocal = () => {
+      if (localOnly === true) {
+        return resolve();
+      }
+      deleteDriveFile(id)
+        .then((res) => console.log(res))
+        .catch((error) => console.error(error))
+        .finally(resolve);
+    };
     try {
       const request = objectStore.delete(id);
-      request.onsuccess = resolve;
+      request.onsuccess = onDeletedLocal;
       request.onerror = (error) => {
         console.log("Request Error", error);
         reject(new Error(`Request Error: ${error}`));
       };
     } catch (error) {
       if (error.name === "DataError") {
-        resolve();
+        onDeletedLocal();
       } else {
         reject(new Error(error));
       }

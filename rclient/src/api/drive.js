@@ -11,17 +11,26 @@ export const sendOne = (object) => {
   return handleDataFormRequest("POST", object, "drive/put/one");
 };
 
-export const deleteFile = (fileDriveId) => {
-  handleSimpleRequest("POST", { fileDriveId }, "drive/delete/one")
-    .then((res) => console.log(res))
-    .catch((error) => console.error(error));
+/**
+ *
+ * @param {string} localId
+ * @param {string} [fileDriveId]
+ * @return {Promise}
+ */
+export const deleteFile = async (localId, fileDriveId) => {
+  if (fileDriveId === undefined) {
+    const driveList = (await listFiles()).data.list.files;
+    fileDriveId = driveList.find(
+      (driveFile) => localId === driveFile.appProperties.boologId
+    )?.id;
+  }
+  if (fileDriveId === undefined) {
+    throw Error("file drive Id not found");
+  }
+  return handleSimpleRequest("POST", { fileDriveId }, "drive/delete/one");
 };
 
-export const listFiles = () => {
-  handleSimpleRequest("GET", {}, "drive/list/all")
-    .then((res) => console.log(res))
-    .catch((error) => console.error(error));
-};
+export const listFiles = () => handleSimpleRequest("GET", {}, "drive/list/all");
 
 export const getOne = (fileDriveId, fileId) =>
   new Promise((resolve, reject) =>
