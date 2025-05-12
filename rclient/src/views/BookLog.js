@@ -65,6 +65,7 @@ export const BookLog = () => {
   const [epub, setEpub] = React.useState(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isImporting, setIsImporting] = React.useState(false);
+  const [importingProgress, setImportingProgress] = React.useState({});
 
   const keysData = [
     { key: "title", label: "", variant: "h5" },
@@ -101,6 +102,7 @@ export const BookLog = () => {
     ) {
       files = event.dataTransfer.files;
     }
+    setImportingProgress({ current: 0, total: files.length });
     if (files.length > 0) {
       setIsImporting(true);
       const resolves = [...Array(files.length)];
@@ -109,7 +111,13 @@ export const BookLog = () => {
           new Promise((resolve, reject) => (resolves[index] = resolve))
       );
       for (let index = 0; index < files.length; index += 1) {
-        addBookFromEpub(files[index].getAsFile()).then(resolves[index]);
+        addBookFromEpub(files[index].getAsFile()).then((res) => {
+          resolves[index](res);
+          setImportingProgress((prev) => ({
+            ...prev,
+            current: prev.current + 1,
+          }));
+        });
       }
       Promise.all(promises).then(() => window.location.reload(false));
     }
@@ -293,7 +301,10 @@ export const BookLog = () => {
           height: "90vh",
         }}
       >
-        <Loading loadingText={"Importing"} />
+        <Loading
+          loadingText={"Importing"}
+          loadingProgress={importingProgress}
+        />
       </Box>
     );
   }
