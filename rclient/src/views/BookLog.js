@@ -66,6 +66,7 @@ export const BookLog = () => {
   const [isLoading, setIsLoading] = React.useState(true);
   const [isImporting, setIsImporting] = React.useState(false);
   const [importingProgress, setImportingProgress] = React.useState({});
+  const [importingSubtext, setImportingSubtext] = React.useState(new Set());
 
   const keysData = [
     { key: "title", label: "", variant: "h5" },
@@ -111,8 +112,14 @@ export const BookLog = () => {
           new Promise((resolve, reject) => (resolves[index] = resolve))
       );
       for (let index = 0; index < files.length; index += 1) {
+        const name = files[index].getAsFile().name;
+        setImportingSubtext((prev) => prev.add(name));
         addBookFromEpub(files[index].getAsFile()).then((res) => {
           resolves[index](res);
+          setImportingSubtext((prev) => {
+            prev.delete(name);
+            return prev;
+          });
           setImportingProgress((prev) => ({
             ...prev,
             current: prev.current + 1,
@@ -304,6 +311,7 @@ export const BookLog = () => {
         <Loading
           loadingText={"Importing"}
           loadingProgress={importingProgress}
+          subLoadingText={[...importingSubtext].join("\n")}
         />
       </Box>
     );
