@@ -127,13 +127,14 @@ export const Loading = ({
           ))}
         </Stack>
         <Stack
-          spacing={1}
+          spacing={2}
           alignItems={"center"}
+          justifyContent={"center"}
           sx={{
             position: "absolute",
             left: 0,
             right: 0,
-            top: "30vh",
+            height: "100%",
             margin: "auto",
           }}
         >
@@ -160,7 +161,14 @@ export const Loading = ({
           />
           {subLoadingText ? (
             <>
-              <Typography variant="h6">
+              <Typography
+                variant="h6"
+                sx={{
+                  whiteSpace: "pre-wrap",
+                  maxHeight: "70vh",
+                  overflowY: "auto",
+                }}
+              >
                 {subLoadingText ??
                   "We are loading some loading, please wait..."}
               </Typography>
