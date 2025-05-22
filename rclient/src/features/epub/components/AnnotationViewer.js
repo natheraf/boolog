@@ -125,6 +125,16 @@ export const AnnotationViewer = ({
           { type: "group_label", label: "Sorting" },
           {
             type: "value",
+            label: "First Occurrence ↓",
+            value: "occurrence_inc",
+          },
+          {
+            type: "value",
+            label: "Last Occurrence ↑",
+            value: "occurrence_dec",
+          },
+          {
+            type: "value",
             label: "New Modified ↓",
             value: "date_modified_dec",
           },
@@ -312,6 +322,16 @@ export const AnnotationViewer = ({
   };
 
   const updateNotesAsMap = (noteSort) => {
+    const sortOnOccurrence = (a, b) =>
+      noteSort.includes("dec")
+        ? Date.parse(b.selectedRangeIndexed.endContainerId) -
+            Date.parse(a.selectedRangeIndexed.endContainerId) ||
+          Date.parse(b.selectedRangeIndexed.endOffset) -
+            Date.parse(a.selectedRangeIndexed.endOffset)
+        : Date.parse(a.selectedRangeIndexed.startContainerId) -
+            Date.parse(b.selectedRangeIndexed.startContainerId) ||
+          Date.parse(a.selectedRangeIndexed.startOffset) -
+            Date.parse(b.selectedRangeIndexed.startOffset);
     if (noteSortWithChaptersRef.current) {
       const res = {};
       let prevSubheader = null;
@@ -329,7 +349,9 @@ export const AnnotationViewer = ({
           res[currentLabel].push(note);
         }
       }
-      if (noteSort.includes("date_modified")) {
+      if (noteSort.includes("occurrence")) {
+        Object.values(res).forEach((list) => list.sort(sortOnOccurrence));
+      } else if (noteSort.includes("date_modified")) {
         Object.values(res).forEach((list) =>
           list.sort((a, b) =>
             noteSort.includes("dec")
@@ -365,7 +387,9 @@ export const AnnotationViewer = ({
           res.push(note);
         }
       }
-      if (noteSort.includes("date_modified")) {
+      if (noteSort.includes("occurrence")) {
+        res.sort(sortOnOccurrence);
+      } else if (noteSort.includes("date_modified")) {
         res.sort((a, b) =>
           noteSort.includes("dec")
             ? Date.parse(b.dateModified) - Date.parse(a.dateModified)
