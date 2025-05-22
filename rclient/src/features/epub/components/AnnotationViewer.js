@@ -7,6 +7,7 @@ import {
   AppBar,
   Box,
   Divider,
+  FormControlLabel,
   IconButton,
   ListSubheader,
   Menu,
@@ -14,6 +15,7 @@ import {
   Paper,
   Select,
   Stack,
+  Switch,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -83,13 +85,12 @@ export const AnnotationViewer = ({
   const saveCountDownRef = React.useRef(0);
   const [saveCountDown, setSaveCountDown] = React.useState(0);
   const [memoSort, setMemoSort] = React.useState("alphabetical_inc");
-  const [noteSort, setNoteSort] = React.useState(
-    "date_modified_with_chapters_dec"
-  );
-  const noteSortingWithChapters = noteSort.includes("with_chapters");
+  const [noteSort, setNoteSort] = React.useState("date_modified_dec");
+  const [noteSortWithChapters, setNoteSortWithChapters] = React.useState(true);
+  const noteSortWithChaptersRef = React.useRef(true);
 
   const deleteNotesHelper = (chapter, arrayIndex) => {
-    if (noteSortingWithChapters) {
+    if (noteSortWithChapters) {
       setNotesAsMap((prev) => ({
         ...prev,
         [chapter]: prev[chapter].filter((_obj, index) => index !== arrayIndex),
@@ -102,7 +103,7 @@ export const AnnotationViewer = ({
   };
 
   const setNoteValueHelper = (chapter, arrayIndex, key, value) => {
-    if (noteSortingWithChapters) {
+    if (noteSortWithChapters) {
       setNotesAsMap((prev) => ({
         ...prev,
         [chapter]: prev[chapter].map((obj, index) =>
@@ -121,47 +122,26 @@ export const AnnotationViewer = ({
   const sortSelectEntries =
     tabValueMap[currentTabValue] === "notes"
       ? [
-          { type: "group_label", label: "With Chapters" },
+          { type: "group_label", label: "Sorting" },
           {
             type: "value",
             label: "New Modified ↓",
-            value: "date_modified_with_chapters_dec",
+            value: "date_modified_dec",
           },
           {
             type: "value",
             label: "Old Modified ↑",
-            value: "date_modified_with_chapters_inc",
+            value: "date_modified_inc",
           },
           {
             type: "value",
             label: "New Created ↓",
-            value: "date_created_with_chapters_dec",
+            value: "date_created_dec",
           },
           {
             type: "value",
             label: "Old Created ↑",
-            value: "date_created_with_chapters_inc",
-          },
-          { type: "group_label", label: "Without Chapters" },
-          {
-            type: "value",
-            label: "New Modified ↓",
-            value: "date_modified_without_chapters_dec",
-          },
-          {
-            type: "value",
-            label: "Old Modified ↑",
-            value: "date_modified_without_chapters_inc",
-          },
-          {
-            type: "value",
-            label: "New Created ↓",
-            value: "date_created_without_chapters_dec",
-          },
-          {
-            type: "value",
-            label: "Old Created ↑",
-            value: "date_created_without_chapters_inc",
+            value: "date_created_inc",
           },
         ]
       : [
@@ -332,8 +312,7 @@ export const AnnotationViewer = ({
   };
 
   const updateNotesAsMap = (noteSort) => {
-    const noteSortingWithChapters = noteSort.includes("with_chapters");
-    if (noteSortingWithChapters) {
+    if (noteSortWithChaptersRef.current) {
       const res = {};
       let prevSubheader = null;
       for (const chapterNodes of Object.values(notes)) {
@@ -350,7 +329,7 @@ export const AnnotationViewer = ({
           res[currentLabel].push(note);
         }
       }
-      if (noteSort.includes("date_modified_with_chapters")) {
+      if (noteSort.includes("date_modified")) {
         Object.values(res).forEach((list) =>
           list.sort((a, b) =>
             noteSort.includes("dec")
@@ -358,7 +337,7 @@ export const AnnotationViewer = ({
               : Date.parse(a.dateModified) - Date.parse(b.dateModified)
           )
         );
-      } else if (noteSort.includes("date_created_with_chapters")) {
+      } else if (noteSort.includes("date_created")) {
         Object.values(res).forEach((list) =>
           list.sort((a, b) =>
             noteSort.includes("dec")
@@ -368,7 +347,7 @@ export const AnnotationViewer = ({
         );
       }
       return res;
-    } else if (!noteSortingWithChapters) {
+    } else if (!noteSortWithChaptersRef.current) {
       const res = [];
       let prevSubheader = null;
       for (const chapterNodes of Object.values(notes)) {
@@ -386,13 +365,13 @@ export const AnnotationViewer = ({
           res.push(note);
         }
       }
-      if (noteSort.includes("date_modified_without_chapters")) {
+      if (noteSort.includes("date_modified")) {
         res.sort((a, b) =>
           noteSort.includes("dec")
             ? Date.parse(b.dateModified) - Date.parse(a.dateModified)
             : Date.parse(a.dateModified) - Date.parse(b.dateModified)
         );
-      } else if (noteSort.includes("date_created_without_chapters")) {
+      } else if (noteSort.includes("date_created")) {
         res.sort((a, b) =>
           noteSort.includes("dec")
             ? Date.parse(b.dateCreated) - Date.parse(a.dateCreated)
@@ -496,7 +475,12 @@ export const AnnotationViewer = ({
   };
 
   const handleSortChange = (event) => {
-    const value = event.target.value;
+    if (event?.target?.value === null) {
+      return;
+    }
+    const value =
+      event?.target?.value ??
+      (tabValueMap[currentTabValue] === "notes" ? noteSort : memoSort);
     if (tabValueMap[currentTabValue] === "notes") {
       setNoteSort(value);
       setNotes(value);
@@ -862,6 +846,27 @@ export const AnnotationViewer = ({
                   sx={{ height: 30 }}
                   size="small"
                 >
+                  <MenuItem
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                    disableRipple
+                    value={null}
+                  >
+                    <FormControlLabel
+                      control={<Switch />}
+                      checked={noteSortWithChapters}
+                      onChange={(event) => {
+                        setNoteSortWithChapters(event.target.checked);
+                        noteSortWithChaptersRef.current = event.target.checked;
+                        handleSortChange(null);
+                      }}
+                      label="Group by Chapters"
+                      labelPlacement="start"
+                    />
+                  </MenuItem>
                   {sortSelectEntries.map((entry) =>
                     entry.type === "group_label" ? (
                       <ListSubheader key={entry.label}>
@@ -893,7 +898,7 @@ export const AnnotationViewer = ({
                 >
                   {"No Notes"}
                 </Typography>
-              ) : noteSortingWithChapters ? (
+              ) : noteSortWithChapters ? (
                 notesWithGroups()
               ) : (
                 notesWithoutGroups()
