@@ -851,6 +851,7 @@ export const AnnotationViewer = ({
                       "&:hover": {
                         backgroundColor: "transparent",
                       },
+                      marginTop: -1,
                     }}
                     disableRipple
                     value={null}
