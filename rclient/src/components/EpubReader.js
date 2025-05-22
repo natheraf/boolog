@@ -764,7 +764,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             ) {
               markToAnchor = marks[start];
             }
-            if (window.getSelection().rangeCount === 1) {
+            if (
+              window.getSelection().rangeCount === 1 &&
+              ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ===
+                false
+            ) {
               handleMarkHighlightOnClick(markToAnchor);
             }
           };
