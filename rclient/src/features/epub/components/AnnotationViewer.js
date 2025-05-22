@@ -852,6 +852,9 @@ export const AnnotationViewer = ({
                         backgroundColor: "transparent",
                       },
                       marginTop: -1,
+                      ...(tabValueMap[currentTabValue] === "notes"
+                        ? {}
+                        : { display: "none" }),
                     }}
                     disableRipple
                     value={null}
