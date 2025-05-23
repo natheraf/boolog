@@ -22,6 +22,18 @@ export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
+    "Update 5/23/25 4:29PM": [
+      "been busy with finals and life. feels like a lot and not much has changed at the same time. might forget to list some changes",
+      "reminder: alpha software. none of your data is safe from deletion",
+      "format page width instead of page margins",
+      "annotation view has sort feature",
+      "sync is now available. sign in with google or email",
+      'google drive integration is now available only when singed in "with" google',
+      "preview notes in annotation viewer for context",
+      "-- technical notes below --",
+      "rewritten highlights to fix syncing issues",
+      "redesigned local database structure to allow cheap partial writes",
+    ],
     "Update 3/21/25 6:35PM": [
       "Added back button in reader.",
       "Clicking added keys d and space to turn pages in reader.",
