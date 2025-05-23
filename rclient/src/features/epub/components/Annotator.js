@@ -255,6 +255,7 @@ export const Annotator = ({
       }
 
       handleInjectingMarkToTextNodes(
+        document,
         null,
         range,
         defaultHighlightColor,
