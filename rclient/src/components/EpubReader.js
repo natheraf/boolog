@@ -740,6 +740,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
             `[nodeId="${selectedRange.endContainerId}"]`
           );
           handleInjectingMarkToEpubNodes(
+            document,
             noteId,
             selectedRange,
             entry.highlightColor,
