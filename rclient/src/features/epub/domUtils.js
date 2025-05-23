@@ -37,6 +37,7 @@ export const changeTemporaryMarksToPermanent = (nodes, noteId) => {
 };
 
 export const handleInjectingMarkToTextNodes = (
+  doc,
   noteId,
   selectedRange,
   highlightColor,
@@ -44,7 +45,7 @@ export const handleInjectingMarkToTextNodes = (
 ) => {
   const markNode = (node, noteId, highlightColor) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      const mark = document.createElement("span");
+      const mark = doc.createElement("span");
       mark.classList.add(markClassName);
       if (noteId) {
         mark.classList.add(noteId);
@@ -159,8 +160,8 @@ export const handleInjectingMarkToTextNodes = (
   }
 };
 
-const getTextNodeAtOffset = (node, offset) => {
-  const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+const getTextNodeAtOffset = (doc, node, offset) => {
+  const walker = doc.createTreeWalker(node, NodeFilter.SHOW_TEXT);
   while (walker.nextNode()) {
     const textNode = walker.currentNode;
     const length = textNode.textContent.length;
@@ -173,16 +174,19 @@ const getTextNodeAtOffset = (node, offset) => {
 };
 
 export const handleInjectingMarkToEpubNodes = (
+  doc,
   noteId,
   selectedRange,
   highlightColor,
   markClassName
 ) => {
   const startResult = getTextNodeAtOffset(
+    doc,
     selectedRange.startContainer,
     selectedRange.startOffset
   );
   const endResult = getTextNodeAtOffset(
+    doc,
     selectedRange.endContainer,
     selectedRange.endOffset
   );
@@ -193,6 +197,7 @@ export const handleInjectingMarkToEpubNodes = (
     endOffset: endResult.offset,
   };
   handleInjectingMarkToTextNodes(
+    doc,
     noteId,
     selectedRange,
     highlightColor,
@@ -215,4 +220,65 @@ export const getLastTextNode = (node) => {
     lastNode = walker.currentNode;
   }
   return lastNode;
+};
+
+const getClosestEpubNode = (node) => {
+  let it = node;
+  while (it !== null && it.classList?.contains("epub-node") === false) {
+    it = it.parentElement;
+  }
+  return it;
+};
+
+const trimRangeOfEpubNodes = (doc, startId, endId) => {
+  let it = doc.querySelector(`[nodeid="${startId}"]`);
+  while (it.parentElement !== null) {
+    const parent = it.parentElement;
+    while (it.previousSibling !== null) {
+      parent.removeChild(it.previousSibling);
+    }
+    it = it.parentElement;
+  }
+  it = doc.querySelector(`[nodeid="${endId}"]`);
+  while (it.parentElement !== null) {
+    const parent = it.parentElement;
+    while (it.nextSibling !== null) {
+      parent.removeChild(it.nextSibling);
+    }
+    it = it.parentElement;
+  }
+  return doc;
+};
+
+export const trimAndHighlight = (
+  stringHTML,
+  selectedRangeIndexed,
+  highlightColor
+) => {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(stringHTML, "text/html");
+  trimRangeOfEpubNodes(
+    doc,
+    selectedRangeIndexed.startContainerId,
+    selectedRangeIndexed.endContainerId
+  );
+
+  const selectedRange = structuredClone(selectedRangeIndexed);
+  selectedRange.startContainer = doc.querySelector(
+    `[nodeId="${selectedRange.startContainerId}"]`
+  );
+  selectedRange.endContainer = doc.querySelector(
+    `[nodeId="${selectedRange.endContainerId}"]`
+  );
+  handleInjectingMarkToEpubNodes(
+    doc,
+    null,
+    selectedRange,
+    highlightColor,
+    "temporary-mark"
+  );
+  for (const node of doc.querySelectorAll(`[nodeid]`)) {
+    node.removeAttribute("nodeid");
+  }
+  return doc.getElementById("inner-content").outerHTML;
 };

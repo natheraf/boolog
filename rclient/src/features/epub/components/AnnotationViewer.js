@@ -32,7 +32,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LinkIcon from "@mui/icons-material/Link";
 import PaletteIcon from "@mui/icons-material/Palette";
 import { SimpleColorPicker } from "./SimpleColorPicker";
-import { disableHighlightNodes } from "../domUtils";
+import { disableHighlightNodes, trimAndHighlight } from "../domUtils";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const LastModified = ({ entry }) => {
   return (
@@ -88,6 +89,21 @@ export const AnnotationViewer = ({
   const [noteSort, setNoteSort] = React.useState("date_modified_dec");
   const [noteSortWithChapters, setNoteSortWithChapters] = React.useState(true);
   const noteSortWithChaptersRef = React.useRef(true);
+  const [expandedNotesMap, setExpandedNotesMap] = React.useState(new Map());
+
+  const handleExpandNote = (note) => {
+    setExpandedNotesMap((prev) => {
+      prev.set(
+        note.id,
+        trimAndHighlight(
+          spine[note.spineIndex].element,
+          note.selectedRangeIndexed,
+          note.highlightColor
+        )
+      );
+      return new Map(prev);
+    });
+  };
 
   const deleteNotesHelper = (chapter, arrayIndex) => {
     if (noteSortWithChapters) {
@@ -456,6 +472,7 @@ export const AnnotationViewer = ({
     setMemoAsArray(updateMemosAsArray());
     clearTemporaryMarks();
     setAnchorEl(event.currentTarget);
+    setExpandedNotesMap(new Map());
   };
 
   const handleCloseAnnotation = () => {
@@ -575,15 +592,26 @@ export const AnnotationViewer = ({
                 <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
                   <Stack spacing={1}>
                     <LastModified entry={note} />
-                    <Typography>
-                      <span
-                        style={{
-                          backgroundColor: note.highlightColor,
+                    {expandedNotesMap.has(note.id) ? (
+                      <Box
+                        sx={{ overflowX: "auto" }}
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            expandedNotesMap.get(note.id) ??
+                            "something went wrong...",
                         }}
-                      >
-                        {note.selectedText}
-                      </span>
-                    </Typography>
+                      />
+                    ) : (
+                      <Typography>
+                        <span
+                          style={{
+                            backgroundColor: note.highlightColor,
+                          }}
+                        >
+                          {note.selectedText}
+                        </span>
+                      </Typography>
+                    )}
                     <Stack sx={{ width: "100%" }}>
                       <Typography variant="body">Note</Typography>
                       <Textarea
@@ -609,6 +637,15 @@ export const AnnotationViewer = ({
                       />
                     </Stack>
                     <Stack spacing={1} direction="row">
+                      <Tooltip title="Preview">
+                        <IconButton
+                          onClick={() => handleExpandNote(note)}
+                          size="small"
+                          disabled={expandedNotesMap.has(note.id)}
+                        >
+                          <VisibilityIcon />
+                        </IconButton>
+                      </Tooltip>
                       <Tooltip title="Go to location">
                         <IconButton
                           onClick={() =>
