@@ -3,6 +3,7 @@ const {
   fetchGoogleFonts,
 } = require("../../externalAPI/google/googleAPI");
 const { getDatabase } = require("../database");
+const { sampleEpubPath } = require("../config/resources.config");
 
 const getGoogleFonts = () =>
   new Promise((resolve, reject) => {
@@ -35,6 +36,13 @@ exports.get = (req, res) => {
     searchGoogleBooks(query, pageLimit, page).then((searchResults) =>
       res.status(200).send({ searchResults })
     );
+  } else if (key === "sampleEpub") {
+    const fs = require("fs");
+    const readStream = fs.createReadStream(sampleEpubPath);
+    res.writeHead(200, {
+      "Content-Type": "application/epub+zip",
+    });
+    readStream.pipe(res);
   } else {
     res.status(500).send({ message: "no key found" });
   }
