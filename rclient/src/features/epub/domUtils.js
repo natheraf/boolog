@@ -22,12 +22,6 @@ export const disableHighlightNodes = (nodes) => {
   deleteNodesAndLiftChildren(nodes);
 };
 
-export const changeStyleValue = (nodes, key, value) => {
-  for (const node of nodes) {
-    node.style[key] = value;
-  }
-};
-
 export const changeTemporaryMarksToPermanent = (nodes, noteId) => {
   for (const node of nodes) {
     node.classList.remove("temporary-mark");
@@ -51,9 +45,10 @@ export const handleInjectingMarkToTextNodes = (
         mark.classList.add(noteId);
         mark.setAttribute("noteid", noteId);
       }
-      mark.style.backgroundColor = highlightColor;
-      mark.style.fontSize = "inherit";
-      mark.style.fontWeight = "inherit";
+      mark.setAttribute(
+        "style",
+        `background-color: ${highlightColor} !important;`
+      );
       node.parentNode.replaceChild(mark, node);
       mark.appendChild(node);
       return;

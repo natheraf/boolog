@@ -1108,6 +1108,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           ? ""
           : `text-indent: ${format.textIndent}rem !important;`
       }
+      .temporary-mark, .mark {
+        all: unset !important;
+        font-size: inherit !important; 
+        font-weight: inherit !important;
+      }
     `;
     const styleId = `epub-css-user-formatting`;
     const styleElement =

@@ -19,7 +19,6 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { HtmlTooltip, SmallTab, SmallTabs } from "../../CustomComponents";
 import { SimpleColorPicker } from "./SimpleColorPicker";
 import {
-  changeStyleValue,
   changeTemporaryMarksToPermanent,
   disableHighlightNodes,
   getFirstTextNode,
@@ -121,13 +120,14 @@ export const Annotator = ({
       isTextField && event.target.value === "" ? null : event.target.value;
     const noteId =
       selectedAnchor === null ? anchorEl?.getAttribute(noteIdAttribute) : null;
-    changeStyleValue(
-      document.getElementsByClassName(
-        noteId === null ? "temporary-mark" : noteId
-      ),
-      "backgroundColor",
-      value ?? defaultHighlightColor
-    );
+    for (const node of document.getElementsByClassName(
+      noteId === null ? "temporary-mark" : noteId
+    )) {
+      node.setAttribute(
+        "style",
+        `background-color: ${value ?? defaultHighlightColor} !important;`
+      );
+    }
     setHighlightColor(value);
   };
 
@@ -305,7 +305,10 @@ export const Annotator = ({
   const handleUpdateHighlight = (noteId) => {
     const marks = document.getElementsByClassName(noteId);
     for (const mark of marks) {
-      mark.style.backgroundColor = highlightColor;
+      mark.setAttribute(
+        "style",
+        `background-color: ${highlightColor} !important;`
+      );
     }
   };
 
