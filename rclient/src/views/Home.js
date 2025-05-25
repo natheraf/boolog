@@ -22,8 +22,13 @@ export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
-    "Update 5/23/25 4:29PM": [
-      "been busy with finals and life. feels like a lot and not much has changed at the same time. might forget to list some changes",
+    "Update 5/25/25 6:09PM": [
+      "improved compatibility with more epubs (https://www.gutenberg.org/ebooks/64317 and https://www.planetebook.com/the-great-gatsby/)",
+      "fixed issues with highlights inheriting unwanted styles from parent",
+      "users can now import a sample epub if their library is empty",
+    ],
+    "Update 5/23/25 4:29AM": [
+      "been busy. feels like a lot and not much has changed at the same time. not all changes are listed",
       "reminder: alpha software. none of your data is safe from deletion",
       "format page width instead of page margins",
       "annotation view has sort feature",
