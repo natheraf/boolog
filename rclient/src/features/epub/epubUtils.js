@@ -127,6 +127,9 @@ export const processEpub = (epubObject) => {
 
   const navMap = new Map(); // content -> nav label / chapter name
   const toc = [];
+  if (Array.isArray(tocRef.navMap?.navPoint) === false) {
+    tocRef.navMap.navPoint = [tocRef.navMap.navPoint];
+  }
   const navPoints =
     tocRef.navMap?.navPoint?.sort(
       (a, b) => (a.playOrder ?? 0) - (b.playOrder ?? 0)
@@ -161,6 +164,9 @@ export const processEpub = (epubObject) => {
     spineRef = [spineRef];
   }
   for (const item of spineRef) {
+    if (elementMap.has(item["@_idref"]) === false) {
+      continue;
+    }
     spineMap[elementMap.get(item["@_idref"]).href] = spineStack.length;
     spineStack.push({
       element: elementMap.get(item["@_idref"]).section,
@@ -318,7 +324,9 @@ export const processEpub = (epubObject) => {
       }
     }
   };
-  addAllCreators(metadata.creator);
+  if (metadata.hasOwnProperty("creator")) {
+    addAllCreators(metadata.creator);
+  }
   metadata.common.authors.value = metadata.common.authors.value.filter(
     (value) => value !== undefined
   );
