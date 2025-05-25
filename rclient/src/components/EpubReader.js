@@ -1108,17 +1108,28 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
           ? ""
           : `text-indent: ${format.textIndent}rem !important;`
       }
-      .temporary-mark, .mark {
-        all: unset !important;
-        font-size: inherit !important; 
-        font-weight: inherit !important;
-      }
     `;
     const styleId = `epub-css-user-formatting`;
     const styleElement =
       document.querySelector(`#${styleId}`) ?? document.createElement("style");
     styleElement.id = styleId;
     styleElement.innerHTML = `#content *, #previous-content * {\n${userFormattingStyle}\n}`;
+    document.head.insertAdjacentElement("beforeend", styleElement);
+  };
+
+  const putHighlightStyles = () => {
+    const highlightStyles = `
+      .temporary-mark, .mark {
+        all: unset !important;
+        font-size: inherit !important; 
+        font-weight: inherit !important;
+      }
+    `;
+    const styleId = `epub-css-highlight-styles`;
+    const styleElement =
+      document.querySelector(`#${styleId}`) ?? document.createElement("style");
+    styleElement.id = styleId;
+    styleElement.innerHTML = `#content *, #previous-content * {\n${highlightStyles}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
   };
 
@@ -1176,6 +1187,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       document.head.insertAdjacentElement("beforeend", styleElement);
       epubStyleIds.current.push(styleElement.id);
     }
+    putHighlightStyles();
     putFormattingStyleElement();
     setSpinePointer((prev) => {
       const startIndex = prev ?? 0;
