@@ -38,6 +38,7 @@ import {
 } from "../api/IndexedDB/epubData";
 import { defaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
+import { handleSimpleRequest } from "../api/Axios";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -67,6 +68,7 @@ export const BookLog = () => {
   const [isImporting, setIsImporting] = React.useState(false);
   const [importingProgress, setImportingProgress] = React.useState({});
   const [importingSubtext, setImportingSubtext] = React.useState(new Set());
+  const [showImportSample, setShowImportSample] = React.useState(false);
 
   const keysData = [
     { key: "title", label: "", variant: "h5" },
@@ -87,6 +89,23 @@ export const BookLog = () => {
       variant: "body2",
     },
   ];
+
+  const importSampleBook = () => {
+    handleSimpleRequest("GET", { responseType: "blob" }, "resources/get", {
+      key: "sampleEpub",
+    })
+      .then((res) => {
+        const file = new File([res.data], "file", {
+          type: res.data.type,
+        });
+        addBookFromEpub(file).then(() => (window.location.href = "/books"));
+      })
+      .catch((error) =>
+        error instanceof Error
+          ? console.log(error)
+          : console.log("unknown error")
+      );
+  };
 
   const handleDrop = (event) => {
     event.preventDefault();
@@ -228,6 +247,7 @@ export const BookLog = () => {
           for (const item of res) {
             obj[item.status].items.push(item);
           }
+          setShowImportSample(res.length === 0);
           setLibrary(obj);
           setIsLoading(false);
         })
@@ -339,6 +359,21 @@ export const BookLog = () => {
         />
       ) : null}
       <Stack onDrop={handleDrop} onDragOver={handleDragOver}>
+        {showImportSample ? (
+          <Fade timeout={2000} in={true}>
+            <Typography
+              sx={{
+                alignSelf: "center",
+                padding: 1,
+                color: theme.palette.primary.main,
+                cursor: "pointer",
+              }}
+              onClick={importSampleBook}
+            >
+              Start with a sample book
+            </Typography>
+          </Fade>
+        ) : null}
         {statuses.map((obj, index) => (
           <Slide
             key={obj.status}
