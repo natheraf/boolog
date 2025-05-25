@@ -156,6 +156,12 @@ export const convertObjectToXML = (object) => {
   return xmlDataStr;
 };
 
+/**
+ *
+ * @param {Blob} file
+ * @param {string=} fileId
+ * @returns
+ */
 export const addEpub = (file, fileId) =>
   new Promise((resolve, reject) => {
     if (!file || file?.type !== "application/epub+zip") {
