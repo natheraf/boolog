@@ -1596,7 +1596,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 sx={{
                   maxWidth: `${pageWidth}px`,
                   minWidth: `${pageWidth}px`,
-                  overflow: "hidden",
+                  // overflow: "hidden",
                 }}
               >
                 <Box
@@ -1626,9 +1626,18 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   width: "100%",
                   height: dialogContentHeight,
                   position: "relative",
-                  opacity: 0.4,
                 }}
               >
+                {/* <Box
+                  sx={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: theme.palette.background.paper,
+                    opacity: 1,
+                    justifyContent: "flex-end",
+                  }}
+                /> */}
                 <Divider
                   orientation="vertical"
                   sx={{
@@ -1636,6 +1645,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     left: 0,
                     visibility: formatting.showDividers ? "visible" : "hidden",
+                    opacity: 0.4,
                   }}
                 />
                 <NavigateNextIcon
@@ -1650,6 +1660,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                       windowWidth - formatting.pageWidth >= 100
                         ? "visible"
                         : "hidden",
+                    opacity: 0.4,
                   }}
                   htmlColor={"gray"}
                 />
