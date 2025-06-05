@@ -32,6 +32,21 @@ import CopyAllIcon from "@mui/icons-material/CopyAll";
 let selectedRange = null;
 let selectedRangeIndexed = null;
 
+const isIOS = () => {
+  return (
+    [
+      "iPad Simulator",
+      "iPhone Simulator",
+      "iPod Simulator",
+      "iPad",
+      "iPhone",
+      "iPod",
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  );
+};
+
 const formatMemoKey = (key) => {
   if (!key) {
     return null;
@@ -400,18 +415,13 @@ export const Annotator = ({
   };
 
   const handleTouchSelect = (event) => {
-    let selection = null;
-    if (window.getSelection) {
-      selection = window.getSelection();
-    } else if (typeof document.selection !== "undefined") {
-      selection = document.selection;
-    }
-    if (selection.isCollapsed === false) {
+    const selection = window.getSelection();
+    if (isIOS() === false && selection.isCollapsed === false) {
       event.preventDefault();
     }
     if (oldTouchSelect.current) {
       setTimeout(() => {
-        if (selection.isCollapsed === false) {
+        if (window.getSelection().isCollapsed === false) {
           handleGetTextSelection();
         }
       }, 100);
