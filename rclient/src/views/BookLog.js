@@ -162,7 +162,7 @@ export const BookLog = () => {
       Object.keys(formatting).forEach(
         (key) => key.startsWith("_") && delete formatting[key]
       );
-      formatting.pageWidth = Math.min(window.innerWidth, 700);
+      formatting.pageWidth = Math.min(window.innerWidth - 25, 700);
       getEpubDataWithDefault({
         key: "epubGlobalFormatting",
         formatting,

@@ -56,6 +56,7 @@ let imagesInMemory = new Set();
 
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
+  const opacityOfSideElements = 0.4;
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const addAlert = React.useContext(AlertsContext).addAlert;
 
@@ -109,7 +110,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
-  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth - 25);
   const getDialogContentHeight = () =>
     window.innerHeight -
     leftOverHeight +
@@ -1158,7 +1159,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const updateWindowSize = () => {
-    setWindowWidth(window.innerWidth);
+    setWindowWidth(window.innerWidth - 25);
     setDialogContentHeight(getDialogContentHeight());
   };
 
@@ -1436,9 +1437,10 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         <Stack
           sx={{
             overflow: "hidden",
-            ...(formatting.pageColor === "Original"
-              ? {}
-              : { backgroundColor: formatting.pageColor }),
+            backgroundColor:
+              formatting.pageColor === "Original"
+                ? theme.palette.background.paper
+                : formatting.pageColor,
           }}
         >
           <Stack id="reader-body">
@@ -1544,13 +1546,24 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               spacing={1}
             >
               <Box
+                onClick={handlePreviousPage}
                 sx={{
                   width: "100%",
                   height: dialogContentHeight,
                   position: "relative",
-                  opacity: 0.4,
+                  zIndex: 1,
+                  cursor: "pointer",
                 }}
               >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: theme.palette.background.paper,
+                    justifyContent: "flex-end",
+                  }}
+                />
                 <Divider
                   orientation="vertical"
                   sx={{
@@ -1558,6 +1571,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     right: 0,
                     visibility: formatting.showDividers ? "visible" : "hidden",
+                    opacity: opacityOfSideElements,
                   }}
                 />
                 <NavigateBeforeIcon
@@ -1572,31 +1586,16 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                       windowWidth - formatting.pageWidth >= 100
                         ? "visible"
                         : "hidden",
+                    opacity: opacityOfSideElements,
                   }}
                   htmlColor={"gray"}
-                />
-                <Button
-                  variant="text"
-                  onClick={handlePreviousPage}
-                  sx={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    "&.MuiButtonBase-root:hover": {
-                      backgroundColor: "transparent",
-                    },
-                    maskImage:
-                      "linear-gradient(to right, black 50%, transparent)",
-                    justifyContent: "flex-start",
-                  }}
-                  disableRipple={!theme.transitions.reduceMotion}
                 />
               </Box>
               <Box
                 sx={{
                   maxWidth: `${pageWidth}px`,
                   minWidth: `${pageWidth}px`,
-                  // overflow: "hidden",
+                  overflow: "visible",
                 }}
               >
                 <Box
@@ -1622,22 +1621,23 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 />
               </Box>
               <Box
+                onClick={handleNextPage}
                 sx={{
                   width: "100%",
                   height: dialogContentHeight,
                   position: "relative",
+                  cursor: "pointer",
                 }}
               >
-                {/* <Box
+                <Box
                   sx={{
                     position: "absolute",
                     width: "100%",
                     height: "100%",
                     backgroundColor: theme.palette.background.paper,
-                    opacity: 1,
                     justifyContent: "flex-end",
                   }}
-                /> */}
+                />
                 <Divider
                   orientation="vertical"
                   sx={{
@@ -1645,7 +1645,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     left: 0,
                     visibility: formatting.showDividers ? "visible" : "hidden",
-                    opacity: 0.4,
+                    opacity: opacityOfSideElements,
                   }}
                 />
                 <NavigateNextIcon
@@ -1660,7 +1660,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                       windowWidth - formatting.pageWidth >= 100
                         ? "visible"
                         : "hidden",
-                    opacity: 0.4,
+                    opacity: opacityOfSideElements,
                   }}
                   htmlColor={"gray"}
                 />
@@ -1678,6 +1678,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     maskImage:
                       "linear-gradient(to left, black 50%, transparent)",
                     justifyContent: "flex-end",
+                    opacity: opacityOfSideElements,
+                    visibility:
+                      windowWidth - formatting.pageWidth >= 143
+                        ? "visible"
+                        : "hidden",
                   }}
                   disableRipple={!theme.transitions.reduceMotion}
                 />
