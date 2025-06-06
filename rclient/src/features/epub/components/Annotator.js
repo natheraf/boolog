@@ -416,20 +416,28 @@ export const Annotator = ({
 
   const handleTouchSelect = (event) => {
     const selection = window.getSelection();
-    if (isIOS() === false && selection.isCollapsed === false) {
-      event.preventDefault();
-    }
-    if (oldTouchSelect.current) {
+    if (isIOS()) {
+      if (oldTouchSelect.current) {
+        setTimeout(() => {
+          if (window.getSelection().isCollapsed === false) {
+            handleGetTextSelection();
+          }
+        }, 100);
+        oldTouchSelect.current = null;
+      } else if (selection.isCollapsed === false) {
+        oldTouchSelect.current = true;
+      } else {
+        oldTouchSelect.current = null;
+      }
+    } else {
+      if (selection.isCollapsed === false) {
+        event.preventDefault();
+      }
       setTimeout(() => {
         if (window.getSelection().isCollapsed === false) {
           handleGetTextSelection();
         }
       }, 100);
-      oldTouchSelect.current = null;
-    } else if (selection.isCollapsed === false) {
-      oldTouchSelect.current = true;
-    } else {
-      oldTouchSelect.current = null;
     }
   };
 
