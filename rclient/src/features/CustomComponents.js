@@ -30,6 +30,7 @@ export const HtmlTooltip = styled(({ className, ...props }) => (
     backgroundColor: theme.palette.background.paper,
     maxWidth: 220,
     fontSize: theme.typography.pxToRem(12),
+    color: theme.palette.text.primary,
   },
 }));
 
