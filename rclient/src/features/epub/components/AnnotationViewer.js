@@ -302,7 +302,10 @@ export const AnnotationViewer = ({
       disableHighlightNodes(nodes);
     } else {
       for (const node of nodes) {
-        node.style.backgroundColor = note.highlightColor;
+        node.setAttribute(
+          "style",
+          `background-color: ${note.highlightColor} !important;`
+        );
       }
     }
     startSaveCountDown();
