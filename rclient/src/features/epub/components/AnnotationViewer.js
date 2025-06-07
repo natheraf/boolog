@@ -98,7 +98,8 @@ export const AnnotationViewer = ({
         trimAndHighlight(
           spine[note.spineIndex].element,
           note.selectedRangeIndexed,
-          note.highlightColor
+          note.highlightColor,
+          note.id
         )
       );
       return new Map(prev);

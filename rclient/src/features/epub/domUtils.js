@@ -248,7 +248,8 @@ const trimRangeOfEpubNodes = (doc, startId, endId) => {
 export const trimAndHighlight = (
   stringHTML,
   selectedRangeIndexed,
-  highlightColor
+  highlightColor,
+  nodeId
 ) => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(stringHTML, "text/html");
@@ -267,7 +268,7 @@ export const trimAndHighlight = (
   );
   handleInjectingMarkToEpubNodes(
     doc,
-    null,
+    nodeId,
     selectedRange,
     highlightColor,
     "temporary-mark"
