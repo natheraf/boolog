@@ -455,7 +455,10 @@ export const Annotator = ({
   }, []);
 
   return (
-    <Backdrop open={openAnnotator}>
+    <Backdrop
+      open={openAnnotator}
+      sx={{ zIndex: 2 /* previous button zIndex is 1 */ }}
+    >
       <Menu
         id="annotator-menu"
         anchorEl={selectedAnchor || anchorEl}
