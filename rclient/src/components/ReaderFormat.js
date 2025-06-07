@@ -290,7 +290,7 @@ export const ReaderFormat = ({
               <Stack direction="row" spacing={1} alignItems={"center"}>
                 <Typography width="40%">{"User"}</Typography>
                 <Typography variant="subtitle">
-                  {"Customizable, defaulting to the book style."}
+                  {"Customizable, defaults to the book style."}
                 </Typography>
               </Stack>
             </ToggleButton>
