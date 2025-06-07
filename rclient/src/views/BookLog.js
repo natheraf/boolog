@@ -171,6 +171,7 @@ export const BookLog = () => {
         getEpubDataWithDefaultInDotNotation(id, {
           key: id,
           formatting: {
+            useStandardFormatting: true,
             useGlobalFormatting: true,
             value: globalFormatting,
           },

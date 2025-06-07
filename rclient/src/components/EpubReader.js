@@ -45,6 +45,7 @@ import {
   DialogSlideUpTransition,
   CircularProgressWithLabel,
 } from "../features/CustomComponents";
+import { standardFormatting } from "../api/Local";
 
 let firstTouchX = null;
 let firstTouchY = null;
@@ -68,6 +69,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [useGlobalFormatting, setUseGlobalFormatting] = React.useState(
     epubObject.formatting.useGlobalFormatting
   );
+  const [useStandardFormatting, setUseStandardFormatting] = React.useState(
+    epubObject.formatting.useStandardFormatting
+  );
+
+  const backgroundColors =
+    useStandardFormatting || formatting.pageColor === "Original"
+      ? theme.palette.background.paper
+      : formatting.pageColor;
 
   const spine = React.useRef(epubObject.spine);
   const hrefSpineMap = React.useRef(epubObject.spineIndexMap);
@@ -110,11 +119,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const [currentPage, setCurrentPage] = React.useState(0);
   const columnGap = 10;
-  const [windowWidth, setWindowWidth] = React.useState(window.innerWidth - 25);
-  const getDialogContentHeight = () =>
+  const highlightBorderSafety = 45;
+  const [windowWidth, setWindowWidth] = React.useState(
+    window.innerWidth - highlightBorderSafety
+  );
+  const getDialogContentHeight = (paramFormatting = formatting) =>
     window.innerHeight -
     leftOverHeight +
-    (!formatting.showPageNavigator + !formatting.showSpineNavigator) *
+    (!paramFormatting.showPageNavigator + !paramFormatting.showSpineNavigator) *
       leftOverNavHeight;
   const [dialogContentHeight, setDialogContentHeight] = React.useState(
     getDialogContentHeight
@@ -250,7 +262,27 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       key: entryId,
       formatting: {
         useGlobalFormatting: newUseGlobalFormatting,
+        useStandardFormatting,
         value,
+      },
+    });
+  };
+
+  const setUseStandardFormattingHelper = (newValue) => {
+    if (newValue) {
+      setDialogContentHeight(getDialogContentHeight(standardFormatting));
+      putFormattingStyleElement(standardFormatting);
+    } else {
+      setDialogContentHeight(getDialogContentHeight());
+      handleSetFormatting(formatting);
+    }
+    setUseStandardFormatting(newValue);
+    updateEpubDataInDotNotation({
+      key: entryId,
+      formatting: {
+        useGlobalFormatting,
+        useStandardFormatting: newValue,
+        value: formatting,
       },
     });
   };
@@ -265,6 +297,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         key: entryId,
         formatting: {
           useGlobalFormatting: newValue,
+          useStandardFormatting,
           value: formatting,
         },
       });
@@ -1050,7 +1083,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   }, [handleOnKeyDown]);
 
   const putFormattingStyleElement = (forceFormatting) => {
-    const format = forceFormatting ?? formatting;
+    const format = structuredClone(forceFormatting ?? formatting);
 
     const remoteFont = format.fontFamily.kind === "webfonts#webfont";
     const linkId = "webfont-google";
@@ -1065,6 +1098,14 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       document.head.insertAdjacentElement("afterbegin", linkElement);
     } else {
       document.getElementById(linkId)?.remove();
+    }
+
+    if (format.pageColor === "Standard") {
+      format.pageColor = theme.palette.background.paper;
+    }
+
+    if (format.textColor === "Standard") {
+      format.textColor = theme.palette.text.primary;
     }
 
     const fontFamily = remoteFont
@@ -1159,7 +1200,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   };
 
   const updateWindowSize = () => {
-    setWindowWidth(window.innerWidth - 25);
+    setWindowWidth(window.innerWidth - highlightBorderSafety);
     setDialogContentHeight(getDialogContentHeight());
   };
 
@@ -1189,7 +1230,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       epubStyleIds.current.push(styleElement.id);
     }
     putHighlightStyles();
-    putFormattingStyleElement();
+    if (useStandardFormatting) {
+      setDialogContentHeight(getDialogContentHeight(standardFormatting));
+      putFormattingStyleElement(standardFormatting);
+    } else {
+      putFormattingStyleElement();
+    }
     setSpinePointer((prev) => {
       const startIndex = prev ?? 0;
       spineIndexTracker = startIndex;
@@ -1425,6 +1471,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                   setFormatting={handleSetFormatting}
                   useGlobalFormatting={useGlobalFormatting}
                   setUseGlobalFormatting={setUseGlobalFormattingHelper}
+                  useStandardFormatting={useStandardFormatting}
+                  setUseStandardFormatting={setUseStandardFormattingHelper}
                 />
               </Stack>
             )}
@@ -1437,10 +1485,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         <Stack
           sx={{
             overflow: "hidden",
-            backgroundColor:
-              formatting.pageColor === "Original"
-                ? theme.palette.background.paper
-                : formatting.pageColor,
+            backgroundColor: backgroundColors,
           }}
         >
           <Stack id="reader-body">
@@ -1544,6 +1589,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               justifyContent={"center"}
               sx={{ height: "100%" }}
               spacing={1}
+              overflow="hidden"
             >
               <Box
                 onClick={handlePreviousPage}
@@ -1560,7 +1606,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     position: "absolute",
                     width: "100%",
                     height: "100%",
-                    backgroundColor: theme.palette.background.paper,
+                    backgroundColor: backgroundColors,
                     justifyContent: "flex-end",
                   }}
                 />
@@ -1634,7 +1680,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     position: "absolute",
                     width: "100%",
                     height: "100%",
-                    backgroundColor: theme.palette.background.paper,
+                    backgroundColor: backgroundColors,
                     justifyContent: "flex-end",
                   }}
                 />

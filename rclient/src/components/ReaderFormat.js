@@ -14,6 +14,8 @@ import {
   Stack,
   Switch,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -34,6 +36,8 @@ export const ReaderFormat = ({
   setFormatting,
   useGlobalFormatting,
   setUseGlobalFormatting,
+  useStandardFormatting,
+  setUseStandardFormatting,
 }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
@@ -78,6 +82,13 @@ export const ReaderFormat = ({
 
   const userInfoContext = React.useContext(UserInfoContext);
   const isLoggedIn = React.useRef(userInfoContext.isLoggedIn());
+
+  const onChangeFormattingMode = (event, value) => {
+    if (value === null) {
+      return;
+    }
+    setUseStandardFormatting(value === "standard");
+  };
 
   const handleCheckedOnChange = (key) => (event) => {
     const checked = event.target.checked;
@@ -260,203 +271,32 @@ export const ReaderFormat = ({
               <CloseIcon />
             </IconButton>
           </Stack>
-          <Paper sx={{ width: "100%", p: 1 }}>
-            <Stack spacing={1} alignItems={"center"}>
-              <Stack direction={"row"} spacing={1} alignItems={"center"}>
-                <Typography variant="h6">{"Font Family"}</Typography>
-                <DynamicCloudIcon />
+          <ToggleButtonGroup
+            orientation="vertical"
+            exclusive
+            color="primary"
+            value={useStandardFormatting ? "standard" : "user"}
+            onChange={onChangeFormattingMode}
+          >
+            <ToggleButton sx={{ textTransform: "none" }} value="standard">
+              <Stack direction="row" spacing={1} alignItems={"center"}>
+                <Typography width="40%">{"Standard"}</Typography>
+                <Typography variant="subtitle">
+                  {"Consistent reading experience"}
+                </Typography>
               </Stack>
-              <Tooltip
-                title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
-                placement="top"
-                open={fieldState.fontFamilyOpen ?? false}
-              >
-                <Autocomplete
-                  value={formatting.fontFamily}
-                  options={allFonts}
-                  groupBy={(option) =>
-                    option.group === undefined ? "Google Fonts" : option.group
-                  }
-                  isOptionEqualToValue={(option, value) =>
-                    (option.value ?? option.family) ===
-                    (value?.value ?? value?.family)
-                  }
-                  getOptionLabel={(option) => option.label ?? option.family}
-                  onChange={handleOnChangeAutoComplete("fontFamily")}
-                  onOpen={() => handleOnOpen("fontFamily")}
-                  onClose={() => handleOnClose("fontFamily")}
-                  renderInput={(params) => <TextField {...params} />}
-                  size="small"
-                  fullWidth
-                />
-              </Tooltip>
-            </Stack>
-          </Paper>
-          {[
-            { title: "Font Size", value: "fontSize", endText: "rem" },
-            { title: "Font Weight", value: "fontWeight", endText: "abs" },
-            {
-              title: "Page Width",
-              value: "pageWidth",
-              endText: "px",
-            },
-            {
-              title: "Page Height Margins",
-              value: "pageHeightMargins",
-              endText: "px",
-            },
-            { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
-            { title: "Indent", value: "textIndent", endText: "rem" },
-            { title: "Line Height", value: "lineHeight", endText: "u" },
-          ].map((obj) => (
-            <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
-              <Stack spacing={1} alignItems={"center"}>
-                <Typography variant="h6">{obj.title}</Typography>
-                <Stack
-                  direction="row"
-                  justifyContent={"space-evenly"}
-                  sx={{ width: "100%" }}
-                  spacing={1}
-                >
-                  <IconButton
-                    onClick={() => handleStepValue(obj.value, "decrease")}
-                    disabled={
-                      fieldState[obj.value] <=
-                      defaultFormatting[`_${obj.value}Bounds`].min
-                    }
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <Paper>
-                    <TextField
-                      fullWidth
-                      value={fieldState[obj.value]}
-                      placeholder={defaultFormatting[obj.value].toString()}
-                      InputProps={{
-                        endAdornment: (
-                          <Stack direction="row">
-                            <InputAdornment position="end">
-                              {obj.endText}
-                            </InputAdornment>
-                            {fieldState[`${obj.value}Focus`] === true ? (
-                              <InputAdornment position="end">
-                                <Tooltip title={"Press Enter to Apply"}>
-                                  <KeyboardReturnIcon
-                                    fontSize="small"
-                                    color="success"
-                                  />
-                                </Tooltip>
-                              </InputAdornment>
-                            ) : null}
-                          </Stack>
-                        ),
-                      }}
-                      onChange={handleOnChangeField(obj.value)}
-                      onBlur={() => handleFieldOnBlur(obj.value)}
-                      onFocus={() => handleFieldOnFocus(obj.value)}
-                      onKeyDown={handleFieldReturn(obj.value)}
-                      size="small"
-                    />
-                  </Paper>
-                  <IconButton
-                    onClick={() => handleStepValue(obj.value, "increase")}
-                    disabled={
-                      fieldState[obj.value] >=
-                      defaultFormatting[`_${obj.value}Bounds`].max
-                    }
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Stack>
+            </ToggleButton>
+            <ToggleButton sx={{ textTransform: "none" }} value="user">
+              <Stack direction="row" spacing={1} alignItems={"center"}>
+                <Typography width="40%">{"User"}</Typography>
+                <Typography variant="subtitle">
+                  {"Customizable, defaulting to the book style."}
+                </Typography>
               </Stack>
-            </Paper>
-          ))}
-          <Paper sx={{ width: "100%", p: 1 }}>
-            <Stack spacing={1} alignItems={"center"}>
-              <Stack direction={"row"} spacing={1} alignItems={"center"}>
-                <Typography variant="h6">{"Justify"}</Typography>
-                <DynamicCloudIcon />
-              </Stack>
-              <Select
-                value={formatting.textAlign.value}
-                onChange={handleOnChangeSelect("textAlign")}
-                size="small"
-                fullWidth
-              >
-                {defaultFormatting._textAlignments.map((obj) => (
-                  <MenuItem key={obj.value} value={obj.value}>
-                    {obj.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Stack>
-          </Paper>
-          {[
-            { title: "Text Color", value: "textColor" },
-            { title: "Page Color", value: "pageColor" },
-          ].map((obj) => (
-            <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
-              <Stack spacing={1} alignItems={"center"}>
-                <Stack direction={"row"} spacing={1} alignItems={"center"}>
-                  <Typography variant="h6">{obj.title}</Typography>
-                  <DynamicCloudIcon />
-                </Stack>
-                <Tooltip
-                  title="Enter a color name, RGB, HEX, or HSL"
-                  open={fieldState[`${obj.value}Focus`] ?? false}
-                  placement="top"
-                >
-                  <TextField
-                    fullWidth
-                    value={fieldState[obj.value]}
-                    placeholder={defaultFormatting[obj.value].toString()}
-                    InputProps={{
-                      endAdornment:
-                        fieldState[`${obj.value}Focus`] === true ? (
-                          <InputAdornment position="end">
-                            <KeyboardReturnIcon
-                              fontSize="small"
-                              color="success"
-                            />
-                          </InputAdornment>
-                        ) : null,
-                    }}
-                    onChange={handleOnChangeField(obj.value)}
-                    onBlur={() => handleFieldOnBlur(obj.value)}
-                    onFocus={() => handleFieldOnFocus(obj.value)}
-                    onKeyDown={handleFieldReturn(obj.value)}
-                    size="small"
-                  />
-                </Tooltip>
-              </Stack>
-            </Paper>
-          ))}
-          <Paper>
-            <Stack
-              spacing={2}
-              alignItems={"center"}
-              justifyContent={"center"}
-              sx={{ padding: 1 }}
-            >
-              <DynamicCloudIcon />
-              <Stack direction={"row"}>
-                <FormControlLabel
-                  control={<Switch />}
-                  checked={formatting.showArrows}
-                  onChange={handleCheckedOnChange("showArrows")}
-                  label="Show Arrows"
-                  slotProps={{ typography: { variant: "subtitle2" } }}
-                  labelPlacement="top"
-                />
-                <FormControlLabel
-                  control={<Switch />}
-                  checked={formatting.showDividers}
-                  onChange={handleCheckedOnChange("showDividers")}
-                  label="Show Edges"
-                  slotProps={{ typography: { variant: "subtitle2" } }}
-                  labelPlacement="top"
-                />
-              </Stack>
+            </ToggleButton>
+          </ToggleButtonGroup>
+          {useStandardFormatting === false ? (
+            <Stack spacing={2} alignItems={"center"}>
               <FormControlLabel
                 control={<Switch />}
                 checked={useGlobalFormatting}
@@ -464,36 +304,237 @@ export const ReaderFormat = ({
                 label="Use Global"
                 labelPlacement="start"
               />
+              <Paper sx={{ width: "100%", p: 1 }}>
+                <Stack spacing={1} alignItems={"center"}>
+                  <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                    <Typography variant="h6">{"Font Family"}</Typography>
+                    <DynamicCloudIcon />
+                  </Stack>
+                  <Tooltip
+                    title="Some creators may use multiple fonts to convey intent: Consider sticking to the Original"
+                    placement="top"
+                    open={fieldState.fontFamilyOpen ?? false}
+                  >
+                    <Autocomplete
+                      value={formatting.fontFamily}
+                      options={allFonts}
+                      groupBy={(option) =>
+                        option.group === undefined
+                          ? "Google Fonts"
+                          : option.group
+                      }
+                      isOptionEqualToValue={(option, value) =>
+                        (option.value ?? option.family) ===
+                        (value?.value ?? value?.family)
+                      }
+                      getOptionLabel={(option) => option.label ?? option.family}
+                      onChange={handleOnChangeAutoComplete("fontFamily")}
+                      onOpen={() => handleOnOpen("fontFamily")}
+                      onClose={() => handleOnClose("fontFamily")}
+                      renderInput={(params) => <TextField {...params} />}
+                      size="small"
+                      fullWidth
+                    />
+                  </Tooltip>
+                </Stack>
+              </Paper>
+              {[
+                { title: "Font Size", value: "fontSize", endText: "rem" },
+                { title: "Font Weight", value: "fontWeight", endText: "abs" },
+                {
+                  title: "Page Width",
+                  value: "pageWidth",
+                  endText: "px",
+                },
+                {
+                  title: "Page Height Margins",
+                  value: "pageHeightMargins",
+                  endText: "px",
+                },
+                { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
+                { title: "Indent", value: "textIndent", endText: "rem" },
+                { title: "Line Height", value: "lineHeight", endText: "u" },
+              ].map((obj) => (
+                <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
+                  <Stack spacing={1} alignItems={"center"}>
+                    <Typography variant="h6">{obj.title}</Typography>
+                    <Stack
+                      direction="row"
+                      justifyContent={"space-evenly"}
+                      sx={{ width: "100%" }}
+                      spacing={1}
+                    >
+                      <IconButton
+                        onClick={() => handleStepValue(obj.value, "decrease")}
+                        disabled={
+                          fieldState[obj.value] <=
+                          defaultFormatting[`_${obj.value}Bounds`].min
+                        }
+                      >
+                        <RemoveIcon />
+                      </IconButton>
+                      <Paper>
+                        <TextField
+                          fullWidth
+                          value={fieldState[obj.value]}
+                          placeholder={defaultFormatting[obj.value].toString()}
+                          InputProps={{
+                            endAdornment: (
+                              <Stack direction="row">
+                                <InputAdornment position="end">
+                                  {obj.endText}
+                                </InputAdornment>
+                                {fieldState[`${obj.value}Focus`] === true ? (
+                                  <InputAdornment position="end">
+                                    <Tooltip title={"Press Enter to Apply"}>
+                                      <KeyboardReturnIcon
+                                        fontSize="small"
+                                        color="success"
+                                      />
+                                    </Tooltip>
+                                  </InputAdornment>
+                                ) : null}
+                              </Stack>
+                            ),
+                          }}
+                          onChange={handleOnChangeField(obj.value)}
+                          onBlur={() => handleFieldOnBlur(obj.value)}
+                          onFocus={() => handleFieldOnFocus(obj.value)}
+                          onKeyDown={handleFieldReturn(obj.value)}
+                          size="small"
+                        />
+                      </Paper>
+                      <IconButton
+                        onClick={() => handleStepValue(obj.value, "increase")}
+                        disabled={
+                          fieldState[obj.value] >=
+                          defaultFormatting[`_${obj.value}Bounds`].max
+                        }
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Stack>
+                  </Stack>
+                </Paper>
+              ))}
+              <Paper sx={{ width: "100%", p: 1 }}>
+                <Stack spacing={1} alignItems={"center"}>
+                  <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                    <Typography variant="h6">{"Justify"}</Typography>
+                    <DynamicCloudIcon />
+                  </Stack>
+                  <Select
+                    value={formatting.textAlign.value}
+                    onChange={handleOnChangeSelect("textAlign")}
+                    size="small"
+                    fullWidth
+                  >
+                    {defaultFormatting._textAlignments.map((obj) => (
+                      <MenuItem key={obj.value} value={obj.value}>
+                        {obj.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Stack>
+              </Paper>
+              {[
+                { title: "Text Color", value: "textColor" },
+                { title: "Page Color", value: "pageColor" },
+              ].map((obj) => (
+                <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
+                  <Stack spacing={1} alignItems={"center"}>
+                    <Stack direction={"row"} spacing={1} alignItems={"center"}>
+                      <Typography variant="h6">{obj.title}</Typography>
+                      <DynamicCloudIcon />
+                    </Stack>
+                    <Tooltip
+                      title="Enter a color name, RGB, HEX, or HSL"
+                      open={fieldState[`${obj.value}Focus`] ?? false}
+                      placement="top"
+                    >
+                      <TextField
+                        fullWidth
+                        value={fieldState[obj.value]}
+                        placeholder={defaultFormatting[obj.value].toString()}
+                        InputProps={{
+                          endAdornment:
+                            fieldState[`${obj.value}Focus`] === true ? (
+                              <InputAdornment position="end">
+                                <KeyboardReturnIcon
+                                  fontSize="small"
+                                  color="success"
+                                />
+                              </InputAdornment>
+                            ) : null,
+                        }}
+                        onChange={handleOnChangeField(obj.value)}
+                        onBlur={() => handleFieldOnBlur(obj.value)}
+                        onFocus={() => handleFieldOnFocus(obj.value)}
+                        onKeyDown={handleFieldReturn(obj.value)}
+                        size="small"
+                      />
+                    </Tooltip>
+                  </Stack>
+                </Paper>
+              ))}
+              <Paper>
+                <Stack
+                  spacing={2}
+                  alignItems={"center"}
+                  justifyContent={"center"}
+                  sx={{ padding: 1 }}
+                >
+                  <DynamicCloudIcon />
+                  <Stack direction={"row"}>
+                    <FormControlLabel
+                      control={<Switch />}
+                      checked={formatting.showArrows}
+                      onChange={handleCheckedOnChange("showArrows")}
+                      label="Show Arrows"
+                      slotProps={{ typography: { variant: "subtitle2" } }}
+                      labelPlacement="top"
+                    />
+                    <FormControlLabel
+                      control={<Switch />}
+                      checked={formatting.showDividers}
+                      onChange={handleCheckedOnChange("showDividers")}
+                      label="Show Edges"
+                      slotProps={{ typography: { variant: "subtitle2" } }}
+                      labelPlacement="top"
+                    />
+                  </Stack>
+                </Stack>
+                <Stack direction={"row"}>
+                  <FormControlLabel
+                    control={<Switch />}
+                    checked={formatting.showPageNavigator}
+                    onChange={handleCheckedOnChange("showPageNavigator")}
+                    label="Show Pages on Top"
+                    slotProps={{
+                      typography: {
+                        variant: "subtitle2",
+                        sx: { textAlign: "center" },
+                      },
+                    }}
+                    labelPlacement="top"
+                  />
+                  <FormControlLabel
+                    control={<Switch />}
+                    checked={formatting.showSpineNavigator}
+                    onChange={handleCheckedOnChange("showSpineNavigator")}
+                    label="Show Chapters on Bottom"
+                    slotProps={{
+                      typography: {
+                        variant: "subtitle2",
+                        sx: { textAlign: "center" },
+                      },
+                    }}
+                    labelPlacement="top"
+                  />
+                </Stack>
+              </Paper>
             </Stack>
-          </Paper>
-          <Stack direction={"row"}>
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showPageNavigator}
-              onChange={handleCheckedOnChange("showPageNavigator")}
-              label="Show Pages on Top"
-              slotProps={{
-                typography: {
-                  variant: "subtitle2",
-                  sx: { textAlign: "center" },
-                },
-              }}
-              labelPlacement="top"
-            />
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showSpineNavigator}
-              onChange={handleCheckedOnChange("showSpineNavigator")}
-              label="Show Chapters on Bottom"
-              slotProps={{
-                typography: {
-                  variant: "subtitle2",
-                  sx: { textAlign: "center" },
-                },
-              }}
-              labelPlacement="top"
-            />
-          </Stack>
+          ) : null}
         </Stack>
       </Menu>
     </Box>
@@ -505,4 +546,6 @@ ReaderFormat.propTypes = {
   setFormatting: PropTypes.func.isRequired,
   useGlobalFormatting: PropTypes.bool.isRequired,
   setUseGlobalFormatting: PropTypes.func.isRequired,
+  useStandardFormatting: PropTypes.bool.isRequired,
+  setUseStandardFormatting: PropTypes.func.isRequired,
 };

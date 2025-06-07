@@ -84,6 +84,29 @@ export const defaultFormatting = {
   showSpineNavigator: true,
 };
 
+export const standardFormatting = {
+  fontSize: 1.2,
+  lineHeight: "Original",
+  pageWidth: 700,
+  pagesShown: 1,
+  fontFamily: {
+    label: "Original",
+    value: "inherit",
+    group: null,
+    kind: "local",
+  },
+  textAlign: { label: "Original", value: "inherit" },
+  showDividers: true,
+  showArrows: true,
+  fontWeight: "Original",
+  textColor: "Standard",
+  pageColor: "Standard",
+  pageHeightMargins: 25,
+  textIndent: "Original",
+  showPageNavigator: true,
+  showSpineNavigator: true,
+};
+
 const relators = [
   {
     "@id": "http://id.loc.gov/vocabulary/relators/fmo",
