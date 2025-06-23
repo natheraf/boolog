@@ -1667,6 +1667,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                 />
               </Box>
               <Box
+                id="next-page-button"
                 onClick={handleNextPage}
                 sx={{
                   width: "100%",
@@ -1709,28 +1710,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     opacity: opacityOfSideElements,
                   }}
                   htmlColor={"gray"}
-                />
-                <Button
-                  id="next-page-button"
-                  variant="text"
-                  onClick={handleNextPage}
-                  sx={{
-                    position: "absolute",
-                    width: "100%",
-                    height: "100%",
-                    "&.MuiButtonBase-root:hover": {
-                      backgroundColor: "transparent",
-                    },
-                    maskImage:
-                      "linear-gradient(to left, black 50%, transparent)",
-                    justifyContent: "flex-end",
-                    opacity: opacityOfSideElements,
-                    visibility:
-                      windowWidth - formatting.pageWidth >= 143
-                        ? "visible"
-                        : "hidden",
-                  }}
-                  disableRipple={!theme.transitions.reduceMotion}
                 />
               </Box>
             </Stack>
