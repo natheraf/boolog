@@ -74,7 +74,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   );
 
   const backgroundColors =
-    useStandardFormatting || formatting.pageColor === "Original"
+    formatting.pageColor === "Standard" || formatting.pageColor === "Original"
       ? theme.palette.background.paper
       : formatting.pageColor;
 
@@ -118,8 +118,8 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const arrayForSpineNavigator = React.useMemo(() => chapterMeta.current, []);
 
   const [currentPage, setCurrentPage] = React.useState(0);
-  const columnGap = 10;
-  const highlightBorderSafety = 45;
+  const columnGap = 1;
+  const highlightBorderSafety = 25;
   const [windowWidth, setWindowWidth] = React.useState(
     window.innerWidth - highlightBorderSafety
   );
@@ -1588,7 +1588,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               alignItems={"center"}
               justifyContent={"center"}
               sx={{ height: "100%" }}
-              spacing={1}
+              spacing={0}
               overflow="hidden"
             >
               <Box

@@ -96,7 +96,7 @@ export const standardFormatting = {
     kind: "local",
   },
   textAlign: { label: "Original", value: "inherit" },
-  showDividers: true,
+  showDividers: false,
   showArrows: true,
   fontWeight: "Original",
   textColor: "Standard",
