@@ -36,7 +36,7 @@ import {
   getEpubDataWithDefault,
   getEpubDataWithDefaultInDotNotation,
 } from "../api/IndexedDB/epubData";
-import { defaultFormatting } from "../api/Local";
+import { defaultFormatting, defaultStandardFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 import { handleSimpleRequest } from "../api/Axios";
 
@@ -163,28 +163,38 @@ export const BookLog = () => {
         (key) => key.startsWith("_") && delete formatting[key]
       );
       formatting.pageWidth = Math.min(window.innerWidth - 25, 700);
-      getEpubDataWithDefault({
-        key: "epubGlobalFormatting",
+      const standardFormatting = Object.assign(
         formatting,
-      }).then((res) => {
-        const globalFormatting = res.formatting;
-        getEpubDataWithDefaultInDotNotation(id, {
-          key: id,
-          formatting: {
-            useStandardFormatting: true,
-            useGlobalFormatting: true,
-            value: globalFormatting,
-          },
-          progress: { spine: 0, part: 0 },
-          notes: {},
-          memos: {},
+        structuredClone(defaultStandardFormatting)
+      );
+      getEpubDataWithDefault({
+        key: "epubStandardFormatting",
+        formatting: standardFormatting,
+      }).then((standardFormatting) => {
+        data.epubObject.standardFormatting = standardFormatting;
+        getEpubDataWithDefault({
+          key: "epubGlobalFormatting",
+          formatting,
         }).then((res) => {
-          if (res.formatting.useGlobalFormatting) {
-            res.formatting.value = globalFormatting;
-          }
-          data.epubObject = Object.assign(data.epubObject, res);
-          setOpenEpubReader(Boolean(data.epubObject));
-          setEpub({ object: data.epubObject, entryId: id });
+          const globalFormatting = res.formatting;
+          getEpubDataWithDefaultInDotNotation(id, {
+            key: id,
+            formatting: {
+              useStandardFormatting: true,
+              useGlobalFormatting: true,
+              value: globalFormatting,
+            },
+            progress: { spine: 0, part: 0 },
+            notes: {},
+            memos: {},
+          }).then((res) => {
+            if (res.formatting.useGlobalFormatting) {
+              res.formatting.value = globalFormatting;
+            }
+            data.epubObject = Object.assign(data.epubObject, res);
+            setOpenEpubReader(Boolean(data.epubObject));
+            setEpub({ object: data.epubObject, entryId: id });
+          });
         });
       });
     });

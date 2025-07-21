@@ -45,7 +45,6 @@ import {
   DialogSlideUpTransition,
   CircularProgressWithLabel,
 } from "../features/CustomComponents";
-import { standardFormatting } from "../api/Local";
 
 let firstTouchX = null;
 let firstTouchY = null;
@@ -66,12 +65,19 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const [formatting, setFormatting] = React.useState(
     epubObject.formatting.value
   );
+  const standardFormatting = epubObject.standardFormatting.formatting;
   const [useGlobalFormatting, setUseGlobalFormatting] = React.useState(
     epubObject.formatting.useGlobalFormatting
   );
   const [useStandardFormatting, setUseStandardFormatting] = React.useState(
     epubObject.formatting.useStandardFormatting
   );
+
+  const selectedFormatting = useStandardFormatting
+    ? standardFormatting
+    : formatting;
+
+  const showDividers = selectedFormatting.showDividers ? "visible" : "hidden";
 
   const backgroundColors =
     formatting.pageColor === "Standard" || formatting.pageColor === "Original"
@@ -176,6 +182,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const [previousSpineIndexAndPage, setPreviousSpineIndexAndPage] =
     React.useState(null);
+
+  const showArrows =
+    selectedFormatting.showArrows &&
+    windowWidth - selectedFormatting.pageWidth >= 100
+      ? "visible"
+      : "hidden";
 
   const setLocationAsPrevious = () => {
     setPreviousSpineIndexAndPage({
@@ -1616,7 +1628,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     position: "absolute",
                     top: 0,
                     right: 0,
-                    visibility: formatting.showDividers ? "visible" : "hidden",
+                    visibility: showDividers,
                     opacity: opacityOfSideElements,
                   }}
                 />
@@ -1627,11 +1639,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     bottom: 0,
                     margin: "auto",
-                    visibility:
-                      formatting.showArrows &&
-                      windowWidth - formatting.pageWidth >= 100
-                        ? "visible"
-                        : "hidden",
+                    visibility: showArrows,
                     opacity: opacityOfSideElements,
                   }}
                   htmlColor={"gray"}
@@ -1691,7 +1699,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     position: "absolute",
                     top: 0,
                     left: 0,
-                    visibility: formatting.showDividers ? "visible" : "hidden",
+                    visibility: showDividers,
                     opacity: opacityOfSideElements,
                   }}
                 />
@@ -1702,11 +1710,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
                     top: 0,
                     bottom: 0,
                     margin: "auto",
-                    visibility:
-                      formatting.showArrows &&
-                      windowWidth - formatting.pageWidth >= 100
-                        ? "visible"
-                        : "hidden",
+                    visibility: showArrows,
                     opacity: opacityOfSideElements,
                   }}
                   htmlColor={"gray"}

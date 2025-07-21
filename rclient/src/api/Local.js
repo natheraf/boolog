@@ -84,7 +84,7 @@ export const defaultFormatting = {
   showSpineNavigator: true,
 };
 
-export const standardFormatting = {
+export const defaultStandardFormatting = {
   fontSize: 1.2,
   lineHeight: "Original",
   pageWidth: 700,
