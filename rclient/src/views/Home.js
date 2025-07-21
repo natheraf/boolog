@@ -22,6 +22,10 @@ export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
+    "Update 7/20/25 9:18PM": [
+      "fixed issue with ios highlighting the first paragraph when cutoff",
+      "standard formatting available",
+    ],
     "Update 5/25/25 6:09PM": [
       "improved compatibility with more epubs (https://www.gutenberg.org/ebooks/64317 and https://www.planetebook.com/the-great-gatsby/)",
       "fixed issues with highlights inheriting unwanted styles from parent",
