@@ -278,3 +278,19 @@ export const trimAndHighlight = (
   }
   return doc.getElementById("inner-content").outerHTML;
 };
+
+export const getPreviousTextNode = (node) => {
+  do {
+    if (node.previousElementSibling !== null) {
+      node = node.previousElementSibling;
+    } else {
+      while (node.previousElementSibling === null) {
+        node = node.parentElement;
+      }
+    }
+    while (node.lastChild !== null) {
+      node = node.lastChild;
+    }
+  } while (node.nodeType !== Node.TEXT_NODE);
+  return node;
+};

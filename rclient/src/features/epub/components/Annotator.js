@@ -23,6 +23,7 @@ import {
   disableHighlightNodes,
   getFirstTextNode,
   getLastTextNode,
+  getPreviousTextNode,
   handleInjectingMarkToTextNodes,
 } from "../domUtils";
 import { addListener } from "../../listenerManager";
@@ -170,11 +171,15 @@ export const Annotator = ({
     if (annotatorOpen.current === false && selectedString?.length > 0) {
       clearTemporaryMarks();
       const selection = window.getSelection();
+      let focusNode = selection.focusNode;
+      if (selection.focusOffset === 0) {
+        focusNode = getPreviousTextNode(focusNode);
+      }
       if (
         (!selection.anchorNode.parentElement.getAttribute("nodeid") &&
           !selection.anchorNode.parentElement.classList.contains("mark")) ||
-        (!selection.focusNode.parentElement.getAttribute("nodeid") &&
-          !selection.focusNode.parentElement.classList.contains("mark"))
+        (!focusNode.parentElement.getAttribute("nodeid") &&
+          !focusNode.parentElement.classList.contains("mark"))
       ) {
         return;
       }
