@@ -45,6 +45,7 @@ import {
   DialogSlideUpTransition,
   CircularProgressWithLabel,
 } from "../features/CustomComponents";
+import { Header } from "../features/epub/components/Header";
 
 let firstTouchX = null;
 let firstTouchY = null;
@@ -173,8 +174,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const functionsForNextRender = React.useRef([]);
   const functionsWhenImagesInMemory = React.useRef([]);
-
-  const [searchFocused, setSearchFocused] = React.useState(false);
 
   const timeOutToSetProgress = React.useRef(null);
 
@@ -606,16 +605,11 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     }
   };
 
-  const handleSearchIconClick = () => {
-    setSearchFocused(true);
-  };
-
   const handleSearchOnBlur = () => {
     searchNeedle.current = null;
     searchResultAccumulator.current = [];
     setSpineSearchPointer(null);
     setSearchResult([]);
-    setSearchFocused(false);
   };
 
   const handleSearchOnFocus = () => {
@@ -1304,193 +1298,36 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
     >
-      <AppBar
-        id="appBar"
-        variant="outlined"
-        elevation={0}
-        sx={{
-          position: "sticky",
-          top: 0,
-          width: "100%",
+      <Header
+        handleClose={handleClose}
+        title={epubObject.metadata.common.title.value}
+        subtitle={spine?.current?.[spinePointer]?.label ?? null}
+        spine={spine}
+        searchProps={{
+          spineSearchPointer,
+          searchNeedle,
+          handleSearchOnChange,
+          handleSearchInputOnChange,
+          handleSearchOnKeyDown,
+          searchResult,
+          handleSearchOnFocus,
+          handleSearchOnBlur,
         }}
-      >
-        <Toolbar
-          component={Stack}
-          direction="row"
-          alignItems={"center"}
-          justifyContent={"space-between"}
-          spacing={2}
-          sx={{ minHeight: `${appBarHeight}px`, height: `${appBarHeight}px` }}
-          variant="dense"
-        >
-          <Stack
-            alignItems={"center"}
-            direction="row"
-            spacing={1}
-            sx={{ overflow: "hidden" }}
-          >
-            <Tooltip title="esc">
-              <IconButton
-                edge="start"
-                color="inherit"
-                onClick={handleClose}
-                aria-label="close"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            {greaterThanSmall ? (
-              <Stack spacing={-0.5}>
-                <Typography variant="subtitle2" noWrap>
-                  {epubObject.metadata.common.title.value}
-                </Typography>
-                <Typography variant="subtitle1" noWrap>
-                  {spinePointer !== null
-                    ? spine.current[spinePointer].label
-                    : null}
-                </Typography>
-              </Stack>
-            ) : null}
-          </Stack>
-          <Stack direction={"row"} spacing={2}>
-            {searchFocused ? (
-              <Autocomplete
-                value={null}
-                onChange={handleSearchOnChange}
-                onInputChange={handleSearchInputOnChange}
-                onKeyDown={handleSearchOnKeyDown}
-                options={searchResult}
-                onFocus={handleSearchOnFocus}
-                onBlur={handleSearchOnBlur}
-                aria-placeholder={searchNeedle.current}
-                groupBy={(option) =>
-                  spine.current?.[option?.spineIndex]?.label ?? "No Chapter"
-                }
-                getOptionLabel={(option) =>
-                  option.previewStart + option.needle + option.previewEnd
-                }
-                renderOption={(props, option) => (
-                  <Box
-                    component="li"
-                    {...props}
-                    key={[
-                      option.spineIndex,
-                      option.page,
-                      option.textIndex,
-                      option.nodeNumber,
-                    ].join("|")}
-                  >
-                    <Stack>
-                      <Typography variant="caption">{`Part ${
-                        option.chapterPartNumber
-                      } Page ${option.page + 1}`}</Typography>
-                      <span>
-                        <span style={{ color: "gray" }}>
-                          {option.previewStart}
-                        </span>
-                        {option.needle}
-                        <span style={{ color: "gray" }}>
-                          {option.previewEnd}
-                        </span>
-                      </span>
-                    </Stack>
-                  </Box>
-                )}
-                loading={searchNeedle.current !== null}
-                loadingText={
-                  (spineSearchPointer ?? 0) >= (spine.current?.length ?? 0) - 2
-                    ? "Loading results…"
-                    : "Searching…"
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    autoFocus
-                    placeholder="Search"
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {searchNeedle.current !== null ? (
-                            (spineSearchPointer ?? 0) >=
-                            (spine.current?.length ?? 0) - 2 ? (
-                              <CircularProgress
-                                color={"inherit"}
-                                size={20}
-                                disableShrink
-                              />
-                            ) : (
-                              <CircularProgressWithLabel
-                                value={
-                                  ((spineSearchPointer ?? 0) /
-                                    (spine.current?.length ?? 0)) *
-                                  100
-                                }
-                                color={"inherit"}
-                                size={20}
-                                sx={{ circle: { transition: "none" } }}
-                              />
-                            )
-                          ) : (
-                            <Tooltip title={"Press Enter to Search"}>
-                              <KeyboardReturnIcon
-                                fontSize="small"
-                                color="success"
-                              />
-                            </Tooltip>
-                          )}
-                          {params.InputProps.endAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                size="small"
-                disabled={spine.current === null}
-                disableClearable
-                sx={{ width: greaterThanSmall ? "300px" : "180px" }}
-              />
-            ) : (
-              <Stack spacing={1} direction={"row"}>
-                {previousSpineIndexAndPage !== null ? (
-                  <Tooltip title="Back">
-                    <IconButton onClick={goBack}>
-                      <ArrowBackIcon />
-                    </IconButton>
-                  </Tooltip>
-                ) : null}
-                <Tooltip title="Search">
-                  <IconButton onClick={handleSearchIconClick}>
-                    <SearchIcon />
-                  </IconButton>
-                </Tooltip>
-                <AnnotationViewer
-                  spine={spine.current}
-                  entryId={entryId}
-                  clearTemporaryMarks={clearTemporaryMarks}
-                  notes={notes.current}
-                  memos={epubObject.memos}
-                  currentSpineIndex={spinePointer}
-                  goToNote={goToNote}
-                />
-                <TableOfContents
-                  toc={epubObject.toc}
-                  handlePathHref={handlePathHref}
-                  currentSpineIndexLabel={spine.current[spinePointer].label}
-                />
-                <ReaderFormat
-                  formatting={formatting}
-                  setFormatting={handleSetFormatting}
-                  useGlobalFormatting={useGlobalFormatting}
-                  setUseGlobalFormatting={setUseGlobalFormattingHelper}
-                  useStandardFormatting={useStandardFormatting}
-                  setUseStandardFormatting={setUseStandardFormattingHelper}
-                />
-              </Stack>
-            )}
-          </Stack>
-        </Toolbar>
-      </AppBar>
+        annotatorProps={{ clearTemporaryMarks, goToNote }}
+        entryId={entryId}
+        notes={notes}
+        epubObject={epubObject}
+        spinePointer={spinePointer}
+        tocProps={handlePathHref}
+        formatterProp={{
+          formatting,
+          handleSetFormatting,
+          useGlobalFormatting,
+          setUseGlobalFormattingHelper,
+          useStandardFormatting,
+          setUseStandardFormattingHelper,
+        }}
+      />
       {spinePointer === null ? (
         "Loading, please wait..."
       ) : (
