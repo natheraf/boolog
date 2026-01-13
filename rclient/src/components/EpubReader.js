@@ -1318,7 +1318,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
         notes={notes}
         epubObject={epubObject}
         spinePointer={spinePointer}
-        tocProps={handlePathHref}
+        handlePathHref={handlePathHref}
         formatterProp={{
           formatting,
           handleSetFormatting,
