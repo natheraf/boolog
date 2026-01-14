@@ -1,4 +1,30 @@
 import { getRelatorsLabelFromIdentifier } from "../../api/Local";
+import { handleSearchOnDocument } from "./domUtils";
+
+export const handleSearchEpub = (needle, spine) => {
+  const results = [];
+  const parser = new DOMParser();
+  let previousChapterLabel = null;
+  for (let index = 0; index < spine.length; index += 1) {
+    const chapter = spine[index];
+    if (chapter.label !== previousChapterLabel) {
+      results.push({
+        label: chapter.label,
+        searchResults: [],
+      });
+      previousChapterLabel = chapter.label;
+    }
+    const doc = parser.parseFromString(chapter.element, "text/html");
+    const chapterResults = handleSearchOnDocument(needle, doc);
+    if (chapterResults.length > 0) {
+      chapterResults.forEach((result) => (result.spineIndex = index));
+      results[results.length - 1].searchResults.push(...chapterResults);
+    }
+  }
+  return results.filter(
+    (chapterResults) => chapterResults.searchResults.length > 0
+  );
+};
 
 function countWords(s) {
   s = s.replace(/(^\s*)|(\s*$)/gi, ""); //exclude  start and end white-space

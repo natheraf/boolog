@@ -449,13 +449,21 @@ export const Annotator = ({
   React.useEffect(() => {
     document
       .getElementById("content")
+      .addEventListener("mousedown", clearTemporaryMarks);
+    document
+      .getElementById("content")
       .addEventListener("mouseup", handleGetTextSelection);
     document.addEventListener("touchend", handleTouchSelect);
+    document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
+      document
+        .getElementById("content")
+        ?.removeEventListener("mousedown", clearTemporaryMarks);
       document
         .getElementById("content")
         ?.removeEventListener("mouseup", handleGetTextSelection);
       document.removeEventListener("touchend", handleTouchSelect);
+      document.removeEventListener("touchstart", clearTemporaryMarks);
     };
   }, []);
 

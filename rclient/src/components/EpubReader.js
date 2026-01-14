@@ -1,50 +1,33 @@
 import * as React from "react";
 import { useTheme } from "@emotion/react";
 import {
-  AppBar,
-  Autocomplete,
   Box,
-  Button,
   Dialog,
-  IconButton,
-  Slide,
   Stack,
-  TextField,
-  Toolbar,
   Tooltip,
   Typography,
   useMediaQuery,
-  CircularProgress,
   Divider,
 } from "@mui/material";
 
-import { ReaderFormat } from "./ReaderFormat";
 import {
   getEpubData,
   putEpubData,
   updateEpubDataInDotNotation,
 } from "../api/IndexedDB/epubData";
 import { AlertsContext } from "../context/Alerts";
-import SearchIcon from "@mui/icons-material/Search";
-import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import PropTypes from "prop-types";
-import { TableOfContents } from "../features/epub/components/TableOfContents";
 import { Annotator } from "../features/epub/components/Annotator";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { getEpubValueFromPath } from "../features/epub/epubUtils";
-import { AnnotationViewer } from "../features/epub/components/AnnotationViewer";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
   deleteNodesAndLiftChildren,
   handleInjectingMarkToEpubNodes,
 } from "../features/epub/domUtils";
 import { addListener } from "../features/listenerManager";
-import {
-  DialogSlideUpTransition,
-  CircularProgressWithLabel,
-} from "../features/CustomComponents";
+import { DialogSlideUpTransition } from "../features/CustomComponents";
+import { Header } from "../features/epub/components/Header";
 
 let firstTouchX = null;
 let firstTouchY = null;
@@ -148,16 +131,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     return formatting.pageWidth;
   }, [formatting.pageWidth, windowWidth]);
 
-  const [spineSearchPointer, setSpineSearchPointer] = React.useState(null);
-  const searchNeedle = React.useRef(null);
-  const searchResultAccumulator = React.useRef([]);
-  const [searchResult, setSearchResult] = React.useState([]);
-  const [searchValue, setSearchValue] = React.useState(null);
-  const [selectedSearchResult, setSelectedSearchResult] = React.useState(null);
-  const searchResultElement = React.useRef(null);
-  const searchResultElementClone = React.useRef(null);
-  const [searchWebWorker, setSearchWebWorker] = React.useState(null);
-
   const epubStyleIds = React.useRef([]);
 
   const bookTotalWords =
@@ -173,8 +146,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
 
   const functionsForNextRender = React.useRef([]);
   const functionsWhenImagesInMemory = React.useRef([]);
-
-  const [searchFocused, setSearchFocused] = React.useState(false);
 
   const timeOutToSetProgress = React.useRef(null);
 
@@ -321,138 +292,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     epubStyleIds.current.forEach((id) => document.getElementById(id)?.remove());
   };
 
-  const searchEpub = (needle) => {
-    needle = needle.trim();
-    if (needle.length === 0) {
-      return;
-    }
-    searchNeedle.current = needle;
-    searchResultAccumulator.current = [];
-    setSearchResult([]);
-    setSpineSearchPointer(0);
-  };
-
-  const getXPathSearchExpression = React.useCallback(
-    (needle) => {
-      const listOfTags = [
-        "p",
-        "h1",
-        "h2",
-        "h3",
-        "h4",
-        "h5",
-        "h6",
-        "li",
-        "table",
-      ];
-      if (needle && needle.indexOf(`'`) === -1) {
-        return `.//*[${listOfTags
-          .map((tag) => `self::${tag}`)
-          .join(" or ")}][contains(string(.), '${needle}')]`;
-      } else if (needle && needle.indexOf(`"`) === -1) {
-        return `.//*[self::p or self::h1 or self::h2][contains(string(.), "${needle}")]`;
-      }
-      addAlert("Searching single and double quotes unsupported", "warning");
-      return null;
-    },
-    [addAlert]
-  );
-
-  const searchContent = React.useCallback(() => {
-    if (
-      spineSearchPointer !== null &&
-      document.getElementById("previous-content")
-    ) {
-      const needle = searchNeedle.current;
-      const xPathExpression = getXPathSearchExpression(needle);
-      if (xPathExpression === null) {
-        searchNeedle.current = null;
-        setSpineSearchPointer(null);
-        return;
-      }
-      const result = document.evaluate(
-        xPathExpression,
-        document.getElementById("previous-content"),
-        null,
-        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
-        null
-      );
-      let nodeNumber = 0;
-      let node = result.iterateNext();
-      while (node) {
-        if (spineSearchPointer === null || needle !== searchNeedle.current) {
-          return;
-        }
-        const content = document
-          .getElementById("content")
-          .getBoundingClientRect();
-        const fragment = node.getBoundingClientRect();
-        const page = Math.floor(
-          Math.floor(fragment.left) / Math.floor(pageWidth + columnGap)
-        );
-        if (fragment.top < content.bottom) {
-          node = result.iterateNext();
-          continue;
-        }
-
-        const text = node.textContent;
-        searchWebWorker.postMessage({
-          text,
-          searchNeedle: searchNeedle.current,
-          spineSearchPointer,
-          page,
-          bleeds: fragment.right - fragment.left - (pageWidth + columnGap) > 0,
-          nodeNumber,
-          chapterPartNumber:
-            (spine.current[spineSearchPointer]?.backCount ?? 0) + 1,
-        });
-
-        nodeNumber += 1;
-        node = result.iterateNext();
-      }
-    }
-  }, [
-    getXPathSearchExpression,
-    pageWidth,
-    spineSearchPointer,
-    searchWebWorker,
-  ]);
-
-  const incrementSearchPointer = React.useCallback(() => {
-    if (
-      spineSearchPointer !== null &&
-      spineSearchPointer + 1 < spine.current.length
-    ) {
-      setSpineSearchPointer((prev) => (prev ?? 0) + 1);
-    } else {
-      searchNeedle.current = null;
-      setSearchResult(searchResultAccumulator.current);
-      setSpineSearchPointer(null);
-    }
-  }, [spineSearchPointer]);
-
-  React.useEffect(() => {
-    searchContent();
-    incrementSearchPointer();
-  }, [incrementSearchPointer, searchContent]);
-
-  const handleSearchOnKeyDown = (event) => {
-    if (event.key === "Enter") {
-      searchEpub(searchValue);
-    }
-  };
-
-  const handleSearchInputOnChange = (event, newInputValue) => {
-    setSearchValue(newInputValue);
-  };
-
-  const handleSearchOnChange = (event, value) => {
-    clearTemporaryMarks();
-    goToAndPreloadImages(value.spineIndex, value.page);
-    setSelectedSearchResult(value);
-    handleSearchOnBlur();
-  };
-
   const goToLinkFragment = React.useCallback(
     (linkFragment) => {
       if (linkFragment !== null && document.getElementById(linkFragment)) {
@@ -476,150 +315,12 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     [pageWidth]
   );
 
-  React.useEffect(() => {
-    if (selectedSearchResult !== null) {
-      const xPathExpression = getXPathSearchExpression(
-        selectedSearchResult.needle
-      );
-      if (xPathExpression === null) {
-        return;
-      }
-      const result = document.evaluate(
-        xPathExpression,
-        document.getElementById("content"),
-        null,
-        XPathResult.ORDERED_NODE_ITERATOR_TYPE,
-        null
-      );
-      const content = document
-        .getElementById("next-page-button")
-        .getBoundingClientRect();
-      let nodeNumber = 0;
-      let node = result.iterateNext();
-      while (node) {
-        const fragment = node.getBoundingClientRect();
-        if (fragment.top > content.bottom) {
-          node = result.iterateNext();
-          continue;
-        }
-        if (nodeNumber < selectedSearchResult.nodeNumber) {
-          nodeNumber += 1;
-          node = result.iterateNext();
-          continue;
-        }
-
-        const keysForMarkId = ["spineIndex", "page", "textIndex", "nodeNumber"];
-        const markId = keysForMarkId
-          .map((key) => selectedSearchResult[key])
-          .join("|");
-        const markIsPresent = Boolean(document.getElementById(markId));
-        const inner = node.innerHTML;
-        let index = 0;
-        const text = node.textContent;
-        let textContentIndex = 0;
-        if (markIsPresent === false) {
-          while (index < inner.length) {
-            if (
-              inner[index] === "<" &&
-              inner[index] !== text[textContentIndex]
-            ) {
-              index = inner.indexOf(">", index + 1) + 1;
-              continue;
-            }
-            if (textContentIndex === selectedSearchResult.textIndex) {
-              searchResultElement.current = node;
-              searchResultElementClone.current = node.cloneNode(true);
-              node.parentElement.replaceChild(
-                searchResultElementClone.current,
-                node
-              );
-              let currentIndex = index;
-              let needleIndex = 0;
-              const markedNeedleBuilder = [];
-              while (needleIndex < selectedSearchResult.needle.length) {
-                if (
-                  inner[currentIndex] === "<" &&
-                  inner[currentIndex] !==
-                    selectedSearchResult.needle[needleIndex]
-                ) {
-                  markedNeedleBuilder.push(`</mark>`);
-                  while (
-                    inner.indexOf('"', currentIndex) !== -1 &&
-                    inner.indexOf('"', currentIndex) <
-                      inner.indexOf(">", currentIndex)
-                  ) {
-                    currentIndex = inner.indexOf('"', currentIndex + 1) + 1;
-                  }
-                  const tagEndIndex = inner.indexOf(">", currentIndex + 1) + 1;
-                  markedNeedleBuilder.push(
-                    inner.substring(currentIndex, tagEndIndex)
-                  );
-                  currentIndex = tagEndIndex;
-                  markedNeedleBuilder.push(
-                    `<mark style="font-size: inherit;" class="${markId}">`
-                  );
-                } else {
-                  markedNeedleBuilder.push(inner[currentIndex]);
-                  currentIndex += 1;
-                  needleIndex += 1;
-                }
-              }
-              searchResultElementClone.current.innerHTML = `${inner.substring(
-                0,
-                index
-              )}<mark style="font-size: inherit;" id="${markId}">${markedNeedleBuilder.join(
-                ""
-              )}</mark>${inner.substring(currentIndex)}`;
-              break;
-            }
-            index += 1;
-            textContentIndex += 1;
-          }
-        }
-        if (markId !== null && document.getElementById(markId)) {
-          addFunctionsAfterRender(() => {
-            setTimeout(() => goToLinkFragment(markId), 0);
-          }, 1);
-          functionsWhenImagesInMemory.current.push(() =>
-            goToLinkFragment(markId)
-          );
-        }
-        break;
-      }
-      setSelectedSearchResult(null);
-    }
-  }, [getXPathSearchExpression, goToLinkFragment, selectedSearchResult]);
-
   const clearTemporaryMarks = () => {
-    if (searchResultElementClone.current !== null) {
-      searchResultElementClone.current.parentElement.replaceChild(
-        searchResultElement.current,
-        searchResultElementClone.current
-      );
-      searchResultElement.current = null;
-      searchResultElementClone.current = null;
-    }
     if (document.getElementsByClassName("temporary-mark").length > 0) {
       deleteNodesAndLiftChildren(
         document.getElementsByClassName("temporary-mark")
       );
     }
-  };
-
-  const handleSearchIconClick = () => {
-    setSearchFocused(true);
-  };
-
-  const handleSearchOnBlur = () => {
-    searchNeedle.current = null;
-    searchResultAccumulator.current = [];
-    setSpineSearchPointer(null);
-    setSearchResult([]);
-    setSearchFocused(false);
-  };
-
-  const handleSearchOnFocus = () => {
-    setSearchResult([]);
   };
 
   const getCurrentTotalPages = React.useCallback(() => {
@@ -1281,13 +982,6 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
     const searchWebWorker = new Worker(
       new URL("../features/epub/xPathResultWorker.js", import.meta.url)
     );
-    searchWebWorker.addEventListener("message", (event) => {
-      if (event.data?.[0]?.needle !== searchNeedle.current) {
-        return;
-      }
-      searchResultAccumulator.current.push(...event.data);
-    });
-    setSearchWebWorker(searchWebWorker);
 
     return () => {
       searchWebWorker?.terminate();
@@ -1304,193 +998,31 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
     >
-      <AppBar
-        id="appBar"
-        variant="outlined"
-        elevation={0}
-        sx={{
-          position: "sticky",
-          top: 0,
-          width: "100%",
+      <Header
+        handleClose={handleClose}
+        title={epubObject.metadata.common.title.value}
+        subtitle={spine?.current?.[spinePointer]?.label ?? null}
+        spine={spine}
+        searchV2Props={{
+          goToAndPreloadImages,
+          goToLinkFragment,
+          clearTemporaryMarks,
         }}
-      >
-        <Toolbar
-          component={Stack}
-          direction="row"
-          alignItems={"center"}
-          justifyContent={"space-between"}
-          spacing={2}
-          sx={{ minHeight: `${appBarHeight}px`, height: `${appBarHeight}px` }}
-          variant="dense"
-        >
-          <Stack
-            alignItems={"center"}
-            direction="row"
-            spacing={1}
-            sx={{ overflow: "hidden" }}
-          >
-            <Tooltip title="esc">
-              <IconButton
-                edge="start"
-                color="inherit"
-                onClick={handleClose}
-                aria-label="close"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            {greaterThanSmall ? (
-              <Stack spacing={-0.5}>
-                <Typography variant="subtitle2" noWrap>
-                  {epubObject.metadata.common.title.value}
-                </Typography>
-                <Typography variant="subtitle1" noWrap>
-                  {spinePointer !== null
-                    ? spine.current[spinePointer].label
-                    : null}
-                </Typography>
-              </Stack>
-            ) : null}
-          </Stack>
-          <Stack direction={"row"} spacing={2}>
-            {searchFocused ? (
-              <Autocomplete
-                value={null}
-                onChange={handleSearchOnChange}
-                onInputChange={handleSearchInputOnChange}
-                onKeyDown={handleSearchOnKeyDown}
-                options={searchResult}
-                onFocus={handleSearchOnFocus}
-                onBlur={handleSearchOnBlur}
-                aria-placeholder={searchNeedle.current}
-                groupBy={(option) =>
-                  spine.current?.[option?.spineIndex]?.label ?? "No Chapter"
-                }
-                getOptionLabel={(option) =>
-                  option.previewStart + option.needle + option.previewEnd
-                }
-                renderOption={(props, option) => (
-                  <Box
-                    component="li"
-                    {...props}
-                    key={[
-                      option.spineIndex,
-                      option.page,
-                      option.textIndex,
-                      option.nodeNumber,
-                    ].join("|")}
-                  >
-                    <Stack>
-                      <Typography variant="caption">{`Part ${
-                        option.chapterPartNumber
-                      } Page ${option.page + 1}`}</Typography>
-                      <span>
-                        <span style={{ color: "gray" }}>
-                          {option.previewStart}
-                        </span>
-                        {option.needle}
-                        <span style={{ color: "gray" }}>
-                          {option.previewEnd}
-                        </span>
-                      </span>
-                    </Stack>
-                  </Box>
-                )}
-                loading={searchNeedle.current !== null}
-                loadingText={
-                  (spineSearchPointer ?? 0) >= (spine.current?.length ?? 0) - 2
-                    ? "Loading results…"
-                    : "Searching…"
-                }
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    autoFocus
-                    placeholder="Search"
-                    InputProps={{
-                      ...params.InputProps,
-                      endAdornment: (
-                        <>
-                          {searchNeedle.current !== null ? (
-                            (spineSearchPointer ?? 0) >=
-                            (spine.current?.length ?? 0) - 2 ? (
-                              <CircularProgress
-                                color={"inherit"}
-                                size={20}
-                                disableShrink
-                              />
-                            ) : (
-                              <CircularProgressWithLabel
-                                value={
-                                  ((spineSearchPointer ?? 0) /
-                                    (spine.current?.length ?? 0)) *
-                                  100
-                                }
-                                color={"inherit"}
-                                size={20}
-                                sx={{ circle: { transition: "none" } }}
-                              />
-                            )
-                          ) : (
-                            <Tooltip title={"Press Enter to Search"}>
-                              <KeyboardReturnIcon
-                                fontSize="small"
-                                color="success"
-                              />
-                            </Tooltip>
-                          )}
-                          {params.InputProps.endAdornment}
-                        </>
-                      ),
-                    }}
-                  />
-                )}
-                size="small"
-                disabled={spine.current === null}
-                disableClearable
-                sx={{ width: greaterThanSmall ? "300px" : "180px" }}
-              />
-            ) : (
-              <Stack spacing={1} direction={"row"}>
-                {previousSpineIndexAndPage !== null ? (
-                  <Tooltip title="Back">
-                    <IconButton onClick={goBack}>
-                      <ArrowBackIcon />
-                    </IconButton>
-                  </Tooltip>
-                ) : null}
-                <Tooltip title="Search">
-                  <IconButton onClick={handleSearchIconClick}>
-                    <SearchIcon />
-                  </IconButton>
-                </Tooltip>
-                <AnnotationViewer
-                  spine={spine.current}
-                  entryId={entryId}
-                  clearTemporaryMarks={clearTemporaryMarks}
-                  notes={notes.current}
-                  memos={epubObject.memos}
-                  currentSpineIndex={spinePointer}
-                  goToNote={goToNote}
-                />
-                <TableOfContents
-                  toc={epubObject.toc}
-                  handlePathHref={handlePathHref}
-                  currentSpineIndexLabel={spine.current[spinePointer].label}
-                />
-                <ReaderFormat
-                  formatting={formatting}
-                  setFormatting={handleSetFormatting}
-                  useGlobalFormatting={useGlobalFormatting}
-                  setUseGlobalFormatting={setUseGlobalFormattingHelper}
-                  useStandardFormatting={useStandardFormatting}
-                  setUseStandardFormatting={setUseStandardFormattingHelper}
-                />
-              </Stack>
-            )}
-          </Stack>
-        </Toolbar>
-      </AppBar>
+        annotatorProps={{ clearTemporaryMarks, goToNote }}
+        entryId={entryId}
+        notes={notes}
+        epubObject={epubObject}
+        spinePointer={spinePointer}
+        handlePathHref={handlePathHref}
+        formatterProp={{
+          formatting,
+          handleSetFormatting,
+          useGlobalFormatting,
+          setUseGlobalFormattingHelper,
+          useStandardFormatting,
+          setUseStandardFormattingHelper,
+        }}
+      />
       {spinePointer === null ? (
         "Loading, please wait..."
       ) : (
@@ -1787,8 +1319,7 @@ export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
               }}
               dangerouslySetInnerHTML={{
                 __html:
-                  spine.current?.[spineSearchPointer ?? (spinePointer ?? 0) - 1]
-                    ?.element ??
+                  spine.current?.[(spinePointer ?? 0) - 1]?.element ??
                   "something went wrong...<br/> spine.current is missing",
               }}
             />
