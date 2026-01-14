@@ -1,54 +1,37 @@
 import {
   AppBar,
-  Autocomplete,
-  Box,
   IconButton,
   Stack,
-  TextField,
   Toolbar,
   Tooltip,
   Typography,
-  CircularProgress,
   useMediaQuery,
 } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
 import { TableOfContents } from "./TableOfContents";
 import { AnnotationViewer } from "./AnnotationViewer";
 import { ReaderFormat } from "../../../components/ReaderFormat";
-import {
-  DialogSlideUpTransition,
-  CircularProgressWithLabel,
-} from "../../CustomComponents";
-import * as React from "react";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
-import { Search } from "./Search";
+import { SearchV2 } from "./SearchV2";
 
 export const Header = ({
   handleClose,
   title,
   subtitle,
   spine,
-  searchProps,
+  searchV2Props,
   annotatorProps,
   entryId,
   notes,
   epubObject,
   spinePointer,
-  tocProps,
+  handlePathHref,
   formatterProp,
 }) => {
   const appBarHeight = 48;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const [searchFocused, setSearchFocused] = React.useState(false);
-
-  const handleSearchIconClick = () => {
-    setSearchFocused(true);
-  };
 
   return (
     <AppBar
@@ -99,55 +82,45 @@ export const Header = ({
             </Stack>
           ) : null}
         </Stack>
-        <Stack direction={"row"} spacing={2}>
-          {searchFocused ? (
-            <Search
-              searchProps={searchProps}
-              setSearchFocused={setSearchFocused}
-              spine={spine}
-            />
-          ) : (
-            <Stack spacing={1} direction={"row"}>
-              {/* {previousSpineIndexAndPage !== null ? (
+        <Stack spacing={1} direction={"row"}>
+          {/* {previousSpineIndexAndPage !== null ? (
                 <Tooltip title="Back">
-                  <IconButton onClick={goBack}>
-                    <ArrowBackIcon />
-                  </IconButton>
-                </Tooltip>
-              ) : null} */}
-              <Tooltip title="Search">
-                <IconButton onClick={handleSearchIconClick}>
-                  <SearchIcon />
+                <IconButton onClick={goBack}>
+                <ArrowBackIcon />
                 </IconButton>
-              </Tooltip>
-              <AnnotationViewer
-                spine={spine.current}
-                entryId={entryId}
-                clearTemporaryMarks={annotatorProps.clearTemporaryMarks}
-                notes={notes.current}
-                memos={epubObject.memos}
-                currentSpineIndex={spinePointer}
-                goToNote={annotatorProps.goToNote}
-              />
-              <TableOfContents
-                toc={epubObject.toc}
-                handlePathHref={tocProps.handlePathHref}
-                currentSpineIndexLabel={spine.current[spinePointer].label}
-              />
-              <ReaderFormat
-                formatting={formatterProp.formatting}
-                setFormatting={formatterProp.handleSetFormatting}
-                useGlobalFormatting={formatterProp.useGlobalFormatting}
-                setUseGlobalFormatting={
-                  formatterProp.setUseGlobalFormattingHelper
-                }
-                useStandardFormatting={formatterProp.useStandardFormatting}
-                setUseStandardFormatting={
-                  formatterProp.setUseStandardFormattingHelper
-                }
-              />
-            </Stack>
-          )}
+                </Tooltip>
+                ) : null} */}
+          <SearchV2
+            spine={spine}
+            currentSpineIndex={spinePointer}
+            goToAndPreloadImages={searchV2Props.goToAndPreloadImages}
+            goToLinkFragment={searchV2Props.goToLinkFragment}
+            clearTemporaryMarks={searchV2Props.clearTemporaryMarks}
+          />
+          <AnnotationViewer
+            spine={spine.current}
+            entryId={entryId}
+            clearTemporaryMarks={annotatorProps.clearTemporaryMarks}
+            notes={notes.current}
+            memos={epubObject.memos}
+            currentSpineIndex={spinePointer}
+            goToNote={annotatorProps.goToNote}
+          />
+          <TableOfContents
+            toc={epubObject.toc}
+            handlePathHref={handlePathHref}
+            currentSpineIndexLabel={spine.current[spinePointer].label}
+          />
+          <ReaderFormat
+            formatting={formatterProp.formatting}
+            setFormatting={formatterProp.handleSetFormatting}
+            useGlobalFormatting={formatterProp.useGlobalFormatting}
+            setUseGlobalFormatting={formatterProp.setUseGlobalFormattingHelper}
+            useStandardFormatting={formatterProp.useStandardFormatting}
+            setUseStandardFormatting={
+              formatterProp.setUseStandardFormattingHelper
+            }
+          />
         </Stack>
       </Toolbar>
     </AppBar>
@@ -162,9 +135,9 @@ Header.propTypes = {
   title: PropTypes.string,
   subtitle: PropTypes.string,
   spine: PropTypes.object.isRequired,
-  searchProps: PropTypes.object.isRequired,
+  searchV2Props: PropTypes.object.isRequired,
   annotatorProps: PropTypes.object.isRequired,
   spinePointer: PropTypes.number.isRequired,
   formatterProp: PropTypes.object.isRequired,
-  tocProps: PropTypes.object.isRequired,
+  handlePathHref: PropTypes.func.isRequired,
 };

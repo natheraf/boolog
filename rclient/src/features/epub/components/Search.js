@@ -14,6 +14,10 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import { useTheme } from "@emotion/react";
 import PropTypes from "prop-types";
 
+/**
+ * @deprecated
+ * @returns
+ */
 export const Search = ({ searchProps, setSearchFocused, spine }) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));

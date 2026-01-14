@@ -1,3 +1,66 @@
+import {
+  getSearchPreview,
+  getXPathSearchExpression,
+} from "../../utils/stringUtils";
+
+const handleSearchOnElement = (needle, element) => {
+  const text = element.textContent;
+  const textLower = text.toLowerCase();
+  let index = textLower.indexOf(needle);
+  const res = [];
+  while (index !== -1) {
+    const nodeId = element.getAttribute("nodeid");
+    res.push({
+      startContainerId: nodeId,
+      endContainerId: nodeId,
+      startOffset: index,
+      endOffset: index + needle.length,
+      ...getSearchPreview(text, index, needle),
+    });
+    index = textLower.indexOf(needle, index + needle.length);
+  }
+  return res;
+};
+
+export const handleSearchOnDocument = (needle, doc) => {
+  needle = needle.toLowerCase();
+  const xPathExpression = getXPathSearchExpression(needle);
+  const evaluateResults = document.evaluate(
+    xPathExpression,
+    doc,
+    null,
+    XPathResult.ORDERED_NODE_ITERATOR_TYPE,
+    null
+  );
+  const res = [];
+  let node = evaluateResults.iterateNext();
+  while (node) {
+    res.push(...handleSearchOnElement(needle, node));
+    node = evaluateResults.iterateNext();
+  }
+  return res;
+};
+
+export const waitForElement = (selector) =>
+  new Promise((resolve) => {
+    if (document.querySelector(selector)) {
+      return resolve(document.querySelector(selector));
+    }
+
+    const observer = new MutationObserver((mutations) => {
+      if (document.querySelector(selector)) {
+        observer.disconnect();
+        resolve(document.querySelector(selector));
+      }
+    });
+
+    // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
+
 export const deleteNodesAndLiftChildren = (nodes) => {
   const updates = [];
   for (const node of nodes) {
@@ -217,7 +280,7 @@ export const getLastTextNode = (node) => {
   return lastNode;
 };
 
-const getClosestEpubNode = (node) => {
+const getNearestEpubAncestor = (node) => {
   let it = node;
   while (it !== null && it.classList?.contains("epub-node") === false) {
     it = it.parentElement;
