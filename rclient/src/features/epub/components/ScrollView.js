@@ -19,13 +19,11 @@ export const ScrollView = ({
     const height = contentRect.height;
     const targetScrollTop = height * percentage;
     const includeSentinel = targetScrollTop + sentinelsHeight;
-    if (height > includeSentinel) {
-      return epubBody.scroll({
-        top: includeSentinel,
-      });
-    }
-    const keepScrollAboveBottomSentinel = Math.min(height, includeSentinel);
-    epubBody.scroll({
+    const keepScrollAboveBottomSentinel = Math.min(
+      Math.max(height, sentinelsHeight),
+      includeSentinel
+    );
+    return epubBody.scroll({
       top: keepScrollAboveBottomSentinel,
     });
   };
