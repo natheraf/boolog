@@ -22,9 +22,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     spine: epubObject.progress.spine,
     part: epubObject.progress.part,
   });
+
+  const highlightBorderSafety = 25;
   const [formatting, setFormatting] = React.useState({
     pagesShown: 1,
-    pageWidth: Math.min(700, window.innerWidth),
+    pageWidth: Math.min(700, window.innerWidth - highlightBorderSafety),
     pageHeight: window.innerHeight,
     columnGap: 1,
     backgroundColors: theme.palette.background.default,
