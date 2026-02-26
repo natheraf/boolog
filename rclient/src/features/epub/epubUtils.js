@@ -1,6 +1,52 @@
 import { getRelatorsLabelFromIdentifier } from "../../api/Local";
 import { handleSearchOnDocument } from "./domUtils";
 
+export const loadImages = (epubObject, spineIndex, imageObjectURLs) => {
+  const pageHeight = window.innerHeight;
+  const spine = epubObject.spine;
+  const images = epubObject.images;
+  const parser = new DOMParser();
+  const page = parser.parseFromString(spine[spineIndex].element, "text/html");
+  const imageElements = page.querySelectorAll("img, image");
+  for (const element of imageElements) {
+    const tag = element.tagName.toLowerCase();
+    let url;
+    if (tag === "img") {
+      const src = element
+        .getAttribute("ogsrc")
+        ?.substring(element.getAttribute("ogsrc").startsWith("../") * 3);
+      url =
+        imageObjectURLs.get(src) ??
+        URL.createObjectURL(getEpubValueFromPath(images, src));
+      element.src = url;
+      imageObjectURLs.set(src, url);
+      if (["DIV", "SECTION"].includes(element.parentElement.tagName)) {
+        element.style.display = "block";
+      }
+      element.style.objectFit = "scale-down";
+      element.style.margin = "auto";
+      element.style.maxHeight = `${pageHeight}px`;
+      element.style.maxWidth = "100%";
+    } else if (tag === "image") {
+      let src = null;
+      for (const key of ["xlink:href", "oghref", "ogsrc"]) {
+        if (element.getAttribute(key) !== null) {
+          src = element.getAttribute(key);
+        }
+      }
+      src = src?.substring(src.startsWith("../") * 3);
+      url =
+        imageObjectURLs.get(src) ??
+        URL.createObjectURL(getEpubValueFromPath(images, src));
+      imageObjectURLs.set(src, url);
+      element.setAttribute("href", url);
+      element.style.height = "100%";
+      element.style.width = "";
+    }
+  }
+  spine[spineIndex].element = page.documentElement.outerHTML;
+};
+
 export const handleSearchEpub = (needle, spine) => {
   const results = [];
   const parser = new DOMParser();
