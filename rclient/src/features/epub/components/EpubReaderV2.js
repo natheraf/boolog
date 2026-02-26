@@ -5,7 +5,7 @@ import { DialogSlideUpTransition } from "../../CustomComponents";
 import PropTypes from "prop-types";
 import { updateEpubDataInDotNotation } from "../../../api/IndexedDB/epubData";
 import { ViewRenderer } from "./ViewRenderer";
-import { getEpubValueFromPath } from "../epubUtils";
+import { getEpubValueFromPath, loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { waitForElement } from "../domUtils";
 import { useTheme } from "@emotion/react";
@@ -45,7 +45,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     console.log(spine, part);
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
-    loadImages(spine);
+    prepareSpineIndex(spine);
     setProgress({ spine, part });
     clearTimeout(timeOutToSetProgress.current);
     timeOutToSetProgress.current = setTimeout(() => {
@@ -57,59 +57,27 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
 
   const spine = epubObject.spine;
-  const [visitedSpineIndex, setVisitedSpineIndex] = React.useState([]);
+  const [preparedSpineIndexes, setPreparedSpineIndexes] = React.useState([]);
   const imageObjectURLs = React.useRef(new Map());
 
-  const loadImages = (spineIndex) => {
-    if (visitedSpineIndex.includes(spineIndex)) return;
-    const parser = new DOMParser();
-    const page = parser.parseFromString(spine[spineIndex].element, "text/html");
-    const imageElements = page.querySelectorAll("img, image");
-    const images = epubObject.images;
-    for (const element of imageElements) {
-      const tag = element.tagName.toLowerCase();
-      let url;
-      if (tag === "img") {
-        const src = element
-          .getAttribute("ogsrc")
-          ?.substring(element.getAttribute("ogsrc").startsWith("../") * 3);
-        url =
-          imageObjectURLs.current.get(src) ??
-          URL.createObjectURL(getEpubValueFromPath(images, src));
-        element.src = url;
-        imageObjectURLs.current.set(src, url);
-        if (["DIV", "SECTION"].includes(element.parentElement.tagName)) {
-          element.style.display = "block";
-        }
-        element.style.objectFit = "scale-down";
-        element.style.margin = "auto";
-        element.style.maxHeight = `${formatting.pageHeight}px`;
-        element.style.maxWidth = "100%";
-      } else if (tag === "image") {
-        let src = null;
-        for (const key of ["xlink:href", "oghref", "ogsrc"]) {
-          if (element.getAttribute(key) !== null) {
-            src = element.getAttribute(key);
-          }
-        }
-        src = src?.substring(src.startsWith("../") * 3);
-        url =
-          imageObjectURLs.current.get(src) ??
-          URL.createObjectURL(getEpubValueFromPath(images, src));
-        imageObjectURLs.current.set(src, url);
-        element.setAttribute("href", url);
-        element.style.height = "100%";
-        element.style.width = "";
+  const prepareSpineIndex = (spineIndex) => {
+    for (
+      let index = Math.max(0, spineIndex - 1);
+      index < spineIndex + 2;
+      index += 1
+    ) {
+      if (preparedSpineIndexes.includes(index)) {
+        continue;
       }
+      loadImages(epubObject, index, imageObjectURLs.current);
+      setPreparedSpineIndexes((prev) =>
+        prev.includes(index) ? prev : [...prev, index]
+      );
     }
-    spine[spineIndex].element = page.documentElement.outerHTML;
-    setVisitedSpineIndex((prev) =>
-      prev.includes(spineIndex) ? prev : [...prev, spineIndex]
-    );
   };
 
   React.useEffect(() => {
-    loadImages(progress.spine);
+    prepareSpineIndex(progress.spine);
     getStateValue("epubView").then(setView);
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
@@ -150,7 +118,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           }}
           tabIndex={0}
         >
-          {visitedSpineIndex.includes(progress.spine) ? (
+          {(progress.spine - 1 >= 0 ||
+            preparedSpineIndexes.includes(progress.spine - 1)) &&
+          preparedSpineIndexes.includes(progress.spine) &&
+          (progress.spine + 1 < spine.length ||
+            preparedSpineIndexes.includes(progress.spine + 1)) ? (
             <ViewRenderer
               epubObject={epubObject}
               spineIndex={progress.spine}
