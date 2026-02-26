@@ -69,15 +69,11 @@ export const ScrollView = ({
   React.useEffect(() => {
     scrollToPercent(partProgress);
     const epubBody = document.getElementById("epub-body");
-    const resizeObserver = new ResizeObserver(() =>
-      scrollToPercent(partProgress)
-    );
-    resizeObserver.observe(epubBody);
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       epubBody.addEventListener("scroll", onScroll);
     }, 500);
     return () => {
-      resizeObserver.disconnect();
+      clearTimeout(timeoutId);
       epubBody.removeEventListener("scroll", onScroll);
     };
   }, []);
