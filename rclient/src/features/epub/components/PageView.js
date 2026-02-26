@@ -14,14 +14,13 @@ export const PageView = ({
   const getTotalPages = () =>
     document.getElementById("content")
       ? Math.floor(
-          document.getElementById("content").scrollWidth /
-            formatting.contentWidth
+          document.getElementById("content").scrollWidth / formatting.pageWidth
         ) +
         +(
           formatting.pagesShown > 1 &&
           (document.getElementById("content").scrollWidth %
-            formatting.contentWidth) /
-            formatting.contentWidth >
+            formatting.pageWidth) /
+            formatting.pageWidth >
             1 / formatting.pagesShown
         )
       : 0;
@@ -71,8 +70,8 @@ export const PageView = ({
       <Box
         sx={{
           height: "100%",
-          minWidth: `${formatting.contentWidth}px`,
-          maxWidth: `${formatting.contentWidth}px`,
+          minWidth: `${formatting.pageWidth}px`,
+          maxWidth: `${formatting.pageWidth}px`,
           overflow: "visible",
         }}
       >
@@ -84,11 +83,11 @@ export const PageView = ({
             columnFill: "balance",
             columnGap: `${formatting.columnGap}px`,
             columnWidth: `${
-              (formatting.contentWidth -
+              (formatting.pageWidth -
                 formatting.columnGap * formatting.pagesShown) /
               formatting.pagesShown
             }px`,
-            transform: `translate(-${currentPage * (formatting.contentWidth + formatting.columnGap)}px);`,
+            transform: `translate(-${currentPage * (formatting.pageWidth + formatting.columnGap)}px);`,
           }}
           dangerouslySetInnerHTML={{
             __html:

@@ -95,8 +95,8 @@ export const ScrollView = ({
       <Box
         id="content"
         sx={{
-          minWidth: `${formatting.contentWidth}px`,
-          maxWidth: `${formatting.contentWidth}px`,
+          minWidth: `${formatting.pageWidth}px`,
+          maxWidth: `${formatting.pageWidth}px`,
         }}
         dangerouslySetInnerHTML={{
           __html:

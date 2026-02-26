@@ -22,6 +22,16 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     spine: epubObject.progress.spine,
     part: epubObject.progress.part,
   });
+  const [formatting, setFormatting] = React.useState({
+    pagesShown: 1,
+    pageWidth: Math.min(700, window.innerWidth),
+    pageHeight: window.innerHeight,
+    columnGap: 1,
+    backgroundColors: theme.palette.background.default,
+    showDividers: true,
+    opacityOfSideElements: 0.5,
+    showArrows: true,
+  });
 
   console.log(epubObject);
   const handleClose = () => {
@@ -42,17 +52,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       });
     }, 500);
   };
-
-  const formatting = {
-    pagesShown: 1,
-    contentWidth: Math.min(700, window.innerWidth),
-    pageHeight: window.innerHeight,
-    columnGap: 1,
-    backgroundColors: theme.palette.background.default,
-    showDividers: true,
-    opacityOfSideElements: 0.5,
-    showArrows: true,
-  }; // temp
 
   const spine = epubObject.spine;
   const [visitedSpineIndex, setVisitedSpineIndex] = React.useState([]);
@@ -83,7 +82,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
         element.style.margin = "auto";
         // todo: allow resize
         element.style.maxHeight = `${formatting.pageHeight}px`;
-        element.style.maxWidth = `${formatting.contentWidth}px`;
+        element.style.maxWidth = `${formatting.pageWidth}px`;
       } else if (tag === "image") {
         let src = null;
         for (const key of ["xlink:href", "oghref", "ogsrc"]) {
