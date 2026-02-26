@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { Box, Divider, Stack } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
@@ -6,15 +7,8 @@ export const SideButtons = ({
   children,
   leftButtonOnClick,
   rightButtonOnClick,
+  formatting,
 }) => {
-  // temp
-  const [backgroundColors, showDividers, opacityOfSideElements, showArrows] = [
-    "white",
-    true,
-    0.5,
-    true,
-  ];
-
   return (
     <Stack
       direction="row"
@@ -40,7 +34,7 @@ export const SideButtons = ({
             position: "absolute",
             width: "100%",
             height: "100%",
-            backgroundColor: backgroundColors,
+            backgroundColor: formatting.backgroundColors,
             justifyContent: "flex-end",
           }}
         />
@@ -50,8 +44,8 @@ export const SideButtons = ({
             position: "absolute",
             top: 0,
             right: 0,
-            visibility: showDividers,
-            opacity: opacityOfSideElements,
+            visibility: formatting.showDividers,
+            opacity: formatting.opacityOfSideElements,
           }}
         />
         <NavigateBeforeIcon
@@ -60,8 +54,8 @@ export const SideButtons = ({
             left: 0,
             top: "50%",
             margin: "auto",
-            visibility: showArrows,
-            opacity: opacityOfSideElements,
+            visibility: formatting.showArrows,
+            opacity: formatting.opacityOfSideElements,
           }}
           htmlColor={"gray"}
         />
@@ -82,7 +76,7 @@ export const SideButtons = ({
             position: "absolute",
             width: "100%",
             height: "100%",
-            backgroundColor: backgroundColors,
+            backgroundColor: formatting.backgroundColors,
             justifyContent: "flex-end",
           }}
         />
@@ -92,8 +86,8 @@ export const SideButtons = ({
             position: "absolute",
             top: 0,
             left: 0,
-            visibility: showDividers,
-            opacity: opacityOfSideElements,
+            visibility: formatting.showDividers,
+            opacity: formatting.opacityOfSideElements,
           }}
         />
         <NavigateNextIcon
@@ -102,12 +96,19 @@ export const SideButtons = ({
             right: 0,
             top: "50%",
             margin: "auto",
-            visibility: showArrows,
-            opacity: opacityOfSideElements,
+            visibility: formatting.showArrows,
+            opacity: formatting.opacityOfSideElements,
           }}
           htmlColor={"gray"}
         />
       </Box>
     </Stack>
   );
+};
+
+SideButtons.propTypes = {
+  children: PropTypes.element.isRequired,
+  leftButtonOnClick: PropTypes.func.isRequired,
+  rightButtonOnClick: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
 };
