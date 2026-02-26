@@ -74,7 +74,6 @@ export const PageView = ({
           minWidth: `${formatting.contentWidth}px`,
           maxWidth: `${formatting.contentWidth}px`,
           overflow: "visible",
-          backgroundColor: "gray",
         }}
       >
         <Box
