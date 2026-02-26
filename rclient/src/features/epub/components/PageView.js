@@ -2,7 +2,10 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import { Box, Fade } from "@mui/material";
 import { SideButtons } from "./SideButtons";
-import { waitForElement } from "../domUtils";
+import {
+  attachOnClickListenersToLinkElements,
+  waitForElement,
+} from "../domUtils";
 
 export const PageView = ({
   spine,
@@ -61,6 +64,7 @@ export const PageView = ({
 
   React.useEffect(() => {
     setCurrentPage(Math.floor(partProgress * getTotalPages()));
+    attachOnClickListenersToLinkElements();
   }, [spineIndex]);
 
   return (

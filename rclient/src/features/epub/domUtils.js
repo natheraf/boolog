@@ -357,3 +357,18 @@ export const getPreviousTextNode = (node) => {
   } while (node.nodeType !== Node.TEXT_NODE);
   return node;
 };
+
+export const attachOnClickListenersToLinkElements = () => {
+  document
+    .getElementById("content")
+    ?.querySelectorAll("a[linkto]")
+    .forEach(async (node) => {
+      const tag = node.tagName.toLowerCase();
+      if (tag === "a" && node.getAttribute("linkto") !== "null") {
+        node.style.cursor = "pointer";
+        node.addEventListener("click", () => {
+          // handlePathHref(node.getAttribute("linkto"));
+        });
+      }
+    });
+};

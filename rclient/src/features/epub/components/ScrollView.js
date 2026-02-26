@@ -1,6 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { Box } from "@mui/material";
+import { attachOnClickListenersToLinkElements } from "../domUtils";
 
 export const ScrollView = ({
   spine,
@@ -67,6 +68,7 @@ export const ScrollView = ({
     const timeoutId = setTimeout(() => {
       epubBody.addEventListener("scroll", onScroll);
     }, 500);
+    attachOnClickListenersToLinkElements();
     return () => {
       clearTimeout(timeoutId);
       epubBody.removeEventListener("scroll", onScroll);

@@ -4,7 +4,7 @@ import { HeaderV2 } from "./HeaderV2";
 import { DialogSlideUpTransition } from "../../CustomComponents";
 import PropTypes from "prop-types";
 import { updateEpubDataInDotNotation } from "../../../api/IndexedDB/epubData";
-import { ViewRenderer } from "./ContentRenderer";
+import { ViewRenderer } from "./ViewRenderer";
 import { getEpubValueFromPath } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { waitForElement } from "../domUtils";
