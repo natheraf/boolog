@@ -22,6 +22,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     spine: epubObject.progress.spine,
     part: epubObject.progress.part,
   });
+  const [view, setView] = React.useState(null);
 
   const highlightBorderSafety = 25;
   const [formatting, setFormatting] = React.useState({
@@ -82,9 +83,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
         }
         element.style.objectFit = "scale-down";
         element.style.margin = "auto";
-        // todo: allow resize
         element.style.maxHeight = `${formatting.pageHeight}px`;
-        element.style.maxWidth = `${formatting.pageWidth}px`;
+        element.style.maxWidth = "100%";
       } else if (tag === "image") {
         let src = null;
         for (const key of ["xlink:href", "oghref", "ogsrc"]) {
@@ -107,8 +107,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       prev.includes(spineIndex) ? prev : [...prev, spineIndex]
     );
   };
-
-  const [view, setView] = React.useState(null);
 
   React.useEffect(() => {
     loadImages(progress.spine);
@@ -134,8 +132,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       >
         <HeaderV2
           sx={{ flex: "0 1 auto" }}
+          epubObject={epubObject}
           handleClose={handleClose}
           setView={setView}
+          formatting={formatting}
+          setFormatting={setFormatting}
         />
         <Box
           id="epub-body"
