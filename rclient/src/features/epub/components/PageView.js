@@ -11,6 +11,8 @@ export const PageView = ({
   formatting,
   setProgress,
 }) => {
+  const columnGap = 1;
+
   const getTotalPages = () =>
     document.getElementById("content")
       ? Math.floor(
@@ -81,13 +83,12 @@ export const PageView = ({
             width: "100%",
             height: "100%",
             columnFill: "balance",
-            columnGap: `${formatting.columnGap}px`,
+            columnGap: `${columnGap}px`,
             columnWidth: `${
-              (formatting.pageWidth -
-                formatting.columnGap * formatting.pagesShown) /
+              (formatting.pageWidth - columnGap * formatting.pagesShown) /
               formatting.pagesShown
             }px`,
-            transform: `translate(-${currentPage * (formatting.pageWidth + formatting.columnGap)}px);`,
+            transform: `translate(-${currentPage * (formatting.pageWidth + columnGap)}px);`,
           }}
           dangerouslySetInnerHTML={{
             __html:
