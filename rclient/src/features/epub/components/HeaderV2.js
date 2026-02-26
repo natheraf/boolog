@@ -16,8 +16,15 @@ import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
 import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
+import { EpubFormatterV2 } from "./EpubFormatterV2";
 
-export const HeaderV2 = ({ handleClose, setView }) => {
+export const HeaderV2 = ({
+  epubObject,
+  handleClose,
+  setView,
+  formatting,
+  setFormatting,
+}) => {
   const { title, subtitle } = {};
   const appBarHeight = 48;
   const theme = useTheme();
@@ -166,6 +173,11 @@ export const HeaderV2 = ({ handleClose, setView }) => {
                 <SearchIcon />
               </IconButton>
             </Tooltip>
+            <EpubFormatterV2
+              epubObject={epubObject}
+              formatting={formatting}
+              setFormatting={setFormatting}
+            />
             {/* {previousSpineIndexAndPage !== null ? (
             <Tooltip title="Back (b)">
             <IconButton onClick={goBack}>
@@ -215,4 +227,6 @@ export const HeaderV2 = ({ handleClose, setView }) => {
 HeaderV2.propTypes = {
   handleClose: PropTypes.func.isRequired,
   setView: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
+  setFormatting: PropTypes.func.isRequired,
 };
