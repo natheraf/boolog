@@ -115,7 +115,7 @@ export const HeaderV2 = ({
   }, []);
 
   return (
-    <Slide direction="down" in={show} mountOnEnter unmountOnExit>
+    <Slide direction="down" in={show}>
       <AppBar
         id="appBar"
         variant="outlined"
