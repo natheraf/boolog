@@ -153,7 +153,7 @@ export const ContinuousScrollView = ({
       removeAllLinkListeners();
       epubBody.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [spineIndex, focusElement]);
 
   return (
     <Stack
