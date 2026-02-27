@@ -104,7 +104,7 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     const styleElement =
       document.querySelector(`#${styleId}`) ?? document.createElement("style");
     styleElement.id = styleId;
-    styleElement.innerHTML = `#content * {\n${userFormattingStyle}\n}`;
+    styleElement.innerHTML = `#content *, .content * {\n${userFormattingStyle}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
     return styleId;
   };
@@ -121,7 +121,7 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     const styleElement =
       document.querySelector(`#${styleId}`) ?? document.createElement("style");
     styleElement.id = styleId;
-    styleElement.innerHTML = `#content * {\n${highlightStyles}\n}`;
+    styleElement.innerHTML = `#content *, .content * {\n${highlightStyles}\n}`;
     document.head.insertAdjacentElement("beforeend", styleElement);
     return styleId;
   };
@@ -130,7 +130,7 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     for (const [key, value] of Object.entries(epubObject.css)) {
       const styleElement = document.createElement("style");
       styleElement.id = `epub-css-${key}`;
-      styleElement.innerHTML = `#content * {\n${value}\n}`;
+      styleElement.innerHTML = `#content *, .content * {\n${value}\n}`;
       document.head.insertAdjacentElement("beforeend", styleElement);
       stylingElementIds.current.push(styleElement.id);
     }
