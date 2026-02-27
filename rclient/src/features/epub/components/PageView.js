@@ -128,7 +128,6 @@ export const PageView = ({
           Math.floor(contentRect.width + columnGap)
       );
       setCurrentPage(pageDelta);
-      console.log("test");
       setProgress(spineIndex, pageDelta / getTotalPages());
     }
     setFocusElement(null);
