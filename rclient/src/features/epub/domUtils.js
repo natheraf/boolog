@@ -358,17 +358,24 @@ export const getPreviousTextNode = (node) => {
   return node;
 };
 
-export const attachOnClickListenersToLinkElements = () => {
+export const attachOnClickListenersToLinkElements = (handlePathHref) => {
+  const removeListenerFunctions = [];
   document
     .getElementById("content")
     ?.querySelectorAll("a[linkto]")
-    .forEach(async (node) => {
+    .forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (tag === "a" && node.getAttribute("linkto") !== "null") {
         node.style.cursor = "pointer";
         node.addEventListener("click", () => {
-          // handlePathHref(node.getAttribute("linkto"));
+          handlePathHref(node.getAttribute("linkto"));
         });
+        removeListenerFunctions.push(() =>
+          node.removeEventListener("click", () => {
+            handlePathHref(node.getAttribute("linkto"));
+          })
+        );
       }
     });
+  return () => removeListenerFunctions.forEach((fn) => fn());
 };
