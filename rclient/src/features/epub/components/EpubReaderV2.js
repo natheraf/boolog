@@ -63,7 +63,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   const prepareSpineIndex = (spineIndex) => {
     for (
       let index = Math.max(0, spineIndex - 1);
-      index < spineIndex + 2;
+      index < Math.min(spine.length, spineIndex + 2);
       index += 1
     ) {
       if (preparedSpineIndexes.includes(index)) {
@@ -118,10 +118,10 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           }}
           tabIndex={0}
         >
-          {(progress.spine - 1 >= 0 ||
+          {(progress.spine === 0 ||
             preparedSpineIndexes.includes(progress.spine - 1)) &&
           preparedSpineIndexes.includes(progress.spine) &&
-          (progress.spine + 1 < spine.length ||
+          (progress.spine + 1 === spine.length ||
             preparedSpineIndexes.includes(progress.spine + 1)) ? (
             <ViewRenderer
               epubObject={epubObject}
