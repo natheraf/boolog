@@ -162,6 +162,7 @@ export const PageView = ({
       >
         <Box
           id="content"
+          className="content"
           sx={{
             width: "100%",
             height: "100%",

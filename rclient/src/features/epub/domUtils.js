@@ -360,10 +360,8 @@ export const getPreviousTextNode = (node) => {
 
 export const attachOnClickListenersToLinkElements = (handlePathHref) => {
   const removeListenerFunctions = [];
-  document
-    .getElementById("content")
-    ?.querySelectorAll("a[linkto]")
-    .forEach((node) => {
+  [...document.getElementsByClassName("content")].forEach((content) => {
+    content?.querySelectorAll("a[linkto]").forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (tag === "a" && node.getAttribute("linkto") !== "null") {
         node.style.cursor = "pointer";
@@ -377,5 +375,6 @@ export const attachOnClickListenersToLinkElements = (handlePathHref) => {
         );
       }
     });
+  });
   return () => removeListenerFunctions.forEach((fn) => fn());
 };
