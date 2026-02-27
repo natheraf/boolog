@@ -1,5 +1,5 @@
 import * as React from "react";
-import PropType from "prop-types";
+import PropTypes from "prop-types";
 import { SideButtons } from "./SideButtons";
 import { PageView } from "./PageView";
 import { ScrollView } from "./ScrollView";
@@ -14,6 +14,8 @@ export const ViewRenderer = ({
   epubObject,
   spineIndex,
   partProgress,
+  focusElement,
+  setFocusElement,
   formatting,
   setProgress,
   view,
@@ -33,9 +35,12 @@ export const ViewRenderer = ({
     [
       "page",
       <PageView
-        spine={epubObject.spine}
+        key={spineIndex}
+        epubObject={epubObject}
         spineIndex={spineIndex}
         partProgress={partProgress}
+        focusElement={focusElement}
+        setFocusElement={setFocusElement}
         formatting={formatting}
         setProgress={setProgress}
       />,
@@ -46,10 +51,12 @@ export const ViewRenderer = ({
 };
 
 ViewRenderer.propType = {
-  epubObject: PropType.object.isRequired,
-  spineIndex: PropType.number.isRequired,
-  partProgress: PropType.number.isRequired,
-  formatting: PropType.object.isRequired,
-  setProgress: PropType.func.isRequired,
-  view: PropType.string.isRequired,
+  epubObject: PropTypes.object.isRequired,
+  spineIndex: PropTypes.number.isRequired,
+  partProgress: PropTypes.number.isRequired,
+  focusElement: PropTypes.object.isRequired,
+  setFocusElement: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
+  setProgress: PropTypes.func.isRequired,
+  view: PropTypes.string.isRequired,
 };
