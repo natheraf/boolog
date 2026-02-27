@@ -3,6 +3,7 @@ import PropType from "prop-types";
 import { SideButtons } from "./SideButtons";
 import { PageView } from "./PageView";
 import { ScrollView } from "./ScrollView";
+import { ContinuousScrollView } from "./ContinuousScrollView";
 
 /**
  * Content state manager: progress
@@ -20,7 +21,7 @@ export const ViewRenderer = ({
   const viewMap = new Map([
     [
       "scroll",
-      <ScrollView
+      <ContinuousScrollView
         key={spineIndex}
         spine={epubObject.spine}
         spineIndex={spineIndex}
