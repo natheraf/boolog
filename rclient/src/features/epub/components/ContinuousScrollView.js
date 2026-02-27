@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Box, Stack } from "@mui/material";
+import { Box, Fade, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 
 export const ContinuousScrollView = ({
@@ -122,20 +122,22 @@ export const ContinuousScrollView = ({
       />
       <Box id="bottom-sentinel" sx={{ height: sentinelsHeight }} />
       {spineIndex + 1 < spine.length && (
-        <Box
-          id="next-content"
-          className="content"
-          sx={{
-            minWidth: `${formatting.pageWidth}px`,
-            maxWidth: `${formatting.pageWidth}px`,
-            minHeight: window.innerHeight,
-          }}
-          dangerouslySetInnerHTML={{
-            __html:
-              spine?.[spineIndex + 1 ?? -1]?.element ??
-              "something went wrong...<br/> spine.current is missing",
-          }}
-        />
+        <Fade in={true}>
+          <Box
+            id="next-content"
+            className="content"
+            sx={{
+              minWidth: `${formatting.pageWidth}px`,
+              maxWidth: `${formatting.pageWidth}px`,
+              minHeight: window.innerHeight,
+            }}
+            dangerouslySetInnerHTML={{
+              __html:
+                spine?.[spineIndex + 1 ?? -1]?.element ??
+                "something went wrong...<br/> spine.current is missing",
+            }}
+          />
+        </Fade>
       )}
     </Stack>
   );
