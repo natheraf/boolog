@@ -2,15 +2,20 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import { Box, Fade, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
+import { getEpubValueFromPath } from "../epubUtils";
 
 export const ContinuousScrollView = ({
-  spine,
+  epubObject,
   spineIndex,
   partProgress,
+  focusElement,
+  setFocusElement,
   formatting,
   setProgress,
 }) => {
+  const spine = epubObject.spine;
   const sentinelsHeight = window.innerHeight * 0.5;
+  const spineIndexMap = epubObject.spineIndexMap;
 
   const scrollToPercent = (percentage) => {
     const epubBody = document.getElementById("epub-body");
@@ -66,16 +71,86 @@ export const ContinuousScrollView = ({
     }, 500);
   };
 
+  const handlePathHref = (path) => {
+    if (window.getSelection().isCollapsed === false) {
+      return;
+    }
+    if (path.startsWith("http")) {
+      return window.open(path, "_blank");
+    }
+    if (path.startsWith("../")) {
+      path = path.substring(3);
+    } else if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+    const pathSpineIndex = getEpubValueFromPath(
+      spineIndexMap,
+      path.includes("#") === false ? path : path.substring(0, path.indexOf("#"))
+    );
+    if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+      setProgress(pathSpineIndex, 0);
+    }
+    let linkFragment = null;
+    if (path.includes("#")) {
+      linkFragment = path.substring(path.indexOf("#") + 1);
+      const focusElement = {
+        attributeName: "id",
+        attributeValue: linkFragment,
+      };
+      if (path.startsWith("#") || pathSpineIndex === spineIndex) {
+        return handleFocusElement(focusElement);
+      }
+      setFocusElement(focusElement);
+    }
+  };
+
+  const handleFocusElement = (focusElement) => {
+    const { attributeName, attributeValue } = focusElement;
+    let element = null;
+    if (attributeName === "id") {
+      element = document.getElementById(attributeValue);
+    } else if (attributeName === "class") {
+      element = document.getElementsByClassName(attributeName)[0];
+    } else {
+      element = document.querySelector(
+        `[${attributeName}="${attributeValue}"]`
+      );
+    }
+    if (element !== null) {
+      const elementRect = element.getBoundingClientRect();
+      const contentRect = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      if (
+        elementRect.top > contentRect.bottom ||
+        elementRect.bottom < contentRect.top
+      ) {
+        return;
+      }
+      const elementPositionPercentage =
+        (elementRect.top - contentRect.top) / contentRect.height;
+      setProgress(spineIndex, elementPositionPercentage);
+      scrollToPercent(elementPositionPercentage);
+    }
+    setFocusElement(null);
+  };
+
   React.useEffect(() => {
-    scrollToPercent(partProgress);
+    if (focusElement !== null) {
+      handleFocusElement(focusElement);
+    } else {
+      scrollToPercent(partProgress);
+    }
     const epubBody = document.getElementById("epub-body");
     const timeoutId = setTimeout(() => {
       epubBody.addEventListener("scroll", onScroll);
     }, 500);
-    attachOnClickListenersToLinkElements();
+    const removeAllLinkListeners =
+      attachOnClickListenersToLinkElements(handlePathHref);
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(timeoutToSetProgress.current);
+      removeAllLinkListeners();
       epubBody.removeEventListener("scroll", onScroll);
     };
   }, []);
@@ -144,9 +219,11 @@ export const ContinuousScrollView = ({
 };
 
 ContinuousScrollView.propType = {
-  spine: PropTypes.array.isRequired,
+  epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
+  focusElement: PropTypes.object.isRequired,
+  setFocusElement: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
 };

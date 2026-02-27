@@ -25,9 +25,11 @@ export const ViewRenderer = ({
       "scroll",
       <ContinuousScrollView
         key={spineIndex}
-        spine={epubObject.spine}
+        epubObject={epubObject}
         spineIndex={spineIndex}
         partProgress={partProgress}
+        focusElement={focusElement}
+        setFocusElement={setFocusElement}
         formatting={formatting}
         setProgress={setProgress}
       />,
