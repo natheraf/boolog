@@ -6,14 +6,19 @@ import {
   attachOnClickListenersToLinkElements,
   waitForElement,
 } from "../domUtils";
+import { getEpubValueFromPath } from "../epubUtils";
 
 export const PageView = ({
-  spine,
+  epubObject,
   spineIndex,
   partProgress,
+  focusElement,
+  setFocusElement,
   formatting,
   setProgress,
 }) => {
+  const spine = epubObject.spine;
+  const spineIndexMap = epubObject.spineIndexMap;
   const columnGap = 1;
 
   const getTotalPages = () =>
@@ -62,10 +67,85 @@ export const PageView = ({
     }
   };
 
+  const handlePathHref = (path) => {
+    if (window.getSelection().isCollapsed === false) {
+      return;
+    }
+    if (path.startsWith("http")) {
+      return window.open(path, "_blank");
+    }
+    if (path.startsWith("../")) {
+      path = path.substring(3);
+    } else if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+    const pathSpineIndex = getEpubValueFromPath(
+      spineIndexMap,
+      path.includes("#") === false ? path : path.substring(0, path.indexOf("#"))
+    );
+    if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+      setProgress(pathSpineIndex, 0);
+    }
+    let linkFragment = null;
+    if (path.includes("#")) {
+      linkFragment = path.substring(path.indexOf("#") + 1);
+      const focusElement = {
+        attributeName: "id",
+        attributeValue: linkFragment,
+      };
+      if (path.startsWith("#") || pathSpineIndex === spineIndex) {
+        return handleFocusElement(focusElement);
+      }
+      setFocusElement(focusElement);
+    }
+  };
+
+  const handleFocusElement = (focusElement) => {
+    const { attributeName, attributeValue } = focusElement;
+    let element = null;
+    if (attributeName === "id") {
+      element = document.getElementById(attributeValue);
+    } else if (attributeName === "class") {
+      element = document.getElementsByClassName(attributeName)[0];
+    } else {
+      element = document.querySelector(
+        `[${attributeName}="${attributeValue}"]`
+      );
+    }
+    if (element !== null) {
+      const elementRect = element.getBoundingClientRect();
+      const contentRect = document
+        .getElementById("content")
+        .getBoundingClientRect();
+      if (
+        elementRect.top > contentRect.bottom ||
+        elementRect.bottom < contentRect.top
+      ) {
+        return;
+      }
+      const pageDelta = Math.floor(
+        (Math.floor(elementRect.left) - Math.floor(contentRect.left)) /
+          Math.floor(contentRect.width + columnGap)
+      );
+      setCurrentPage(pageDelta);
+      console.log("test");
+      setProgress(spineIndex, pageDelta / getTotalPages());
+    }
+    setFocusElement(null);
+  };
+
   React.useEffect(() => {
-    setCurrentPage(Math.floor(partProgress * getTotalPages()));
-    attachOnClickListenersToLinkElements();
-  }, [spineIndex]);
+    if (focusElement !== null) {
+      handleFocusElement(focusElement);
+    } else {
+      setCurrentPage(Math.floor(partProgress * getTotalPages()));
+    }
+    const removeAllLinkListeners =
+      attachOnClickListenersToLinkElements(handlePathHref);
+    return () => {
+      removeAllLinkListeners();
+    };
+  }, []);
 
   return (
     <SideButtons
@@ -106,9 +186,11 @@ export const PageView = ({
 };
 
 PageView.propType = {
-  spine: PropTypes.array.isRequired,
+  epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
+  focusElement: PropTypes.object.isRequired,
+  setFocusElement: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
 };
