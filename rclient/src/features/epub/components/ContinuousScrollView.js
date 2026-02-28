@@ -143,11 +143,14 @@ export const ContinuousScrollView = ({
   };
 
   React.useEffect(() => {
-    if (focusElement !== null) {
-      handleFocusElement(focusElement);
-    } else {
-      scrollToPercent(partProgress);
-    }
+    setTimeout(() => {
+      // setTimeout executes after images are rendered.
+      if (focusElement !== null) {
+        handleFocusElement(focusElement);
+      } else {
+        scrollToPercent(partProgress);
+      }
+    });
     const epubBody = document.getElementById("epub-body");
     const timeoutId = setTimeout(() => {
       epubBody.addEventListener("scroll", onScroll);
