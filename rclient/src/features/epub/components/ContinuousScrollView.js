@@ -175,8 +175,27 @@ export const ContinuousScrollView = ({
       }}
     >
       {spineIndex - 1 >= 0 && (
+        <Fade in={true} timeout={100}>
+          <Box
+            id="previous-content"
+            className="content"
+            sx={{
+              minWidth: `${formatting.pageWidth}px`,
+              maxWidth: `${formatting.pageWidth}px`,
+              minHeight: window.innerHeight,
+            }}
+            dangerouslySetInnerHTML={{
+              __html:
+                spine?.[spineIndex - 1 ?? -1]?.element ??
+                "something went wrong...<br/> spine.current is missing",
+            }}
+          />
+        </Fade>
+      )}
+      <Box id="top-sentinel" sx={{ height: sentinelsHeight }} />
+      <Fade in={true} timeout={100}>
         <Box
-          id="previous-content"
+          id="content"
           className="content"
           sx={{
             minWidth: `${formatting.pageWidth}px`,
@@ -185,29 +204,14 @@ export const ContinuousScrollView = ({
           }}
           dangerouslySetInnerHTML={{
             __html:
-              spine?.[spineIndex - 1 ?? -1]?.element ??
+              spine?.[spineIndex ?? -1]?.element ??
               "something went wrong...<br/> spine.current is missing",
           }}
         />
-      )}
-      <Box id="top-sentinel" sx={{ height: sentinelsHeight }} />
-      <Box
-        id="content"
-        className="content"
-        sx={{
-          minWidth: `${formatting.pageWidth}px`,
-          maxWidth: `${formatting.pageWidth}px`,
-          minHeight: window.innerHeight,
-        }}
-        dangerouslySetInnerHTML={{
-          __html:
-            spine?.[spineIndex ?? -1]?.element ??
-            "something went wrong...<br/> spine.current is missing",
-        }}
-      />
+      </Fade>
       <Box id="bottom-sentinel" sx={{ height: sentinelsHeight }} />
       {spineIndex + 1 < spine.length && (
-        <Fade in={true}>
+        <Fade in={true} timeout={100}>
           <Box
             id="next-content"
             className="content"
