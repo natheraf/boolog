@@ -193,22 +193,20 @@ export const ContinuousScrollView = ({
         </Fade>
       )}
       <Box id="top-sentinel" sx={{ height: sentinelsHeight }} />
-      <Fade in={true} timeout={100}>
-        <Box
-          id="content"
-          className="content"
-          sx={{
-            minWidth: `${formatting.pageWidth}px`,
-            maxWidth: `${formatting.pageWidth}px`,
-            minHeight: window.innerHeight,
-          }}
-          dangerouslySetInnerHTML={{
-            __html:
-              spine?.[spineIndex ?? -1]?.element ??
-              "something went wrong...<br/> spine.current is missing",
-          }}
-        />
-      </Fade>
+      <Box
+        id="content"
+        className="content"
+        sx={{
+          minWidth: `${formatting.pageWidth}px`,
+          maxWidth: `${formatting.pageWidth}px`,
+          minHeight: window.innerHeight,
+        }}
+        dangerouslySetInnerHTML={{
+          __html:
+            spine?.[spineIndex ?? -1]?.element ??
+            "something went wrong...<br/> spine.current is missing",
+        }}
+      />
       <Box id="bottom-sentinel" sx={{ height: sentinelsHeight }} />
       {spineIndex + 1 < spine.length && (
         <Fade in={true} timeout={100}>
