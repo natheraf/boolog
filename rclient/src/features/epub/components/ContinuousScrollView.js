@@ -65,7 +65,14 @@ export const ContinuousScrollView = ({
     }
 
     timeoutToSetProgress.current = setTimeout(() => {
-      const avoidNegatives = Math.max(0, -contentRect.top / contentRect.height);
+      const appBar = document.getElementById("appBar");
+      const isAppBarHiding = appBar.style.visibility === "hidden";
+      const appBarHeight =
+        appBar.getBoundingClientRect().height * +!isAppBarHiding;
+      const avoidNegatives = Math.max(
+        0,
+        (-contentRect.top + appBarHeight) / contentRect.height
+      );
       const avoidOne = Math.min(0.999999, avoidNegatives);
       setProgress(spineIndex, avoidOne);
     }, 500);
