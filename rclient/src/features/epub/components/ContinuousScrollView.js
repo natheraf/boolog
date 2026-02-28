@@ -56,7 +56,7 @@ export const ContinuousScrollView = ({
       topSentinelRect.top + bottomSentinelRect.height * 0.1 >
         window.innerHeight;
     const scrollingToNextChapter =
-      nextContent && nextContentRect.top - bottomSentinelRect.height * 0.2 < 0;
+      nextContent && nextContentRect.top - bottomSentinelRect.height * 0.1 < 0;
 
     if (scrollingToPreviousChapter) {
       return setProgress(Math.max(0, spineIndex - 1), 0.999999);
