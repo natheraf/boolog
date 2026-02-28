@@ -134,11 +134,14 @@ export const PageView = ({
   };
 
   React.useEffect(() => {
-    if (focusElement !== null) {
-      handleFocusElement(focusElement);
-    } else {
-      setCurrentPage(Math.floor(partProgress * getTotalPages()));
-    }
+    setTimeout(() => {
+      // setTimeout executes after images are rendered.
+      if (focusElement !== null) {
+        handleFocusElement(focusElement);
+      } else {
+        setCurrentPage(Math.floor(partProgress * getTotalPages()));
+      }
+    });
     const removeAllLinkListeners =
       attachOnClickListenersToLinkElements(handlePathHref);
     return () => {
