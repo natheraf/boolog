@@ -14,8 +14,8 @@ export const ViewRenderer = ({
   epubObject,
   spineIndex,
   partProgress,
-  focusElement,
-  setFocusElement,
+  forceFocus,
+  setForceFocus,
   formatting,
   setProgress,
   view,
@@ -28,8 +28,8 @@ export const ViewRenderer = ({
         epubObject={epubObject}
         spineIndex={spineIndex}
         partProgress={partProgress}
-        focusElement={focusElement}
-        setFocusElement={setFocusElement}
+        forceFocus={forceFocus}
+        setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
       />,
@@ -41,8 +41,8 @@ export const ViewRenderer = ({
         epubObject={epubObject}
         spineIndex={spineIndex}
         partProgress={partProgress}
-        focusElement={focusElement}
-        setFocusElement={setFocusElement}
+        forceFocus={forceFocus}
+        setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
       />,
@@ -56,8 +56,8 @@ ViewRenderer.propType = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
-  focusElement: PropTypes.object.isRequired,
-  setFocusElement: PropTypes.func.isRequired,
+  forceFocus: PropTypes.object.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,

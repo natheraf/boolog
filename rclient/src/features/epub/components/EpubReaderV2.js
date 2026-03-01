@@ -23,7 +23,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     part: epubObject.progress.part,
   });
   const [view, setView] = React.useState(null);
-  const [focusElement, setFocusElement] = React.useState(null);
+  const [forceFocus, setForceFocus] = React.useState(null);
 
   const highlightBorderSafety = 25;
   const [formatting, setFormatting] = React.useState({
@@ -128,8 +128,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               epubObject={epubObject}
               spineIndex={progress.spine}
               partProgress={progress.part}
-              focusElement={focusElement}
-              setFocusElement={setFocusElement}
+              forceFocus={forceFocus}
+              setForceFocus={setForceFocus}
               formatting={formatting}
               setProgress={setProgressHelper}
               view={view}

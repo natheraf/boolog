@@ -8,8 +8,8 @@ export const ContinuousScrollView = ({
   epubObject,
   spineIndex,
   partProgress,
-  focusElement,
-  setFocusElement,
+  forceFocus,
+  setForceFocus,
   formatting,
   setProgress,
 }) => {
@@ -100,19 +100,20 @@ export const ContinuousScrollView = ({
     let linkFragment = null;
     if (path.includes("#")) {
       linkFragment = path.substring(path.indexOf("#") + 1);
-      const focusElement = {
+      const forceFocus = {
+        type: "element",
         attributeName: "id",
         attributeValue: linkFragment,
       };
       if (path.startsWith("#") || pathSpineIndex === spineIndex) {
-        return handleFocusElement(focusElement);
+        return handleFocusElement(forceFocus);
       }
-      setFocusElement(focusElement);
+      setForceFocus(forceFocus);
     }
   };
 
-  const handleFocusElement = (focusElement) => {
-    const { attributeName, attributeValue } = focusElement;
+  const handleFocusElement = (forceFocus) => {
+    const { attributeName, attributeValue } = forceFocus;
     let element = null;
     if (attributeName === "id") {
       element = document.getElementById(attributeValue);
@@ -139,16 +140,19 @@ export const ContinuousScrollView = ({
       setProgress(spineIndex, elementPositionPercentage);
       scrollToPercent(elementPositionPercentage);
     }
-    setFocusElement(null);
+    setForceFocus(null);
   };
 
   React.useEffect(() => {
     setTimeout(() => {
       // setTimeout executes after images are rendered.
-      if (focusElement !== null) {
-        handleFocusElement(focusElement);
+      if (forceFocus?.type === "element") {
+        handleFocusElement(forceFocus);
       } else {
         scrollToPercent(partProgress);
+      }
+      if (forceFocus?.type === "partProgress") {
+        setForceFocus(null);
       }
     });
     const epubBody = document.getElementById("epub-body");
@@ -163,7 +167,7 @@ export const ContinuousScrollView = ({
       removeAllLinkListeners();
       epubBody.removeEventListener("scroll", onScroll);
     };
-  }, [spineIndex, focusElement]);
+  }, [spineIndex, forceFocus]);
 
   return (
     <Stack
@@ -234,8 +238,8 @@ ContinuousScrollView.propType = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
-  focusElement: PropTypes.object.isRequired,
-  setFocusElement: PropTypes.func.isRequired,
+  forceFocus: PropTypes.object.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
 };
