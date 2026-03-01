@@ -23,6 +23,12 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     part: epubObject.progress.part,
   });
   const [view, setView] = React.useState(null);
+  const setViewHelper = (value) => {
+    setView(value);
+    if (value === "scroll" && progress.part === 0) {
+      setForceFocus({ type: "boundary", location: "start" });
+    }
+  };
   const [forceFocus, setForceFocus] = React.useState(null);
 
   const highlightBorderSafety = 25;
@@ -47,6 +53,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
     prepareSpineIndex(spine);
+    setForceFocus(null);
     setProgress({ spine, part });
     clearTimeout(timeOutToSetProgress.current);
     timeOutToSetProgress.current = setTimeout(() => {
@@ -103,7 +110,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           sx={{ flex: "0 1 auto" }}
           epubObject={epubObject}
           handleClose={handleClose}
-          setView={setView}
+          view={view}
+          setView={setViewHelper}
           formatting={formatting}
           setFormatting={setFormatting}
         />

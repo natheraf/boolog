@@ -21,6 +21,7 @@ import { EpubFormatterV2 } from "./EpubFormatterV2";
 export const HeaderV2 = ({
   epubObject,
   handleClose,
+  view,
   setView,
   formatting,
   setFormatting,
@@ -87,11 +88,9 @@ export const HeaderV2 = ({
   };
 
   const onChangeView = () => {
-    setView((prev) => {
-      const newView = prev === "scroll" ? "page" : "scroll";
-      setStateValue("epubView", newView);
-      return newView;
-    });
+    const newView = view === "scroll" ? "page" : "scroll";
+    setStateValue("epubView", newView);
+    setView(newView);
   };
 
   React.useEffect(() => {

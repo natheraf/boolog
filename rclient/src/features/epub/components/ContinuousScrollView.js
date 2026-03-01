@@ -14,10 +14,10 @@ export const ContinuousScrollView = ({
   setProgress,
 }) => {
   const spine = epubObject.spine;
-  const sentinelsHeight = window.innerHeight * 0.5;
+  const sentinelsHeight = window.innerHeight * 1.1;
   const spineIndexMap = epubObject.spineIndexMap;
 
-  const scrollToPercent = (percentage) => {
+  const scrollToPercent = (percentage, boundary) => {
     const epubBody = document.getElementById("epub-body");
     const previousContentHeight =
       document?.getElementById("previous-content")?.getBoundingClientRect()
@@ -29,12 +29,16 @@ export const ContinuousScrollView = ({
     const heightBeforeContent = previousContentHeight + sentinelsHeight;
     const includeSentinelAndPreviousChapter =
       heightBeforeContent + targetScrollTop;
-    const keepScrollAboveBottomSentinel =
+    const keepScrollSmoothToNextChapter =
+      percentage === 0 && boundary !== "start"
+        ? includeSentinelAndPreviousChapter - window.innerHeight
+        : includeSentinelAndPreviousChapter;
+    const keepScrollBelowTopSentinel =
       percentage === 0.999999
         ? includeSentinelAndPreviousChapter - window.innerHeight
         : includeSentinelAndPreviousChapter;
     return epubBody.scroll({
-      top: keepScrollAboveBottomSentinel,
+      top: keepScrollSmoothToNextChapter,
     });
   };
 
@@ -53,10 +57,11 @@ export const ContinuousScrollView = ({
 
     const scrollingToPreviousChapter =
       previousContent &&
-      topSentinelRect.top + bottomSentinelRect.height * 0.1 >
-        window.innerHeight;
+      topSentinelRect.top > -bottomSentinelRect.height * 0.03;
     const scrollingToNextChapter =
-      nextContent && nextContentRect.top - bottomSentinelRect.height * 0.1 < 0;
+      nextContent &&
+      nextContentRect.top - bottomSentinelRect.height <
+        bottomSentinelRect.height * 0.03;
 
     if (scrollingToPreviousChapter) {
       return setProgress(Math.max(0, spineIndex - 1), 0.999999);
@@ -149,7 +154,7 @@ export const ContinuousScrollView = ({
       if (forceFocus?.type === "element") {
         handleFocusElement(forceFocus);
       } else {
-        scrollToPercent(partProgress);
+        scrollToPercent(partProgress, forceFocus?.location);
       }
       if (forceFocus?.type === "partProgress") {
         setForceFocus(null);
@@ -197,20 +202,22 @@ export const ContinuousScrollView = ({
         </Fade>
       )}
       <Box id="top-sentinel" sx={{ height: sentinelsHeight }} />
-      <Box
-        id="content"
-        className="content"
-        sx={{
-          minWidth: `${formatting.pageWidth}px`,
-          maxWidth: `${formatting.pageWidth}px`,
-          minHeight: window.innerHeight,
-        }}
-        dangerouslySetInnerHTML={{
-          __html:
-            spine?.[spineIndex ?? -1]?.element ??
-            "something went wrong...<br/> spine.current is missing",
-        }}
-      />
+      <Fade in={true} timeout={100}>
+        <Box
+          id="content"
+          className="content"
+          sx={{
+            minWidth: `${formatting.pageWidth}px`,
+            maxWidth: `${formatting.pageWidth}px`,
+            minHeight: window.innerHeight,
+          }}
+          dangerouslySetInnerHTML={{
+            __html:
+              spine?.[spineIndex ?? -1]?.element ??
+              "something went wrong...<br/> spine.current is missing",
+          }}
+        />
+      </Fade>
       <Box id="bottom-sentinel" sx={{ height: sentinelsHeight }} />
       {spineIndex + 1 < spine.length && (
         <Fade in={true} timeout={100}>
