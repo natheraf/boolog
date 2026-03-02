@@ -179,6 +179,7 @@ export const ScrollView = ({
       >
         <Box
           id="content"
+          className="content"
           sx={{
             minWidth: `${formatting.pageWidth}px`,
             maxWidth: `${formatting.pageWidth}px`,
