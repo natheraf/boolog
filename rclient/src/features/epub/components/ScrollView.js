@@ -155,6 +155,7 @@ export const ScrollView = ({
     const removeAllLinkListeners =
       attachOnClickListenersToLinkElements(handlePathHref);
     return () => {
+      clearTimeout(timeOutToSetProgress.current);
       clearTimeout(timeoutId);
       removeAllLinkListeners();
       epubBody.removeEventListener("scroll", onScroll);
