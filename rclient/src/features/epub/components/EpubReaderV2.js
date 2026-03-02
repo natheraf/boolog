@@ -23,6 +23,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     part: epubObject.progress.part,
   });
   const [view, setView] = React.useState(null);
+  /**
+   * when swapping to scroll at the start of a chapter, continuous scroll will scroll all the way up to the top sentinel. this was a workaround. look: ContinuousScrollView:32
+   * @deprecated
+   * @param {string} value
+   */
   const setViewHelper = (value) => {
     setView(value);
     if (value === "scroll" && progress.part === 0) {
@@ -111,7 +116,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           epubObject={epubObject}
           handleClose={handleClose}
           view={view}
-          setView={setViewHelper}
+          setView={setView}
           formatting={formatting}
           setFormatting={setFormatting}
         />

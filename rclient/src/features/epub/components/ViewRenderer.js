@@ -23,7 +23,7 @@ export const ViewRenderer = ({
   const viewMap = new Map([
     [
       "scroll",
-      <ContinuousScrollView
+      <ScrollView
         key={spineIndex}
         epubObject={epubObject}
         spineIndex={spineIndex}
