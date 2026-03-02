@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Box, Slide } from "@mui/material";
+import { Box, Slide, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { getEpubValueFromPath } from "../epubUtils";
 
@@ -59,11 +59,15 @@ export const ScrollView = ({
     }
 
     timeOutToSetProgress.current = setTimeout(() => {
-      if (contentRect.top > 0) {
-        setProgress(spineIndex, 0);
-        return;
-      }
-      setProgress(spineIndex, -contentRect.top / contentRect.height);
+      const appBar = document.getElementById("appBar");
+      const isAppBarHiding = appBar.style.visibility === "hidden";
+      const appBarHeight =
+        appBar.getBoundingClientRect().height * +!isAppBarHiding;
+      const includeAppBarHeight = -contentRect.top + appBarHeight;
+      const percentage = includeAppBarHeight / contentRect.height;
+      const avoidNegatives = Math.max(0, percentage);
+      const avoidOne = Math.min(0.999999, avoidNegatives);
+      setProgress(spineIndex, avoidOne);
     }, 500);
   };
 
@@ -150,7 +154,6 @@ export const ScrollView = ({
     }, 500);
     const removeAllLinkListeners =
       attachOnClickListenersToLinkElements(handlePathHref);
-    attachOnClickListenersToLinkElements();
     return () => {
       clearTimeout(timeoutId);
       removeAllLinkListeners();
@@ -159,11 +162,11 @@ export const ScrollView = ({
   }, []);
 
   return (
-    <Box
+    <Stack
       id="scroll-view"
+      alignItems={"center"}
       sx={{
         overflow: "hidden",
-        justifyItems: "center",
         backgroundColor: formatting.backgroundColor,
       }}
     >
@@ -187,7 +190,7 @@ export const ScrollView = ({
         />
       </Slide>
       <Box sx={{ height: sentinelsHeight }} />
-    </Box>
+    </Stack>
   );
 };
 
