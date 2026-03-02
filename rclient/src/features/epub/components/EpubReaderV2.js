@@ -10,6 +10,9 @@ import { getStateValue } from "../../../api/IndexedDB/State";
 import { waitForElement } from "../domUtils";
 import { useTheme } from "@emotion/react";
 
+let historyVar = [];
+let historyIndexVar = 0;
+
 /**
  * Main wrapper for epub reader v2. Epub state manager.
  * @param {*} param0
@@ -22,6 +25,13 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     spine: epubObject.progress.spine,
     part: epubObject.progress.part,
   });
+  const [history, setHistory] = React.useState([
+    {
+      spine: epubObject.progress.spine,
+      part: epubObject.progress.part,
+    },
+  ]);
+  const [historyIndex, setHistoryIndex] = React.useState(0);
   const [view, setView] = React.useState(null);
   /**
    * when swapping to scroll at the start of a chapter, continuous scroll will scroll all the way up to the top sentinel. this was a workaround. look: ContinuousScrollView:32
@@ -53,13 +63,57 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     setOpenEpubReader(false);
   };
 
-  const setProgressHelper = (spine, part) => {
+  const handleHistoryChange = (spine, part, keepForwardHistory) => {
+    if (keepForwardHistory) {
+      setForceFocus({ type: "partProgress" });
+    }
+    const newHistoryEntryIsNotDuplicateOfPrevious =
+      historyVar[historyIndexVar]?.spine !== spine ||
+      historyVar[historyIndexVar]?.part !== part;
+    if (
+      keepForwardHistory !== true &&
+      newHistoryEntryIsNotDuplicateOfPrevious
+    ) {
+      const newHistoryArray = [
+        ...historyVar.slice(0, historyIndex + 1),
+        { spine, part },
+      ];
+      historyVar = newHistoryArray;
+      setHistory(newHistoryArray);
+      historyIndexVar = newHistoryArray.length - 1;
+      setHistoryIndex(historyIndexVar);
+    }
+  };
+
+  // const handleHistoryChange = (spine, part, keepForwardHistory) => {
+  //   if (keepForwardHistory) {
+  //     setForceFocus({ type: "partProgress" });
+  //   }
+  //   const newHistoryEntryIsNotDuplicateOfPrevious =
+  //     history[historyIndex]?.spine !== spine ||
+  //     history[historyIndex]?.part !== part;
+  //   if (
+  //     keepForwardHistory !== true &&
+  //     newHistoryEntryIsNotDuplicateOfPrevious
+  //   ) {
+  //     const newHistoryArray = [
+  //       ...history.slice(0, historyIndex + 1),
+  //       { spine, part },
+  //     ];
+  //     setHistory(newHistoryArray);
+  //     setHistoryIndex(newHistoryArray.length - 1);
+  //     console.log(newHistoryArray, newHistoryArray.length - 1);
+  //   }
+  // };
+
+  const setProgressHelper = (spine, part, keepForwardHistory) => {
     console.log(spine, part);
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
     prepareSpineIndex(spine);
     setForceFocus(null);
     setProgress({ spine, part });
+    handleHistoryChange(spine, part, keepForwardHistory);
     clearTimeout(timeOutToSetProgress.current);
     timeOutToSetProgress.current = setTimeout(() => {
       updateEpubDataInDotNotation({
@@ -90,6 +144,13 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
 
   React.useEffect(() => {
+    historyVar = [
+      {
+        spine: epubObject.progress.spine,
+        part: epubObject.progress.part,
+      },
+    ];
+    historyIndexVar = 0;
     prepareSpineIndex(progress.spine);
     getStateValue("epubView").then(setView);
     return () => {
@@ -104,63 +165,69 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
     >
-      <Box
-        sx={{
-          height: window.innerHeight,
-          display: "flex",
-          flexFlow: "column",
-        }}
-      >
-        <HeaderV2
-          sx={{ flex: "0 1 auto" }}
-          epubObject={epubObject}
-          handleClose={handleClose}
-          view={view}
-          setView={setView}
-          formatting={formatting}
-          setFormatting={setFormatting}
-        />
+      {view && (
         <Box
-          id="epub-body"
           sx={{
-            backgroundColor: formatting.backgroundColors,
-            flex: "1 1 auto",
-            overflowY: "auto",
-            width: "100%",
-            scrollbarColor: `${theme.palette.text.disabled} ${theme.palette.background.paper}`,
-            scrollbarWidth: "thin",
+            height: window.innerHeight,
+            display: "flex",
+            flexFlow: "column",
           }}
-          tabIndex={0}
         >
-          {(progress.spine === 0 ||
-            preparedSpineIndexes.includes(progress.spine - 1)) &&
-          preparedSpineIndexes.includes(progress.spine) &&
-          (progress.spine + 1 === spine.length ||
-            preparedSpineIndexes.includes(progress.spine + 1)) ? (
-            <ViewRenderer
-              epubObject={epubObject}
-              spineIndex={progress.spine}
-              partProgress={progress.part}
-              forceFocus={forceFocus}
-              setForceFocus={setForceFocus}
-              formatting={formatting}
-              setProgress={setProgressHelper}
-              view={view}
-            />
-          ) : (
-            <Stack
-              sx={{
-                width: "100%",
-                height: "100%",
-              }}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <CircularProgress />
-            </Stack>
-          )}
+          <HeaderV2
+            sx={{ flex: "0 1 auto" }}
+            epubObject={epubObject}
+            handleClose={handleClose}
+            view={view}
+            setView={setView}
+            formatting={formatting}
+            setFormatting={setFormatting}
+            history={history}
+            historyIndex={historyIndex}
+            setHistoryIndex={setHistoryIndex}
+            setProgress={setProgressHelper}
+          />
+          <Box
+            id="epub-body"
+            sx={{
+              backgroundColor: formatting.backgroundColors,
+              flex: "1 1 auto",
+              overflowY: "auto",
+              width: "100%",
+              scrollbarColor: `${theme.palette.text.disabled} ${theme.palette.background.paper}`,
+              scrollbarWidth: "thin",
+            }}
+            tabIndex={0}
+          >
+            {(progress.spine === 0 ||
+              preparedSpineIndexes.includes(progress.spine - 1)) &&
+            preparedSpineIndexes.includes(progress.spine) &&
+            (progress.spine + 1 === spine.length ||
+              preparedSpineIndexes.includes(progress.spine + 1)) ? (
+              <ViewRenderer
+                epubObject={epubObject}
+                spineIndex={progress.spine}
+                partProgress={progress.part}
+                forceFocus={forceFocus}
+                setForceFocus={setForceFocus}
+                formatting={formatting}
+                setProgress={setProgressHelper}
+                view={view}
+              />
+            ) : (
+              <Stack
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress />
+              </Stack>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
     </Dialog>
   );
 };
