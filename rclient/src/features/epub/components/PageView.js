@@ -134,6 +134,18 @@ export const PageView = ({
     setForceFocus(null);
   };
 
+  /**
+   * Non-react elements need to refresh their functions attached on their listeners with updated react state.
+   * This is for history management
+   */
+  // React.useEffect(() => {
+  //   const removeAllLinkListeners =
+  //     attachOnClickListenersToLinkElements(handlePathHref);
+  //   return () => {
+  //     removeAllLinkListeners();
+  //   };
+  // });
+
   React.useEffect(() => {
     setTimeout(() => {
       // setTimeout executes after images are rendered.
@@ -145,13 +157,13 @@ export const PageView = ({
       if (forceFocus?.type === "partProgress") {
         setForceFocus(null);
       }
+      const removeAllLinkListeners =
+        attachOnClickListenersToLinkElements(handlePathHref);
+      return () => {
+        removeAllLinkListeners();
+      };
     });
-    const removeAllLinkListeners =
-      attachOnClickListenersToLinkElements(handlePathHref);
-    return () => {
-      removeAllLinkListeners();
-    };
-  }, []);
+  }, [forceFocus]);
 
   return (
     <SideButtons

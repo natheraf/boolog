@@ -17,6 +17,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
 import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
 import { EpubFormatterV2 } from "./EpubFormatterV2";
+import { HistoryButtons } from "./HistoryButtons";
 
 export const HeaderV2 = ({
   epubObject,
@@ -25,6 +26,10 @@ export const HeaderV2 = ({
   setView,
   formatting,
   setFormatting,
+  history,
+  historyIndex,
+  setHistoryIndex,
+  setProgress,
 }) => {
   const { title, subtitle } = {};
   const appBarHeight = 48;
@@ -164,6 +169,12 @@ export const HeaderV2 = ({
             ) : null}
           </Stack>
           <Stack spacing={1} direction={"row"}>
+            <HistoryButtons
+              history={history}
+              historyIndex={historyIndex}
+              setHistoryIndex={setHistoryIndex}
+              setProgress={setProgress}
+            />
             <FormControlLabel
               control={<Switch defaultChecked onChange={onChangeView} />}
             />
@@ -224,8 +235,14 @@ export const HeaderV2 = ({
 };
 
 HeaderV2.propTypes = {
+  epubObject: PropTypes.object.isRequired,
   handleClose: PropTypes.func.isRequired,
+  view: PropTypes.string.isRequired,
   setView: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
+  history: PropTypes.array.isRequired,
+  historyIndex: PropTypes.number.isRequired,
+  setHistoryIndex: PropTypes.func.isRequired,
+  setProgress: PropTypes.func.isRequired,
 };
