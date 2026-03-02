@@ -142,7 +142,7 @@ export const ScrollView = ({
       if (forceFocus?.type === "element") {
         handleFocusElement(forceFocus);
       } else {
-        scrollToPercent(partProgress, forceFocus?.location);
+        scrollToPercent(partProgress);
       }
       if (forceFocus?.type === "partProgress") {
         setForceFocus(null);
@@ -160,7 +160,7 @@ export const ScrollView = ({
       removeAllLinkListeners();
       epubBody.removeEventListener("scroll", onScroll);
     };
-  }, []);
+  }, [forceFocus]);
 
   return (
     <Stack
