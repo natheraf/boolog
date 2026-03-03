@@ -29,17 +29,14 @@ export const HistoryButtons = ({
 
   return (
     <Stack direction={"row"}>
-      <Tooltip title={"Back (q)"} disableHoverListener={historyIndex <= 0}>
+      <Tooltip title={"Back (q)"}>
         <span>
           <IconButton onClick={handleBackOnClick} disabled={historyIndex <= 0}>
             <ArrowBackIcon />
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip
-        title={"Forward (e)"}
-        disableHoverListener={historyIndex >= history.length - 1}
-      >
+      <Tooltip title={"Forward (e)"}>
         <span>
           <IconButton
             onClick={handleForwardOnClick}
