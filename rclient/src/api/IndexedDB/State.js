@@ -136,7 +136,7 @@ const getValueHelper = (db, key) =>
     const request = objectStore.get(key);
     request.onsuccess = (event) => {
       const result = event.target.result;
-      resolve(result.value);
+      resolve(result?.value);
     };
     request.onerror = (error) => reject(new Error(error));
   });
