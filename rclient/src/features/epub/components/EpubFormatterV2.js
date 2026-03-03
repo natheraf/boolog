@@ -1,6 +1,24 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
+import { getGoogleFonts } from "../../../api/GoogleAPI";
+import {
+  Box,
+  IconButton,
+  Menu,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import TextFormatIcon from "@mui/icons-material/TextFormat";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
+import CloseIcon from "@mui/icons-material/Close";
+import CloudIcon from "@mui/icons-material/Cloud";
+import { EpubFormattingPresets } from "./EpubFormattingPresets";
+import { getStateValue } from "../../../api/IndexedDB/State";
+import { putHighlightStyles } from "../formattingUtils";
 
 /**
  * ReaderFormat Rewritten
@@ -31,102 +49,26 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     );
   };
 
-  const putFormattingStyleElement = (forceFormatting) => {
-    const format = structuredClone(forceFormatting ?? formatting);
+  const googleFonts = React.useRef(null);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const openFormatting = Boolean(anchorEl);
 
-    const remoteFont = format.fontFamily.kind === "webfonts#webfont";
-    const linkId = "webfont-google";
-    if (remoteFont) {
-      const linkElement =
-        document.querySelector(`#${linkId}`) ?? document.createElement("link");
-      linkElement.id = linkId;
-      linkElement.rel = "stylesheet";
-      linkElement.href = `https://fonts.googleapis.com/css?family=${encodeURIComponent(
-        format.fontFamily.family
-      )}`;
-      document.head.insertAdjacentElement("afterbegin", linkElement);
-    } else {
-      document.getElementById(linkId)?.remove();
-    }
-
-    if (format.pageColor === "Standard") {
-      format.pageColor = theme.palette.background.paper;
-    }
-
-    if (format.textColor === "Standard") {
-      format.textColor = theme.palette.text.primary;
-    }
-
-    const fontFamily = remoteFont
-      ? `"${format.fontFamily.family}"`
-      : format.fontFamily.value;
-    const userFormattingStyle = `
-      ${
-        format.fontSize === "Original"
-          ? ""
-          : `font-size: ${format.fontSize}rem;`
-      }
-      ${
-        format.lineHeight === "Original"
-          ? ""
-          : `line-height: ${format.lineHeight / 10} !important;`
-      }
-      ${
-        fontFamily === "inherit" ? "" : `font-family: ${fontFamily} !important;`
-      }
-      ${
-        format.textAlign.value === "inherit"
-          ? ""
-          : `text-align: ${format.textAlign.value} !important;`
-      }
-      ${
-        format.fontWeight === "Original"
-          ? ""
-          : `font-weight: ${format.fontWeight} !important;`
-      }
-      ${
-        format.textColor === "Original"
-          ? ""
-          : `color: ${format.textColor} !important;`
-      }
-      ${
-        format.pageColor === "Original"
-          ? ""
-          : `background-color: ${format.pageColor} !important;`
-      }
-      ${
-        format.textIndent === "Original"
-          ? ""
-          : `text-indent: ${format.textIndent}rem !important;`
-      }
-    `;
-    const styleId = `epub-css-user-formatting`;
-    const styleElement =
-      document.querySelector(`#${styleId}`) ?? document.createElement("style");
-    styleElement.id = styleId;
-    styleElement.innerHTML = `#content *, .content * {\n${userFormattingStyle}\n}`;
-    document.head.insertAdjacentElement("beforeend", styleElement);
-    return styleId;
+  const handleOpenFormatting = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseFormatting = (event) => {
+    setAnchorEl(null);
   };
 
-  const putHighlightStyles = () => {
-    const highlightStyles = `
-      .temporary-mark, .mark {
-        all: unset !important;
-        font-size: inherit !important; 
-        font-weight: inherit !important;
-      }
-    `;
-    const styleId = `epub-css-highlight-styles`;
-    const styleElement =
-      document.querySelector(`#${styleId}`) ?? document.createElement("style");
-    styleElement.id = styleId;
-    styleElement.innerHTML = `#content *, .content * {\n${highlightStyles}\n}`;
-    document.head.insertAdjacentElement("beforeend", styleElement);
-    return styleId;
-  };
+  const [epubPreset, setEpubPreset] = React.useState(null);
 
   React.useEffect(() => {
+    getGoogleFonts().then((obj) => {
+      googleFonts.current = obj.items;
+    });
+    getStateValue("epubPreset").then((value) => {
+      setEpubPreset(value ?? theme.palette.mode);
+    });
     for (const [key, value] of Object.entries(epubObject.css)) {
       const styleElement = document.createElement("style");
       styleElement.id = `epub-css-${key}`;
@@ -142,6 +84,49 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
       window.removeEventListener("resize", updateWindowSize);
     };
   }, []);
+
+  return (
+    <Box>
+      <Tooltip title="Format (f)">
+        <IconButton onClick={handleOpenFormatting}>
+          <TextFormatIcon />
+        </IconButton>
+      </Tooltip>
+      <Menu
+        anchorEl={anchorEl}
+        open={openFormatting}
+        onClose={handleCloseFormatting}
+      >
+        <Stack
+          spacing={2}
+          alignItems={"center"}
+          sx={{ width: "300px", padding: 2 }}
+        >
+          <Stack
+            direction={"row"}
+            alignItems={"center"}
+            justifyContent={"space-between"}
+            sx={{ width: "100%" }}
+          >
+            <Typography noWrap variant="h5">
+              {"Formatting"}
+            </Typography>
+            <Tooltip title={"Close (esc)"}>
+              <IconButton onClick={handleCloseFormatting} size="small">
+                <CloseIcon />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+          <Stack spacing={2} alignItems={"center"}>
+            <EpubFormattingPresets
+              formatting={formatting}
+              setFormatting={setFormatting}
+            />
+          </Stack>
+        </Stack>
+      </Menu>
+    </Box>
+  );
 };
 
 EpubFormatterV2.propTypes = {
