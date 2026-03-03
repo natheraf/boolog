@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { IconButton, Stack } from "@mui/material";
+import { IconButton, Stack, Tooltip } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
@@ -29,15 +29,26 @@ export const HistoryButtons = ({
 
   return (
     <Stack direction={"row"}>
-      <IconButton onClick={handleBackOnClick} disabled={historyIndex <= 0}>
-        <ArrowBackIcon />
-      </IconButton>
-      <IconButton
-        onClick={handleForwardOnClick}
-        disabled={historyIndex >= history.length - 1}
+      <Tooltip title={"Back (q)"} disableHoverListener={historyIndex <= 0}>
+        <span>
+          <IconButton onClick={handleBackOnClick} disabled={historyIndex <= 0}>
+            <ArrowBackIcon />
+          </IconButton>
+        </span>
+      </Tooltip>
+      <Tooltip
+        title={"Forward (e)"}
+        disableHoverListener={historyIndex >= history.length - 1}
       >
-        <ArrowForwardIcon />
-      </IconButton>
+        <span>
+          <IconButton
+            onClick={handleForwardOnClick}
+            disabled={historyIndex >= history.length - 1}
+          >
+            <ArrowForwardIcon />
+          </IconButton>
+        </span>
+      </Tooltip>
     </Stack>
   );
 };
