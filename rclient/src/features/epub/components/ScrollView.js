@@ -189,6 +189,7 @@ export const ScrollView = ({
           sx={{
             minWidth: `${formatting.pageWidth}px`,
             maxWidth: `${formatting.pageWidth}px`,
+            minHeight: window.innerHeight,
           }}
           dangerouslySetInnerHTML={{
             __html:
