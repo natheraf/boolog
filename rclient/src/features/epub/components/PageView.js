@@ -138,13 +138,13 @@ export const PageView = ({
    * Non-react elements need to refresh their functions attached on their listeners with updated react state.
    * This is for history management
    */
-  // React.useEffect(() => {
-  //   const removeAllLinkListeners =
-  //     attachOnClickListenersToLinkElements(handlePathHref);
-  //   return () => {
-  //     removeAllLinkListeners();
-  //   };
-  // });
+  React.useEffect(() => {
+    const removeAllLinkListeners =
+      attachOnClickListenersToLinkElements(handlePathHref);
+    return () => {
+      removeAllLinkListeners();
+    };
+  });
 
   React.useEffect(() => {
     setTimeout(() => {

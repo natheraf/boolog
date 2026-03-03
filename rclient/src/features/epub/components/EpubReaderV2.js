@@ -10,9 +10,6 @@ import { getStateValue } from "../../../api/IndexedDB/State";
 import { waitForElement } from "../domUtils";
 import { useTheme } from "@emotion/react";
 
-let historyVar = [];
-let historyIndexVar = 0;
-
 /**
  * Main wrapper for epub reader v2. Epub state manager.
  * @param {*} param0
@@ -68,43 +65,21 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       setForceFocus({ type: "partProgress" });
     }
     const newHistoryEntryIsNotDuplicateOfPrevious =
-      historyVar[historyIndexVar]?.spine !== spine ||
-      historyVar[historyIndexVar]?.part !== part;
+      history[historyIndex]?.spine !== spine ||
+      history[historyIndex]?.part !== part;
     if (
       keepForwardHistory !== true &&
       newHistoryEntryIsNotDuplicateOfPrevious
     ) {
       const newHistoryArray = [
-        ...historyVar.slice(0, historyIndex + 1),
+        ...history.slice(0, historyIndex + 1),
         { spine, part },
       ];
-      historyVar = newHistoryArray;
       setHistory(newHistoryArray);
-      historyIndexVar = newHistoryArray.length - 1;
-      setHistoryIndex(historyIndexVar);
+      setHistoryIndex(newHistoryArray.length - 1);
+      console.log(newHistoryArray, newHistoryArray.length - 1);
     }
   };
-
-  // const handleHistoryChange = (spine, part, keepForwardHistory) => {
-  //   if (keepForwardHistory) {
-  //     setForceFocus({ type: "partProgress" });
-  //   }
-  //   const newHistoryEntryIsNotDuplicateOfPrevious =
-  //     history[historyIndex]?.spine !== spine ||
-  //     history[historyIndex]?.part !== part;
-  //   if (
-  //     keepForwardHistory !== true &&
-  //     newHistoryEntryIsNotDuplicateOfPrevious
-  //   ) {
-  //     const newHistoryArray = [
-  //       ...history.slice(0, historyIndex + 1),
-  //       { spine, part },
-  //     ];
-  //     setHistory(newHistoryArray);
-  //     setHistoryIndex(newHistoryArray.length - 1);
-  //     console.log(newHistoryArray, newHistoryArray.length - 1);
-  //   }
-  // };
 
   const setProgressHelper = (spine, part, keepForwardHistory) => {
     console.log(spine, part);
@@ -144,13 +119,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
 
   React.useEffect(() => {
-    historyVar = [
-      {
-        spine: epubObject.progress.spine,
-        part: epubObject.progress.part,
-      },
-    ];
-    historyIndexVar = 0;
     prepareSpineIndex(progress.spine);
     getStateValue("epubView").then(setView);
     return () => {

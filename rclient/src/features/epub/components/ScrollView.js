@@ -24,14 +24,14 @@ export const ScrollView = ({
       .getBoundingClientRect().height;
     const targetScrollTop = contentHeight * percentage;
     const includeSentinel = targetScrollTop + sentinelsHeight;
-    const keepScrollAboveBottomSentinel =
+    const showABitOfBottomSentinel =
       percentage === 0.999999
-        ? includeSentinel - sentinelsHeight * 0.5
+        ? includeSentinel - sentinelsHeight * 0.7
         : includeSentinel;
     const showABitOfTopSentinel =
       percentage === 0
-        ? includeSentinel - sentinelsHeight * 0.5
-        : keepScrollAboveBottomSentinel;
+        ? includeSentinel - sentinelsHeight * 0.3
+        : showABitOfBottomSentinel;
     return epubBody.scroll({
       top: showABitOfTopSentinel,
     });
@@ -136,6 +136,23 @@ export const ScrollView = ({
     setForceFocus(null);
   };
 
+  /**
+   * Keep progress react state updated when scrolling for history management
+   */
+  React.useEffect(() => {
+    const epubBody = document.getElementById("epub-body");
+    const timeoutId = setTimeout(() => {
+      epubBody.addEventListener("scroll", onScroll);
+    }, 300);
+    const removeAllLinkListeners =
+      attachOnClickListenersToLinkElements(handlePathHref);
+    return () => {
+      clearTimeout(timeoutId);
+      epubBody.removeEventListener("scroll", onScroll);
+      removeAllLinkListeners();
+    };
+  }, [partProgress]);
+
   React.useEffect(() => {
     setTimeout(() => {
       // setTimeout executes after images are rendered.
@@ -148,17 +165,8 @@ export const ScrollView = ({
         setForceFocus(null);
       }
     });
-    const epubBody = document.getElementById("epub-body");
-    const timeoutId = setTimeout(() => {
-      epubBody.addEventListener("scroll", onScroll);
-    }, 500);
-    const removeAllLinkListeners =
-      attachOnClickListenersToLinkElements(handlePathHref);
     return () => {
       clearTimeout(timeOutToSetProgress.current);
-      clearTimeout(timeoutId);
-      removeAllLinkListeners();
-      epubBody.removeEventListener("scroll", onScroll);
     };
   }, [forceFocus]);
 
