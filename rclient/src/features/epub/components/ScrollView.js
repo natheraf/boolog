@@ -149,6 +149,7 @@ export const ScrollView = ({
     return () => {
       clearTimeout(timeoutId);
       epubBody.removeEventListener("scroll", onScroll);
+      clearTimeout(timeOutToSetProgress.current);
       removeAllLinkListeners();
     };
   }, [partProgress]);
@@ -165,9 +166,6 @@ export const ScrollView = ({
         setForceFocus(null);
       }
     });
-    return () => {
-      clearTimeout(timeOutToSetProgress.current);
-    };
   }, [forceFocus]);
 
   return (
