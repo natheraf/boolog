@@ -16,6 +16,11 @@ export const ScrollView = ({
   const spine = epubObject.spine;
   const sentinelsHeight = window.innerHeight;
   const spineIndexMap = epubObject.spineIndexMap;
+  const highlightBorderSafety = 25;
+  const pageWidth = Math.min(
+    formatting.pageWidth,
+    window.innerWidth - highlightBorderSafety
+  );
 
   const scrollToPercent = (percentage) => {
     const epubBody = document.getElementById("epub-body");
@@ -193,8 +198,8 @@ export const ScrollView = ({
           id="content"
           className="content"
           sx={{
-            minWidth: `${formatting.pageWidth}px`,
-            maxWidth: `${formatting.pageWidth}px`,
+            minWidth: `${pageWidth}px`,
+            maxWidth: `${pageWidth}px`,
             minHeight: window.innerHeight,
           }}
           dangerouslySetInnerHTML={{

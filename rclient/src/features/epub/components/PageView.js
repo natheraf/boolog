@@ -20,17 +20,19 @@ export const PageView = ({
   const spine = epubObject.spine;
   const spineIndexMap = epubObject.spineIndexMap;
   const columnGap = 1;
+  const highlightBorderSafety = 25;
+  const pageWidth = Math.min(
+    formatting.pageWidth,
+    window.innerWidth - highlightBorderSafety
+  );
 
   const getTotalPages = () =>
     document.getElementById("content")
-      ? Math.floor(
-          document.getElementById("content").scrollWidth / formatting.pageWidth
-        ) +
+      ? Math.floor(document.getElementById("content").scrollWidth / pageWidth) +
         +(
           formatting.pagesShown > 1 &&
-          (document.getElementById("content").scrollWidth %
-            formatting.pageWidth) /
-            formatting.pageWidth >
+          (document.getElementById("content").scrollWidth % pageWidth) /
+            pageWidth >
             1 / formatting.pagesShown
         )
       : 0;
@@ -174,8 +176,8 @@ export const PageView = ({
       <Box
         sx={{
           height: "100%",
-          minWidth: `${formatting.pageWidth}px`,
-          maxWidth: `${formatting.pageWidth}px`,
+          minWidth: `${pageWidth}px`,
+          maxWidth: `${pageWidth}px`,
           overflow: "visible",
         }}
       >
@@ -188,10 +190,10 @@ export const PageView = ({
             columnFill: "balance",
             columnGap: `${columnGap}px`,
             columnWidth: `${
-              (formatting.pageWidth - columnGap * formatting.pagesShown) /
+              (pageWidth - columnGap * formatting.pagesShown) /
               formatting.pagesShown
             }px`,
-            transform: `translate(-${currentPage * (formatting.pageWidth + columnGap)}px);`,
+            transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
           }}
           dangerouslySetInnerHTML={{
             __html:

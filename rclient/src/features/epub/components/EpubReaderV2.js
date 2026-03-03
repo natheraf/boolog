@@ -43,17 +43,9 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
   const [forceFocus, setForceFocus] = React.useState(null);
 
-  const highlightBorderSafety = 25;
-  const [formatting, setFormatting] = React.useState({
-    pagesShown: 1,
-    pageWidth: Math.min(700, window.innerWidth - highlightBorderSafety),
-    pageHeight: window.innerHeight,
-    columnGap: 1,
-    backgroundColors: theme.palette.background.default,
-    showDividers: true,
-    opacityOfSideElements: 0.5,
-    showArrows: true,
-  });
+  const [formatting, setFormatting] = React.useState(
+    epubObject.formatting.value
+  );
 
   console.log(epubObject);
   const handleClose = () => {
