@@ -23,7 +23,9 @@ export const ScrollView = ({
       .getElementById("content")
       .getBoundingClientRect().height;
     const targetScrollTop = contentHeight * percentage;
-    const includeSentinel = targetScrollTop + sentinelsHeight;
+    const topSentinelExists = spineIndex > 0;
+    const includeSentinel =
+      targetScrollTop + sentinelsHeight * +topSentinelExists;
     const showABitOfBottomSentinel =
       percentage === 0.999999
         ? includeSentinel - sentinelsHeight * 0.7
@@ -43,17 +45,21 @@ export const ScrollView = ({
     const content = document.getElementById("content");
     const contentRect = content.getBoundingClientRect();
     const goPreviousChapter = event.target.scrollTop <= 5;
+    const onFirstChapter = spineIndex === 0;
     const goNextChapter =
       contentRect.height +
-        sentinelsHeight * 2 -
+        sentinelsHeight * (2 - +onFirstChapter) -
         (event.target.scrollTop + window.innerHeight) <
       5;
 
-    if (goPreviousChapter || goNextChapter) {
+    if (
+      (goPreviousChapter && spineIndex !== 0) ||
+      (goNextChapter && spineIndex !== spine.length - 1)
+    ) {
       if (goPreviousChapter) {
-        setProgress(Math.max(0, spineIndex - 1), 0.999999);
+        setProgress(spineIndex - 1, 0.999999);
       } else if (goNextChapter) {
-        setProgress(Math.min(spineIndex + 1, spine.length - 1), 0);
+        setProgress(spineIndex + 1, 0);
       }
       return;
     }
@@ -177,7 +183,7 @@ export const ScrollView = ({
         backgroundColor: formatting.backgroundColor,
       }}
     >
-      <Box sx={{ height: sentinelsHeight }} />
+      {spineIndex > 0 && <Box sx={{ height: sentinelsHeight }} />}
       <Slide
         in={true}
         timeout={200}
@@ -198,7 +204,9 @@ export const ScrollView = ({
           }}
         />
       </Slide>
-      <Box sx={{ height: sentinelsHeight }} />
+      {spineIndex < spine.length - 1 && (
+        <Box sx={{ height: sentinelsHeight }} />
+      )}
     </Stack>
   );
 };
