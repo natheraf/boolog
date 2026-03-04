@@ -163,39 +163,27 @@ export const BookLog = () => {
       Object.keys(formatting).forEach(
         (key) => key.startsWith("_") && delete formatting[key]
       );
-      formatting.pageWidth = Math.min(window.innerWidth - 25, 700);
-      const standardFormatting = Object.assign(
-        formatting,
-        structuredClone(defaultStandardFormatting)
+      const highlightBorderSafety = 25;
+      formatting.pageWidth = Math.min(
+        window.innerWidth - highlightBorderSafety,
+        700
       );
       getEpubDataWithDefault({
-        key: "epubStandardFormatting",
-        formatting: standardFormatting,
-      }).then((standardFormatting) => {
-        data.epubObject.standardFormatting = standardFormatting;
-        getEpubDataWithDefault({
-          key: "epubGlobalFormatting",
-          formatting,
+        key: "epubGlobalFormatting",
+        formatting,
+      }).then((globalFormatting) => {
+        console.log(globalFormatting);
+        getEpubDataWithDefaultInDotNotation(id, {
+          key: id,
+          progress: { spine: 0, part: 0 },
+          notes: {},
+          memos: {},
         }).then((res) => {
-          const globalFormatting = res.formatting;
-          getEpubDataWithDefaultInDotNotation(id, {
-            key: id,
-            formatting: {
-              useStandardFormatting: true,
-              useGlobalFormatting: true,
-              value: globalFormatting,
-            },
-            progress: { spine: 0, part: 0 },
-            notes: {},
-            memos: {},
-          }).then((res) => {
-            if (res.formatting.useGlobalFormatting) {
-              res.formatting.value = globalFormatting;
-            }
-            data.epubObject = Object.assign(data.epubObject, res);
-            setOpenEpubReader(Boolean(data.epubObject));
-            setEpub({ object: data.epubObject, entryId: id });
+          data.epubObject = Object.assign(data.epubObject, res, {
+            formatting: globalFormatting.formatting,
           });
+          setOpenEpubReader(Boolean(data.epubObject));
+          setEpub({ object: data.epubObject, entryId: id });
         });
       });
     });

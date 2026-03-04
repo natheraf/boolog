@@ -43,9 +43,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
   const [forceFocus, setForceFocus] = React.useState(null);
 
-  const [formatting, setFormatting] = React.useState(
-    epubObject.formatting.value
-  );
+  const [formatting, setFormatting] = React.useState(epubObject.formatting);
 
   console.log(epubObject);
   const handleClose = () => {
@@ -69,12 +67,10 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       ];
       setHistory(newHistoryArray);
       setHistoryIndex(newHistoryArray.length - 1);
-      console.log(newHistoryArray, newHistoryArray.length - 1);
     }
   };
 
   const setProgressHelper = (spine, part, keepForwardHistory) => {
-    console.log(spine, part);
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
     prepareSpineIndex(spine);
@@ -149,11 +145,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           <Box
             id="epub-body"
             sx={{
-              backgroundColor: formatting.backgroundColors,
+              backgroundColor: formatting.pageColor,
               flex: "1 1 auto",
               overflowY: "auto",
               width: "100%",
-              scrollbarColor: `${theme.palette.text.disabled} ${theme.palette.background.paper}`,
+              scrollbarColor: `${theme.palette.text.disabled} ${formatting.pageColor}`,
               scrollbarWidth: "thin",
             }}
             tabIndex={0}
