@@ -17,8 +17,12 @@ import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import CloseIcon from "@mui/icons-material/Close";
 import CloudIcon from "@mui/icons-material/Cloud";
 import { EpubFormattingPresets } from "./EpubFormattingPresets";
-import { getStateValue } from "../../../api/IndexedDB/State";
-import { putHighlightStyles } from "../formattingUtils";
+import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
+import {
+  putFormattingStyleElement,
+  putHighlightStyles,
+  getFormattingWithPreset,
+} from "../formattingUtils";
 
 /**
  * ReaderFormat Rewritten
@@ -60,14 +64,28 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     setAnchorEl(null);
   };
 
-  const [epubPreset, setEpubPreset] = React.useState(null);
+  const [epubPreset, setEpubPreset] = React.useState("custom");
+
+  const setFormattingHelper = (newFormatting) => {
+    setFormatting(newFormatting);
+    const id = putFormattingStyleElement(theme, newFormatting);
+    if (!stylingElementIds.current.includes(id)) {
+      stylingElementIds.current.push(id);
+    }
+  };
 
   React.useEffect(() => {
     getGoogleFonts().then((obj) => {
       googleFonts.current = obj.items;
     });
     getStateValue("epubPreset").then((value) => {
-      setEpubPreset(value ?? theme.palette.mode);
+      if (value === undefined) {
+        value = theme.palette.mode;
+        setStateValue("epubPreset", value);
+      }
+      setEpubPreset(value);
+      const formattingWithPreset = getFormattingWithPreset(value, formatting);
+      setFormattingHelper(formattingWithPreset);
     });
     for (const [key, value] of Object.entries(epubObject.css)) {
       const styleElement = document.createElement("style");
@@ -77,7 +95,6 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
       stylingElementIds.current.push(styleElement.id);
     }
     stylingElementIds.current.push(putHighlightStyles());
-    // stylingElementIds.current.push(putFormattingStyleElement());
     window.addEventListener("resize", updateWindowSize);
     return () => {
       clearEpubStyles();
@@ -120,7 +137,9 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
           <Stack spacing={2} alignItems={"center"}>
             <EpubFormattingPresets
               formatting={formatting}
-              setFormatting={setFormatting}
+              setFormatting={setFormattingHelper}
+              preset={epubPreset}
+              setPreset={setEpubPreset}
             />
           </Stack>
         </Stack>

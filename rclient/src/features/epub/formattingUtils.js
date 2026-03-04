@@ -92,3 +92,15 @@ export const putHighlightStyles = () => {
   document.head.insertAdjacentElement("beforeend", styleElement);
   return styleId;
 };
+
+const presets = new Map([
+  ["midNight", { pageColor: "black", textColor: "#ffffff90" }],
+  ["dark", { pageColor: "black", textColor: "white" }],
+  ["twilight", { pageColor: "#FDF4DC", textColor: "black" }],
+  ["light", { pageColor: "white", textColor: "black" }],
+  ["custom", {}],
+]);
+
+export const getFormattingWithPreset = (presetName, formatting) => {
+  return { ...formatting, ...presets.get(presetName) };
+};
