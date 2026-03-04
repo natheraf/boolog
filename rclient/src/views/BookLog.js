@@ -40,6 +40,7 @@ import { defaultFormatting, defaultStandardFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 import { handleSimpleRequest } from "../api/Axios";
 import { EpubReaderV2 } from "../features/epub/components/EpubReaderV2";
+import { getStateValue, setStateValue } from "../api/IndexedDB/State";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -172,18 +173,24 @@ export const BookLog = () => {
         key: "epubGlobalFormatting",
         formatting,
       }).then((globalFormatting) => {
-        console.log(globalFormatting);
         getEpubDataWithDefaultInDotNotation(id, {
           key: id,
           progress: { spine: 0, part: 0 },
           notes: {},
           memos: {},
         }).then((res) => {
-          data.epubObject = Object.assign(data.epubObject, res, {
-            formatting: globalFormatting.formatting,
+          getStateValue("epubPreset").then((formattingPreset) => {
+            if (formattingPreset === undefined) {
+              formattingPreset = theme.palette.mode;
+              setStateValue("epubPreset", formattingPreset);
+            }
+            data.epubObject = Object.assign(data.epubObject, res, {
+              formatting: globalFormatting.formatting,
+              formattingPreset,
+            });
+            setOpenEpubReader(Boolean(data.epubObject));
+            setEpub({ object: data.epubObject, entryId: id });
           });
-          setOpenEpubReader(Boolean(data.epubObject));
-          setEpub({ object: data.epubObject, entryId: id });
         });
       });
     });

@@ -90,16 +90,14 @@ export const EpubFormatterV2 = ({
       stylingElementIds.current.push(styleElement.id);
     }
     stylingElementIds.current.push(putHighlightStyles());
-    getStateValue("epubPreset").then((value) => {
-      if (value === undefined) {
-        value = theme.palette.mode;
-        setStateValue("epubPreset", value);
-      }
-      setEpubPreset(value);
-      const formattingWithPreset = getFormattingWithPreset(value, formatting);
-      setFormattingHelper(formattingWithPreset);
-      setLoadedCSS(true);
-    });
+    const initialPreset = epubObject.formattingPreset;
+    setEpubPreset(initialPreset);
+    const formattingWithPreset = getFormattingWithPreset(
+      initialPreset,
+      formatting
+    );
+    setFormattingHelper(formattingWithPreset);
+    setLoadedCSS(true);
     window.addEventListener("resize", updateWindowSize);
     return () => {
       clearEpubStyles();
