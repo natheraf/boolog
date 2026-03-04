@@ -14,6 +14,8 @@ import VerticalAlignCenterIcon from "@mui/icons-material/VerticalAlignCenter";
 import WidthNormalIcon from "@mui/icons-material/WidthNormal";
 import WidthFullIcon from "@mui/icons-material/WidthFull";
 import BookIcon from "@mui/icons-material/Book";
+import FormatBoldIcon from "@mui/icons-material/FormatBold";
+import { FormatLessBoldIcon } from "./components/FormatLessBoldIcon";
 
 export const putFormattingStyleElement = (theme, formatting) => {
   const format = structuredClone(formatting);
@@ -135,6 +137,8 @@ export const formattingNumberFields = [
     value: "fontWeight",
     endText: "abs",
     advancedOption: true,
+    decreaseIcon: FormatLessBoldIcon,
+    increaseIcon: FormatBoldIcon,
   },
   {
     title: "Page Width",
