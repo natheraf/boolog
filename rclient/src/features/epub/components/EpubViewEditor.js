@@ -1,7 +1,14 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Paper, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
-import ViewDayIcon from "@mui/icons-material/ViewDay";
+import {
+  Box,
+  Paper,
+  Stack,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
+import ViewCarouselIcon from "@mui/icons-material/ViewCarousel";
+import PanoramaVerticalIcon from "@mui/icons-material/PanoramaVertical";
 
 export const EpubViewEditor = ({ view, setView }) => {
   const handleOnChange = (_event, newView) => {
@@ -18,26 +25,39 @@ export const EpubViewEditor = ({ view, setView }) => {
         exclusive
         onChange={handleOnChange}
         aria-label="color preset"
+        orientation={"vertical"}
       >
         {[
           {
             value: "page",
             ariaLabel: "page view",
             title: "Page View",
-            icon: <ViewDayIcon />,
+            label: "Pagination",
+            icon: ViewCarouselIcon,
           },
           {
             value: "scroll",
             ariaLabel: "scroll view",
             title: "Scroll View",
-            icon: <ViewDayIcon sx={{ transform: "rotate(90deg)" }} />,
+            label: "Endless Scroll",
+            icon: PanoramaVerticalIcon,
           },
         ].map((obj) => (
-          <Tooltip key={obj.value} title={obj.title}>
-            <ToggleButton value={obj.value} aria-label={obj.ariaLabel}>
-              {obj.icon}
-            </ToggleButton>
-          </Tooltip>
+          <ToggleButton
+            key={obj.value}
+            value={obj.value}
+            aria-label={obj.ariaLabel}
+          >
+            <Stack
+              direction={"row"}
+              spacing={5}
+              justifyContent={"space-between"}
+              sx={{ width: "100%" }}
+            >
+              <Box>{obj.label}</Box>
+              {<obj.icon />}
+            </Stack>
+          </ToggleButton>
         ))}
       </ToggleButtonGroup>
     </Paper>
