@@ -20,6 +20,7 @@ import {
 } from "../formattingUtils";
 import { EpubFormatEditor } from "./EpubFormatEditor";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
+import { EpubViewEditor } from "./EpubViewEditor";
 
 /**
  * ReaderFormat Rewritten
@@ -147,6 +148,7 @@ export const EpubFormatterV2 = ({
               preset={epubPreset}
               setPreset={setEpubPreset}
             />
+            <EpubViewEditor view={view} setView={setView} />
             <EpubFormatEditor
               formatting={formatting}
               setFormatting={setFormattingHelper}
