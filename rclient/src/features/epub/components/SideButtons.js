@@ -9,6 +9,9 @@ export const SideButtons = ({
   rightButtonOnClick,
   formatting,
 }) => {
+  const arrowVisibility = formatting.showArrows ? "visible" : "hidden";
+  const dividerVisibility = formatting.showDividers ? "visible" : "hidden";
+
   return (
     <Stack
       direction="row"
@@ -44,7 +47,7 @@ export const SideButtons = ({
             position: "absolute",
             top: 0,
             right: 0,
-            visibility: formatting.showDividers,
+            visibility: dividerVisibility,
             opacity: formatting.opacityOfSideElements,
           }}
         />
@@ -54,7 +57,7 @@ export const SideButtons = ({
             left: 0,
             top: "50%",
             margin: "auto",
-            visibility: formatting.showArrows,
+            visibility: arrowVisibility,
             opacity: formatting.opacityOfSideElements,
           }}
           htmlColor={"gray"}
@@ -86,7 +89,7 @@ export const SideButtons = ({
             position: "absolute",
             top: 0,
             left: 0,
-            visibility: formatting.showDividers,
+            visibility: dividerVisibility,
             opacity: formatting.opacityOfSideElements,
           }}
         />
@@ -96,7 +99,7 @@ export const SideButtons = ({
             right: 0,
             top: "50%",
             margin: "auto",
-            visibility: formatting.showArrows,
+            visibility: arrowVisibility,
             opacity: formatting.opacityOfSideElements,
           }}
           htmlColor={"gray"}
