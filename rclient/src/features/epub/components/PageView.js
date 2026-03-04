@@ -206,7 +206,7 @@ export const PageView = ({
   );
 };
 
-PageView.propType = {
+PageView.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,

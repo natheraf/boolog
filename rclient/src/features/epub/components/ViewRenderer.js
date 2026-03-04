@@ -54,7 +54,7 @@ export const ViewRenderer = ({
   return (view && viewMap.get(view)) ?? null;
 };
 
-ViewRenderer.propType = {
+ViewRenderer.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
