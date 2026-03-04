@@ -165,7 +165,7 @@ export const PageView = ({
         removeAllLinkListeners();
       };
     });
-  }, [forceFocus]);
+  }, [forceFocus, formatting]);
 
   return (
     <SideButtons
