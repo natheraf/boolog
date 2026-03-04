@@ -44,6 +44,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   const [forceFocus, setForceFocus] = React.useState(null);
 
   const [formatting, setFormatting] = React.useState(epubObject.formatting);
+  const [formatMenuIsOpen, setFormatMenuIsOpen] = React.useState(false);
 
   const [loadedCSS, setLoadedCSS] = React.useState(false);
 
@@ -73,6 +74,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
 
   const setProgressHelper = (spine, part, keepForwardHistory) => {
+    console.log(spine, part);
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
     prepareSpineIndex(spine);
@@ -144,6 +146,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             setHistoryIndex={setHistoryIndex}
             setProgress={setProgressHelper}
             setLoadedCSS={setLoadedCSS}
+            setFormatMenuIsOpen={setFormatMenuIsOpen}
           />
           <Box
             id="epub-body"
@@ -172,6 +175,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
                 formatting={formatting}
                 setProgress={setProgressHelper}
                 view={view}
+                formatMenuIsOpen={formatMenuIsOpen}
               />
             ) : (
               <Stack

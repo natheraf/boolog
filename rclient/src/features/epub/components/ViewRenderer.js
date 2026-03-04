@@ -19,6 +19,7 @@ export const ViewRenderer = ({
   formatting,
   setProgress,
   view,
+  formatMenuIsOpen,
 }) => {
   const viewMap = new Map([
     [
@@ -32,6 +33,7 @@ export const ViewRenderer = ({
         setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
+        formatMenuIsOpen={formatMenuIsOpen}
       />,
     ],
     [
@@ -61,4 +63,5 @@ ViewRenderer.propType = {
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
+  formatMenuIsOpen: PropTypes.bool.isRequired,
 };

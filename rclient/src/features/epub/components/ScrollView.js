@@ -12,6 +12,7 @@ export const ScrollView = ({
   setForceFocus,
   formatting,
   setProgress,
+  formatMenuIsOpen,
 }) => {
   const spine = epubObject.spine;
   const sentinelsHeight = window.innerHeight;
@@ -152,18 +153,22 @@ export const ScrollView = ({
    */
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
-    const timeoutId = setTimeout(() => {
-      epubBody.addEventListener("scroll", onScroll);
-    }, 300);
-    const removeAllLinkListeners =
-      attachOnClickListenersToLinkElements(handlePathHref);
+    let timeoutId = null;
+    let removeAllLinkListeners = null;
+    if (formatMenuIsOpen === false) {
+      timeoutId = setTimeout(() => {
+        epubBody.addEventListener("scroll", onScroll);
+      }, 300);
+      removeAllLinkListeners =
+        attachOnClickListenersToLinkElements(handlePathHref);
+    }
     return () => {
       clearTimeout(timeoutId);
       epubBody.removeEventListener("scroll", onScroll);
       clearTimeout(timeOutToSetProgress.current);
-      removeAllLinkListeners();
+      removeAllLinkListeners?.();
     };
-  }, [partProgress]);
+  }, [partProgress, formatMenuIsOpen]);
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -177,7 +182,7 @@ export const ScrollView = ({
         setForceFocus(null);
       }
     });
-  }, [forceFocus]);
+  }, [forceFocus, formatting]);
 
   return (
     <Stack
@@ -216,7 +221,7 @@ export const ScrollView = ({
   );
 };
 
-ScrollView.propType = {
+ScrollView.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
@@ -224,4 +229,5 @@ ScrollView.propType = {
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  formatMenuIsOpen: PropTypes.bool.isRequired,
 };
