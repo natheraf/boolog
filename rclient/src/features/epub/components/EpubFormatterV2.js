@@ -1,7 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { getGoogleFonts } from "../../../api/GoogleAPI";
 import {
   Box,
   IconButton,
@@ -11,11 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import TextFormatIcon from "@mui/icons-material/TextFormat";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import CloseIcon from "@mui/icons-material/Close";
-import CloudIcon from "@mui/icons-material/Cloud";
 import { EpubFormattingPresets } from "./EpubFormattingPresets";
 import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
 import {
@@ -23,6 +18,7 @@ import {
   putHighlightStyles,
   getFormattingWithPreset,
 } from "../formattingUtils";
+import { EpubFormatEditor } from "./EpubFormatEditor";
 
 /**
  * ReaderFormat Rewritten
@@ -53,7 +49,6 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
     );
   };
 
-  const googleFonts = React.useRef(null);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openFormatting = Boolean(anchorEl);
 
@@ -75,9 +70,6 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
   };
 
   React.useEffect(() => {
-    getGoogleFonts().then((obj) => {
-      googleFonts.current = obj.items;
-    });
     getStateValue("epubPreset").then((value) => {
       if (value === undefined) {
         value = theme.palette.mode;
@@ -140,6 +132,10 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
               setFormatting={setFormattingHelper}
               preset={epubPreset}
               setPreset={setEpubPreset}
+            />
+            <EpubFormatEditor
+              formatting={formatting}
+              setFormatting={setFormattingHelper}
             />
           </Stack>
         </Stack>

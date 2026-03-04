@@ -107,6 +107,34 @@ export const defaultStandardFormatting = {
   showSpineNavigator: true,
 };
 
+export const fontFamilies = [
+  { label: "Original", value: "inherit", group: null, kind: "local" },
+
+  { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+  {
+    label: "Sans-Serif",
+    value: "sans-serif",
+    group: "Generic",
+    kind: "local",
+  },
+  {
+    label: "Monospace",
+    value: "monospace",
+    group: "Generic",
+    kind: "local",
+  },
+  { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+  { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+  { label: "Math", value: "math", group: "Generic" },
+  { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+  {
+    label: "System-UI",
+    value: "system-ui",
+    group: "Generic",
+    kind: "local",
+  },
+];
+
 const relators = [
   {
     "@id": "http://id.loc.gov/vocabulary/relators/fmo",
