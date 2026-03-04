@@ -5,9 +5,8 @@ import { DialogSlideUpTransition } from "../../CustomComponents";
 import PropTypes from "prop-types";
 import { updateEpubDataInDotNotation } from "../../../api/IndexedDB/epubData";
 import { ViewRenderer } from "./ViewRenderer";
-import { getEpubValueFromPath, loadImages } from "../epubUtils";
+import { loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
-import { waitForElement } from "../domUtils";
 import { useTheme } from "@emotion/react";
 
 /**
@@ -125,6 +124,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           <HeaderV2
             sx={{ flex: "0 1 auto" }}
             epubObject={epubObject}
+            spineIndex={progress.spine}
             handleClose={handleClose}
             view={view}
             setView={setView}
@@ -136,6 +136,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             setProgress={setProgressHelper}
             setLoadedCSS={setLoadedCSS}
             setFormatMenuIsOpen={setFormatMenuIsOpen}
+            setForceFocus={setForceFocus}
           />
           <Box
             id="epub-body"

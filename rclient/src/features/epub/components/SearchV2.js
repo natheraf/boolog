@@ -21,19 +21,23 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import LinkIcon from "@mui/icons-material/Link";
 import { AlertsContext } from "../../../context/Alerts";
-import { handleInjectingMarkToEpubNodes, waitForElement } from "../domUtils";
+import {
+  clearTemporaryMarks,
+  handleInjectingMarkToEpubNodes,
+  waitForElement,
+} from "../domUtils";
 import { handleSearchEpub } from "../epubUtils";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import { useTheme } from "@emotion/react";
 
 export const SearchV2 = ({
-  spine,
+  epubObject,
   currentSpineIndex,
   goToAndPreloadImages,
-  goToLinkFragment,
-  clearTemporaryMarks,
+  setForceFocus,
 }) => {
+  const spine = epubObject.spine;
   const theme = useTheme();
   const defaultHighlightColor =
     theme.palette.mode === "dark"
@@ -81,14 +85,14 @@ export const SearchV2 = ({
       return addAlert("Search input is falsely or empty", "error");
     }
     const startTime = performance.now();
-    const res = handleSearchEpub(searchTextfieldValue, spine.current);
+    const res = handleSearchEpub(searchTextfieldValue, spine);
     const timeTaken = {};
     timeTaken.totalSearchResults = 0;
     for (const chapterResult of res) {
       chapterResult.isCurrentChapter =
-        chapterResult.label === spine.current[currentSpineIndex].label;
+        chapterResult.label === spine[currentSpineIndex].label;
       chapterResult.isExpanded =
-        chapterResult.label === spine.current[currentSpineIndex].label;
+        chapterResult.label === spine[currentSpineIndex].label;
       timeTaken.totalSearchResults += chapterResult.searchResults.length;
     }
     const endTime = performance.now();
@@ -151,8 +155,7 @@ export const SearchV2 = ({
     };
 
   const searchResultHandleOnClick = (searchResult) => () => {
-    console.log(searchResult);
-    goToAndPreloadImages(searchResult.spineIndex);
+    goToAndPreloadImages(searchResult.spineIndex, 0);
     waitForElement(`[nodeid='${searchResult.startContainerId}']`).then(() => {
       const range = searchResult;
       range.startContainer = document.querySelector(
@@ -170,7 +173,12 @@ export const SearchV2 = ({
       );
       waitForElement(".temporary-mark").then((element) => {
         element.id = getNewId();
-        goToLinkFragment(`${element.id}`);
+        const forceFocus = {
+          type: "element",
+          attributeName: "id",
+          attributeValue: element.id,
+        };
+        setForceFocus(forceFocus);
       });
     });
     handleClose();
@@ -178,7 +186,7 @@ export const SearchV2 = ({
 
   return (
     <>
-      <Tooltip title="Search">
+      <Tooltip title="Search (s)">
         <IconButton onClick={handleClickOpen}>
           <SearchIcon />
         </IconButton>
@@ -316,8 +324,8 @@ export const SearchV2 = ({
                           >
                             <Typography variant="subtitle2" color="dimgray">
                               Part:{" "}
-                              {(spine.current[searchResult.spineIndex]
-                                ?.backCount ?? 0) + 1}
+                              {(spine[searchResult.spineIndex]?.backCount ??
+                                0) + 1}
                             </Typography>
                             <Stack direction={"row"}>
                               <Tooltip title="Go to location">
@@ -390,9 +398,8 @@ export const SearchV2 = ({
 };
 
 SearchV2.propTypes = {
-  spine: PropTypes.object.isRequired,
+  epubObject: PropTypes.object.isRequired,
   currentSpineIndex: PropTypes.number.isRequired,
   goToAndPreloadImages: PropTypes.func.isRequired,
-  goToLinkFragment: PropTypes.func.isRequired,
-  clearTemporaryMarks: PropTypes.func.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
 };

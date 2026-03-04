@@ -378,3 +378,11 @@ export const attachOnClickListenersToLinkElements = (handlePathHref) => {
   });
   return () => removeListenerFunctions.forEach((fn) => fn());
 };
+
+export const clearTemporaryMarks = () => {
+  if (document.getElementsByClassName("temporary-mark").length > 0) {
+    deleteNodesAndLiftChildren(
+      document.getElementsByClassName("temporary-mark")
+    );
+  }
+};

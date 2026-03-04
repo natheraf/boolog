@@ -11,14 +11,15 @@ import {
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { EpubFormatterV2 } from "./EpubFormatterV2";
 import { HistoryButtons } from "./HistoryButtons";
+import { SearchV2 } from "./SearchV2";
 
 export const HeaderV2 = ({
   epubObject,
+  spineIndex,
   handleClose,
   view,
   setView,
@@ -30,6 +31,7 @@ export const HeaderV2 = ({
   setProgress,
   setLoadedCSS,
   setFormatMenuIsOpen,
+  setForceFocus,
 }) => {
   const { title, subtitle } = {};
   const appBarHeight = 48;
@@ -169,11 +171,12 @@ export const HeaderV2 = ({
               setHistoryIndex={setHistoryIndex}
               setProgress={setProgress}
             />
-            <Tooltip title="Search (s)">
-              <IconButton>
-                <SearchIcon />
-              </IconButton>
-            </Tooltip>
+            <SearchV2
+              epubObject={epubObject}
+              currentSpineIndex={spineIndex}
+              goToAndPreloadImages={setProgress}
+              setForceFocus={setForceFocus}
+            />
             <EpubFormatterV2
               epubObject={epubObject}
               formatting={formatting}
@@ -231,6 +234,7 @@ export const HeaderV2 = ({
 
 HeaderV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
+  spineIndex: PropTypes.number.isRequired,
   handleClose: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
   setView: PropTypes.func.isRequired,
@@ -242,4 +246,5 @@ HeaderV2.propTypes = {
   setProgress: PropTypes.func.isRequired,
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
 };
