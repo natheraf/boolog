@@ -14,6 +14,7 @@ export const ScrollView = ({
   setProgress,
   formatMenuIsOpen,
 }) => {
+  const epubBody = document.getElementById("epub-body");
   const spine = epubObject.spine;
   const sentinelsHeight = window.innerHeight;
   const spineIndexMap = epubObject.spineIndexMap;
@@ -22,6 +23,7 @@ export const ScrollView = ({
     formatting.pageWidth,
     window.innerWidth - highlightBorderSafety
   );
+  const isMouseDown = React.useRef(false);
 
   const scrollToPercent = (percentage) => {
     const epubBody = document.getElementById("epub-body");
@@ -46,16 +48,20 @@ export const ScrollView = ({
   };
 
   const timeOutToSetProgress = React.useRef(null);
-  const onScroll = (event) => {
+  const onScroll = () => {
     clearTimeout(timeOutToSetProgress.current);
+    if (isMouseDown.current) {
+      return;
+    }
     const content = document.getElementById("content");
     const contentRect = content.getBoundingClientRect();
-    const goPreviousChapter = event.target.scrollTop <= 5;
+    const epubBodyScrollTop = epubBody.scrollTop;
+    const goPreviousChapter = epubBodyScrollTop <= 5;
     const onFirstChapter = spineIndex === 0;
     const goNextChapter =
       contentRect.height +
         sentinelsHeight * (2 - +onFirstChapter) -
-        (event.target.scrollTop + window.innerHeight) <
+        (epubBodyScrollTop + window.innerHeight) <
       5;
 
     if (
@@ -152,7 +158,6 @@ export const ScrollView = ({
    * Keep progress react state updated when scrolling for history management
    */
   React.useEffect(() => {
-    const epubBody = document.getElementById("epub-body");
     let timeoutId = null;
     let removeAllLinkListeners = null;
     if (formatMenuIsOpen === false) {
@@ -183,6 +188,23 @@ export const ScrollView = ({
       }
     });
   }, [forceFocus, formatting]);
+
+  const onMouseDown = () => {
+    isMouseDown.current = true;
+  };
+  const onMouseUp = () => {
+    isMouseDown.current = false;
+    onScroll();
+  };
+
+  React.useEffect(() => {
+    epubBody.addEventListener("mousedown", onMouseDown);
+    epubBody.addEventListener("mouseup", onMouseUp);
+    return () => {
+      epubBody.removeEventListener("mousedown", onMouseDown);
+      epubBody.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
 
   return (
     <Stack
@@ -225,7 +247,7 @@ ScrollView.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
-  forceFocus: PropTypes.object.isRequired,
+  forceFocus: PropTypes.object,
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
