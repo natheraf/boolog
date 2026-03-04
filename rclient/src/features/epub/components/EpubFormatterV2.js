@@ -19,12 +19,19 @@ import {
   getFormattingWithPreset,
 } from "../formattingUtils";
 import { EpubFormatEditor } from "./EpubFormatEditor";
+import { putEpubData } from "../../../api/IndexedDB/epubData";
 
 /**
  * ReaderFormat Rewritten
  * @param {*} param0
  */
-export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
+export const EpubFormatterV2 = ({
+  epubObject,
+  formatting,
+  setFormatting,
+  view,
+  setView,
+}) => {
   const theme = useTheme();
   const stylingElementIds = React.useRef([]);
   const timeoutToUpdateWindowSize = React.useRef(null);
@@ -63,6 +70,10 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
 
   const setFormattingHelper = (newFormatting) => {
     setFormatting(newFormatting);
+    putEpubData(
+      { key: "epubGlobalFormatting", formatting: newFormatting },
+      true
+    );
     const id = putFormattingStyleElement(theme, newFormatting);
     if (!stylingElementIds.current.includes(id)) {
       stylingElementIds.current.push(id);
@@ -136,6 +147,9 @@ export const EpubFormatterV2 = ({ epubObject, formatting, setFormatting }) => {
             <EpubFormatEditor
               formatting={formatting}
               setFormatting={setFormattingHelper}
+              epubPreset={epubPreset}
+              view={view}
+              setView={setView}
             />
           </Stack>
         </Stack>
@@ -148,4 +162,6 @@ EpubFormatterV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
+  view: PropTypes.string.isRequired,
+  setView: PropTypes.func.isRequired,
 };
