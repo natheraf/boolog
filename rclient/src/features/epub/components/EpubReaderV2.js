@@ -45,6 +45,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
 
   const [formatting, setFormatting] = React.useState(epubObject.formatting);
 
+  const [loadedCSS, setLoadedCSS] = React.useState(false);
+
   console.log(epubObject);
   const handleClose = () => {
     setOpenEpubReader(false);
@@ -141,6 +143,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             historyIndex={historyIndex}
             setHistoryIndex={setHistoryIndex}
             setProgress={setProgressHelper}
+            setLoadedCSS={setLoadedCSS}
           />
           <Box
             id="epub-body"
@@ -154,7 +157,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             }}
             tabIndex={0}
           >
-            {(progress.spine === 0 ||
+            {loadedCSS &&
+            (progress.spine === 0 ||
               preparedSpineIndexes.includes(progress.spine - 1)) &&
             preparedSpineIndexes.includes(progress.spine) &&
             (progress.spine + 1 === spine.length ||

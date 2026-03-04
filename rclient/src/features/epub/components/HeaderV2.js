@@ -30,6 +30,7 @@ export const HeaderV2 = ({
   historyIndex,
   setHistoryIndex,
   setProgress,
+  setLoadedCSS,
 }) => {
   const { title, subtitle } = {};
   const appBarHeight = 48;
@@ -189,6 +190,7 @@ export const HeaderV2 = ({
               setFormatting={setFormatting}
               view={view}
               setView={setView}
+              setLoadedCSS={setLoadedCSS}
             />
             {/* {previousSpineIndexAndPage !== null ? (
             <Tooltip title="Back (b)">
@@ -247,4 +249,5 @@ HeaderV2.propTypes = {
   historyIndex: PropTypes.number.isRequired,
   setHistoryIndex: PropTypes.func.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setLoadedCSS: PropTypes.func.isRequired,
 };

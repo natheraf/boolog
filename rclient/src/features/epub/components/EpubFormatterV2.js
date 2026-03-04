@@ -31,6 +31,7 @@ export const EpubFormatterV2 = ({
   setFormatting,
   view,
   setView,
+  setLoadedCSS,
 }) => {
   const theme = useTheme();
   const stylingElementIds = React.useRef([]);
@@ -81,15 +82,6 @@ export const EpubFormatterV2 = ({
   };
 
   React.useEffect(() => {
-    getStateValue("epubPreset").then((value) => {
-      if (value === undefined) {
-        value = theme.palette.mode;
-        setStateValue("epubPreset", value);
-      }
-      setEpubPreset(value);
-      const formattingWithPreset = getFormattingWithPreset(value, formatting);
-      setFormattingHelper(formattingWithPreset);
-    });
     for (const [key, value] of Object.entries(epubObject.css)) {
       const styleElement = document.createElement("style");
       styleElement.id = `epub-css-${key}`;
@@ -98,6 +90,16 @@ export const EpubFormatterV2 = ({
       stylingElementIds.current.push(styleElement.id);
     }
     stylingElementIds.current.push(putHighlightStyles());
+    getStateValue("epubPreset").then((value) => {
+      if (value === undefined) {
+        value = theme.palette.mode;
+        setStateValue("epubPreset", value);
+      }
+      setEpubPreset(value);
+      const formattingWithPreset = getFormattingWithPreset(value, formatting);
+      setFormattingHelper(formattingWithPreset);
+      setLoadedCSS(true);
+    });
     window.addEventListener("resize", updateWindowSize);
     return () => {
       clearEpubStyles();
@@ -164,4 +166,5 @@ EpubFormatterV2.propTypes = {
   setFormatting: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
   setView: PropTypes.func.isRequired,
+  setLoadedCSS: PropTypes.func.isRequired,
 };
