@@ -1,11 +1,9 @@
 import * as React from "react";
 import {
   AppBar,
-  FormControlLabel,
   IconButton,
   Slide,
   Stack,
-  Switch,
   Toolbar,
   Tooltip,
   Typography,
@@ -15,7 +13,7 @@ import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import SearchIcon from "@mui/icons-material/Search";
 import PropTypes from "prop-types";
-import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
+import { getStateValue } from "../../../api/IndexedDB/State";
 import { EpubFormatterV2 } from "./EpubFormatterV2";
 import { HistoryButtons } from "./HistoryButtons";
 
@@ -94,12 +92,6 @@ export const HeaderV2 = ({
     mouseDown.current = false;
   };
 
-  const onChangeView = () => {
-    const newView = view === "scroll" ? "page" : "scroll";
-    setStateValue("epubView", newView);
-    setView(newView);
-  };
-
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
     getStateValue("epubHeaderAutoHide").then((autoHide) => {
@@ -176,9 +168,6 @@ export const HeaderV2 = ({
               historyIndex={historyIndex}
               setHistoryIndex={setHistoryIndex}
               setProgress={setProgress}
-            />
-            <FormControlLabel
-              control={<Switch defaultChecked onChange={onChangeView} />}
             />
             <Tooltip title="Search (s)">
               <IconButton>
