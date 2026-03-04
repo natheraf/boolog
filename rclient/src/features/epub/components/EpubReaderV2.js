@@ -30,17 +30,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   ]);
   const [historyIndex, setHistoryIndex] = React.useState(0);
   const [view, setView] = React.useState(null);
-  /**
-   * when swapping to scroll at the start of a chapter, continuous scroll will scroll all the way up to the top sentinel. this was a workaround. look: ContinuousScrollView:32
-   * @deprecated
-   * @param {string} value
-   */
-  const setViewHelper = (value) => {
-    setView(value);
-    if (value === "scroll" && progress.part === 0) {
-      setForceFocus({ type: "boundary", location: "start" });
-    }
-  };
   const [forceFocus, setForceFocus] = React.useState(null);
 
   const [formatting, setFormatting] = React.useState(epubObject.formatting);
