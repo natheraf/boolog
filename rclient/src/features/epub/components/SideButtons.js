@@ -34,7 +34,7 @@ export const SideButtons = ({
             position: "absolute",
             width: "100%",
             height: "100%",
-            backgroundColor: formatting.backgroundColors,
+            backgroundColor: formatting.pageColor,
             justifyContent: "flex-end",
           }}
         />
@@ -76,7 +76,7 @@ export const SideButtons = ({
             position: "absolute",
             width: "100%",
             height: "100%",
-            backgroundColor: formatting.backgroundColors,
+            backgroundColor: formatting.pageColor,
             justifyContent: "flex-end",
           }}
         />
