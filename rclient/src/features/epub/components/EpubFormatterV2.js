@@ -12,7 +12,6 @@ import {
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import CloseIcon from "@mui/icons-material/Close";
 import { EpubFormattingPresets } from "./EpubFormattingPresets";
-import { getStateValue, setStateValue } from "../../../api/IndexedDB/State";
 import {
   putFormattingStyleElement,
   putHighlightStyles,
@@ -120,6 +119,7 @@ export const EpubFormatterV2 = ({
         anchorEl={anchorEl}
         open={openFormatting}
         onClose={handleCloseFormatting}
+        disableRestoreFocus={true}
       >
         <Stack
           spacing={2}

@@ -99,11 +99,19 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     }
   };
 
+  const onDocumentFocusChange = (event) => {
+    if (event?.target?.role === "presentation") {
+      document.getElementById("epub-body")?.focus();
+    }
+  };
+
   React.useEffect(() => {
     prepareSpineIndex(progress.spine);
     getStateValue("epubView").then(setView);
+    document.addEventListener("focusin", onDocumentFocusChange);
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
+      document.removeEventListener("focusin", onDocumentFocusChange);
     };
   }, []);
 
@@ -147,7 +155,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               scrollbarColor: `${theme.palette.text.disabled} ${formatting.pageColor}`,
               scrollbarWidth: "thin",
             }}
-            tabIndex={0}
           >
             {loadedCSS &&
             (progress.spine === 0 ||
