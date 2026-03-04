@@ -187,6 +187,8 @@ export const HeaderV2 = ({
               epubObject={epubObject}
               formatting={formatting}
               setFormatting={setFormatting}
+              view={view}
+              setView={setView}
             />
             {/* {previousSpineIndexAndPage !== null ? (
             <Tooltip title="Back (b)">

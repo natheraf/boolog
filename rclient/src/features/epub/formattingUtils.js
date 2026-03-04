@@ -1,3 +1,20 @@
+import TextIncreaseIcon from "@mui/icons-material/TextIncrease";
+import TextDecreaseIcon from "@mui/icons-material/TextDecrease";
+import DensityMediumIcon from "@mui/icons-material/DensityMedium";
+import DensitySmallIcon from "@mui/icons-material/DensitySmall";
+import SubjectIcon from "@mui/icons-material/Subject";
+import FormatAlignCenterIcon from "@mui/icons-material/FormatAlignCenter";
+import FormatAlignJustifyIcon from "@mui/icons-material/FormatAlignJustify";
+import FormatAlignLeftIcon from "@mui/icons-material/FormatAlignLeft";
+import FormatAlignRightIcon from "@mui/icons-material/FormatAlignRight";
+import FormatIndentIncreaseIcon from "@mui/icons-material/FormatIndentIncrease";
+import FormatIndentDecreaseIcon from "@mui/icons-material/FormatIndentDecrease";
+import HeightIcon from "@mui/icons-material/Height";
+import VerticalAlignCenterIcon from "@mui/icons-material/VerticalAlignCenter";
+import WidthNormalIcon from "@mui/icons-material/WidthNormal";
+import WidthFullIcon from "@mui/icons-material/WidthFull";
+import BookIcon from "@mui/icons-material/Book";
+
 export const putFormattingStyleElement = (theme, formatting) => {
   const format = structuredClone(formatting);
 
@@ -104,3 +121,64 @@ const presets = new Map([
 export const getFormattingWithPreset = (presetName, formatting) => {
   return { ...formatting, ...presets.get(presetName) };
 };
+
+export const formattingNumberFields = [
+  {
+    title: "Font Size",
+    value: "fontSize",
+    endText: "rem",
+    decreaseIcon: TextDecreaseIcon,
+    increaseIcon: TextIncreaseIcon,
+  },
+  {
+    title: "Font Weight",
+    value: "fontWeight",
+    endText: "abs",
+    advancedOption: true,
+  },
+  {
+    title: "Page Width",
+    value: "pageWidth",
+    endText: "px",
+    advancedOption: true,
+    decreaseIcon: WidthNormalIcon,
+    increaseIcon: WidthFullIcon,
+  },
+  {
+    title: "Page Height Margins",
+    value: "pageHeightMargins",
+    endText: "px",
+    advancedOption: true,
+    decreaseIcon: HeightIcon,
+    increaseIcon: VerticalAlignCenterIcon,
+  },
+  {
+    title: "Pages Shown",
+    value: "pagesShown",
+    endText: "pgs",
+    advancedOption: true,
+  },
+  {
+    title: "Indent",
+    value: "textIndent",
+    endText: "rem",
+    advancedOption: true,
+    decreaseIcon: FormatIndentDecreaseIcon,
+    increaseIcon: FormatIndentIncreaseIcon,
+  },
+  {
+    title: "Line Height",
+    value: "lineHeight",
+    endText: "u",
+    decreaseIcon: DensitySmallIcon,
+    increaseIcon: DensityMediumIcon,
+  },
+];
+
+export const justifyIcons = new Map([
+  ["inherit", BookIcon],
+  ["start", FormatAlignLeftIcon],
+  ["end", FormatAlignRightIcon],
+  ["center", FormatAlignCenterIcon],
+  ["justify", FormatAlignJustifyIcon],
+]);

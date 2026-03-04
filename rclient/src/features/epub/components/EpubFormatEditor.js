@@ -5,10 +5,14 @@ import {
   FormControlLabel,
   IconButton,
   InputAdornment,
+  MenuItem,
   Paper,
+  Select,
   Stack,
   Switch,
   TextField,
+  ToggleButton,
+  ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -17,8 +21,15 @@ import { defaultFormatting, fontFamilies } from "../../../api/Local";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import AddIcon from "@mui/icons-material/Add";
+import { formattingNumberFields, justifyIcons } from "../formattingUtils";
 
-export const EpubFormatEditor = ({ formatting, setFormatting }) => {
+export const EpubFormatEditor = ({
+  formatting,
+  setFormatting,
+  epubPreset,
+  view,
+  setView,
+}) => {
   const [allFonts, setAllFonts] = React.useState(fontFamilies);
   const [fieldFocused, setFieldFocused] = React.useState(null);
   const [focusedFieldValue, setFocusedFieldValue] = React.useState(null);
@@ -37,14 +48,22 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
     setFocusedFieldValue(event?.target?.value);
   };
 
-  const handleOnChangeAutoComplete = (key) => (event, value) => {
-    if (!value) {
-      value = defaultFormatting.fontFamily;
+  const handleOnChangeAutoCompleteAndButtonGroup = (key) => (event, value) => {
+    if (key === "fontFamily") {
+      value ??= defaultFormatting.fontFamily;
+      setFormatting({
+        ...formatting,
+        [key]: value,
+      });
     }
-    setFormatting({
-      ...formatting,
-      [key]: value,
-    });
+    if (key === "textAlign" && value !== null) {
+      setFormatting({
+        ...formatting,
+        [key]: defaultFormatting._textAlignments.find(
+          (obj) => obj.value === value
+        ),
+      });
+    }
   };
 
   const handleStepValue = (key, direction) => {
@@ -137,7 +156,7 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
                 (value?.value ?? value?.family)
               }
               getOptionLabel={(option) => option.label ?? option.family}
-              onChange={handleOnChangeAutoComplete("fontFamily")}
+              onChange={handleOnChangeAutoCompleteAndButtonGroup("fontFamily")}
               onOpen={() => handleFieldOnFocus("fontFamily")}
               onClose={handleFieldOnBlur}
               renderInput={(params) => <TextField {...params} />}
@@ -147,42 +166,109 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
           </Tooltip>
         </Stack>
       </Paper>
-      {[
-        { title: "Font Size", value: "fontSize", endText: "rem" },
-        { title: "Font Weight", value: "fontWeight", endText: "abs" },
-        {
-          title: "Page Width",
-          value: "pageWidth",
-          endText: "px",
-        },
-        {
-          title: "Page Height Margins",
-          value: "pageHeightMargins",
-          endText: "px",
-        },
-        { title: "Pages Shown", value: "pagesShown", endText: "pgs" },
-        { title: "Indent", value: "textIndent", endText: "rem" },
-        { title: "Line Height", value: "lineHeight", endText: "u" },
-      ].map((obj) => (
-        <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
-          <Stack spacing={1} alignItems={"center"}>
-            <Typography variant="h6">{obj.title}</Typography>
-            <Stack
-              direction="row"
-              justifyContent={"space-evenly"}
-              sx={{ width: "100%" }}
-              spacing={1}
-            >
-              <IconButton
-                onClick={() => handleStepValue(obj.value, "decrease")}
-                disabled={
-                  formatting[obj.value] <=
-                  defaultFormatting[`_${obj.value}Bounds`].min
-                }
+      {formattingNumberFields
+        .filter((obj) => epubPreset === "custom" || obj.advancedOption !== true)
+        .map((obj) => (
+          <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
+            <Stack spacing={1} alignItems={"center"}>
+              <Typography variant="h6">{obj.title}</Typography>
+              <Stack
+                direction="row"
+                justifyContent={"space-evenly"}
+                sx={{ width: "100%" }}
+                spacing={1}
               >
-                <RemoveIcon />
-              </IconButton>
-              <Paper>
+                <IconButton
+                  onClick={() => handleStepValue(obj.value, "decrease")}
+                  disabled={
+                    formatting[obj.value] <=
+                    defaultFormatting[`_${obj.value}Bounds`].min
+                  }
+                >
+                  {obj.decreaseIcon ? <obj.decreaseIcon /> : <RemoveIcon />}
+                </IconButton>
+                <Paper>
+                  <TextField
+                    fullWidth
+                    value={
+                      fieldFocused === obj.value
+                        ? focusedFieldValue
+                        : formatting[obj.value]
+                    }
+                    placeholder={defaultFormatting[obj.value].toString()}
+                    InputProps={{
+                      endAdornment: (
+                        <Stack direction="row">
+                          <InputAdornment position="end">
+                            {obj.endText}
+                          </InputAdornment>
+                          {fieldFocused === obj.value ? (
+                            <InputAdornment position="end">
+                              <Tooltip title={"Press Enter to Apply"}>
+                                <KeyboardReturnIcon
+                                  fontSize="small"
+                                  color="success"
+                                />
+                              </Tooltip>
+                            </InputAdornment>
+                          ) : null}
+                        </Stack>
+                      ),
+                    }}
+                    onChange={handleOnChangeField}
+                    onBlur={handleFieldOnBlur}
+                    onFocus={() => handleFieldOnFocus(obj.value)}
+                    onKeyDown={handleFieldReturn(obj.value)}
+                    size="small"
+                  />
+                </Paper>
+                <IconButton
+                  onClick={() => handleStepValue(obj.value, "increase")}
+                  disabled={
+                    formatting[obj.value] >=
+                    defaultFormatting[`_${obj.value}Bounds`].max
+                  }
+                >
+                  {obj.increaseIcon ? <obj.increaseIcon /> : <AddIcon />}
+                </IconButton>
+              </Stack>
+            </Stack>
+          </Paper>
+        ))}
+      <Paper sx={{ width: "100%", p: 1 }}>
+        <Stack spacing={1} alignItems={"center"}>
+          <Typography variant="h6">{`Justify: ${formatting.textAlign.label}`}</Typography>
+          <ToggleButtonGroup
+            value={formatting.textAlign.value}
+            exclusive
+            onChange={handleOnChangeAutoCompleteAndButtonGroup("textAlign")}
+            aria-label="text alignment"
+          >
+            {defaultFormatting._textAlignments.map((obj) => {
+              const Icon = justifyIcons.get(obj.value);
+              return (
+                <Tooltip key={obj.value} title={obj.label}>
+                  <ToggleButton value={obj.value}>
+                    <Icon />
+                  </ToggleButton>
+                </Tooltip>
+              );
+            })}
+          </ToggleButtonGroup>
+        </Stack>
+      </Paper>
+      {epubPreset === "custom" &&
+        [
+          { title: "Text Color", value: "textColor" },
+          { title: "Page Color", value: "pageColor" },
+        ].map((obj) => (
+          <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
+            <Stack spacing={1} alignItems={"center"}>
+              <Typography variant="h6">{obj.title}</Typography>
+              <Tooltip
+                title="Enter a color name, RGB, HEX, or HSL"
+                open={fieldFocused === obj.value}
+              >
                 <TextField
                   fullWidth
                   value={
@@ -192,23 +278,15 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
                   }
                   placeholder={defaultFormatting[obj.value].toString()}
                   InputProps={{
-                    endAdornment: (
-                      <Stack direction="row">
+                    endAdornment:
+                      focusedFieldValue === obj.value ? (
                         <InputAdornment position="end">
-                          {obj.endText}
+                          <KeyboardReturnIcon
+                            fontSize="small"
+                            color="success"
+                          />
                         </InputAdornment>
-                        {fieldFocused === obj.value ? (
-                          <InputAdornment position="end">
-                            <Tooltip title={"Press Enter to Apply"}>
-                              <KeyboardReturnIcon
-                                fontSize="small"
-                                color="success"
-                              />
-                            </Tooltip>
-                          </InputAdornment>
-                        ) : null}
-                      </Stack>
-                    ),
+                      ) : null,
                   }}
                   onChange={handleOnChangeField}
                   onBlur={handleFieldOnBlur}
@@ -216,57 +294,10 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
                   onKeyDown={handleFieldReturn(obj.value)}
                   size="small"
                 />
-              </Paper>
-              <IconButton
-                onClick={() => handleStepValue(obj.value, "increase")}
-                disabled={
-                  formatting[obj.value] >=
-                  defaultFormatting[`_${obj.value}Bounds`].max
-                }
-              >
-                <AddIcon />
-              </IconButton>
+              </Tooltip>
             </Stack>
-          </Stack>
-        </Paper>
-      ))}
-      {[
-        { title: "Text Color", value: "textColor" },
-        { title: "Page Color", value: "pageColor" },
-      ].map((obj) => (
-        <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
-          <Stack spacing={1} alignItems={"center"}>
-            <Typography variant="h6">{obj.title}</Typography>
-            <Tooltip
-              title="Enter a color name, RGB, HEX, or HSL"
-              open={fieldFocused === obj.value}
-            >
-              <TextField
-                fullWidth
-                value={
-                  fieldFocused === obj.value
-                    ? focusedFieldValue
-                    : formatting[obj.value]
-                }
-                placeholder={defaultFormatting[obj.value].toString()}
-                InputProps={{
-                  endAdornment:
-                    focusedFieldValue === obj.value ? (
-                      <InputAdornment position="end">
-                        <KeyboardReturnIcon fontSize="small" color="success" />
-                      </InputAdornment>
-                    ) : null,
-                }}
-                onChange={handleOnChangeField}
-                onBlur={handleFieldOnBlur}
-                onFocus={() => handleFieldOnFocus(obj.value)}
-                onKeyDown={handleFieldReturn(obj.value)}
-                size="small"
-              />
-            </Tooltip>
-          </Stack>
-        </Paper>
-      ))}
+          </Paper>
+        ))}
       <Paper>
         <Stack
           spacing={2}
@@ -329,4 +360,7 @@ export const EpubFormatEditor = ({ formatting, setFormatting }) => {
 EpubFormatEditor.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
+  epubPreset: PropTypes.string.isRequired,
+  view: PropTypes.string.isRequired,
+  setView: PropTypes.func.isRequired,
 };
