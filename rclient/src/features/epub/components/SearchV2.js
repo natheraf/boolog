@@ -38,6 +38,7 @@ export const SearchV2 = ({
   setForceFocus,
 }) => {
   const spine = epubObject.spine;
+  const currentChapterLabel = spine[currentSpineIndex].label;
   const theme = useTheme();
   const defaultHighlightColor =
     theme.palette.mode === "dark"
@@ -89,8 +90,7 @@ export const SearchV2 = ({
     const timeTaken = {};
     timeTaken.totalSearchResults = 0;
     for (const chapterResult of res) {
-      chapterResult.isCurrentChapter =
-        chapterResult.label === spine[currentSpineIndex].label;
+      chapterResult.chapterLabel = chapterResult.label;
       chapterResult.isExpanded =
         chapterResult.label === spine[currentSpineIndex].label;
       timeTaken.totalSearchResults += chapterResult.searchResults.length;
@@ -266,9 +266,10 @@ export const SearchV2 = ({
                     <Typography
                       variant="h6"
                       sx={{
-                        fontWeight: chapterResults.isCurrentChapter
-                          ? "bold"
-                          : "unset",
+                        fontWeight:
+                          chapterResults.chapterLabel === currentChapterLabel
+                            ? "bold"
+                            : "unset",
                       }}
                     >
                       {chapterResults.label}
