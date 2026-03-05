@@ -139,55 +139,55 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             setFormatMenuIsOpen={setFormatMenuIsOpen}
             setForceFocus={setForceFocus}
           />
-          <Box
-            id="epub-body"
-            sx={{
-              backgroundColor: formatting.pageColor,
-              flex: "1 1 auto",
-              overflowY: "auto",
-              width: "100%",
-              scrollbarColor: `${formatting.textColor} ${formatting.pageColor}`,
-              scrollbarWidth: "thin",
-            }}
-          >
-            {loadedCSS &&
-            (progress.spine === 0 ||
-              preparedSpineIndexes.includes(progress.spine - 1)) &&
-            preparedSpineIndexes.includes(progress.spine) &&
-            (progress.spine + 1 === spine.length ||
-              preparedSpineIndexes.includes(progress.spine + 1)) ? (
-              <ViewRenderer
-                epubObject={epubObject}
-                spineIndex={progress.spine}
-                partProgress={progress.part}
-                forceFocus={forceFocus}
-                setForceFocus={setForceFocus}
-                formatting={formatting}
-                setProgress={setProgressHelper}
-                view={view}
-                formatMenuIsOpen={formatMenuIsOpen}
-              />
-            ) : (
-              <Stack
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                }}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <CircularProgress />
-              </Stack>
-            )}
-          </Box>
-          {view === "page" && (
+          <Stack direction={"row"} sx={{ overflow: "hidden", height: "100%" }}>
             <SpineNavigator
               epubObject={epubObject}
               spineIndex={progress.spine}
               formatting={formatting}
               setProgress={setProgressHelper}
             />
-          )}
+            <Box
+              id="epub-body"
+              sx={{
+                backgroundColor: formatting.pageColor,
+                flex: "1 1 auto",
+                overflowY: "auto",
+                width: "100%",
+                scrollbarColor: `${formatting.textColor} ${formatting.pageColor}`,
+                scrollbarWidth: "thin",
+              }}
+            >
+              {loadedCSS &&
+              (progress.spine === 0 ||
+                preparedSpineIndexes.includes(progress.spine - 1)) &&
+              preparedSpineIndexes.includes(progress.spine) &&
+              (progress.spine + 1 === spine.length ||
+                preparedSpineIndexes.includes(progress.spine + 1)) ? (
+                <ViewRenderer
+                  epubObject={epubObject}
+                  spineIndex={progress.spine}
+                  partProgress={progress.part}
+                  forceFocus={forceFocus}
+                  setForceFocus={setForceFocus}
+                  formatting={formatting}
+                  setProgress={setProgressHelper}
+                  view={view}
+                  formatMenuIsOpen={formatMenuIsOpen}
+                />
+              ) : (
+                <Stack
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <CircularProgress />
+                </Stack>
+              )}
+            </Box>
+          </Stack>
         </Box>
       )}
     </Dialog>

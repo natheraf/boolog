@@ -8,7 +8,7 @@ export const SpineNavigator = ({
   setProgress,
 }) => {
   const arrayForSpineNavigator = epubObject.chapterMeta;
-  const spineNavigateHeight = 10;
+  const spineNavigateSize = 10;
 
   const handleOnClick = (spineIndex) => {
     setProgress(spineIndex, 0);
@@ -16,27 +16,25 @@ export const SpineNavigator = ({
 
   return formatting.showSpineNavigator ? (
     <Stack
-      justifyContent="center"
       sx={{
-        maxHeight: `${spineNavigateHeight}px`,
-        minHeight: `${spineNavigateHeight}px`,
+        height: "100%",
         overflow: "hidden",
-        width: "100%",
-        backgroundColor: formatting.pageColor,
+        maxWidth: `${spineNavigateSize}px`,
+        minWidth: `${spineNavigateSize}px`,
       }}
-      direction={"row"}
+      direction={"column"}
     >
       {arrayForSpineNavigator.map((obj) => (
-        <Tooltip key={obj.label} title={obj.label} arrow>
+        <Tooltip key={obj.label} title={obj.label} placement="right" arrow>
           <Box
             onClick={() => handleOnClick(obj.spineStartIndex)}
             sx={{
               backgroundColor: formatting.textColor,
               opacity: spineIndex >= obj.spineStartIndex ? 0.5 : 0.2,
               cursor: "pointer",
+              height: "100%",
               width: "100%",
               borderRadius: "10px",
-              marginBottom: `-5px`,
             }}
           />
         </Tooltip>
