@@ -96,9 +96,6 @@ export const PageView = ({
         attributeName: "id",
         attributeValue: linkFragment,
       };
-      if (path.startsWith("#") || pathSpineIndex === spineIndex) {
-        return handleFocusElement(forceFocus);
-      }
       setForceFocus(forceFocus);
     }
   };
