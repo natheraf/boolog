@@ -1,11 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Box, Fade } from "@mui/material";
+import { Box } from "@mui/material";
 import { SideButtons } from "./SideButtons";
-import {
-  attachOnClickListenersToLinkElements,
-  waitForElement,
-} from "../domUtils";
+import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { getEpubValueFromPath } from "../epubUtils";
 
 export const PageView = ({
@@ -81,12 +78,15 @@ export const PageView = ({
     } else if (path.startsWith("/")) {
       path = path.substring(1);
     }
-    const pathSpineIndex = getEpubValueFromPath(
-      spineIndexMap,
-      path.includes("#") === false ? path : path.substring(0, path.indexOf("#"))
-    );
-    if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
-      setProgress(pathSpineIndex, 0);
+    const pathWithoutId =
+      path.includes("#") === false
+        ? path
+        : path.substring(0, path.indexOf("#"));
+    if (pathWithoutId.length > 0) {
+      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
+      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+        setProgress(pathSpineIndex, 0);
+      }
     }
     let linkFragment = null;
     if (path.includes("#")) {
@@ -138,12 +138,15 @@ export const PageView = ({
    * This is for history management
    */
   React.useEffect(() => {
-    const removeAllLinkListeners =
-      attachOnClickListenersToLinkElements(handlePathHref);
+    const abortController = new AbortController();
+    attachOnClickListenersToLinkElements(
+      handlePathHref,
+      abortController.signal
+    );
     return () => {
-      removeAllLinkListeners();
+      abortController.abort();
     };
-  });
+  }, []);
 
   React.useEffect(() => {
     setTimeout(() => {
@@ -156,11 +159,6 @@ export const PageView = ({
       if (forceFocus?.type === "partProgress") {
         setForceFocus(null);
       }
-      const removeAllLinkListeners =
-        attachOnClickListenersToLinkElements(handlePathHref);
-      return () => {
-        removeAllLinkListeners();
-      };
     });
   }, [forceFocus, formatting]);
 

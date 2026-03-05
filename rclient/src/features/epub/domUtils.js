@@ -358,25 +358,25 @@ export const getPreviousTextNode = (node) => {
   return node;
 };
 
-export const attachOnClickListenersToLinkElements = (handlePathHref) => {
-  const removeListenerFunctions = [];
+export const attachOnClickListenersToLinkElements = (
+  handlePathHref,
+  abortControllerSignal
+) => {
   [...document.getElementsByClassName("content")].forEach((content) => {
     content?.querySelectorAll("a[linkto]").forEach((node) => {
       const tag = node.tagName.toLowerCase();
       if (tag === "a" && node.getAttribute("linkto") !== "null") {
         node.style.cursor = "pointer";
-        node.addEventListener("click", () => {
-          handlePathHref(node.getAttribute("linkto"));
-        });
-        removeListenerFunctions.push(() =>
-          node.removeEventListener("click", () => {
+        node.addEventListener(
+          "click",
+          () => {
             handlePathHref(node.getAttribute("linkto"));
-          })
+          },
+          { signal: abortControllerSignal }
         );
       }
     });
   });
-  return () => removeListenerFunctions.forEach((fn) => fn());
 };
 
 export const clearTemporaryMarks = () => {

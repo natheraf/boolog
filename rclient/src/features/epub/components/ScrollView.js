@@ -101,12 +101,15 @@ export const ScrollView = ({
     } else if (path.startsWith("/")) {
       path = path.substring(1);
     }
-    const pathSpineIndex = getEpubValueFromPath(
-      spineIndexMap,
-      path.includes("#") === false ? path : path.substring(0, path.indexOf("#"))
-    );
-    if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
-      setProgress(pathSpineIndex, 0);
+    const pathWithoutId =
+      path.includes("#") === false
+        ? path
+        : path.substring(0, path.indexOf("#"));
+    if (pathWithoutId.length > 0) {
+      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
+      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+        setProgress(pathSpineIndex, 0);
+      }
     }
     let linkFragment = null;
     if (path.includes("#")) {
@@ -156,19 +159,22 @@ export const ScrollView = ({
    */
   React.useEffect(() => {
     let timeoutId = null;
-    let removeAllLinkListeners = null;
+    let abortController = new AbortController();
     if (formatMenuIsOpen === false) {
+      abortController = new AbortController();
+      attachOnClickListenersToLinkElements(
+        handlePathHref,
+        abortController.signal
+      );
       timeoutId = setTimeout(() => {
         epubBody.addEventListener("scroll", onScroll);
       }, 300);
-      removeAllLinkListeners =
-        attachOnClickListenersToLinkElements(handlePathHref);
     }
     return () => {
       clearTimeout(timeoutId);
-      epubBody.removeEventListener("scroll", onScroll);
       clearTimeout(timeOutToSetProgress.current);
-      removeAllLinkListeners?.();
+      epubBody.removeEventListener("scroll", onScroll);
+      abortController.abort();
     };
   }, [partProgress, formatMenuIsOpen]);
 
