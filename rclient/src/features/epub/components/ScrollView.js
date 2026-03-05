@@ -2,7 +2,7 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import { Box, Slide, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
-import { getEpubValueFromPath } from "../epubUtils";
+import { handlePathHref } from "../epubUtils";
 
 export const ScrollView = ({
   epubObject,
@@ -89,40 +89,6 @@ export const ScrollView = ({
     }, 500);
   };
 
-  const handlePathHref = (path) => {
-    if (window.getSelection().isCollapsed === false) {
-      return;
-    }
-    if (path.startsWith("http")) {
-      return window.open(path, "_blank");
-    }
-    if (path.startsWith("../")) {
-      path = path.substring(3);
-    } else if (path.startsWith("/")) {
-      path = path.substring(1);
-    }
-    const pathWithoutId =
-      path.includes("#") === false
-        ? path
-        : path.substring(0, path.indexOf("#"));
-    if (pathWithoutId.length > 0) {
-      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
-      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
-        setProgress(pathSpineIndex, 0);
-      }
-    }
-    let linkFragment = null;
-    if (path.includes("#")) {
-      linkFragment = path.substring(path.indexOf("#") + 1);
-      const forceFocus = {
-        type: "element",
-        attributeName: "id",
-        attributeValue: linkFragment,
-      };
-      setForceFocus(forceFocus);
-    }
-  };
-
   const handleFocusElement = (forceFocus) => {
     const { attributeName, attributeValue } = forceFocus;
     let element = null;
@@ -163,7 +129,7 @@ export const ScrollView = ({
     if (formatMenuIsOpen === false) {
       abortController = new AbortController();
       attachOnClickListenersToLinkElements(
-        handlePathHref,
+        handlePathHref(spineIndex, spineIndexMap, setProgress, setForceFocus),
         abortController.signal
       );
       timeoutId = setTimeout(() => {

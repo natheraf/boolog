@@ -408,3 +408,38 @@ export const processEpub = (epubObject) => {
     toc,
   };
 };
+
+export const handlePathHref =
+  (spineIndex, spineIndexMap, setProgress, setForceFocus) => (path) => {
+    if (window.getSelection().isCollapsed === false) {
+      return;
+    }
+    if (path.startsWith("http")) {
+      return window.open(path, "_blank");
+    }
+    if (path.startsWith("../")) {
+      path = path.substring(3);
+    } else if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+    const pathWithoutId =
+      path.includes("#") === false
+        ? path
+        : path.substring(0, path.indexOf("#"));
+    if (pathWithoutId.length > 0) {
+      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
+      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+        setProgress(pathSpineIndex, 0);
+      }
+    }
+    let linkFragment = null;
+    if (path.includes("#")) {
+      linkFragment = path.substring(path.indexOf("#") + 1);
+      const forceFocus = {
+        type: "element",
+        attributeName: "id",
+        attributeValue: linkFragment,
+      };
+      setForceFocus(forceFocus);
+    }
+  };
