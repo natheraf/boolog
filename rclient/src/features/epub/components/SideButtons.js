@@ -16,6 +16,8 @@ export const SideButtons = ({
     formatting.textAlign.value === "inherit" ||
     formatting.textAlign.value === "center";
 
+  const opacityOfSideElements = 0.2;
+
   return (
     <Stack
       direction="row"
@@ -45,7 +47,8 @@ export const SideButtons = ({
               top: 0,
               right: 0,
               visibility: dividerVisibility,
-              opacity: formatting.opacityOfSideElements,
+              opacity: opacityOfSideElements,
+              backgroundColor: formatting.textColor,
             }}
           />
         )}
@@ -71,7 +74,8 @@ export const SideButtons = ({
               top: 0,
               left: 0,
               visibility: dividerVisibility,
-              opacity: formatting.opacityOfSideElements,
+              opacity: opacityOfSideElements,
+              backgroundColor: formatting.textColor,
             }}
           />
         )}
