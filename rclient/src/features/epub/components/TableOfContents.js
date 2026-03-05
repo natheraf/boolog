@@ -8,25 +8,39 @@ import {
   Stack,
   Tooltip,
   Typography,
+  useTheme,
 } from "@mui/material";
 
 import TocIcon from "@mui/icons-material/Toc";
 import CloseIcon from "@mui/icons-material/Close";
+import { handlePathHref } from "../epubUtils";
 
 export const TableOfContents = ({
-  toc,
-  handlePathHref,
-  currentSpineIndexLabel,
+  epubObject,
+  spineIndex,
+  setProgress,
+  setForceFocus,
 }) => {
+  const theme = useTheme();
+  const spine = epubObject.spine;
+  const toc = epubObject.toc;
+  const spineIndexMap = epubObject.spineIndexMap;
+  const currentSpineIndexLabel = spine[spineIndex].label;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openToc = Boolean(anchorEl);
 
   const handleOpenToc = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleCloseToc = (event) => {
+  const handleCloseToc = () => {
     setAnchorEl(null);
   };
+
+  const handleOnClick = (src) => {
+    handlePathHref(spineIndex, spineIndexMap, setProgress, setForceFocus)(src);
+    handleCloseToc();
+  };
+
   return (
     <>
       <Tooltip title="Table of Contents">
@@ -52,14 +66,15 @@ export const TableOfContents = ({
           {toc.map((obj) => (
             <Typography
               key={`${obj.src}-${obj.label}`}
-              onClick={() => {
-                handlePathHref(obj.src);
-                handleCloseToc();
-              }}
+              onClick={() => handleOnClick(obj.src)}
               sx={{
                 cursor: "pointer",
                 fontWeight:
                   currentSpineIndexLabel === obj.label ? "bold" : "inherit",
+                color:
+                  currentSpineIndexLabel === obj.label
+                    ? theme.palette.primary.main
+                    : "inherit",
               }}
             >
               {obj.label}
@@ -72,7 +87,8 @@ export const TableOfContents = ({
 };
 
 TableOfContents.propTypes = {
-  toc: PropTypes.array.isRequired,
-  handlePathHref: PropTypes.func.isRequired,
-  currentSpineIndexLabel: PropTypes.string,
+  epubObject: PropTypes.object.isRequired,
+  spineIndex: PropTypes.number.isRequired,
+  setProgress: PropTypes.func.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
 };

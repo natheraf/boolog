@@ -16,6 +16,7 @@ import { getStateValue } from "../../../api/IndexedDB/State";
 import { EpubFormatterV2 } from "./EpubFormatterV2";
 import { HistoryButtons } from "./HistoryButtons";
 import { SearchV2 } from "./SearchV2";
+import { TableOfContents } from "./TableOfContents";
 
 export const HeaderV2 = ({
   epubObject,
@@ -177,6 +178,21 @@ export const HeaderV2 = ({
               goToAndPreloadImages={setProgress}
               setForceFocus={setForceFocus}
             />
+            <TableOfContents
+              epubObject={epubObject}
+              spineIndex={spineIndex}
+              setProgress={setProgress}
+              setForceFocus={setProgress}
+            />
+            {/* <AnnotationViewer
+            spine={spine.current}
+            entryId={entryId}
+            clearTemporaryMarks={annotatorProps.clearTemporaryMarks}
+            notes={notes.current}
+            memos={epubObject.memos}
+            currentSpineIndex={spinePointer}
+            goToNote={annotatorProps.goToNote}
+          /> */}
             <EpubFormatterV2
               epubObject={epubObject}
               formatting={formatting}
@@ -186,45 +202,6 @@ export const HeaderV2 = ({
               setLoadedCSS={setLoadedCSS}
               setFormatMenuIsOpen={setFormatMenuIsOpen}
             />
-            {/* {previousSpineIndexAndPage !== null ? (
-            <Tooltip title="Back (b)">
-            <IconButton onClick={goBack}>
-            <ArrowBackIcon />
-            </IconButton>
-            </Tooltip>
-          ) : null}
-           
-          <SearchV2
-            spine={spine}
-            currentSpineIndex={spinePointer}
-            goToAndPreloadImages={searchV2Props.goToAndPreloadImages}
-            goToLinkFragment={searchV2Props.goToLinkFragment}
-            clearTemporaryMarks={searchV2Props.clearTemporaryMarks}
-          />
-          <AnnotationViewer
-            spine={spine.current}
-            entryId={entryId}
-            clearTemporaryMarks={annotatorProps.clearTemporaryMarks}
-            notes={notes.current}
-            memos={epubObject.memos}
-            currentSpineIndex={spinePointer}
-            goToNote={annotatorProps.goToNote}
-          />
-          <TableOfContents
-            toc={epubObject.toc}
-            handlePathHref={handlePathHref}
-            currentSpineIndexLabel={spine.current[spinePointer].label}
-          />
-          <ReaderFormat
-            formatting={formatterProp.formatting}
-            setFormatting={formatterProp.handleSetFormatting}
-            useGlobalFormatting={formatterProp.useGlobalFormatting}
-            setUseGlobalFormatting={formatterProp.setUseGlobalFormattingHelper}
-            useStandardFormatting={formatterProp.useStandardFormatting}
-            setUseStandardFormatting={
-              formatterProp.setUseStandardFormattingHelper
-            }
-          /> */}
           </Stack>
         </Toolbar>
       </AppBar>
