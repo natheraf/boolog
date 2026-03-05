@@ -162,7 +162,6 @@ export const processEpub = (epubObject) => {
         }
         node.style.objectFit = "scale-down";
         node.style.margin = "auto";
-        node.id = node.getAttribute("src");
         node.setAttribute("ogsrc", node.getAttribute("src"));
       } else if (tag === "image") {
         node.style.height = "100%";
@@ -171,10 +170,6 @@ export const processEpub = (epubObject) => {
           node.setAttribute("ogsrc", node.getAttribute("src"));
         node.getAttribute("href") &&
           node.setAttribute("oghref", node.getAttribute("href"));
-        node.id =
-          node.getAttribute("src") ||
-          node.getAttribute("href") ||
-          node.getAttribute("xlink:href");
       } else if (tag === "a") {
         node.setAttribute("linkto", node.getAttribute("href"));
         node.removeAttribute("href");
