@@ -299,52 +299,27 @@ export const EpubFormatEditor = ({
           </Paper>
         ))}
       <Paper sx={{ padding: 1 }}>
-        {view === "page" && (
-          <Stack
-            spacing={2}
-            alignItems={"center"}
-            justifyContent={"center"}
-            sx={{ padding: 1 }}
-          >
-            <Stack direction={"row"}>
-              <FormControlLabel
-                control={<Switch />}
-                checked={formatting.showArrows}
-                onChange={handleCheckedOnChange("showArrows")}
-                label="Show Arrows"
-                slotProps={{ typography: { variant: "subtitle2" } }}
-                labelPlacement="top"
-              />
-              <FormControlLabel
-                control={<Switch />}
-                checked={formatting.showDividers}
-                onChange={handleCheckedOnChange("showDividers")}
-                label="Show Edges"
-                slotProps={{ typography: { variant: "subtitle2" } }}
-                labelPlacement="top"
-              />
-            </Stack>
-          </Stack>
-        )}
         <Stack direction={"row"}>
-          <FormControlLabel
-            control={<Switch />}
-            checked={formatting.showPageNavigator}
-            onChange={handleCheckedOnChange("showPageNavigator")}
-            label="Show Pages on Top"
-            slotProps={{
-              typography: {
-                variant: "subtitle2",
-                sx: { textAlign: "center" },
-              },
-            }}
-            labelPlacement="top"
-          />
+          {view === "page" && (
+            <FormControlLabel
+              control={<Switch />}
+              checked={formatting.showPageNavigator}
+              onChange={handleCheckedOnChange("showPageNavigator")}
+              label="Show Pages on Right"
+              slotProps={{
+                typography: {
+                  variant: "subtitle2",
+                  sx: { textAlign: "center" },
+                },
+              }}
+              labelPlacement="top"
+            />
+          )}
           <FormControlLabel
             control={<Switch />}
             checked={formatting.showSpineNavigator}
             onChange={handleCheckedOnChange("showSpineNavigator")}
-            label="Show Chapters on Bottom"
+            label="Show Chapters on Left"
             slotProps={{
               typography: {
                 variant: "subtitle2",
