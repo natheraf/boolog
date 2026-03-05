@@ -146,7 +146,7 @@ export const PageView = ({
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   React.useEffect(() => {
     setTimeout(() => {
