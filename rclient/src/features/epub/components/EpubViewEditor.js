@@ -9,12 +9,14 @@ import {
 } from "@mui/material";
 import ViewCarouselIcon from "@mui/icons-material/ViewCarousel";
 import PanoramaVerticalIcon from "@mui/icons-material/PanoramaVertical";
+import { setStateValue } from "../../../api/IndexedDB/State";
 
 export const EpubViewEditor = ({ view, setView }) => {
   const handleOnChange = (_event, newView) => {
     if (newView === null) {
       return;
     }
+    setStateValue("epubView", newView);
     setView(newView);
   };
 
