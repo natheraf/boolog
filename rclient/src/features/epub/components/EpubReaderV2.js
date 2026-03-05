@@ -8,6 +8,7 @@ import { ViewRenderer } from "./ViewRenderer";
 import { loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { useTheme } from "@emotion/react";
+import { SpineNavigator } from "./SpineNavigator";
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
@@ -145,7 +146,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               flex: "1 1 auto",
               overflowY: "auto",
               width: "100%",
-              scrollbarColor: `${theme.palette.text.disabled} ${formatting.pageColor}`,
+              scrollbarColor: `${formatting.textColor} ${formatting.pageColor}`,
               scrollbarWidth: "thin",
             }}
           >
@@ -179,6 +180,14 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               </Stack>
             )}
           </Box>
+          {view === "page" && (
+            <SpineNavigator
+              epubObject={epubObject}
+              spineIndex={progress.spine}
+              formatting={formatting}
+              setProgress={setProgressHelper}
+            />
+          )}
         </Box>
       )}
     </Dialog>
