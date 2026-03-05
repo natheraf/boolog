@@ -88,107 +88,95 @@ export const ChapterNavigator = ({
 
   React.useEffect(() => {
     setArrayForPageNavigator([...new Array(getTotalPages()).keys()]);
-  }, [spineIndex, formatting]);
+  }, [spineIndex, currentPage, formatting]);
 
   return (
-    formatting.showPageNavigator && (
+    <Stack
+      sx={{
+        height: viewHeight,
+        overflow: "hidden",
+        maxWidth: `${chapterNavigateSize}px`,
+        minWidth: `${chapterNavigateSize}px`,
+        position: "absolute",
+        right: 0,
+        bottom: 0,
+        zIndex: 2,
+      }}
+      spacing={0.3}
+    >
+      {arrayForPreviousChapterNavigator.map((index) => (
+        <Tooltip key={index} title={`Part ${index + 1}`} placement="left" arrow>
+          <Box
+            onClick={() => {
+              handleBackChapterOnClick(index);
+            }}
+            sx={{
+              backgroundColor: `${theme.palette.primary.dark}`,
+              opacity: 0.4,
+              cursor: "pointer",
+              height: `${getChapterPartSizeInNav(index, "previous")}%`,
+              borderTopLeftRadius: "7px",
+              borderBottomLeftRadius: "7px",
+              position: "relative",
+              right: -3,
+            }}
+          />
+        </Tooltip>
+      ))}
       <Stack
-        sx={{
-          height: viewHeight,
-          overflow: "hidden",
-          maxWidth: `${chapterNavigateSize}px`,
-          minWidth: `${chapterNavigateSize}px`,
-          position: "absolute",
-          right: 0,
-          bottom: 0,
-          zIndex: 2,
-        }}
-        spacing={0.3}
+        sx={{ height: `${getChapterPartSizeInNav(spineIndex)}%` }}
+        spacing={0}
+        direction={"column"}
       >
-        {arrayForPreviousChapterNavigator.map((index) => (
-          <Tooltip
-            key={index}
-            title={`Part ${index + 1}`}
-            placement="left"
-            arrow
-          >
+        {arrayForPageNavigator.map((index) => (
+          <Tooltip key={index} title={`Pg ${index + 1}`} placement="left" arrow>
             <Box
-              onClick={() => {
-                handleBackChapterOnClick(index);
-              }}
+              onClick={() => handleCurrentChapterOnClick(index)}
               sx={{
-                backgroundColor: `${theme.palette.primary.dark}`,
-                opacity: 0.4,
+                backgroundColor: getCurrentPartColor(currentPage, index),
+                opacity: currentPage < index ? 0.3 : 0.4,
                 cursor: "pointer",
-                height: `${getChapterPartSizeInNav(index, "previous")}%`,
-                borderTopLeftRadius: "7px",
-                borderBottomLeftRadius: "7px",
+                height: "100%",
+                borderTopLeftRadius: "10px",
+                borderBottomLeftRadius: "10px",
+                borderBottom: `3px solid ${formatting.textColor}`,
                 position: "relative",
-                right: -3,
-              }}
-            />
-          </Tooltip>
-        ))}
-        <Stack
-          sx={{ height: `${getChapterPartSizeInNav(spineIndex)}%` }}
-          spacing={0}
-          direction={"column"}
-        >
-          {arrayForPageNavigator.map((index) => (
-            <Tooltip
-              key={index}
-              title={`Pg ${index + 1}`}
-              placement="left"
-              arrow
-            >
-              <Box
-                onClick={() => handleCurrentChapterOnClick(index)}
-                sx={{
-                  backgroundColor: getCurrentPartColor(currentPage, index),
-                  opacity: currentPage < index ? 0.3 : 0.4,
-                  cursor: "pointer",
-                  height: "100%",
-                  borderTopLeftRadius: "10px",
-                  borderBottomLeftRadius: "10px",
-                  borderBottom: `3px solid ${formatting.textColor}`,
-                  position: "relative",
-                }}
-              />
-            </Tooltip>
-          ))}
-        </Stack>
-        {arrayForNextChapterNavigator.map((index) => (
-          <Tooltip
-            key={index}
-            title={`Part ${
-              spine[spineIndex].backCount +
-              spine[spineIndex].frontCount +
-              1 -
-              (spine[spineIndex].frontCount - index) +
-              1
-            }`}
-            placement="left"
-            arrow
-          >
-            <Box
-              onClick={() => {
-                handleForwardChapterOnClick(index);
-              }}
-              sx={{
-                backgroundColor: `${formatting.textColor}`,
-                opacity: 0.2,
-                cursor: "pointer",
-                height: `${getChapterPartSizeInNav(index, "next")}%`,
-                borderTopLeftRadius: "7px",
-                borderBottomLeftRadius: "7px",
-                position: "relative",
-                right: -3,
               }}
             />
           </Tooltip>
         ))}
       </Stack>
-    )
+      {arrayForNextChapterNavigator.map((index) => (
+        <Tooltip
+          key={index}
+          title={`Part ${
+            spine[spineIndex].backCount +
+            spine[spineIndex].frontCount +
+            1 -
+            (spine[spineIndex].frontCount - index) +
+            1
+          }`}
+          placement="left"
+          arrow
+        >
+          <Box
+            onClick={() => {
+              handleForwardChapterOnClick(index);
+            }}
+            sx={{
+              backgroundColor: `${formatting.textColor}`,
+              opacity: 0.2,
+              cursor: "pointer",
+              height: `${getChapterPartSizeInNav(index, "next")}%`,
+              borderTopLeftRadius: "7px",
+              borderBottomLeftRadius: "7px",
+              position: "relative",
+              right: -3,
+            }}
+          />
+        </Tooltip>
+      ))}
+    </Stack>
   );
 };
 

@@ -132,15 +132,17 @@ export const PageView = ({
 
   return (
     <>
-      <ChapterNavigator
-        epubObject={epubObject}
-        spineIndex={spineIndex}
-        formatting={formatting}
-        setProgress={setProgress}
-        autoHide={autoHide}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-      />
+      {formatting.showPageNavigator && (
+        <ChapterNavigator
+          epubObject={epubObject}
+          spineIndex={spineIndex}
+          formatting={formatting}
+          setProgress={setProgress}
+          autoHide={autoHide}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
+      )}
       <SideButtons
         leftButtonOnClick={handlePreviousPage}
         rightButtonOnClick={handleNextPage}
