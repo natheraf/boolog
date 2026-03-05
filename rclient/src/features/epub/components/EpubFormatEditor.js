@@ -298,36 +298,36 @@ export const EpubFormatEditor = ({
             </Stack>
           </Paper>
         ))}
-      <Paper sx={{ padding: 1 }}>
-        <Stack direction={"row"}>
-          {view === "page" && (
-            <FormControlLabel
-              control={<Switch />}
-              checked={formatting.showPageNavigator}
-              onChange={handleCheckedOnChange("showPageNavigator")}
-              label="Show Pages on Right"
-              slotProps={{
-                typography: {
-                  variant: "subtitle2",
-                  sx: { textAlign: "center" },
-                },
-              }}
-              labelPlacement="top"
-            />
-          )}
+      <Paper sx={{ width: "100%", paddingRight: 3 }}>
+        <Stack direction={"column"}>
           <FormControlLabel
             control={<Switch />}
             checked={formatting.showSpineNavigator}
             onChange={handleCheckedOnChange("showSpineNavigator")}
             label="Show Chapters on Left"
-            slotProps={{
-              typography: {
-                variant: "subtitle2",
-                sx: { textAlign: "center" },
-              },
-            }}
-            labelPlacement="top"
+            slotProps={{ typography: { variant: "subtitle1" } }}
+            labelPlacement="start"
           />
+          {view === "page" && (
+            <>
+              <FormControlLabel
+                control={<Switch />}
+                checked={formatting.showPageNavigator}
+                onChange={handleCheckedOnChange("showPageNavigator")}
+                label="Show Pages on Right"
+                slotProps={{ typography: { variant: "subtitle1" } }}
+                labelPlacement="start"
+              />
+              <FormControlLabel
+                control={<Switch />}
+                checked={formatting.showDividers}
+                onChange={handleCheckedOnChange("showDividers")}
+                label="Show Edge"
+                slotProps={{ typography: { variant: "subtitle1" } }}
+                labelPlacement="start"
+              />
+            </>
+          )}
         </Stack>
       </Paper>
     </Stack>

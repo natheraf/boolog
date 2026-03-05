@@ -1,5 +1,5 @@
 import PropTypes from "prop-types";
-import { Box, Stack } from "@mui/material";
+import { Box, Divider, Stack } from "@mui/material";
 
 export const SideButtons = ({
   children,
@@ -7,6 +7,15 @@ export const SideButtons = ({
   rightButtonOnClick,
   formatting,
 }) => {
+  const dividerVisibility = formatting.showDividers ? "visible" : "hidden";
+  const showLeftDivider =
+    formatting.textAlign.value === "end" ||
+    formatting.textAlign.value === "center";
+  const showRightDivider =
+    formatting.textAlign.value === "start" ||
+    formatting.textAlign.value === "inherit" ||
+    formatting.textAlign.value === "center";
+
   return (
     <Stack
       direction="row"
@@ -22,11 +31,25 @@ export const SideButtons = ({
         sx={{
           width: "100%",
           height: "100%",
+          position: "relative",
           cursor: "pointer",
           zIndex: 1,
           backgroundColor: formatting.pageColor,
         }}
-      />
+      >
+        {showLeftDivider && (
+          <Divider
+            orientation="vertical"
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              visibility: dividerVisibility,
+              opacity: formatting.opacityOfSideElements,
+            }}
+          />
+        )}
+      </Box>
       {children}
       <Box
         id="next-page-button"
@@ -34,11 +57,25 @@ export const SideButtons = ({
         sx={{
           width: "100%",
           height: "100%",
+          position: "relative",
           cursor: "pointer",
           zIndex: 1,
           backgroundColor: formatting.pageColor,
         }}
-      />
+      >
+        {showRightDivider && (
+          <Divider
+            orientation="vertical"
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              visibility: dividerVisibility,
+              opacity: formatting.opacityOfSideElements,
+            }}
+          />
+        )}
+      </Box>
     </Stack>
   );
 };
