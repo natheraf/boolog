@@ -207,7 +207,7 @@ PageView.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   partProgress: PropTypes.number.isRequired,
-  forceFocus: PropTypes.object.isRequired,
+  forceFocus: PropTypes.object,
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
