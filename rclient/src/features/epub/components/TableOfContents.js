@@ -73,7 +73,7 @@ export const TableOfContents = ({
                   currentSpineIndexLabel === obj.label ? "bold" : "inherit",
                 color:
                   currentSpineIndexLabel === obj.label
-                    ? theme.palette.primary.main
+                    ? theme.palette.secondary.main
                     : "inherit",
               }}
             >
