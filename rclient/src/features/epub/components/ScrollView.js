@@ -56,13 +56,14 @@ export const ScrollView = ({
     const content = document.getElementById("content");
     const contentRect = content.getBoundingClientRect();
     const epubBodyScrollTop = epubBody.scrollTop;
-    const goPreviousChapter = epubBodyScrollTop <= 5;
+    const bufferToChangeChapters = sentinelsHeight * 0.05;
+    const goPreviousChapter = epubBodyScrollTop <= bufferToChangeChapters;
     const onFirstChapter = spineIndex === 0;
     const goNextChapter =
       contentRect.height +
         sentinelsHeight * (2 - +onFirstChapter) -
         (epubBodyScrollTop + window.innerHeight) <
-      5;
+      bufferToChangeChapters;
 
     if (
       (goPreviousChapter && spineIndex !== 0) ||
