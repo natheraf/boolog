@@ -1,9 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { SideButtons } from "./SideButtons";
 import { PageView } from "./PageView";
 import { ScrollView } from "./ScrollView";
-import { ContinuousScrollView } from "./ContinuousScrollView";
 import { SpineNavigator } from "./SpineNavigator";
 
 /**
@@ -49,6 +47,7 @@ export const ViewRenderer = ({
         setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
+        autoHide={autoHide}
       />,
     ],
   ]);

@@ -4,6 +4,7 @@ import { Box } from "@mui/material";
 import { SideButtons } from "./SideButtons";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
+import { ChapterNavigator } from "./ChapterNavigator";
 
 export const PageView = ({
   epubObject,
@@ -13,6 +14,7 @@ export const PageView = ({
   setForceFocus,
   formatting,
   setProgress,
+  autoHide,
 }) => {
   const spine = epubObject.spine;
   const spineIndexMap = epubObject.spineIndexMap;
@@ -129,41 +131,52 @@ export const PageView = ({
   }, [forceFocus, formatting]);
 
   return (
-    <SideButtons
-      leftButtonOnClick={handlePreviousPage}
-      rightButtonOnClick={handleNextPage}
-      formatting={formatting}
-    >
-      <Box
-        sx={{
-          height: "100%",
-          minWidth: `${pageWidth}px`,
-          maxWidth: `${pageWidth}px`,
-          overflow: "visible",
-        }}
+    <>
+      <ChapterNavigator
+        epubObject={epubObject}
+        spineIndex={spineIndex}
+        formatting={formatting}
+        setProgress={setProgress}
+        autoHide={autoHide}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
+      <SideButtons
+        leftButtonOnClick={handlePreviousPage}
+        rightButtonOnClick={handleNextPage}
+        formatting={formatting}
       >
         <Box
-          id="content"
-          className="content"
           sx={{
-            width: "100%",
             height: "100%",
-            columnFill: "balance",
-            columnGap: `${columnGap}px`,
-            columnWidth: `${
-              (pageWidth - columnGap * formatting.pagesShown) /
-              formatting.pagesShown
-            }px`,
-            transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
+            minWidth: `${pageWidth}px`,
+            maxWidth: `${pageWidth}px`,
+            overflow: "visible",
           }}
-          dangerouslySetInnerHTML={{
-            __html:
-              spine?.[spineIndex ?? -1]?.element ??
-              "something went wrong...<br/> spine.current is missing",
-          }}
-        />
-      </Box>
-    </SideButtons>
+        >
+          <Box
+            id="content"
+            className="content"
+            sx={{
+              width: "100%",
+              height: "100%",
+              columnFill: "balance",
+              columnGap: `${columnGap}px`,
+              columnWidth: `${
+                (pageWidth - columnGap * formatting.pagesShown) /
+                formatting.pagesShown
+              }px`,
+              transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
+            }}
+            dangerouslySetInnerHTML={{
+              __html:
+                spine?.[spineIndex ?? -1]?.element ??
+                "something went wrong...<br/> spine.current is missing",
+            }}
+          />
+        </Box>
+      </SideButtons>
+    </>
   );
 };
 
@@ -175,4 +188,5 @@ PageView.propTypes = {
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  autoHide: PropTypes.bool.isRequired,
 };
