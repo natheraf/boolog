@@ -1,11 +1,13 @@
 import PropTypes from "prop-types";
 import { Box, Stack, Tooltip } from "@mui/material";
+import { appBarHeight } from "./HeaderV2";
 
 export const SpineNavigator = ({
   epubObject,
   spineIndex,
   formatting,
   setProgress,
+  autoHide,
 }) => {
   const arrayForSpineNavigator = epubObject.chapterMeta;
   const spineNavigateSize = 10;
@@ -14,13 +16,19 @@ export const SpineNavigator = ({
     setProgress(spineIndex, 0);
   };
 
+  const viewHeight = window.innerHeight - appBarHeight * +!autoHide;
+
   return formatting.showSpineNavigator ? (
     <Stack
       sx={{
-        height: "100%",
+        height: viewHeight,
         overflow: "hidden",
         maxWidth: `${spineNavigateSize}px`,
         minWidth: `${spineNavigateSize}px`,
+        position: "absolute",
+        left: 0,
+        bottom: 0,
+        zIndex: 2,
       }}
       direction={"column"}
     >
@@ -48,4 +56,5 @@ SpineNavigator.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  autoHide: PropTypes.bool.isRequired,
 };

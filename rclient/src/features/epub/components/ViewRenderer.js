@@ -4,6 +4,7 @@ import { SideButtons } from "./SideButtons";
 import { PageView } from "./PageView";
 import { ScrollView } from "./ScrollView";
 import { ContinuousScrollView } from "./ContinuousScrollView";
+import { SpineNavigator } from "./SpineNavigator";
 
 /**
  * Content state manager: progress
@@ -20,6 +21,7 @@ export const ViewRenderer = ({
   setProgress,
   view,
   formatMenuIsOpen,
+  autoHide,
 }) => {
   const viewMap = new Map([
     [
@@ -51,7 +53,18 @@ export const ViewRenderer = ({
     ],
   ]);
 
-  return (view && viewMap.get(view)) ?? null;
+  return (
+    <>
+      <SpineNavigator
+        epubObject={epubObject}
+        spineIndex={spineIndex}
+        formatting={formatting}
+        setProgress={setProgress}
+        autoHide={autoHide}
+      />
+      {(view && viewMap.get(view)) ?? null}
+    </>
+  );
 };
 
 ViewRenderer.propTypes = {
@@ -64,4 +77,5 @@ ViewRenderer.propTypes = {
   setProgress: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
   formatMenuIsOpen: PropTypes.bool.isRequired,
+  autoHide: PropTypes.bool.isRequired,
 };
