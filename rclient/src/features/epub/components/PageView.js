@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Box } from "@mui/material";
+import { Box, Fade } from "@mui/material";
 import { SideButtons } from "./SideButtons";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
@@ -146,35 +146,37 @@ export const PageView = ({
         rightButtonOnClick={handleNextPage}
         formatting={formatting}
       >
-        <Box
-          sx={{
-            height: "100%",
-            minWidth: `${pageWidth}px`,
-            maxWidth: `${pageWidth}px`,
-            overflow: "visible",
-          }}
-        >
+        <Fade in={true} timeout={200}>
           <Box
-            id="content"
-            className="content"
             sx={{
-              width: "100%",
               height: "100%",
-              columnFill: "balance",
-              columnGap: `${columnGap}px`,
-              columnWidth: `${
-                (pageWidth - columnGap * formatting.pagesShown) /
-                formatting.pagesShown
-              }px`,
-              transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
+              minWidth: `${pageWidth}px`,
+              maxWidth: `${pageWidth}px`,
+              overflow: "visible",
             }}
-            dangerouslySetInnerHTML={{
-              __html:
-                spine?.[spineIndex ?? -1]?.element ??
-                "something went wrong...<br/> spine.current is missing",
-            }}
-          />
-        </Box>
+          >
+            <Box
+              id="content"
+              className="content"
+              sx={{
+                width: "100%",
+                height: "100%",
+                columnFill: "balance",
+                columnGap: `${columnGap}px`,
+                columnWidth: `${
+                  (pageWidth - columnGap * formatting.pagesShown) /
+                  formatting.pagesShown
+                }px`,
+                transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
+              }}
+              dangerouslySetInnerHTML={{
+                __html:
+                  spine?.[spineIndex ?? -1]?.element ??
+                  "something went wrong...<br/> spine.current is missing",
+              }}
+            />
+          </Box>
+        </Fade>
       </SideButtons>
     </>
   );
