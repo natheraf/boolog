@@ -183,7 +183,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
                 alignItems="center"
                 justifyContent="center"
               >
-                <CircularProgress />
+                <CircularProgress disableShrink />
               </Stack>
             )}
           </Box>
