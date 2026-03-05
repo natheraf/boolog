@@ -12,11 +12,12 @@ import {
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import PropTypes from "prop-types";
-import { getStateValue } from "../../../api/IndexedDB/State";
 import { EpubFormatterV2 } from "./EpubFormatterV2";
 import { HistoryButtons } from "./HistoryButtons";
 import { SearchV2 } from "./SearchV2";
 import { TableOfContents } from "./TableOfContents";
+
+export const appBarHeight = 48;
 
 export const HeaderV2 = ({
   epubObject,
@@ -33,15 +34,15 @@ export const HeaderV2 = ({
   setLoadedCSS,
   setFormatMenuIsOpen,
   setForceFocus,
+  autoHide,
+  setAutoHide,
 }) => {
   const { title, subtitle } = {};
-  const appBarHeight = 48;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [show, setShow] = React.useState(true);
   const showRef = React.useRef(false);
   const showTimeoutId = React.useRef(null);
-  const [autoHide, setAutoHide] = React.useState(false);
   const mouseDown = React.useRef(false);
 
   const handleSetShow = (value) => {
@@ -97,23 +98,20 @@ export const HeaderV2 = ({
 
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
-    getStateValue("epubHeaderAutoHide").then((autoHide) => {
-      if (autoHide) {
-        epubBody.addEventListener("mousemove", onMouseMove);
-        epubBody.addEventListener("touchend", handleTouchEnd);
-        window.addEventListener("mouseup", onMouseUp);
-        window.addEventListener("mousedown", onMouseDown);
-        handleSetShow(false);
-        setAutoHide(true);
-      }
-    });
+    if (autoHide) {
+      epubBody.addEventListener("mousemove", onMouseMove);
+      epubBody.addEventListener("touchend", handleTouchEnd);
+      window.addEventListener("mouseup", onMouseUp);
+      window.addEventListener("mousedown", onMouseDown);
+      handleSetShow(false);
+    }
     return () => {
       epubBody.removeEventListener("mousemove", onMouseMove);
       epubBody.removeEventListener("touchend", handleTouchEnd);
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("mousedown", onMouseDown);
     };
-  }, []);
+  }, [autoHide]);
 
   return (
     <Slide direction="down" in={show}>
@@ -224,4 +222,6 @@ HeaderV2.propTypes = {
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
   setForceFocus: PropTypes.func.isRequired,
+  autoHide: PropTypes.bool.isRequired,
+  setAutoHide: PropTypes.func.isRequired,
 };

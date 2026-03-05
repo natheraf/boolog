@@ -8,7 +8,6 @@ import { ViewRenderer } from "./ViewRenderer";
 import { loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { useTheme } from "@emotion/react";
-import { SpineNavigator } from "./SpineNavigator";
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
@@ -99,9 +98,14 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     }
   };
 
+  const [autoHide, setAutoHide] = React.useState(false);
+
   React.useEffect(() => {
     prepareSpineIndex(progress.spine);
-    getStateValue("epubView").then(setView);
+    getStateValue("epubHeaderAutoHide").then((autoHide) => {
+      setAutoHide(autoHide);
+      getStateValue("epubView").then(setView);
+    });
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
     };
@@ -138,56 +142,51 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             setLoadedCSS={setLoadedCSS}
             setFormatMenuIsOpen={setFormatMenuIsOpen}
             setForceFocus={setForceFocus}
+            autoHide={autoHide}
+            setAutoHide={setAutoHide}
           />
-          <Stack direction={"row"} sx={{ overflow: "hidden", height: "100%" }}>
-            <SpineNavigator
-              epubObject={epubObject}
-              spineIndex={progress.spine}
-              formatting={formatting}
-              setProgress={setProgressHelper}
-            />
-            <Box
-              id="epub-body"
-              sx={{
-                backgroundColor: formatting.pageColor,
-                flex: "1 1 auto",
-                overflowY: "auto",
-                width: "100%",
-                scrollbarColor: `${formatting.textColor} ${formatting.pageColor}`,
-                scrollbarWidth: "thin",
-              }}
-            >
-              {loadedCSS &&
-              (progress.spine === 0 ||
-                preparedSpineIndexes.includes(progress.spine - 1)) &&
-              preparedSpineIndexes.includes(progress.spine) &&
-              (progress.spine + 1 === spine.length ||
-                preparedSpineIndexes.includes(progress.spine + 1)) ? (
-                <ViewRenderer
-                  epubObject={epubObject}
-                  spineIndex={progress.spine}
-                  partProgress={progress.part}
-                  forceFocus={forceFocus}
-                  setForceFocus={setForceFocus}
-                  formatting={formatting}
-                  setProgress={setProgressHelper}
-                  view={view}
-                  formatMenuIsOpen={formatMenuIsOpen}
-                />
-              ) : (
-                <Stack
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                  }}
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <CircularProgress />
-                </Stack>
-              )}
-            </Box>
-          </Stack>
+          <Box
+            id="epub-body"
+            sx={{
+              backgroundColor: formatting.pageColor,
+              flex: "1 1 auto",
+              overflowY: "auto",
+              width: "100%",
+              scrollbarColor: `${formatting.textColor} ${formatting.pageColor}`,
+              scrollbarWidth: "thin",
+            }}
+          >
+            {loadedCSS &&
+            (progress.spine === 0 ||
+              preparedSpineIndexes.includes(progress.spine - 1)) &&
+            preparedSpineIndexes.includes(progress.spine) &&
+            (progress.spine + 1 === spine.length ||
+              preparedSpineIndexes.includes(progress.spine + 1)) ? (
+              <ViewRenderer
+                epubObject={epubObject}
+                spineIndex={progress.spine}
+                partProgress={progress.part}
+                forceFocus={forceFocus}
+                setForceFocus={setForceFocus}
+                formatting={formatting}
+                setProgress={setProgressHelper}
+                view={view}
+                formatMenuIsOpen={formatMenuIsOpen}
+                autoHide={autoHide}
+              />
+            ) : (
+              <Stack
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                }}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <CircularProgress />
+              </Stack>
+            )}
+          </Box>
         </Box>
       )}
     </Dialog>

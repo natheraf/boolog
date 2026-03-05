@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Box, Slide, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
+import { appBarHeight } from "./HeaderV2";
 
 export const ScrollView = ({
   epubObject,
@@ -79,9 +80,6 @@ export const ScrollView = ({
 
     timeOutToSetProgress.current = setTimeout(() => {
       const appBar = document.getElementById("appBar");
-      const isAppBarHiding = appBar.style.visibility === "hidden";
-      const appBarHeight =
-        appBar.getBoundingClientRect().height * +!isAppBarHiding;
       const includeAppBarHeight = -contentRect.top + appBarHeight;
       const percentage = includeAppBarHeight / contentRect.height;
       const avoidNegatives = Math.max(0, percentage);
