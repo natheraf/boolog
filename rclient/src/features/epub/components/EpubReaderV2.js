@@ -8,6 +8,7 @@ import { ViewRenderer } from "./ViewRenderer";
 import { loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { useTheme } from "@emotion/react";
+import { AnnotatorV2 } from "./AnnotatorV2";
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
@@ -16,6 +17,7 @@ import { useTheme } from "@emotion/react";
  */
 export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   const theme = useTheme();
+  const spine = epubObject.spine;
   const timeOutToSetProgress = React.useRef(null);
   const [progress, setProgress] = React.useState({
     spine: epubObject.progress.spine,
@@ -35,6 +37,13 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   const [formatMenuIsOpen, setFormatMenuIsOpen] = React.useState(false);
 
   const [loadedCSS, setLoadedCSS] = React.useState(false);
+
+  const [preparedSpineIndexes, setPreparedSpineIndexes] = React.useState([]);
+  const imageObjectURLs = React.useRef(new Map());
+
+  const [autoHide, setAutoHide] = React.useState(false);
+
+  const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
 
   console.log(epubObject);
   const handleClose = () => {
@@ -78,10 +87,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     }, 500);
   };
 
-  const spine = epubObject.spine;
-  const [preparedSpineIndexes, setPreparedSpineIndexes] = React.useState([]);
-  const imageObjectURLs = React.useRef(new Map());
-
   const prepareSpineIndex = (spineIndex) => {
     for (
       let index = Math.max(0, spineIndex - 1);
@@ -97,8 +102,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       );
     }
   };
-
-  const [autoHide, setAutoHide] = React.useState(false);
 
   React.useEffect(() => {
     prepareSpineIndex(progress.spine);
@@ -187,6 +190,12 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               </Stack>
             )}
           </Box>
+          <AnnotatorV2
+            epubObject={epubObject}
+            spineIndex={progress.spine}
+            anchorEl={annotatorAnchorEl}
+            setAnchorEl={setAnnotatorAnchorEl}
+          />
         </Box>
       )}
     </Dialog>

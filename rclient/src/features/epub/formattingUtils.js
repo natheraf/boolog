@@ -188,3 +188,22 @@ export const justifyIcons = new Map([
   ["center", FormatAlignCenterIcon],
   ["justify", FormatAlignJustifyIcon],
 ]);
+
+export const formatMemoKey = (key) => {
+  if (!key) {
+    return null;
+  }
+  key = key.toLowerCase();
+  const apostrophes = ["’", "'", "ʼ"];
+  for (const char of apostrophes) {
+    if (
+      (key.lastIndexOf("s") === key.length - 2 &&
+        key.lastIndexOf(char) === key.length - 1) ||
+      (key.lastIndexOf("s") === key.length - 1 &&
+        key.lastIndexOf(char) === key.length - 2)
+    ) {
+      key = key.substring(0, key.lastIndexOf(char));
+    }
+  }
+  return key;
+};
