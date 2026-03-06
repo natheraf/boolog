@@ -95,12 +95,14 @@ export const putFormattingStyleElement = (theme, formatting) => {
   return styleId;
 };
 
-export const putHighlightStyles = () => {
+export const putHighlightStyles = (color, backgroundColor) => {
   const highlightStyles = `
       .temporary-mark, .mark {
         all: unset !important;
         font-size: inherit !important; 
         font-weight: inherit !important;
+        color: ${color} !important;
+        background-color: ${backgroundColor} !important;
       }
     `;
   const styleId = `epub-css-highlight-styles`;

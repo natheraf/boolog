@@ -85,6 +85,16 @@ export const EpubFormatterV2 = ({
   };
 
   React.useEffect(() => {
+    const styleId = putHighlightStyles(
+      formatting.pageColor,
+      formatting.textColor
+    );
+    if (!stylingElementIds.current.includes(styleId)) {
+      stylingElementIds.current.push(styleId);
+    }
+  }, [formatting]);
+
+  React.useEffect(() => {
     for (const [key, value] of Object.entries(epubObject.css)) {
       const styleElement = document.createElement("style");
       styleElement.id = `epub-css-${key}`;
@@ -92,7 +102,6 @@ export const EpubFormatterV2 = ({
       document.head.insertAdjacentElement("beforeend", styleElement);
       stylingElementIds.current.push(styleElement.id);
     }
-    stylingElementIds.current.push(putHighlightStyles());
     const initialPreset = epubObject.formattingPreset;
     setEpubPreset(initialPreset);
     const formattingWithPreset = getFormattingWithPreset(

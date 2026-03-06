@@ -156,22 +156,22 @@ export const SearchV2 = ({
 
   const searchResultHandleOnClick = (searchResult) => () => {
     goToAndPreloadImages(searchResult.spineIndex, 0);
-    waitForElement(`[nodeid='${searchResult.startContainerId}']`).then(() => {
-      const range = searchResult;
-      range.startContainer = document.querySelector(
-        `[nodeId="${range.startContainerId}"]`
-      );
-      range.endContainer = document.querySelector(
-        `[nodeId="${range.endContainerId}"]`
-      );
-      handleInjectingMarkToEpubNodes(
-        document,
-        null,
-        range,
-        defaultHighlightColor,
-        "temporary-mark"
-      );
-      waitForElement(".temporary-mark").then((element) => {
+    waitForElement(`[nodeid='${searchResult.startContainerId}']`).then(
+      (element) => {
+        const range = searchResult;
+        range.startContainer = document.querySelector(
+          `[nodeId="${range.startContainerId}"]`
+        );
+        range.endContainer = document.querySelector(
+          `[nodeId="${range.endContainerId}"]`
+        );
+        handleInjectingMarkToEpubNodes(
+          document,
+          null,
+          range,
+          "",
+          "temporary-mark"
+        );
         element.id = getNewId();
         const forceFocus = {
           type: "element",
@@ -179,8 +179,8 @@ export const SearchV2 = ({
           attributeValue: element.id,
         };
         setForceFocus(forceFocus);
-      });
-    });
+      }
+    );
     handleClose();
   };
 
