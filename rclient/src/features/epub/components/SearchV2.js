@@ -168,7 +168,7 @@ export const SearchV2 = ({
         document,
         null,
         range,
-        defaultHighlightColor,
+        "",
         "temporary-mark"
       );
       waitForElement(".temporary-mark").then((element) => {
