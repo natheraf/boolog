@@ -1,7 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { Backdrop, Box, Menu } from "@mui/material";
+import { Backdrop, Box, Menu, Stack } from "@mui/material";
 import {
   clearTemporaryMarks,
   getFirstTextNode,
@@ -11,6 +11,9 @@ import {
   waitForElements,
 } from "../domUtils";
 import { formatMemoKey } from "../formattingUtils";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import StickyNote2Icon from "@mui/icons-material/StickyNote2";
+import { AnnotatorLeftSideBar } from "./AnnotatorLeftSideBar";
 
 export const AnnotatorV2 = ({
   epubObject,
@@ -22,7 +25,6 @@ export const AnnotatorV2 = ({
   const noteIdAttribute = "noteid";
   const annotatorWidth = 300;
   const annotatorHeight = 300;
-  const tabPanelHeight = 30;
 
   const memos = epubObject.memos;
   const notes = epubObject.notes;
@@ -35,8 +37,11 @@ export const AnnotatorV2 = ({
 
   const memo = React.useRef(null);
 
-  const [currentTab, setCurrentTab] = React.useState(null);
-  const tabValueMap = ["note", "memo"];
+  const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
+  const optionTabs = [
+    { title: "Note", icon: BorderColorIcon, value: "note" },
+    { title: "Memo", icon: StickyNote2Icon, value: "memo" },
+  ];
 
   const [noteValue, setNoteValue] = React.useState(
     notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.note ?? ""
@@ -66,11 +71,12 @@ export const AnnotatorV2 = ({
   const chooseTabForSelectedString = (selectedString) => {
     return selectedString.includes(" ") &&
       selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
-      ? tabValueMap.indexOf("note")
-      : tabValueMap.indexOf("memo");
+      ? optionTabs.findIndex((entry) => entry.value === "note")
+      : optionTabs.findIndex((entry) => entry.value === "memo");
   };
 
   const handleOnChangeTab = (event, value) => {
+    setCurrentTabIndex(value);
     return;
     const textArea = document.getElementById("annotator-text-area");
     setTimeout(() => {
@@ -82,7 +88,6 @@ export const AnnotatorV2 = ({
         );
       }
     });
-    setCurrentTab(value);
   };
 
   const handleCloseAnnotator = () => {
@@ -208,7 +213,7 @@ export const AnnotatorV2 = ({
               element.getBoundingClientRect().width
             ))
         );
-        if (topSpace > bottomSpace) {
+        if (bottomSpace < annotatorHeight * 1.1) {
           appearTop.current = true;
           setAnchorEl(topElement);
         } else {
@@ -228,12 +233,12 @@ export const AnnotatorV2 = ({
   };
 
   React.useEffect(() => {
-    document.addEventListener("mousedown", clearTemporaryMarks);
+    // document.addEventListener("mousedown", clearTemporaryMarks);
     document.addEventListener("mouseup", handleGetTextSelection);
     // document.addEventListener("touchend", handleTouchSelect);
     document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
-      document.removeEventListener("mousedown", clearTemporaryMarks);
+      // document.removeEventListener("mousedown", clearTemporaryMarks);
       document.removeEventListener("mouseup", handleGetTextSelection);
       // document.removeEventListener("touchend", handleTouchSelect);
       document.removeEventListener("touchstart", clearTemporaryMarks);
@@ -241,7 +246,10 @@ export const AnnotatorV2 = ({
   }, []);
 
   return (
-    <Backdrop open={openAnnotator}>
+    <Backdrop
+      open={openAnnotator}
+      sx={{ zIndex: 1 /** to show above side buttons */ }}
+    >
       {anchorEl && (
         <Menu
           id="annotator-menu"
@@ -252,19 +260,27 @@ export const AnnotatorV2 = ({
             vertical: getVerticalOffset(),
             horizontal: getHorizontalOffset(),
           }}
-          // transformOrigin={{
-          //   vertical:
-          //     (anchorEl?.getBoundingClientRect()?.top ??
-          //       selectionRect?.top ??
-          //       0) > Math.floor(window.innerHeight / 2)
-          //       ? "bottom"
-          //       : "top",
-          //   horizontal: "center",
-          // }}
+          slotProps={{
+            paper: {
+              sx: {
+                overflow: "visible",
+              },
+            },
+          }}
         >
-          <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
-            test
-          </Box>
+          <Stack
+            direction={"row"}
+            sx={{ position: "relative", overflow: "visible" }}
+          >
+            <AnnotatorLeftSideBar
+              optionTabs={optionTabs}
+              currentTabIndex={currentTabIndex}
+              setCurrentTabIndex={setCurrentTabIndex}
+            />
+            <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
+              test
+            </Box>
+          </Stack>
         </Menu>
       )}
     </Backdrop>
