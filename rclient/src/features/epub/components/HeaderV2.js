@@ -165,6 +165,7 @@ export const HeaderV2 = ({
           </Stack>
           <Stack spacing={1} direction={"row"}>
             <HistoryButtons
+              epubObject={epubObject}
               history={history}
               historyIndex={historyIndex}
               setHistoryIndex={setHistoryIndex}
