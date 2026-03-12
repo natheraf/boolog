@@ -14,6 +14,7 @@ export const PageView = ({
   setForceFocus,
   formatting,
   setProgress,
+  setProgressWithoutAddingHistory,
   autoHide,
 }) => {
   const spine = epubObject.spine;
@@ -108,7 +109,12 @@ export const PageView = ({
   React.useEffect(() => {
     const abortController = new AbortController();
     attachOnClickListenersToLinkElements(
-      handlePathHref(spineIndex, spineIndexMap, setProgress, setForceFocus),
+      handlePathHref(
+        spineIndex,
+        spineIndexMap,
+        setProgressWithoutAddingHistory,
+        setForceFocus
+      ),
       abortController.signal
     );
     return () => {
@@ -192,5 +198,6 @@ PageView.propTypes = {
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setProgressWithoutAddingHistory: PropTypes.func.isRequired,
   autoHide: PropTypes.bool.isRequired,
 };

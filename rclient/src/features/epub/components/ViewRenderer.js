@@ -17,6 +17,7 @@ export const ViewRenderer = ({
   setForceFocus,
   formatting,
   setProgress,
+  setProgressWithoutAddingHistory,
   view,
   formatMenuIsOpen,
   autoHide,
@@ -33,6 +34,7 @@ export const ViewRenderer = ({
         setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
+        setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
         formatMenuIsOpen={formatMenuIsOpen}
       />,
     ],
@@ -47,6 +49,7 @@ export const ViewRenderer = ({
         setForceFocus={setForceFocus}
         formatting={formatting}
         setProgress={setProgress}
+        setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
         autoHide={autoHide}
       />,
     ],
@@ -74,6 +77,7 @@ ViewRenderer.propTypes = {
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setProgressWithoutAddingHistory: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
   formatMenuIsOpen: PropTypes.bool.isRequired,
   autoHide: PropTypes.bool.isRequired,

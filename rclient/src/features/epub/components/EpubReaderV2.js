@@ -50,15 +50,21 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     setOpenEpubReader(false);
   };
 
-  const handleHistoryChange = (spine, part, keepForwardHistory) => {
-    if (keepForwardHistory) {
-      setForceFocus({ type: "partProgress" });
+  const handleHistoryChange = (
+    spine,
+    part,
+    isHistoryEntry,
+    doNotAddToHistory
+  ) => {
+    if (isHistoryEntry) {
+      return setForceFocus({ type: "partProgress" });
     }
     const newHistoryEntryIsNotDuplicateOfPrevious =
       history[historyIndex]?.spine !== spine ||
       history[historyIndex]?.part !== part;
     if (
-      keepForwardHistory !== true &&
+      isHistoryEntry !== true &&
+      doNotAddToHistory !== true &&
       newHistoryEntryIsNotDuplicateOfPrevious
     ) {
       const newHistoryArray = [
@@ -70,14 +76,19 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     }
   };
 
-  const setProgressHelper = (spine, part, keepForwardHistory) => {
+  const setProgressHelper = (
+    spine,
+    part,
+    isHistoryEntry = false,
+    doNotAddToHistory = false
+  ) => {
     console.log(spine, part);
     epubObject.progress.spine = spine;
     epubObject.progress.part = part;
     prepareSpineIndex(spine);
     setForceFocus(null);
     setProgress({ spine, part });
-    handleHistoryChange(spine, part, keepForwardHistory);
+    handleHistoryChange(spine, part, isHistoryEntry, doNotAddToHistory);
     clearTimeout(timeOutToSetProgress.current);
     timeOutToSetProgress.current = setTimeout(() => {
       updateEpubDataInDotNotation({
@@ -85,6 +96,14 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
         progress: { spine, part },
       });
     }, 500);
+  };
+
+  const setProgressIsHistoryEntry = (spine, part) => {
+    setProgressHelper(spine, part, true);
+  };
+
+  const setProgressWithoutAddingHistory = (spine, part) => {
+    setProgressHelper(spine, part, false, true);
   };
 
   const prepareSpineIndex = (spineIndex) => {
@@ -142,6 +161,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             historyIndex={historyIndex}
             setHistoryIndex={setHistoryIndex}
             setProgress={setProgressHelper}
+            setProgressIsHistoryEntry={setProgressIsHistoryEntry}
+            setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
             setLoadedCSS={setLoadedCSS}
             setFormatMenuIsOpen={setFormatMenuIsOpen}
             setForceFocus={setForceFocus}
@@ -173,6 +194,9 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
                 setForceFocus={setForceFocus}
                 formatting={formatting}
                 setProgress={setProgressHelper}
+                setProgressWithoutAddingHistory={
+                  setProgressWithoutAddingHistory
+                }
                 view={view}
                 formatMenuIsOpen={formatMenuIsOpen}
                 autoHide={autoHide}

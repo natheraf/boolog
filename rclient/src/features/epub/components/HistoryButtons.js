@@ -43,7 +43,7 @@ export const HistoryButtons = ({
       );
     }
     const progressObject = history[historyIndex + 1];
-    setProgress(progressObject.spine, progressObject.part, true);
+    setProgress(progressObject.spine, progressObject.part);
     setHistoryIndex(historyIndex + 1);
   };
   const handleBackOnClick = (event) => {
@@ -57,7 +57,7 @@ export const HistoryButtons = ({
       );
     }
     const progressObject = history[historyIndex - 1];
-    setProgress(progressObject.spine, progressObject.part, true);
+    setProgress(progressObject.spine, progressObject.part);
     setHistoryIndex(historyIndex - 1);
   };
 
@@ -70,7 +70,7 @@ export const HistoryButtons = ({
       newHistoryIndex = historyIndex + (index + 1);
     }
     const progressObject = history[newHistoryIndex];
-    setProgress(progressObject.spine, progressObject.part, true);
+    setProgress(progressObject.spine, progressObject.part);
     setHistoryIndex(newHistoryIndex);
   };
 

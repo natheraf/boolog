@@ -31,6 +31,8 @@ export const HeaderV2 = ({
   historyIndex,
   setHistoryIndex,
   setProgress,
+  setProgressIsHistoryEntry,
+  setProgressWithoutAddingHistory,
   setLoadedCSS,
   setFormatMenuIsOpen,
   setForceFocus,
@@ -169,18 +171,18 @@ export const HeaderV2 = ({
               history={history}
               historyIndex={historyIndex}
               setHistoryIndex={setHistoryIndex}
-              setProgress={setProgress}
+              setProgress={setProgressIsHistoryEntry}
             />
             <SearchV2
               epubObject={epubObject}
               currentSpineIndex={spineIndex}
-              goToAndPreloadImages={setProgress}
+              goToAndPreloadImages={setProgressWithoutAddingHistory}
               setForceFocus={setForceFocus}
             />
             <TableOfContents
               epubObject={epubObject}
               spineIndex={spineIndex}
-              setProgress={setProgress}
+              setProgress={setProgressWithoutAddingHistory}
               setForceFocus={setForceFocus}
             />
             {/* <AnnotationViewer
@@ -220,6 +222,8 @@ HeaderV2.propTypes = {
   historyIndex: PropTypes.number.isRequired,
   setHistoryIndex: PropTypes.func.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setProgressIsHistoryEntry: PropTypes.func.isRequired,
+  setProgressWithoutAddingHistory: PropTypes.func.isRequired,
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
   setForceFocus: PropTypes.func.isRequired,

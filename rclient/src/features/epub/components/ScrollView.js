@@ -13,6 +13,7 @@ export const ScrollView = ({
   setForceFocus,
   formatting,
   setProgress,
+  setProgressWithoutAddingHistory,
   formatMenuIsOpen,
 }) => {
   const epubBody = document.getElementById("epub-body");
@@ -128,7 +129,12 @@ export const ScrollView = ({
     if (formatMenuIsOpen === false) {
       abortController = new AbortController();
       attachOnClickListenersToLinkElements(
-        handlePathHref(spineIndex, spineIndexMap, setProgress, setForceFocus),
+        handlePathHref(
+          spineIndex,
+          spineIndexMap,
+          setProgressWithoutAddingHistory,
+          setForceFocus
+        ),
         abortController.signal
       );
       timeoutId = setTimeout(() => {
@@ -219,5 +225,6 @@ ScrollView.propTypes = {
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setProgressWithoutAddingHistory: PropTypes.func.isRequired,
   formatMenuIsOpen: PropTypes.bool.isRequired,
 };
