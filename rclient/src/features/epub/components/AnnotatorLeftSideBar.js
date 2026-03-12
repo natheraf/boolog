@@ -57,7 +57,7 @@ export const AnnotatorLeftSideBar = ({
 };
 
 AnnotatorLeftSideBar.propTypes = {
-  optionTabs: PropTypes.object.isRequired,
+  optionTabs: PropTypes.array.isRequired,
   currentTabIndex: PropTypes.number.isRequired,
   setCurrentTabIndex: PropTypes.func.isRequired,
 };
