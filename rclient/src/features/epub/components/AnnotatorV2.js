@@ -143,11 +143,18 @@ export const AnnotatorV2 = ({
       }
 
       let startOffset = range.startOffset;
-      while (range.startContainer.textContent[startOffset] === " ") {
+      const startTextContent = range.startContainer.textContent;
+      while (
+        startOffset < startTextContent.length &&
+        startTextContent[startOffset] === " "
+      ) {
         startOffset += 1;
       }
       let endOffset = range.endOffset;
-      while (range.endContainer.textContent[endOffset - 1] === " ") {
+      while (
+        endOffset > 0 &&
+        range.endContainer.textContent[endOffset - 1] === " "
+      ) {
         endOffset -= 1;
       }
 
@@ -285,4 +292,11 @@ export const AnnotatorV2 = ({
       )}
     </Backdrop>
   );
+};
+
+AnnotatorV2.propTypes = {
+  epubObject: PropTypes.object.isRequired,
+  spineIndex: PropTypes.number.isRequired,
+  anchorEl: PropTypes.element,
+  setAnchorEl: PropTypes.func.isRequired,
 };
