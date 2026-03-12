@@ -1,6 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Box, Fade } from "@mui/material";
+import { Box, CircularProgress, Fade, Stack } from "@mui/material";
 import { SideButtons } from "./SideButtons";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
@@ -122,6 +122,8 @@ export const PageView = ({
     };
   });
 
+  const [isLoading, setIsLoading] = React.useState(true);
+
   React.useEffect(() => {
     setTimeout(() => {
       // setTimeout executes after images are rendered.
@@ -133,12 +135,32 @@ export const PageView = ({
       if (forceFocus?.type === "partProgress") {
         setForceFocus(null);
       }
+      setIsLoading(false);
     });
   }, [forceFocus, formatting]);
 
   return (
     <>
-      {formatting.showPageNavigator && (
+      {isLoading && (
+        <Stack
+          sx={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            top: 0,
+            left: 0,
+            zIndex: 1,
+            backgroundColor: formatting.pageColor,
+          }}
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Fade in={true} timeout={200}>
+            <CircularProgress disableShrink />
+          </Fade>
+        </Stack>
+      )}
+      {formatting.showPageNavigator && !isLoading && (
         <ChapterNavigator
           epubObject={epubObject}
           spineIndex={spineIndex}
@@ -154,37 +176,35 @@ export const PageView = ({
         rightButtonOnClick={handleNextPage}
         formatting={formatting}
       >
-        <Fade in={true} timeout={200}>
+        <Box
+          sx={{
+            height: "100%",
+            minWidth: `${pageWidth}px`,
+            maxWidth: `${pageWidth}px`,
+            overflow: "visible",
+          }}
+        >
           <Box
+            id="content"
+            className="content"
             sx={{
+              width: "100%",
               height: "100%",
-              minWidth: `${pageWidth}px`,
-              maxWidth: `${pageWidth}px`,
-              overflow: "visible",
+              columnFill: "balance",
+              columnGap: `${columnGap}px`,
+              columnWidth: `${
+                (pageWidth - columnGap * formatting.pagesShown) /
+                formatting.pagesShown
+              }px`,
+              transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
             }}
-          >
-            <Box
-              id="content"
-              className="content"
-              sx={{
-                width: "100%",
-                height: "100%",
-                columnFill: "balance",
-                columnGap: `${columnGap}px`,
-                columnWidth: `${
-                  (pageWidth - columnGap * formatting.pagesShown) /
-                  formatting.pagesShown
-                }px`,
-                transform: `translate(-${currentPage * (pageWidth + columnGap)}px);`,
-              }}
-              dangerouslySetInnerHTML={{
-                __html:
-                  spine?.[spineIndex ?? -1]?.element ??
-                  "something went wrong...<br/> spine.current is missing",
-              }}
-            />
-          </Box>
-        </Fade>
+            dangerouslySetInnerHTML={{
+              __html:
+                spine?.[spineIndex ?? -1]?.element ??
+                "something went wrong...<br/> spine.current is missing",
+            }}
+          />
+        </Box>
       </SideButtons>
     </>
   );
