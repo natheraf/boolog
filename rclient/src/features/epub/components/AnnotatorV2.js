@@ -4,15 +4,11 @@ import { useTheme } from "@emotion/react";
 import { Backdrop, Box, Divider, Menu, Stack, Typography } from "@mui/material";
 import {
   clearTemporaryMarks,
-  getActualEndContainer,
-  getFirstTextNode,
-  getLastTextNode,
-  getPreviousTextNode,
   handleInjectingMarkToEpubNodes,
-  handleInjectingMarkToTextNodes,
-  getTrimmedSelectedRange,
+  trimSelectedRange,
   waitForElements,
   getNearestEpubAncestor,
+  setRangeToTextNodesOnly,
 } from "../domUtils";
 import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
@@ -120,76 +116,33 @@ export const AnnotatorV2 = ({
     const selectedString = window.getSelection()?.toString()?.trim();
     if (openAnnotator === false && selectedString?.length > 0) {
       const selection = window.getSelection();
-      const epubAnchorNode = getNearestEpubAncestor(selection.anchorNode);
-      const epubFocusNode = getNearestEpubAncestor(selection.focusNode);
-      if (
-        !epubAnchorNode ||
-        !epubFocusNode ||
-        !(
-          epubAnchorNode.getAttribute("nodeid") &&
-          epubAnchorNode.classList.contains("epub-node")
-        ) ||
-        !(
-          epubFocusNode.getAttribute("nodeid") &&
-          epubFocusNode.classList.contains("epub-node")
-        )
-      ) {
+      clearTemporaryMarks();
+      let range = selection.getRangeAt(0);
+      if (range.endOffset === 0 && range.endContainer instanceof HTMLElement) {
+        selection.modify("extend", "backward", "character");
+      }
+      if (range.collapsed) {
+        range.setEnd(selection.anchorNode, selection.anchorOffset);
+        range.setStart(selection.focusNode, selection.focusOffset);
+      }
+      range = selection.getRangeAt(0);
+      selection.empty();
+      setRangeToTextNodesOnly(range);
+      const content = document.getElementById("content");
+      const startContainerInContent = content.contains(range.startContainer);
+      const endContainerInContent = content.contains(range.endContainer);
+      if (!startContainerInContent || !endContainerInContent) {
         return;
       }
-      clearTemporaryMarks();
-      selectedText.current = selectedString;
-      // removes possessive form
-      textInMemoKeyFormat.current = formatMemoKey(selectedString);
-      memo.current = memos[textInMemoKeyFormat.current]?.memo ?? "";
-      // if 2 spaces, probably a note
-      handleOnChangeTab(null, chooseTabForSelectedString(selectedString));
-      setHighlightColor(null);
-      setNoteValue("");
 
-      const range = selection.getRangeAt(0);
-      const selectedRange = {
-        startContainer: range.startContainer,
-        startOffset: range.startOffset,
-        endContainer: range.endContainer,
-        endOffset: range.endOffset,
-      };
-      selection.empty();
+      trimSelectedRange(range);
 
-      // fix bug if element ends with br (or an html element)
-      if (selectedRange.endContainer instanceof HTMLElement) {
-        if (
-          selectedRange.endContainer !== selectedRange.startContainer &&
-          selectedRange.endContainer.contains(selectedRange.startContainer)
-        ) {
-          const lastNode = getLastTextNode(selectedRange.endContainer);
-          selectedRange.endContainer = lastNode;
-          selectedRange.endOffset = lastNode.length;
-        } else {
-          const firstNode = getFirstTextNode(selectedRange.endContainer);
-          selectedRange.endContainer = firstNode;
-          selectedRange.endOffset = 0;
-        }
-      }
+      const startNode = range.startContainer;
+      const endNode = range.endContainer;
+      let startContainerParent = getNearestEpubAncestor(startNode);
+      let endContainerParent = getNearestEpubAncestor(endNode);
 
-      const [trimmedStartOffset, trimmedEndOffset] =
-        getTrimmedSelectedRange(selectedRange);
-      selectedRange.startOffset = trimmedStartOffset;
-      selectedRange.endOffset = trimmedEndOffset;
-
-      const startNode = selectedRange.startContainer;
-      const endNode = selectedRange.endContainer;
-      let startContainerParent = startNode.parentElement;
-      while (startContainerParent.classList.contains("epub-node") === false) {
-        startContainerParent = startContainerParent.parentElement;
-      }
-      selectedRange.startContainer = startContainerParent;
-      let endContainerParent = endNode.parentElement;
-      while (endContainerParent.classList.contains("epub-node") === false) {
-        endContainerParent = endContainerParent.parentElement;
-      }
-      selectedRange.endContainer = endContainerParent;
-
-      let startOffsetFromParent = selectedRange.startOffset;
+      let startOffsetFromParent = range.startOffset;
       let walker = document.createTreeWalker(
         startContainerParent,
         NodeFilter.SHOW_TEXT
@@ -201,9 +154,8 @@ export const AnnotatorV2 = ({
         }
         startOffsetFromParent += textNode.textContent.length;
       }
-      selectedRange.startOffset = startOffsetFromParent;
 
-      let endOffsetFromParent = selectedRange.endOffset;
+      let endOffsetFromParent = range.endOffset;
       walker = document.createTreeWalker(
         endContainerParent,
         NodeFilter.SHOW_TEXT
@@ -215,10 +167,22 @@ export const AnnotatorV2 = ({
         }
         endOffsetFromParent += textNode.textContent.length;
       }
-      selectedRange.endOffset = endOffsetFromParent;
 
-      [selectedRange.endContainer, selectedRange.endOffset] =
-        getActualEndContainer(selectedRange);
+      const selectedRange = {
+        startContainer: startContainerParent,
+        startOffset: startOffsetFromParent,
+        endContainer: endContainerParent,
+        endOffset: endOffsetFromParent,
+      };
+
+      selectedText.current = selectedString;
+      // removes possessive form
+      textInMemoKeyFormat.current = formatMemoKey(selectedString);
+      memo.current = memos[textInMemoKeyFormat.current]?.memo ?? "";
+      // if 2 spaces, probably a note
+      handleOnChangeTab(null, chooseTabForSelectedString(selectedString));
+      setHighlightColor(null);
+      setNoteValue("");
 
       selectedRangeIndexed.current = {
         startContainerId: selectedRange.startContainer.getAttribute("nodeid"),
@@ -251,10 +215,10 @@ export const AnnotatorV2 = ({
         );
         if (bottomSpace < annotatorHeight * 1.1) {
           appearTop.current = true;
-          setAnchorEl(topElement);
+          setAnchorEl(getNearestEpubAncestor(topElement));
         } else {
           appearTop.current = false;
-          setAnchorEl(bottomElement);
+          setAnchorEl(getNearestEpubAncestor(bottomElement));
         }
       });
     }

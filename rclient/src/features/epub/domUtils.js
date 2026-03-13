@@ -411,7 +411,7 @@ export const clearTemporaryMarks = () => {
   }
 };
 
-export const getTrimmedSelectedRange = (range) => {
+export const trimSelectedRange = (range) => {
   let startOffset = range.startOffset;
   const startTextContent = range.startContainer.textContent;
   while (
@@ -427,7 +427,8 @@ export const getTrimmedSelectedRange = (range) => {
   ) {
     endOffset -= 1;
   }
-  return [startOffset, endOffset];
+  range.setStart(range.startContainer, startOffset);
+  range.setEnd(range.endContainer, endOffset);
 };
 
 export const getActualEndContainer = (range) => {
@@ -453,3 +454,71 @@ export const getActualEndContainer = (range) => {
 
   return [endContainer, endOffset];
 };
+
+export const setRangeToTextNodesOnly = (range) => {
+  const content = document.getElementById("content");
+  if (range.endContainer instanceof HTMLElement) {
+    let previousEpubNodeTextNode = null;
+    let walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      if (
+        [Node.DOCUMENT_POSITION_PRECEDING].includes(
+          textNode.compareDocumentPosition(range.endContainer)
+        )
+      ) {
+        break;
+      }
+      if (getNearestEpubAncestor(textNode)) {
+        previousEpubNodeTextNode = textNode;
+      }
+    }
+    range.setEnd(previousEpubNodeTextNode, previousEpubNodeTextNode.length);
+  }
+};
+
+// export const setRangeToTextNodesOnly = (range) => {
+//   // triple clicking to highlight the last paragraph
+//   const content = document.getElementById("content");
+//   if (!content.contains(range.endContainer)) {
+//     console.log(1);
+//     const epubNodes = [...document.getElementsByClassName("epub-node")];
+//     const lastNode = epubNodes.at(-1);
+//     const textNode = getLastTextNode(lastNode);
+//     return range.setEnd(textNode, textNode.length);
+//   }
+//   if (
+//     range.endContainer instanceof HTMLElement &&
+//     range.endContainer !== range.startContainer &&
+//     range.endContainer.contains(range.startContainer)
+//   ) {
+//     console.log(2);
+//     // if there are <br/>(s) at the end of the node;
+//     const textNode = getLastTextNode(range.endContainer);
+//     range.setEnd(textNode, textNode.length);
+//   } else if (
+//     range.endContainer instanceof HTMLElement &&
+//     getFirstTextNode(range.endContainer)
+//   ) {
+//     console.log(3);
+//     const textNode = getFirstTextNode(range.endContainer);
+//     range.setEnd(textNode, 0);
+//   } else if (range.endContainer instanceof HTMLElement) {
+//     let previousEpubNodeTextNode = null;
+//     let walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+//     while (walker.nextNode()) {
+//       const textNode = walker.currentNode;
+//       if (
+//         textNode.compareDocumentPosition(range.endContainer) ===
+//         Node.DOCUMENT_POSITION_PRECEDING
+//       ) {
+//         break;
+//       }
+//       if (getNearestEpubAncestor(textNode)) {
+//         previousEpubNodeTextNode = textNode;
+//         console.log(previousEpubNodeTextNode);
+//       }
+//     }
+//     range.setEnd(previousEpubNodeTextNode, previousEpubNodeTextNode.length);
+//   }
+// };
