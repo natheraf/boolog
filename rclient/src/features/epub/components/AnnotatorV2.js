@@ -82,7 +82,6 @@ export const AnnotatorV2 = ({
         return "top";
       }
     } else {
-      console.log("test");
       return "top";
     }
   };

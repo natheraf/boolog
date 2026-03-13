@@ -34,7 +34,6 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
   };
 
   const handleReactColorOnChange = (color) => {
-    console.log(color);
     setHighlightColor(
       `rgba(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b}, ${color.rgb.a})`
     );
