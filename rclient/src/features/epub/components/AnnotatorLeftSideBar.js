@@ -1,8 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { Divider, Stack, Tooltip, Typography } from "@mui/material";
+import { Stack, Tooltip } from "@mui/material";
 import { useTheme } from "@emotion/react";
-import { HtmlTooltip } from "../../CustomComponents";
 
 export const AnnotatorLeftSideBar = ({
   optionTabs,
@@ -34,8 +33,8 @@ export const AnnotatorLeftSideBar = ({
       }}
     >
       {optionTabs.map((option, index) => (
-        <HtmlTooltip
-          title={option.htmlTooltipTitle}
+        <Tooltip
+          title={option.title}
           key={option.title}
           placement="left"
           enterDelay={300}
@@ -59,7 +58,7 @@ export const AnnotatorLeftSideBar = ({
           >
             <option.icon />
           </Stack>
-        </HtmlTooltip>
+        </Tooltip>
       ))}
     </Stack>
   );

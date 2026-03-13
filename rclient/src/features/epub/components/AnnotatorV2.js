@@ -45,44 +45,8 @@ export const AnnotatorV2 = ({
 
   const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
   const optionTabs = [
-    {
-      title: "Note",
-      icon: BorderColorIcon,
-      value: "note",
-      htmlTooltipTitle: (
-        <Stack spacing={1}>
-          <Typography variant="h6">{"Notes"}</Typography>
-          <Typography variant="subtitle2">{"Can be left empty."}</Typography>
-          <Divider />
-          <Typography>{"Highlight"}</Typography>
-          <Typography variant="subtitle2">
-            {
-              "If no highlight color is selected and a note is written, the highlight will be transparent."
-            }
-          </Typography>
-        </Stack>
-      ),
-    },
-    {
-      title: "Memo",
-      icon: StickyNote2Icon,
-      value: "memo",
-      htmlTooltipTitle: (
-        <Stack spacing={1}>
-          <Typography variant="h6">{"Memos"}</Typography>
-          <Typography variant="subtitle2">
-            {"Memos appear in every occurrence of a word/phrase"}
-          </Typography>
-          <Divider />
-          <Typography>{"Usage"}</Typography>
-          <Typography variant="subtitle2">
-            {
-              "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
-            }
-          </Typography>
-        </Stack>
-      ),
-    },
+    { title: "Note", icon: BorderColorIcon, value: "note" },
+    { title: "Memo", icon: StickyNote2Icon, value: "memo" },
   ];
 
   const [noteValue, setNoteValue] = React.useState(
