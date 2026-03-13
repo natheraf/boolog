@@ -143,7 +143,6 @@ export const AnnotatorV2 = ({
   const handleGetTextSelection = () => {
     const selectedString = window.getSelection()?.toString()?.trim();
     if (openAnnotator === false && selectedString?.length > 0) {
-      clearTemporaryMarks();
       const selection = window.getSelection();
       const epubAnchorNode = getNearestEpubAncestor(selection.anchorNode);
       const epubFocusNode = getNearestEpubAncestor(selection.focusNode);
@@ -161,6 +160,7 @@ export const AnnotatorV2 = ({
       ) {
         return;
       }
+      clearTemporaryMarks();
       selectedText.current = selectedString;
       // removes possessive form
       textInMemoKeyFormat.current = formatMemoKey(selectedString);
