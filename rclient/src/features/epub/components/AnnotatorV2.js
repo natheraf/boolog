@@ -19,6 +19,7 @@ import BorderColorIcon from "@mui/icons-material/BorderColor";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import { AnnotatorLeftSideBar } from "./AnnotatorLeftSideBar";
 import { AnnotatorNotes } from "./AnnotatorNotes";
+import { AnnotatorMemos } from "./AnnotatorMemos";
 
 export const AnnotatorV2 = ({
   epubObject,
@@ -300,7 +301,7 @@ export const AnnotatorV2 = ({
               {optionTabs[currentTabIndex].value === "note" ? (
                 <AnnotatorNotes selectedText={selectedText.current} />
               ) : (
-                "test"
+                <AnnotatorMemos selectedText={selectedText.current} />
               )}
             </Box>
           </Stack>

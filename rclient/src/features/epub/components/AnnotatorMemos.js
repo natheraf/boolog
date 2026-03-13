@@ -16,19 +16,18 @@ import { Textarea } from "../../../components/Textarea";
 import CheckIcon from "@mui/icons-material/Check";
 import HelpIcon from "@mui/icons-material/Help";
 
-export const AnnotatorNotes = ({ selectedText }) => {
-  const [note, setNote] = React.useState("");
-  const [highlightColor, setHighlightColor] = React.useState(null);
+export const AnnotatorMemos = ({ selectedText }) => {
+  const [memo, setMemo] = React.useState("");
   const [copySuccess, setCopySuccess] = React.useState(false);
   const copySuccessTimeout = React.useRef(null);
-  const [showNotesHelp, setShowNotesHelp] = React.useState(false);
+  const [showMemosHelp, setShowMemosHelp] = React.useState(false);
 
   const handleClear = () => {
-    setNote("");
+    setMemo("");
   };
 
   const handleTextAreaOnChange = (event) => {
-    setNote(event?.target?.value ?? "");
+    setMemo(event?.target?.value ?? "");
   };
 
   const handleCopySelectedText = () => {
@@ -47,14 +46,14 @@ export const AnnotatorNotes = ({ selectedText }) => {
     }
   };
 
-  const handleOnClickNotesHelp = () => {
-    setShowNotesHelp((prev) => !prev);
+  const handleOnClickMemosHelp = () => {
+    setShowMemosHelp((prev) => !prev);
   };
 
   React.useEffect(() => {
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
-    const annotatorNodes = document.getElementById("annotator-notes");
+    const annotatorNodes = document.getElementById("annotator-memos");
     annotatorNodes.addEventListener("keydown", handleOnKeyDown);
     return () => {
       annotatorNodes.removeEventListener("keydown", handleOnKeyDown);
@@ -63,7 +62,7 @@ export const AnnotatorNotes = ({ selectedText }) => {
 
   return (
     <Stack
-      id="annotator-notes"
+      id="annotator-memos"
       sx={{
         width: "100%",
         padding: 1,
@@ -74,25 +73,25 @@ export const AnnotatorNotes = ({ selectedText }) => {
         <HtmlTooltip
           title={
             <Stack spacing={1}>
-              <Typography variant="h6">{"Notes"}</Typography>
+              <Typography variant="h6">{"Memos"}</Typography>
               <Typography variant="subtitle2">
-                {"Can be left empty."}
+                {"Memos appear in every occurrence of a word/phrase"}
               </Typography>
               <Divider />
-              <Typography>{"Highlight"}</Typography>
+              <Typography>{"Usage"}</Typography>
               <Typography variant="subtitle2">
                 {
-                  "If no highlight color is selected and a note is written, the highlight will be transparent."
+                  "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
                 }
               </Typography>
             </Stack>
           }
-          open={showNotesHelp}
+          open={showMemosHelp}
           placement="top"
         >
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h5">Notes</Typography>
-            <IconButton size="small" onClick={handleOnClickNotesHelp}>
+            <Typography variant="h5">Memos</Typography>
+            <IconButton size="small" onClick={handleOnClickMemosHelp}>
               <HelpIcon fontSize="small" htmlColor={"gray"} />
             </IconButton>
           </Stack>
@@ -109,7 +108,7 @@ export const AnnotatorNotes = ({ selectedText }) => {
               )}
             </IconButton>
           </Tooltip>
-          {note.length > 0 || highlightColor ? (
+          {memo.length > 0 ? (
             <Tooltip placement="top" title={"Clear"}>
               <IconButton onClick={handleClear}>
                 <DeleteIcon fontSize="small" />
@@ -142,7 +141,7 @@ export const AnnotatorNotes = ({ selectedText }) => {
       <Divider />
       <Textarea
         id="annotator-text-area"
-        value={note}
+        value={memo}
         onChange={handleTextAreaOnChange}
         onKeyDown={(event) => event.stopPropagation()}
         sx={{
@@ -165,4 +164,4 @@ export const AnnotatorNotes = ({ selectedText }) => {
   );
 };
 
-AnnotatorNotes.propTypes = {};
+AnnotatorMemos.propTypes = {};
