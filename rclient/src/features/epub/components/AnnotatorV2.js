@@ -66,12 +66,24 @@ export const AnnotatorV2 = ({
   const getVerticalOffset = () => {
     if (anchorEl) {
       if (appearTop.current) {
-        return -annotatorHeight - 20;
+        return -10;
       } else {
         return (anchorElRect?.height ?? 0) + 10;
       }
     } else {
-      return -20;
+      return -10;
+    }
+  };
+  const getVerticalOrigin = () => {
+    if (anchorEl) {
+      if (appearTop.current) {
+        return "bottom";
+      } else {
+        return "top";
+      }
+    } else {
+      console.log("test");
+      return "top";
     }
   };
 
@@ -279,6 +291,9 @@ export const AnnotatorV2 = ({
           anchorOrigin={{
             vertical: getVerticalOffset(),
             horizontal: getHorizontalOffset(),
+          }}
+          transformOrigin={{
+            vertical: getVerticalOrigin(),
           }}
           slotProps={{
             paper: {
