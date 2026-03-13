@@ -4,11 +4,15 @@ import { useTheme } from "@emotion/react";
 import { Backdrop, Box, Menu, Stack } from "@mui/material";
 import {
   clearTemporaryMarks,
+  getActualEndContainer,
   getFirstTextNode,
   getLastTextNode,
   getPreviousTextNode,
+  handleInjectingMarkToEpubNodes,
   handleInjectingMarkToTextNodes,
+  getTrimmedSelectedRange,
   waitForElements,
+  getNearestEpubAncestor,
 } from "../domUtils";
 import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
@@ -25,6 +29,7 @@ export const AnnotatorV2 = ({
   const noteIdAttribute = "noteid";
   const annotatorWidth = 300;
   const annotatorHeight = 300;
+  const highlightMouseUpTimeout = 200;
 
   const memos = epubObject.memos;
   const notes = epubObject.notes;
@@ -95,20 +100,38 @@ export const AnnotatorV2 = ({
     setAnchorEl(null);
   };
 
+  const mouseUpTimeout = React.useRef(null);
+
+  const clearMouseUpTimeout = () => {
+    clearTimeout(mouseUpTimeout.current);
+  };
+
+  const handleUpDown = () => {
+    clearMouseUpTimeout();
+    mouseUpTimeout.current = setTimeout(
+      handleGetTextSelection,
+      highlightMouseUpTimeout
+    );
+  };
+
   const handleGetTextSelection = () => {
     const selectedString = window.getSelection()?.toString()?.trim();
     if (openAnnotator === false && selectedString?.length > 0) {
       clearTemporaryMarks();
       const selection = window.getSelection();
-      let focusNode = selection.focusNode;
-      if (selection.focusOffset === 0) {
-        focusNode = getPreviousTextNode(focusNode);
-      }
+      const epubAnchorNode = getNearestEpubAncestor(selection.anchorNode);
+      const epubFocusNode = getNearestEpubAncestor(selection.focusNode);
       if (
-        (!selection.anchorNode.parentElement.getAttribute("nodeid") &&
-          !selection.anchorNode.parentElement.classList.contains("mark")) ||
-        (!focusNode.parentElement.getAttribute("nodeid") &&
-          !focusNode.parentElement.classList.contains("mark"))
+        !epubAnchorNode ||
+        !epubFocusNode ||
+        !(
+          epubAnchorNode.getAttribute("nodeid") &&
+          epubAnchorNode.classList.contains("epub-node")
+        ) ||
+        !(
+          epubFocusNode.getAttribute("nodeid") &&
+          epubFocusNode.classList.contains("epub-node")
+        )
       ) {
         return;
       }
@@ -122,57 +145,49 @@ export const AnnotatorV2 = ({
       setNoteValue("");
 
       const range = selection.getRangeAt(0);
-      if (range.collapsed) {
-        range.setEnd(selection.anchorNode, selection.anchorOffset);
-        range.setStart(selection.focusNode, selection.focusOffset);
-      }
+      const selectedRange = {
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+        endContainer: range.endContainer,
+        endOffset: range.endOffset,
+      };
       selection.empty();
 
-      // fix bug if element ends with br or user double click and highlights to the end of element
-      if (range.endContainer instanceof HTMLElement) {
+      // fix bug if element ends with br (or an html element)
+      if (selectedRange.endContainer instanceof HTMLElement) {
         if (
-          range.endContainer !== range.startContainer &&
-          range.endContainer.contains(range.startContainer)
+          selectedRange.endContainer !== selectedRange.startContainer &&
+          selectedRange.endContainer.contains(selectedRange.startContainer)
         ) {
-          const lastNode = getLastTextNode(range.endContainer);
-          range.setEnd(lastNode, lastNode.length);
+          const lastNode = getLastTextNode(selectedRange.endContainer);
+          selectedRange.endContainer = lastNode;
+          selectedRange.endOffset = lastNode.length;
         } else {
-          const firstNode = getFirstTextNode(range.endContainer);
-          range.setEnd(firstNode, 0);
+          const firstNode = getFirstTextNode(selectedRange.endContainer);
+          selectedRange.endContainer = firstNode;
+          selectedRange.endOffset = 0;
         }
       }
 
-      let startOffset = range.startOffset;
-      const startTextContent = range.startContainer.textContent;
-      while (
-        startOffset < startTextContent.length &&
-        startTextContent[startOffset] === " "
-      ) {
-        startOffset += 1;
-      }
-      let endOffset = range.endOffset;
-      while (
-        endOffset > 0 &&
-        range.endContainer.textContent[endOffset - 1] === " "
-      ) {
-        endOffset -= 1;
-      }
+      const [trimmedStartOffset, trimmedEndOffset] =
+        getTrimmedSelectedRange(selectedRange);
+      selectedRange.startOffset = trimmedStartOffset;
+      selectedRange.endOffset = trimmedEndOffset;
 
-      range.setStart(range.startContainer, startOffset);
-      range.setEnd(range.endContainer, endOffset);
-
-      const startNode = range.startContainer;
-      const endNode = range.endContainer;
+      const startNode = selectedRange.startContainer;
+      const endNode = selectedRange.endContainer;
       let startContainerParent = startNode.parentElement;
       while (startContainerParent.classList.contains("epub-node") === false) {
         startContainerParent = startContainerParent.parentElement;
       }
+      selectedRange.startContainer = startContainerParent;
       let endContainerParent = endNode.parentElement;
       while (endContainerParent.classList.contains("epub-node") === false) {
         endContainerParent = endContainerParent.parentElement;
       }
+      selectedRange.endContainer = endContainerParent;
 
-      let startOffsetFromParent = startOffset;
+      let startOffsetFromParent = selectedRange.startOffset;
       let walker = document.createTreeWalker(
         startContainerParent,
         NodeFilter.SHOW_TEXT
@@ -184,8 +199,9 @@ export const AnnotatorV2 = ({
         }
         startOffsetFromParent += textNode.textContent.length;
       }
+      selectedRange.startOffset = startOffsetFromParent;
 
-      let endOffsetFromParent = endOffset;
+      let endOffsetFromParent = selectedRange.endOffset;
       walker = document.createTreeWalker(
         endContainerParent,
         NodeFilter.SHOW_TEXT
@@ -197,11 +213,22 @@ export const AnnotatorV2 = ({
         }
         endOffsetFromParent += textNode.textContent.length;
       }
+      selectedRange.endOffset = endOffsetFromParent;
 
-      handleInjectingMarkToTextNodes(
+      [selectedRange.endContainer, selectedRange.endOffset] =
+        getActualEndContainer(selectedRange);
+
+      selectedRangeIndexed.current = {
+        startContainerId: selectedRange.startContainer.getAttribute("nodeid"),
+        startOffset: selectedRange.startOffset,
+        endContainerId: selectedRange.endContainer.getAttribute("nodeid"),
+        endOffset: selectedRange.endOffset,
+      };
+
+      handleInjectingMarkToEpubNodes(
         document,
         null,
-        range,
+        selectedRange,
         "",
         "temporary-mark"
       );
@@ -228,25 +255,20 @@ export const AnnotatorV2 = ({
           setAnchorEl(bottomElement);
         }
       });
-
-      selectedRangeIndexed.current = {
-        startContainerId: startContainerParent.getAttribute("nodeid"),
-        startOffset: startOffsetFromParent,
-        endContainerId: endContainerParent.getAttribute("nodeid"),
-        endOffset: endOffsetFromParent,
-      };
-      selectedRange.current = range;
     }
   };
 
   React.useEffect(() => {
     // document.addEventListener("mousedown", clearTemporaryMarks);
-    document.addEventListener("mouseup", handleGetTextSelection);
+    document.addEventListener("mouseup", handleUpDown);
+    document.addEventListener("mousedown", clearMouseUpTimeout);
     // document.addEventListener("touchend", handleTouchSelect);
     document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       // document.removeEventListener("mousedown", clearTemporaryMarks);
-      document.removeEventListener("mouseup", handleGetTextSelection);
+      document.removeEventListener("mouseup", handleUpDown);
+      clearTimeout(mouseUpTimeout.current);
+      document.removeEventListener("mousedown", clearMouseUpTimeout);
       // document.removeEventListener("touchend", handleTouchSelect);
       document.removeEventListener("touchstart", clearTemporaryMarks);
     };
@@ -297,6 +319,6 @@ export const AnnotatorV2 = ({
 AnnotatorV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
-  anchorEl: PropTypes.element,
+  anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,
 };

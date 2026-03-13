@@ -300,9 +300,13 @@ export const getLastTextNode = (node) => {
   return lastNode;
 };
 
-const getNearestEpubAncestor = (node) => {
+export const getNearestEpubAncestor = (node) => {
   let it = node;
-  while (it !== null && it.classList?.contains("epub-node") === false) {
+  while (
+    it &&
+    (it.nodeType !== Node.ELEMENT_NODE ||
+      it.classList.contains("epub-node") === false)
+  ) {
     it = it.parentElement;
   }
   return it;
@@ -364,7 +368,7 @@ export const trimAndHighlight = (
 
 export const getPreviousTextNode = (node) => {
   do {
-    if (node.previousElementSibling !== null) {
+    if (node.previousElementSibling) {
       node = node.previousElementSibling;
     } else {
       while (node.previousElementSibling === null) {
@@ -405,4 +409,47 @@ export const clearTemporaryMarks = () => {
       document.getElementsByClassName("temporary-mark")
     );
   }
+};
+
+export const getTrimmedSelectedRange = (range) => {
+  let startOffset = range.startOffset;
+  const startTextContent = range.startContainer.textContent;
+  while (
+    startOffset < startTextContent.length &&
+    startTextContent[startOffset] === " "
+  ) {
+    startOffset += 1;
+  }
+  let endOffset = range.endOffset;
+  while (
+    endOffset > 0 &&
+    range.endContainer.textContent[endOffset - 1] === " "
+  ) {
+    endOffset -= 1;
+  }
+  return [startOffset, endOffset];
+};
+
+export const getActualEndContainer = (range) => {
+  let { endContainer, endOffset, startContainer } = range;
+
+  let it = endContainer;
+  let deepestCommonAncestor = endContainer;
+  while (!deepestCommonAncestor.contains(startContainer)) {
+    it = deepestCommonAncestor;
+    deepestCommonAncestor = deepestCommonAncestor.parentElement;
+  }
+
+  if (endOffset === 0 && endContainer) {
+    it = it.previousElementSibling;
+    if (it) {
+      endContainer = it;
+      endOffset = it.textContent.length;
+    } else if (endContainer.parentNode) {
+      endContainer = endContainer.parentNode;
+      endOffset = endContainer.textContent.length;
+    }
+  }
+
+  return [endContainer, endOffset];
 };
