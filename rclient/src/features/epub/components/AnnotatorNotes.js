@@ -15,6 +15,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { Textarea } from "../../../components/Textarea";
 import CheckIcon from "@mui/icons-material/Check";
 import HelpIcon from "@mui/icons-material/Help";
+import { SimpleColorPickerV2 } from "./SimpleColorPickerV2";
 
 export const AnnotatorNotes = ({ selectedText }) => {
   const [note, setNote] = React.useState("");
@@ -25,6 +26,7 @@ export const AnnotatorNotes = ({ selectedText }) => {
 
   const handleClear = () => {
     setNote("");
+    setHighlightColor(null);
   };
 
   const handleTextAreaOnChange = (event) => {
@@ -152,6 +154,10 @@ export const AnnotatorNotes = ({ selectedText }) => {
           },
         }}
         minRows={3}
+      />
+      <SimpleColorPickerV2
+        highlightColor={highlightColor}
+        setHighlightColor={setHighlightColor}
       />
       {/* {tabValueMap[currentTabValue] === "note" && (
             <SimpleColorPicker
