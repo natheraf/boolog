@@ -1,7 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { Backdrop, Box, Menu, Stack } from "@mui/material";
+import { Backdrop, Box, Divider, Menu, Stack, Typography } from "@mui/material";
 import {
   clearTemporaryMarks,
   getActualEndContainer,
@@ -18,6 +18,7 @@ import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import { AnnotatorLeftSideBar } from "./AnnotatorLeftSideBar";
+import { AnnotatorNotes } from "./AnnotatorNotes";
 
 export const AnnotatorV2 = ({
   epubObject,
@@ -44,8 +45,44 @@ export const AnnotatorV2 = ({
 
   const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
   const optionTabs = [
-    { title: "Note", icon: BorderColorIcon, value: "note" },
-    { title: "Memo", icon: StickyNote2Icon, value: "memo" },
+    {
+      title: "Note",
+      icon: BorderColorIcon,
+      value: "note",
+      htmlTooltipTitle: (
+        <Stack spacing={1}>
+          <Typography variant="h6">{"Notes"}</Typography>
+          <Typography variant="subtitle2">{"Can be left empty."}</Typography>
+          <Divider />
+          <Typography>{"Highlight"}</Typography>
+          <Typography variant="subtitle2">
+            {
+              "If no highlight color is selected and a note is written, the highlight will be transparent."
+            }
+          </Typography>
+        </Stack>
+      ),
+    },
+    {
+      title: "Memo",
+      icon: StickyNote2Icon,
+      value: "memo",
+      htmlTooltipTitle: (
+        <Stack spacing={1}>
+          <Typography variant="h6">{"Memos"}</Typography>
+          <Typography variant="subtitle2">
+            {"Memos appear in every occurrence of a word/phrase"}
+          </Typography>
+          <Divider />
+          <Typography>{"Usage"}</Typography>
+          <Typography variant="subtitle2">
+            {
+              "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
+            }
+          </Typography>
+        </Stack>
+      ),
+    },
   ];
 
   const [noteValue, setNoteValue] = React.useState(
@@ -80,19 +117,8 @@ export const AnnotatorV2 = ({
       : optionTabs.findIndex((entry) => entry.value === "memo");
   };
 
-  const handleOnChangeTab = (event, value) => {
+  const handleOnChangeTab = (_event, value) => {
     setCurrentTabIndex(value);
-    return;
-    const textArea = document.getElementById("annotator-text-area");
-    setTimeout(() => {
-      if (textArea) {
-        // textArea.focus();
-        textArea.setSelectionRange(
-          textArea.value.length,
-          textArea.value.length
-        );
-      }
-    });
   };
 
   const handleCloseAnnotator = () => {
@@ -307,7 +333,11 @@ export const AnnotatorV2 = ({
               setCurrentTabIndex={setCurrentTabIndex}
             />
             <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
-              test
+              {optionTabs[currentTabIndex].value === "note" ? (
+                <AnnotatorNotes selectedText={selectedText.current} />
+              ) : (
+                "test"
+              )}
             </Box>
           </Stack>
         </Menu>
