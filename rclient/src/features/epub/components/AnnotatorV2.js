@@ -8,8 +8,8 @@ import {
   trimSelectedRange,
   getNearestEpubAncestor,
   setRangeToTextNodesOnly,
-  waitForElement,
   handleDeleteMark,
+  isIOS,
 } from "../domUtils";
 import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
@@ -94,12 +94,40 @@ export const AnnotatorV2 = ({
     clearTimeout(mouseUpTimeout.current);
   };
 
-  const handleUpDown = () => {
+  const handleMouseUp = () => {
     clearMouseUpTimeout();
     mouseUpTimeout.current = setTimeout(
       handleGetTextSelection,
       highlightMouseUpTimeout
     );
+  };
+
+  const oldTouchSelect = React.useRef(null);
+  const handleTouchSelect = (event) => {
+    const selection = window.getSelection();
+    if (isIOS()) {
+      if (oldTouchSelect.current) {
+        setTimeout(() => {
+          if (window.getSelection().isCollapsed === false) {
+            handleGetTextSelection();
+          }
+        }, 100);
+        oldTouchSelect.current = null;
+      } else if (selection.isCollapsed === false) {
+        oldTouchSelect.current = true;
+      } else {
+        oldTouchSelect.current = null;
+      }
+    } else {
+      if (selection.isCollapsed === false) {
+        event.preventDefault();
+      }
+      setTimeout(() => {
+        if (window.getSelection().isCollapsed === false) {
+          handleGetTextSelection();
+        }
+      }, 100);
+    }
   };
 
   const handleGetTextSelection = () => {
@@ -262,18 +290,18 @@ export const AnnotatorV2 = ({
     placeHighlights();
     const content = document.getElementById("content");
     content.addEventListener("mousedown", clearTemporaryMarks);
-    content.addEventListener("mouseup", handleUpDown);
+    content.addEventListener("mouseup", handleMouseUp);
     content.addEventListener("mousedown", clearMouseUpTimeout);
-    // document.addEventListener("touchend", handleTouchSelect);
+    content.addEventListener("touchend", handleTouchSelect);
     content.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       abortController.current.abort();
       deleteHighlights();
       content.removeEventListener("mousedown", clearTemporaryMarks);
-      content.removeEventListener("mouseup", handleUpDown);
+      content.removeEventListener("mouseup", handleMouseUp);
       clearTimeout(mouseUpTimeout.current);
       content.removeEventListener("mousedown", clearMouseUpTimeout);
-      // document.removeEventListener("touchend", handleTouchSelect);
+      content.removeEventListener("touchend", handleTouchSelect);
       content.removeEventListener("touchstart", clearTemporaryMarks);
     };
   }, [spineIndex]);
