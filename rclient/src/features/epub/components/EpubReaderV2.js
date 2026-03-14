@@ -9,6 +9,7 @@ import { loadImages } from "../epubUtils";
 import { getStateValue } from "../../../api/IndexedDB/State";
 import { useTheme } from "@emotion/react";
 import { AnnotatorV2 } from "./AnnotatorV2";
+import { waitForElement } from "../domUtils";
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
@@ -44,6 +45,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   const [autoHide, setAutoHide] = React.useState(false);
 
   const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
+
+  const [renderAnnotator, setRenderAnnotator] = React.useState(false);
 
   console.log(epubObject);
   const handleClose = () => {
@@ -128,6 +131,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       setAutoHide(autoHide);
       getStateValue("epubView").then(setView);
     });
+    waitForElement("#content").then(() => setRenderAnnotator(true));
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
     };
@@ -214,12 +218,14 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               </Stack>
             )}
           </Box>
-          <AnnotatorV2
-            epubObject={epubObject}
-            spineIndex={progress.spine}
-            anchorEl={annotatorAnchorEl}
-            setAnchorEl={setAnnotatorAnchorEl}
-          />
+          {renderAnnotator && (
+            <AnnotatorV2
+              epubObject={epubObject}
+              spineIndex={progress.spine}
+              anchorEl={annotatorAnchorEl}
+              setAnchorEl={setAnnotatorAnchorEl}
+            />
+          )}
         </Box>
       )}
     </Dialog>

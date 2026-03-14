@@ -215,7 +215,6 @@ export const AnnotatorV2 = ({
   };
 
   const placeHighlights = () => {
-    deleteHighlights();
     const spineIndexNotes = notes[spineIndex] ?? [];
     for (const [noteId, entry] of Object.entries(spineIndexNotes)) {
       const selectedRange = structuredClone(entry.selectedRangeIndexed);
@@ -259,21 +258,17 @@ export const AnnotatorV2 = ({
   };
 
   React.useEffect(() => {
-    waitForElement("#content").then((content) => {
-      placeHighlights();
-      content.addEventListener("mousedown", clearTemporaryMarks);
-      content.addEventListener("mouseup", handleUpDown);
-      content.addEventListener("mousedown", clearMouseUpTimeout);
-      // document.addEventListener("touchend", handleTouchSelect);
-      content.addEventListener("touchstart", clearTemporaryMarks);
-    });
     abortController.current = new AbortController();
+    placeHighlights();
+    const content = document.getElementById("content");
+    content.addEventListener("mousedown", clearTemporaryMarks);
+    content.addEventListener("mouseup", handleUpDown);
+    content.addEventListener("mousedown", clearMouseUpTimeout);
+    // document.addEventListener("touchend", handleTouchSelect);
+    content.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       abortController.current.abort();
-      const content = document.getElementById("content");
-      if (!content) {
-        return;
-      }
+      deleteHighlights();
       content.removeEventListener("mousedown", clearTemporaryMarks);
       content.removeEventListener("mouseup", handleUpDown);
       clearTimeout(mouseUpTimeout.current);
