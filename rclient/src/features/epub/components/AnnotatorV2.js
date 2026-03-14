@@ -266,6 +266,9 @@ export const AnnotatorV2 = ({
           ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ===
             false
         ) {
+          setCurrentTabIndex(
+            optionTabs.findIndex((option) => option.value === "note")
+          );
           anchorToElementWithClass(noteId);
         }
       };
