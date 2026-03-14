@@ -81,6 +81,16 @@ export const waitForElements = (selector) =>
     });
   });
 
+export const changePermanentMarksToTemporary = (noteId) => {
+  const nodes = document.getElementsByClassName(noteId);
+  for (const node of nodes) {
+    node.classList.remove(noteId, "mark");
+    node.classList.add("temporary-mark");
+    node.removeAttribute("noteid");
+    node.removeAttribute("style");
+  }
+};
+
 export const deleteNodesAndLiftChildren = (nodes) => {
   const updates = [];
   for (const node of nodes) {
@@ -104,6 +114,9 @@ export const deleteNodesAndLiftChildren = (nodes) => {
 export const disableHighlightNodes = (nodes) => {
   deleteNodesAndLiftChildren(nodes);
 };
+
+export const handleDeleteMark = (noteId) =>
+  disableHighlightNodes(document.getElementsByClassName(noteId));
 
 export const changeTemporaryMarksToPermanent = (nodes, noteId) => {
   for (const node of nodes) {

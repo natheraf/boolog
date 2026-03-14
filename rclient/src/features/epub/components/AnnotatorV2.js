@@ -24,21 +24,14 @@ export const AnnotatorV2 = ({
   setAnchorEl,
 }) => {
   const theme = useTheme();
-  const noteIdAttribute = "noteid";
   const annotatorWidth = 300;
   const annotatorHeight = 300;
   const highlightMouseUpTimeout = 200;
-
-  const memos = epubObject.memos;
-  const notes = epubObject.notes;
 
   const openAnnotator = Boolean(anchorEl);
 
   const appearTop = React.useRef(true);
   const selectedText = React.useRef(null);
-  const textInMemoKeyFormat = React.useRef(null);
-
-  const memo = React.useRef(null);
 
   const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
   const optionTabs = [
@@ -46,13 +39,8 @@ export const AnnotatorV2 = ({
     { title: "Memo", icon: StickyNote2Icon, value: "memo" },
   ];
 
-  const [noteValue, setNoteValue] = React.useState(
-    notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.note ?? ""
-  );
-  const [highlightColor, setHighlightColor] = React.useState(null);
-
   const selectedRangeIndexed = React.useRef(null);
-  const selectedRange = React.useRef(null);
+  const abortController = React.useRef(null);
 
   const selectedWidestWidth = React.useRef(0);
   const anchorElRect = anchorEl?.getBoundingClientRect();
@@ -178,13 +166,8 @@ export const AnnotatorV2 = ({
       };
 
       selectedText.current = selectedString;
-      // removes possessive form
-      textInMemoKeyFormat.current = formatMemoKey(selectedString);
-      memo.current = memos[textInMemoKeyFormat.current]?.memo ?? "";
       // if 2 spaces, probably a note
       handleOnChangeTab(null, chooseTabForSelectedString(selectedString));
-      setHighlightColor(null);
-      setNoteValue("");
 
       selectedRangeIndexed.current = {
         startContainerId: selectedRange.startContainer.getAttribute("nodeid"),
@@ -227,12 +210,14 @@ export const AnnotatorV2 = ({
   };
 
   React.useEffect(() => {
+    abortController.current = new AbortController();
     // document.addEventListener("mousedown", clearTemporaryMarks);
     document.addEventListener("mouseup", handleUpDown);
     document.addEventListener("mousedown", clearMouseUpTimeout);
     // document.addEventListener("touchend", handleTouchSelect);
     document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
+      abortController.current.abort();
       // document.removeEventListener("mousedown", clearTemporaryMarks);
       document.removeEventListener("mouseup", handleUpDown);
       clearTimeout(mouseUpTimeout.current);
@@ -259,6 +244,7 @@ export const AnnotatorV2 = ({
           }}
           transformOrigin={{
             vertical: getVerticalOrigin(),
+            horizontal: 0,
           }}
           slotProps={{
             paper: {
@@ -279,7 +265,15 @@ export const AnnotatorV2 = ({
             />
             <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
               {optionTabs[currentTabIndex].value === "note" ? (
-                <AnnotatorNotes selectedText={selectedText.current} />
+                <AnnotatorNotes
+                  epubObject={epubObject}
+                  spineIndex={spineIndex}
+                  selectedText={selectedText.current}
+                  anchorEl={anchorEl}
+                  setAnchorEl={setAnchorEl}
+                  selectedRangeIndexed={selectedRangeIndexed}
+                  abortController={abortController}
+                />
               ) : (
                 <AnnotatorMemos selectedText={selectedText.current} />
               )}
