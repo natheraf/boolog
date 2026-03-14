@@ -82,7 +82,7 @@ export const waitForElements = (selector) =>
   });
 
 export const changePermanentMarksToTemporary = (noteId) => {
-  const nodes = document.getElementsByClassName(noteId);
+  const nodes = [...document.getElementsByClassName(noteId)];
   for (const node of nodes) {
     node.classList.remove(noteId, "mark");
     node.classList.add("temporary-mark");
