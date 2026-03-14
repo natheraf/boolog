@@ -97,7 +97,7 @@ export const putFormattingStyleElement = (theme, formatting) => {
 
 export const putHighlightStyles = (color, backgroundColor) => {
   const highlightStyles = `
-      .temporary-mark, .mark {
+      .temporary-mark {
         all: unset !important;
         font-size: inherit !important; 
         font-weight: inherit !important;
