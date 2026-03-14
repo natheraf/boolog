@@ -53,6 +53,14 @@ export const AnnotatorNotes = ({ selectedText }) => {
     setShowNotesHelp((prev) => !prev);
   };
 
+  const handleOnClose = () => {
+    /**
+     * todo
+     *
+     *
+     */
+  };
+
   React.useEffect(() => {
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
@@ -159,16 +167,8 @@ export const AnnotatorNotes = ({ selectedText }) => {
         highlightColor={highlightColor}
         setHighlightColor={setHighlightColor}
       />
-      {/* {tabValueMap[currentTabValue] === "note" && (
-            <SimpleColorPicker
-              color={highlightColor}
-              handleRadioOnClick={handleHighlightColorClick}
-              handleRadioChange={handleHighlightColorChange(false)}
-              handleTextFieldChange={handleHighlightColorChange(true)}
-            />
-          )} */}
     </Stack>
   );
 };
 
-AnnotatorNotes.propTypes = {};
+AnnotatorNotes.propTypes = { selectedText: PropTypes.string.isRequired };
