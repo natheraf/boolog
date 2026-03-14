@@ -1,6 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import {
+  Box,
   Divider,
   IconButton,
   Stack,
@@ -32,6 +33,7 @@ export const AnnotatorNotes = ({
   selectedRangeIndexed,
   abortController,
   anchorToElementWithClass,
+  formatting,
 }) => {
   const noteIdAttribute = "noteid";
   const date = new Date().toJSON();
@@ -62,6 +64,15 @@ export const AnnotatorNotes = ({
     handleSave();
   };
 
+  const setHighlightSampleBackground = (highlightColor) => {
+    const highlightSample = document.getElementById("highlight-sample");
+    highlightSample.style.setProperty(
+      "background-color",
+      highlightColor,
+      "important"
+    );
+  };
+
   const setHighlightColorHelper = (value) => {
     if (notes.hasOwnProperty(spineIndex) === false) {
       notes[spineIndex] = {};
@@ -69,6 +80,7 @@ export const AnnotatorNotes = ({
     if (notes[spineIndex].hasOwnProperty(noteId.current) === false) {
       notes[spineIndex][noteId.current] = { highlightColor: null, note: "" };
     }
+    setHighlightSampleBackground(value);
     notes[spineIndex][noteId.current].highlightColor = value;
     setHighlightColor(value);
     handleSave();
@@ -169,6 +181,7 @@ export const AnnotatorNotes = ({
   };
 
   React.useEffect(() => {
+    setHighlightSampleBackground(highlightColor);
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
     textArea.setSelectionRange(textArea.value.length, textArea.value.length);
@@ -241,22 +254,30 @@ export const AnnotatorNotes = ({
         </Stack>
       </Stack>
       <Divider />
-      <Stack
-        direction={"row"}
-        alignItems={"center"}
-        justifyContent={"space-between"}
+      <HtmlTooltip
+        title={<Typography variant="subtitle2">{selectedText}</Typography>}
+        placement="right"
+        enterDelay={200}
+        enterNextDelay={200}
       >
-        <HtmlTooltip
-          title={<Typography variant="subtitle2">{selectedText}</Typography>}
-          placement="right"
-          enterDelay={200}
-          enterNextDelay={200}
+        <Stack
+          direction={"row"}
+          className="content"
+          sx={{ overflow: "hidden", width: "100%" }}
         >
-          <Typography variant="h6" noWrap>
-            {selectedText}
+          <Typography
+            sx={{
+              zIndex: 2 /** to show above simple color picker backdrop */,
+            }}
+            variant="h6"
+            noWrap
+          >
+            {highlightColor && "Lorem "}
+            <span id="highlight-sample">{selectedText}</span>
+            {highlightColor && " ipsum"}
           </Typography>
-        </HtmlTooltip>
-      </Stack>
+        </Stack>
+      </HtmlTooltip>
       <Divider />
       <Textarea
         id="annotator-text-area"
@@ -288,4 +309,5 @@ AnnotatorNotes.propTypes = {
   selectedRangeIndexed: PropTypes.object,
   abortController: PropTypes.object.isRequired,
   anchorToElementWithClass: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
 };

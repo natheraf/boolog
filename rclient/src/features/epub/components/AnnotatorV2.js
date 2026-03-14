@@ -23,6 +23,7 @@ export const AnnotatorV2 = ({
   spineIndex,
   anchorEl,
   setAnchorEl,
+  formatting,
 }) => {
   const notes = epubObject.notes;
   const theme = useTheme();
@@ -356,6 +357,7 @@ export const AnnotatorV2 = ({
                   selectedRangeIndexed={selectedRangeIndexed}
                   abortController={abortController}
                   anchorToElementWithClass={anchorToElementWithClass}
+                  formatting={formatting}
                 />
               ) : (
                 <AnnotatorMemos selectedText={selectedText.current} />
@@ -373,4 +375,5 @@ AnnotatorV2.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
 };

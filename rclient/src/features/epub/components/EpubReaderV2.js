@@ -224,6 +224,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               spineIndex={progress.spine}
               anchorEl={annotatorAnchorEl}
               setAnchorEl={setAnnotatorAnchorEl}
+              formatting={formatting}
             />
           )}
         </Box>
