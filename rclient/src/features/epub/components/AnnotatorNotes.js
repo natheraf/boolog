@@ -171,6 +171,7 @@ export const AnnotatorNotes = ({
   React.useEffect(() => {
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
+    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
     const annotatorNodes = document.getElementById("annotator-notes");
     annotatorNodes.addEventListener("keydown", handleOnKeyDown);
     return () => {
