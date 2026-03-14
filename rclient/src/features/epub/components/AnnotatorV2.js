@@ -215,10 +215,10 @@ export const AnnotatorV2 = ({
         );
         if (bottomSpace < annotatorHeight * 1.1) {
           appearTop.current = true;
-          setAnchorEl(getNearestEpubAncestor(topElement));
+          setAnchorEl(topElement);
         } else {
           appearTop.current = false;
-          setAnchorEl(getNearestEpubAncestor(bottomElement));
+          setAnchorEl(bottomElement);
         }
       });
     }
