@@ -118,15 +118,16 @@ export const AnnotatorV2 = ({
       const selection = window.getSelection();
       clearTemporaryMarks();
       let range = selection.getRangeAt(0);
-      if (range.endOffset === 0 && range.endContainer instanceof HTMLElement) {
-        selection.modify("extend", "backward", "character");
-      }
       if (range.collapsed) {
         range.setEnd(selection.anchorNode, selection.anchorOffset);
         range.setStart(selection.focusNode, selection.focusOffset);
       }
-      range = selection.getRangeAt(0);
       selection.empty();
+      selection.addRange(range);
+      if (range.endOffset === 0 && range.endContainer instanceof HTMLElement) {
+        selection.modify("extend", "backward", "character");
+      }
+      range = selection.getRangeAt(0);
       setRangeToTextNodesOnly(range);
       const content = document.getElementById("content");
       const startContainerInContent = content.contains(range.startContainer);
@@ -134,6 +135,7 @@ export const AnnotatorV2 = ({
       if (!startContainerInContent || !endContainerInContent) {
         return;
       }
+      selection.empty();
 
       trimSelectedRange(range);
 
