@@ -23,6 +23,7 @@ export const AnnotatorV2 = ({
   anchorEl,
   setAnchorEl,
 }) => {
+  const notes = epubObject.notes;
   const theme = useTheme();
   const annotatorWidth = 300;
   const annotatorHeight = 300;
@@ -184,41 +185,42 @@ export const AnnotatorV2 = ({
         "temporary-mark"
       );
 
-      waitForElements(".temporary-mark").then((elements) => {
-        const topElement = elements[0];
-        const bottomElement = elements[elements.length - 1];
-        const topSpace = topElement.getBoundingClientRect().top;
-        const bottomSpace =
-          window.innerHeight - bottomElement.getBoundingClientRect().bottom;
-        selectedWidestWidth.current = 0;
-        elements.forEach(
-          (element) =>
-            (selectedWidestWidth.current = Math.max(
-              selectedWidestWidth.current,
-              element.getBoundingClientRect().width
-            ))
-        );
-        if (bottomSpace < annotatorHeight * 1.1) {
-          appearTop.current = true;
-          setAnchorEl(topElement);
-        } else {
-          appearTop.current = false;
-          setAnchorEl(bottomElement);
-        }
-      });
+      const temporaryMarks = [
+        ...document.getElementsByClassName("temporary-mark"),
+      ];
+      const topElement = temporaryMarks[0];
+      const bottomElement = temporaryMarks[temporaryMarks.length - 1];
+      const topSpace = topElement.getBoundingClientRect().top;
+      const bottomSpace =
+        window.innerHeight - bottomElement.getBoundingClientRect().bottom;
+      selectedWidestWidth.current = 0;
+      temporaryMarks.forEach(
+        (element) =>
+          (selectedWidestWidth.current = Math.max(
+            selectedWidestWidth.current,
+            element.getBoundingClientRect().width
+          ))
+      );
+      if (bottomSpace < annotatorHeight * 1.1) {
+        appearTop.current = true;
+        setAnchorEl(topElement);
+      } else {
+        appearTop.current = false;
+        setAnchorEl(bottomElement);
+      }
     }
   };
 
   React.useEffect(() => {
     abortController.current = new AbortController();
-    // document.addEventListener("mousedown", clearTemporaryMarks);
+    document.addEventListener("mousedown", clearTemporaryMarks);
     document.addEventListener("mouseup", handleUpDown);
     document.addEventListener("mousedown", clearMouseUpTimeout);
     // document.addEventListener("touchend", handleTouchSelect);
     document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       abortController.current.abort();
-      // document.removeEventListener("mousedown", clearTemporaryMarks);
+      document.removeEventListener("mousedown", clearTemporaryMarks);
       document.removeEventListener("mouseup", handleUpDown);
       clearTimeout(mouseUpTimeout.current);
       document.removeEventListener("mousedown", clearMouseUpTimeout);
