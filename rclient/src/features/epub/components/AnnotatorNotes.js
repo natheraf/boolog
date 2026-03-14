@@ -31,6 +31,7 @@ export const AnnotatorNotes = ({
   setAnchorEl,
   selectedRangeIndexed,
   abortController,
+  anchorToElementWithClass,
 }) => {
   const noteIdAttribute = "noteid";
   const date = new Date().toJSON();
@@ -118,23 +119,14 @@ export const AnnotatorNotes = ({
       return;
     }
     changeTemporaryMarksToPermanent(marks, noteId);
-    let markToAnchor = marks.at(-1);
-    if (
-      marks[0].getBoundingClientRect().top > Math.floor(window.innerHeight / 2)
-    ) {
-      markToAnchor = marks[0];
-    }
-    const markOnClick = (event) => {
+    const markOnClick = (noteId) => (event) => {
       event.stopPropagation();
       if (window.getSelection().isCollapsed) {
-        setAnchorEl(markToAnchor);
+        anchorToElementWithClass(noteId);
       }
     };
     for (const mark of marks) {
-      if (highlightColor === null) {
-        mark.style.backgroundColor = null;
-      }
-      mark.addEventListener("click", markOnClick, {
+      mark.addEventListener("click", markOnClick(noteId), {
         signal: abortController.current.signal,
       });
     }
@@ -294,4 +286,5 @@ AnnotatorNotes.propTypes = {
   setAnchorEl: PropTypes.func.isRequired,
   selectedRangeIndexed: PropTypes.object,
   abortController: PropTypes.object.isRequired,
+  anchorToElementWithClass: PropTypes.func.isRequired,
 };

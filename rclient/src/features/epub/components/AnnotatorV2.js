@@ -6,9 +6,10 @@ import {
   clearTemporaryMarks,
   handleInjectingMarkToEpubNodes,
   trimSelectedRange,
-  waitForElements,
   getNearestEpubAncestor,
   setRangeToTextNodesOnly,
+  waitForElement,
+  handleDeleteMark,
 } from "../domUtils";
 import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
@@ -185,49 +186,102 @@ export const AnnotatorV2 = ({
         "temporary-mark"
       );
 
-      const temporaryMarks = [
-        ...document.getElementsByClassName("temporary-mark"),
-      ];
-      const topElement = temporaryMarks[0];
-      const bottomElement = temporaryMarks[temporaryMarks.length - 1];
-      const topSpace = topElement.getBoundingClientRect().top;
-      const bottomSpace =
-        window.innerHeight - bottomElement.getBoundingClientRect().bottom;
-      selectedWidestWidth.current = 0;
-      temporaryMarks.forEach(
-        (element) =>
-          (selectedWidestWidth.current = Math.max(
-            selectedWidestWidth.current,
-            element.getBoundingClientRect().width
-          ))
+      anchorToElementWithClass("temporary-mark");
+    }
+  };
+
+  const anchorToElementWithClass = (className) => {
+    const marks = [...document.getElementsByClassName(className)];
+    const topElement = marks[0];
+    const bottomElement = marks.at(-1);
+    const topSpace = topElement.getBoundingClientRect().top;
+    const bottomSpace =
+      window.innerHeight - bottomElement.getBoundingClientRect().bottom;
+    selectedWidestWidth.current = 0;
+    marks.forEach(
+      (element) =>
+        (selectedWidestWidth.current = Math.max(
+          selectedWidestWidth.current,
+          element.getBoundingClientRect().width
+        ))
+    );
+    if (bottomSpace < annotatorHeight * 1.1) {
+      appearTop.current = true;
+      setAnchorEl(topElement);
+    } else {
+      appearTop.current = false;
+      setAnchorEl(bottomElement);
+    }
+  };
+
+  const placeHighlights = () => {
+    deleteHighlights();
+    const spineIndexNotes = notes[spineIndex] ?? [];
+    for (const [noteId, entry] of Object.entries(spineIndexNotes)) {
+      const selectedRange = structuredClone(entry.selectedRangeIndexed);
+      selectedRange.startContainer = document.querySelector(
+        `[nodeId="${selectedRange.startContainerId}"]`
       );
-      if (bottomSpace < annotatorHeight * 1.1) {
-        appearTop.current = true;
-        setAnchorEl(topElement);
-      } else {
-        appearTop.current = false;
-        setAnchorEl(bottomElement);
+      selectedRange.endContainer = document.querySelector(
+        `[nodeId="${selectedRange.endContainerId}"]`
+      );
+      handleInjectingMarkToEpubNodes(
+        document,
+        noteId,
+        selectedRange,
+        entry.highlightColor,
+        "mark"
+      );
+      const markOnClick = (noteId) => (event) => {
+        event.stopPropagation();
+        if (
+          window.getSelection().isCollapsed &&
+          ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ===
+            false
+        ) {
+          anchorToElementWithClass(noteId);
+        }
+      };
+      const marks = [...document.getElementsByClassName(noteId)];
+      for (const mark of marks) {
+        mark.addEventListener("click", markOnClick(noteId), {
+          signal: abortController.current.signal,
+        });
       }
     }
   };
 
+  const deleteHighlights = () => {
+    const spineIndexNotes = notes[spineIndex] ?? [];
+    for (const noteId of Object.keys(spineIndexNotes)) {
+      handleDeleteMark(noteId);
+    }
+  };
+
   React.useEffect(() => {
+    waitForElement("#content").then((content) => {
+      placeHighlights();
+      content.addEventListener("mousedown", clearTemporaryMarks);
+      content.addEventListener("mouseup", handleUpDown);
+      content.addEventListener("mousedown", clearMouseUpTimeout);
+      // document.addEventListener("touchend", handleTouchSelect);
+      content.addEventListener("touchstart", clearTemporaryMarks);
+    });
     abortController.current = new AbortController();
-    document.addEventListener("mousedown", clearTemporaryMarks);
-    document.addEventListener("mouseup", handleUpDown);
-    document.addEventListener("mousedown", clearMouseUpTimeout);
-    // document.addEventListener("touchend", handleTouchSelect);
-    document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       abortController.current.abort();
-      document.removeEventListener("mousedown", clearTemporaryMarks);
-      document.removeEventListener("mouseup", handleUpDown);
+      const content = document.getElementById("content");
+      if (!content) {
+        return;
+      }
+      content.removeEventListener("mousedown", clearTemporaryMarks);
+      content.removeEventListener("mouseup", handleUpDown);
       clearTimeout(mouseUpTimeout.current);
-      document.removeEventListener("mousedown", clearMouseUpTimeout);
+      content.removeEventListener("mousedown", clearMouseUpTimeout);
       // document.removeEventListener("touchend", handleTouchSelect);
-      document.removeEventListener("touchstart", clearTemporaryMarks);
+      content.removeEventListener("touchstart", clearTemporaryMarks);
     };
-  }, []);
+  }, [spineIndex]);
 
   return (
     <Backdrop
@@ -275,6 +329,7 @@ export const AnnotatorV2 = ({
                   setAnchorEl={setAnchorEl}
                   selectedRangeIndexed={selectedRangeIndexed}
                   abortController={abortController}
+                  anchorToElementWithClass={anchorToElementWithClass}
                 />
               ) : (
                 <AnnotatorMemos selectedText={selectedText.current} />
