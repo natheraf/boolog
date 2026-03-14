@@ -299,7 +299,7 @@ export const AnnotatorV2 = ({
       deleteHighlights();
       content.removeEventListener("mousedown", clearTemporaryMarks);
       content.removeEventListener("mouseup", handleMouseUp);
-      clearTimeout(mouseUpTimeout.current);
+      clearMouseUpTimeout();
       content.removeEventListener("mousedown", clearMouseUpTimeout);
       content.removeEventListener("touchend", handleTouchSelect);
       content.removeEventListener("touchstart", clearTemporaryMarks);
