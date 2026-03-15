@@ -14,6 +14,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import HelpIcon from "@mui/icons-material/Help";
+import CloseIcon from "@mui/icons-material/Close";
 
 export const AnnotatorHeader = ({
   selectedText,
@@ -22,42 +23,28 @@ export const AnnotatorHeader = ({
   tab,
 }) => {
   const tabNames = { notes: "Notes", memos: "Memos" };
-  const helpHTMLTooltips = {
-    memos: (
-      <Stack spacing={1}>
-        <Typography variant="h6">{"Memos"}</Typography>
-        <Typography variant="subtitle2">
-          {"Memos appear in every occurrence of a word/phrase"}
-        </Typography>
-        <Divider />
-        <Typography>{"Usage"}</Typography>
-        <Typography variant="subtitle2">
-          {
-            "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear."
-          }
-        </Typography>
-      </Stack>
-    ),
-    notes: (
-      <Stack spacing={1}>
-        <Typography variant="h6">{"Notes"}</Typography>
-        <Typography variant="subtitle2">{"Can be left empty."}</Typography>
-        <Divider />
-        <Typography>{"Highlight"}</Typography>
-        <Typography variant="subtitle2">
-          {
-            "If no highlight color is selected and a note is written, the highlight will be transparent."
-          }
-        </Typography>
-      </Stack>
-    ),
-  };
   const [showHelp, setShowHelp] = React.useState(false);
   const [copySuccess, setCopySuccess] = React.useState(false);
   const copySuccessTimeout = React.useRef(null);
 
   const handleOnClickHelp = () => {
     setShowHelp((prev) => !prev);
+  };
+  const helpHTMLTooltipData = {
+    memos: {
+      title: "Memos",
+      titleDescription: "Memos appear in every occurrence of a word/phrase",
+      subtitle: "Usage",
+      subtitleDescription:
+        "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear.",
+    },
+    notes: {
+      title: "Notes",
+      titleDescription: "Can be left empty.",
+      subtitle: "Highlight",
+      subtitleDescription:
+        "If no highlight color is selected and a note is written, the highlight will be transparent.",
+    },
   };
 
   const handleCopySelectedText = () => {
@@ -87,7 +74,26 @@ export const AnnotatorHeader = ({
   return (
     <Stack direction={"row"} justifyContent={"space-between"}>
       <HtmlTooltip
-        title={helpHTMLTooltips[tab]}
+        title={
+          <Stack spacing={1}>
+            <Stack direction="row" justifyContent={"space-between"}>
+              <Typography variant="h6">
+                {helpHTMLTooltipData[tab].title}
+              </Typography>
+              <IconButton size="small" onClick={handleOnClickHelp}>
+                <CloseIcon htmlColor="gray" />
+              </IconButton>
+            </Stack>
+            <Typography variant="subtitle2">
+              {helpHTMLTooltipData[tab].titleDescription}
+            </Typography>
+            <Divider />
+            <Typography>{helpHTMLTooltipData[tab].subtitle}</Typography>
+            <Typography variant="subtitle2">
+              {helpHTMLTooltipData[tab].subtitleDescription}
+            </Typography>
+          </Stack>
+        }
         open={showHelp}
         placement="top"
       >
