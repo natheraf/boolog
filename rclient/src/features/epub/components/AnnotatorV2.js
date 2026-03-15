@@ -154,6 +154,7 @@ export const AnnotatorV2 = ({
       if (!startContainerInContent || !endContainerInContent) {
         return;
       }
+      selectedText.current = selectedString;
       selection.empty();
 
       trimSelectedRange(range);
@@ -196,7 +197,6 @@ export const AnnotatorV2 = ({
         endOffset: endOffsetFromParent,
       };
 
-      selectedText.current = selectedString;
       // if 2 spaces, probably a note
       handleOnChangeTab(null, chooseTabForSelectedString(selectedString));
 
@@ -262,6 +262,7 @@ export const AnnotatorV2 = ({
       );
       const markOnClick = (noteId) => (event) => {
         event.stopPropagation();
+        event.preventDefault();
         if (
           window.getSelection().isCollapsed &&
           ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ===
@@ -275,7 +276,7 @@ export const AnnotatorV2 = ({
       };
       const marks = [...document.getElementsByClassName(noteId)];
       for (const mark of marks) {
-        mark.addEventListener("click", markOnClick(noteId), {
+        mark.addEventListener("contextmenu", markOnClick(noteId), {
           signal: abortController.current.signal,
         });
       }

@@ -133,12 +133,13 @@ export const AnnotatorNotes = ({
     changeTemporaryMarksToPermanent(marks, noteId);
     const markOnClick = (noteId) => (event) => {
       event.stopPropagation();
+      event.preventDefault();
       if (window.getSelection().isCollapsed) {
         anchorToElementWithClass(noteId);
       }
     };
     for (const mark of marks) {
-      mark.addEventListener("click", markOnClick(noteId), {
+      mark.addEventListener("contextmenu", markOnClick(noteId), {
         signal: abortController.current.signal,
       });
     }
