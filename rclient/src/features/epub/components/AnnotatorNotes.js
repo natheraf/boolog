@@ -145,6 +145,7 @@ export const AnnotatorNotes = ({
     setHighlightSampleBackground(highlightColor);
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
+    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
   }, []);
 
   return (
