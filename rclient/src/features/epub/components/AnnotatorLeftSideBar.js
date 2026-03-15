@@ -4,7 +4,7 @@ import { Stack, Tooltip } from "@mui/material";
 import { useTheme } from "@emotion/react";
 
 export const AnnotatorLeftSideBar = ({
-  optionTabs,
+  tabOptions,
   currentTabIndex,
   setCurrentTabIndex,
 }) => {
@@ -32,7 +32,7 @@ export const AnnotatorLeftSideBar = ({
         height: "100%",
       }}
     >
-      {optionTabs.map((option, index) => (
+      {tabOptions.map((option, index) => (
         <Tooltip
           title={option.title}
           key={option.title}
@@ -65,7 +65,7 @@ export const AnnotatorLeftSideBar = ({
 };
 
 AnnotatorLeftSideBar.propTypes = {
-  optionTabs: PropTypes.array.isRequired,
+  tabOptions: PropTypes.array.isRequired,
   currentTabIndex: PropTypes.number.isRequired,
   setCurrentTabIndex: PropTypes.func.isRequired,
 };

@@ -53,11 +53,6 @@ export const AnnotatorMemos = ({ selectedText }) => {
   React.useEffect(() => {
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
-    const annotatorNodes = document.getElementById("annotator-memos");
-    annotatorNodes.addEventListener("keydown", handleOnKeyDown);
-    return () => {
-      annotatorNodes.removeEventListener("keydown", handleOnKeyDown);
-    };
   }, []);
 
   return (
@@ -152,16 +147,8 @@ export const AnnotatorMemos = ({ selectedText }) => {
         }}
         minRows={3}
       />
-      {/* {tabValueMap[currentTabValue] === "note" && (
-            <SimpleColorPicker
-              color={highlightColor}
-              handleRadioOnClick={handleHighlightColorClick}
-              handleRadioChange={handleHighlightColorChange(false)}
-              handleTextFieldChange={handleHighlightColorChange(true)}
-            />
-          )} */}
     </Stack>
   );
 };
 
-AnnotatorMemos.propTypes = {};
+AnnotatorMemos.propTypes = { selectedText: PropTypes.string.isRequired };

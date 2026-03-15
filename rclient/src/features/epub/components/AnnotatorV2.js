@@ -38,7 +38,7 @@ export const AnnotatorV2 = ({
   const selectedText = React.useRef(null);
 
   const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
-  const optionTabs = [
+  const tabOptions = [
     { title: "Note", icon: BorderColorIcon, value: "note" },
     { title: "Memo", icon: StickyNote2Icon, value: "memo" },
   ];
@@ -77,8 +77,8 @@ export const AnnotatorV2 = ({
   const chooseTabForSelectedString = (selectedString) => {
     return selectedString.includes(" ") &&
       selectedString.indexOf(" ") !== selectedString.lastIndexOf(" ")
-      ? optionTabs.findIndex((entry) => entry.value === "note")
-      : optionTabs.findIndex((entry) => entry.value === "memo");
+      ? tabOptions.findIndex((entry) => entry.value === "note")
+      : tabOptions.findIndex((entry) => entry.value === "memo");
   };
 
   const handleOnChangeTab = (_event, value) => {
@@ -246,7 +246,7 @@ export const AnnotatorV2 = ({
 
   const setTabToNotes = () =>
     setCurrentTabIndex(
-      optionTabs.findIndex((option) => option.value === "note")
+      tabOptions.findIndex((option) => option.value === "note")
     );
 
   const onTouchEnd = (noteId, markText, markRangeIndexed) => (event) => {
@@ -378,12 +378,12 @@ export const AnnotatorV2 = ({
             sx={{ position: "relative", overflow: "visible" }}
           >
             <AnnotatorLeftSideBar
-              optionTabs={optionTabs}
+              tabOptions={tabOptions}
               currentTabIndex={currentTabIndex}
               setCurrentTabIndex={setCurrentTabIndex}
             />
             <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
-              {optionTabs[currentTabIndex].value === "note" ? (
+              {tabOptions[currentTabIndex].value === "note" ? (
                 <AnnotatorNotes
                   epubObject={epubObject}
                   spineIndex={spineIndex}
