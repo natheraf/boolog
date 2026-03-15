@@ -20,6 +20,7 @@ import { AnnotatorMemos } from "./AnnotatorMemos";
 
 export const AnnotatorV2 = ({
   epubObject,
+  view,
   spineIndex,
   anchorEl,
   setAnchorEl,
@@ -343,7 +344,7 @@ export const AnnotatorV2 = ({
       content.removeEventListener("touchend", handleTouchSelect);
       content.removeEventListener("touchstart", clearTemporaryMarks);
     };
-  }, [spineIndex]);
+  }, [view, spineIndex]);
 
   return (
     <Backdrop
@@ -406,6 +407,7 @@ export const AnnotatorV2 = ({
 
 AnnotatorV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
+  view: PropTypes.string.isRequired,
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,

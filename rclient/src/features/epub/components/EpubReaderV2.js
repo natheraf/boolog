@@ -221,6 +221,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           {renderAnnotator && (
             <AnnotatorV2
               epubObject={epubObject}
+              view={view}
               spineIndex={progress.spine}
               anchorEl={annotatorAnchorEl}
               setAnchorEl={setAnnotatorAnchorEl}
