@@ -13,6 +13,7 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
   const entryId = epubObject.key;
   const memoKey = formatMemoKey(selectedText);
   const [memo, setMemo] = React.useState(memos[memoKey]?.memo ?? "");
+  const [canClear, setCanClear] = React.useState(memo.length > 0);
 
   const setMemoHelper = (value) => {
     setMemo(value);
@@ -49,11 +50,13 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
         };
       }
       putEpubData(memos[memoKey]);
+      setCanClear(true);
     } else {
       if (memos[memoKey].hasOwnProperty("key")) {
         deleteEpubData(memos[memoKey]);
       }
       delete memos[memoKey];
+      setCanClear(false);
     }
   };
 
@@ -74,7 +77,7 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
     >
       <AnnotatorHeader
         selectedText={selectedText}
-        canClear
+        canClear={canClear}
         handleClear={handleClear}
         tab={"memos"}
       />
