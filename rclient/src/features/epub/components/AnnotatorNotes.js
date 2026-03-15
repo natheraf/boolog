@@ -128,7 +128,11 @@ export const AnnotatorNotes = ({
       return;
     }
     changeTemporaryMarksToPermanent(marks, noteId);
-    attachContextMenuListenersToMarks(noteId, selectedText);
+    attachContextMenuListenersToMarks(
+      noteId,
+      selectedText,
+      selectedRangeIndexed.current
+    );
   };
 
   const handleSave = () => {

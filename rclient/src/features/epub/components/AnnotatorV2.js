@@ -248,15 +248,20 @@ export const AnnotatorV2 = ({
       optionTabs.findIndex((option) => option.value === "note")
     );
 
-  const attachContextMenuListenersToMarks = (noteId, markText) => {
+  const attachContextMenuListenersToMarks = (
+    noteId,
+    markText,
+    markRangeIndexed
+  ) => {
     const marks = [...document.getElementsByClassName(noteId)];
     const markOnClick = (noteId) => (event) => {
       event.stopPropagation();
       event.preventDefault();
       if (window.getSelection().isCollapsed) {
+        setTabToNotes();
         anchorToElementWithClass(noteId);
         selectedText.current = markText;
-        setTabToNotes();
+        selectedRangeIndexed.current = markRangeIndexed;
       }
     };
     for (const mark of marks) {
@@ -283,7 +288,11 @@ export const AnnotatorV2 = ({
         entry.highlightColor,
         "mark"
       );
-      attachContextMenuListenersToMarks(noteId, entry.selectedText);
+      attachContextMenuListenersToMarks(
+        noteId,
+        entry.selectedText,
+        entry.selectedRangeIndexed
+      );
     }
   };
 
