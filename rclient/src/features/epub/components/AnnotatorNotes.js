@@ -21,7 +21,6 @@ export const AnnotatorNotes = ({
   attachContextMenuListenersToMarks,
 }) => {
   const noteIdAttribute = "noteid";
-  const date = new Date().toJSON();
   const noteId = React.useRef(
     anchorEl?.getAttribute(noteIdAttribute) ?? getNewId()
   );
@@ -114,6 +113,7 @@ export const AnnotatorNotes = ({
     }
     const note = notes[spineIndex][noteid].note ?? "";
     const highlightColor = notes[spineIndex][noteid].highlightColor ?? null;
+    const date = new Date().toJSON();
     if (note.length > 0 || highlightColor !== null) {
       handleTemporaryMarksAndAddingClickListeners(noteid);
       if (!notes[spineIndex][noteid].hasOwnProperty("dateCreated")) {
