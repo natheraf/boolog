@@ -248,13 +248,16 @@ export const AnnotatorV2 = ({
       optionTabs.findIndex((option) => option.value === "note")
     );
 
-  const attachContextMenuListenersToMarks = (
-    noteId,
-    markText,
-    markRangeIndexed
-  ) => {
-    const marks = [...document.getElementsByClassName(noteId)];
-    const markOnClick = (noteId) => (event) => {
+  const onTouchEnd = (noteId, markText, markRangeIndexed) => (event) => {
+    event.preventDefault();
+    handleOpenMarkToAnnotator(
+      noteId,
+      markText,
+      markRangeIndexed
+    )(new Event(noteId));
+  };
+  const handleOpenMarkToAnnotator =
+    (noteId, markText, markRangeIndexed) => (event) => {
       event.stopPropagation();
       event.preventDefault();
       if (window.getSelection().isCollapsed) {
@@ -264,10 +267,28 @@ export const AnnotatorV2 = ({
         selectedRangeIndexed.current = markRangeIndexed;
       }
     };
+
+  const attachContextMenuListenersToMarks = (
+    noteId,
+    markText,
+    markRangeIndexed
+  ) => {
+    const marks = [...document.getElementsByClassName(noteId)];
     for (const mark of marks) {
-      mark.addEventListener("contextmenu", markOnClick(noteId), {
-        signal: abortController.current.signal,
-      });
+      mark.addEventListener(
+        "contextmenu",
+        handleOpenMarkToAnnotator(noteId, markText, markRangeIndexed),
+        {
+          signal: abortController.current.signal,
+        }
+      );
+      mark.addEventListener(
+        "touchend",
+        onTouchEnd(noteId, markText, markRangeIndexed),
+        {
+          signal: abortController.current.signal,
+        }
+      );
     }
   };
 
