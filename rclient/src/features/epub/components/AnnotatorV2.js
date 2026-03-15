@@ -243,6 +243,29 @@ export const AnnotatorV2 = ({
     }
   };
 
+  const setTabToNotes = () =>
+    setCurrentTabIndex(
+      optionTabs.findIndex((option) => option.value === "note")
+    );
+
+  const attachContextMenuListenersToMarks = (noteId, markText) => {
+    const marks = [...document.getElementsByClassName(noteId)];
+    const markOnClick = (noteId) => (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      if (window.getSelection().isCollapsed) {
+        anchorToElementWithClass(noteId);
+        selectedText.current = markText;
+        setTabToNotes();
+      }
+    };
+    for (const mark of marks) {
+      mark.addEventListener("contextmenu", markOnClick(noteId), {
+        signal: abortController.current.signal,
+      });
+    }
+  };
+
   const placeHighlights = () => {
     const spineIndexNotes = notes[spineIndex] ?? [];
     for (const [noteId, entry] of Object.entries(spineIndexNotes)) {
@@ -260,26 +283,7 @@ export const AnnotatorV2 = ({
         entry.highlightColor,
         "mark"
       );
-      const markOnClick = (noteId) => (event) => {
-        event.stopPropagation();
-        event.preventDefault();
-        if (
-          window.getSelection().isCollapsed &&
-          ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ===
-            false
-        ) {
-          setCurrentTabIndex(
-            optionTabs.findIndex((option) => option.value === "note")
-          );
-          anchorToElementWithClass(noteId);
-        }
-      };
-      const marks = [...document.getElementsByClassName(noteId)];
-      for (const mark of marks) {
-        mark.addEventListener("contextmenu", markOnClick(noteId), {
-          signal: abortController.current.signal,
-        });
-      }
+      attachContextMenuListenersToMarks(noteId, entry.selectedText);
     }
   };
 
@@ -354,11 +358,10 @@ export const AnnotatorV2 = ({
                   spineIndex={spineIndex}
                   selectedText={selectedText.current}
                   anchorEl={anchorEl}
-                  setAnchorEl={setAnchorEl}
                   selectedRangeIndexed={selectedRangeIndexed}
-                  abortController={abortController}
-                  anchorToElementWithClass={anchorToElementWithClass}
-                  formatting={formatting}
+                  attachContextMenuListenersToMarks={
+                    attachContextMenuListenersToMarks
+                  }
                 />
               ) : (
                 <AnnotatorMemos selectedText={selectedText.current} />

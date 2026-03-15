@@ -29,11 +29,8 @@ export const AnnotatorNotes = ({
   spineIndex,
   selectedText,
   anchorEl,
-  setAnchorEl,
   selectedRangeIndexed,
-  abortController,
-  anchorToElementWithClass,
-  formatting,
+  attachContextMenuListenersToMarks,
 }) => {
   const noteIdAttribute = "noteid";
   const date = new Date().toJSON();
@@ -131,18 +128,7 @@ export const AnnotatorNotes = ({
       return;
     }
     changeTemporaryMarksToPermanent(marks, noteId);
-    const markOnClick = (noteId) => (event) => {
-      event.stopPropagation();
-      event.preventDefault();
-      if (window.getSelection().isCollapsed) {
-        anchorToElementWithClass(noteId);
-      }
-    };
-    for (const mark of marks) {
-      mark.addEventListener("contextmenu", markOnClick(noteId), {
-        signal: abortController.current.signal,
-      });
-    }
+    attachContextMenuListenersToMarks(noteId, selectedText);
   };
 
   const handleSave = () => {
@@ -306,9 +292,6 @@ AnnotatorNotes.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   selectedText: PropTypes.string.isRequired,
   anchorEl: PropTypes.object.isRequired,
-  setAnchorEl: PropTypes.func.isRequired,
   selectedRangeIndexed: PropTypes.object,
-  abortController: PropTypes.object.isRequired,
-  anchorToElementWithClass: PropTypes.func.isRequired,
-  formatting: PropTypes.object.isRequired,
+  attachContextMenuListenersToMarks: PropTypes.func.isRequired,
 };
