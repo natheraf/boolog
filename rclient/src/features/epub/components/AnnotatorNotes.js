@@ -182,9 +182,7 @@ export const AnnotatorNotes = ({
             variant="h6"
             noWrap
           >
-            {highlightColor && "Lorem "}
             <span id="highlight-sample">{selectedText}</span>
-            {highlightColor && " ipsum"}
           </Typography>
         </Stack>
       </HtmlTooltip>
