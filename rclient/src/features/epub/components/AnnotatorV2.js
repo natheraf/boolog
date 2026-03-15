@@ -395,7 +395,10 @@ export const AnnotatorV2 = ({
                   }
                 />
               ) : (
-                <AnnotatorMemos selectedText={selectedText.current} />
+                <AnnotatorMemos
+                  epubObject={epubObject}
+                  selectedText={selectedText.current}
+                />
               )}
             </Box>
           </Stack>

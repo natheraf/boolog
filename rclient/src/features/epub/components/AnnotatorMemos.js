@@ -4,21 +4,63 @@ import { Divider, Stack, Typography } from "@mui/material";
 import { HtmlTooltip } from "../../CustomComponents";
 import { Textarea } from "../../../components/Textarea";
 import { AnnotatorHeader } from "./AnnotatorHeader";
+import { formatMemoKey } from "../formattingUtils";
+import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
+import { getNewId } from "../../../api/IndexedDB/common";
 
-export const AnnotatorMemos = ({ selectedText }) => {
-  const [memo, setMemo] = React.useState("");
+export const AnnotatorMemos = ({ epubObject, selectedText }) => {
+  const memos = epubObject.memos;
+  const entryId = epubObject.key;
+  const memoKey = formatMemoKey(selectedText);
+  const [memo, setMemo] = React.useState(memos[memoKey]?.memo ?? "");
+
+  const setMemoHelper = (value) => {
+    setMemo(value);
+    if (memos.hasOwnProperty(memoKey) === false) {
+      memos[memoKey] = {};
+    }
+    memos[memoKey].memo = value;
+    handleSave();
+  };
 
   const handleClear = () => {
-    setMemo("");
+    setMemoHelper("");
   };
 
   const handleTextAreaOnChange = (event) => {
-    setMemo(event?.target?.value ?? "");
+    setMemoHelper(event?.target?.value ?? "");
+  };
+
+  const handleSave = () => {
+    const date = new Date().toJSON();
+    const memo = memos[memoKey].memo;
+    if (memo.length > 0) {
+      if (memos[memoKey].hasOwnProperty("dateCreated")) {
+        memos[memoKey].dateModified = date;
+      } else {
+        const memoId = getNewId();
+        memos[memoKey] = {
+          key: `${entryId}.memos.${memoId}`,
+          entryId,
+          memo,
+          dateCreated: date,
+          dateModified: date,
+          selectedText: selectedText,
+        };
+      }
+      putEpubData(memos[memoKey]);
+    } else {
+      if (memos[memoKey].hasOwnProperty("key")) {
+        deleteEpubData(memos[memoKey]);
+      }
+      delete memos[memoKey];
+    }
   };
 
   React.useEffect(() => {
     const textArea = document.getElementById("annotator-text-area");
     textArea.focus();
+    textArea.setSelectionRange(textArea.value.length, textArea.value.length);
   }, []);
 
   return (
@@ -71,4 +113,7 @@ export const AnnotatorMemos = ({ selectedText }) => {
   );
 };
 
-AnnotatorMemos.propTypes = { selectedText: PropTypes.string.isRequired };
+AnnotatorMemos.propTypes = {
+  epubObject: PropTypes.object.isRequired,
+  selectedText: PropTypes.string.isRequired,
+};
