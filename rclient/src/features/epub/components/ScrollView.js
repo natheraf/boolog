@@ -120,7 +120,6 @@ export const ScrollView = ({
   };
 
   const focusEpubBody = () => {
-    const epubBody = document.getElementById("epub-body");
     epubBody.focus();
   };
 
@@ -128,8 +127,21 @@ export const ScrollView = ({
     if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
       return;
     }
+    const isCtrlOrCmd = event.ctrlKey || event.metaKey;
     if (["ArrowUp", "PageUp", "ArrowDown", "PageDown"].includes(event.key)) {
       focusEpubBody();
+    } else if (["ArrowLeft", "ArrowRight"].includes(event.key) && isCtrlOrCmd) {
+      if (event.key === "ArrowLeft" && partProgress === 0) {
+        setProgress(spineIndex - 1, 0.999999);
+      } else if (event.key === "ArrowLeft") {
+        setProgress(spineIndex, 0);
+        setForceFocus({ type: "partProgress" });
+      } else if (event.key === "ArrowRight" && partProgress === 0.999999) {
+        setProgress(spineIndex + 1, 0);
+      } else if (event.key === "ArrowRight") {
+        setProgress(spineIndex, 0.999999);
+        setForceFocus({ type: "partProgress" });
+      }
     }
   };
 
@@ -153,11 +165,13 @@ export const ScrollView = ({
       timeoutId = setTimeout(() => {
         epubBody.addEventListener("scroll", onScroll);
       }, 300);
+      document.addEventListener("keydown", handleOnKeyDown);
     }
     return () => {
       clearTimeout(timeoutId);
       clearTimeout(timeOutToSetProgress.current);
       epubBody.removeEventListener("scroll", onScroll);
+      document.removeEventListener("keydown", handleOnKeyDown);
       abortController.abort();
     };
   }, [partProgress, formatMenuIsOpen]);
@@ -188,12 +202,10 @@ export const ScrollView = ({
     focusEpubBody();
     epubBody.addEventListener("mousedown", onMouseDown);
     epubBody.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("keydown", handleOnKeyDown);
 
     return () => {
       epubBody.removeEventListener("mousedown", onMouseDown);
       epubBody.removeEventListener("mouseup", onMouseUp);
-      document.removeEventListener("keydown", handleOnKeyDown);
     };
   }, []);
 
