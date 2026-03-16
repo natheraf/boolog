@@ -122,12 +122,14 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
               onClick={handleOpenCustomColorPicker}
               sx={{
                 border: customColorSelected && `solid gray`,
+                width: 40,
+                height: 40,
               }}
             >
               {customColorSelected ? (
-                <PaletteIcon fontSize="small" htmlColor={highlightColor} />
+                <PaletteIcon htmlColor={highlightColor} />
               ) : (
-                <PaletteOutlinedIcon fontSize="small" htmlColor="gray" />
+                <PaletteOutlinedIcon htmlColor="gray" />
               )}
             </IconButton>
           </>
