@@ -83,6 +83,7 @@ export const HistoryButtons = ({
         MenuListProps={{
           "aria-labelledby": "basic-button",
         }}
+        disableRestoreFocus={true}
       >
         {history
           .filter((_entry, index) => index < historyIndex)
@@ -109,6 +110,7 @@ export const HistoryButtons = ({
         MenuListProps={{
           "aria-labelledby": "basic-button",
         }}
+        disableRestoreFocus={true}
       >
         {history
           .filter((_entry, index) => index > historyIndex)

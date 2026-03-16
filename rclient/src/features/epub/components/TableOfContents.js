@@ -48,7 +48,12 @@ export const TableOfContents = ({
           <TocIcon />
         </IconButton>
       </Tooltip>
-      <Menu anchorEl={anchorEl} open={openToc} onClose={handleCloseToc}>
+      <Menu
+        anchorEl={anchorEl}
+        open={openToc}
+        onClose={handleCloseToc}
+        disableRestoreFocus={true}
+      >
         <Stack spacing={2} sx={{ width: "300px", padding: 2 }}>
           <Stack
             direction={"row"}

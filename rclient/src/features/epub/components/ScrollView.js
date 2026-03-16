@@ -80,7 +80,6 @@ export const ScrollView = ({
     }
 
     timeOutToSetProgress.current = setTimeout(() => {
-      const appBar = document.getElementById("appBar");
       const includeAppBarHeight = -contentRect.top + appBarHeight;
       const percentage = includeAppBarHeight / contentRect.height;
       const avoidNegatives = Math.max(0, percentage);
@@ -118,6 +117,20 @@ export const ScrollView = ({
       scrollToPercent(elementPositionPercentage);
     }
     setForceFocus(null);
+  };
+
+  const focusEpubBody = () => {
+    const epubBody = document.getElementById("epub-body");
+    epubBody.focus();
+  };
+
+  const handleOnKeyDown = (event) => {
+    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+      return;
+    }
+    if (["ArrowUp", "PageUp", "ArrowDown", "PageDown"].includes(event.key)) {
+      focusEpubBody();
+    }
   };
 
   /**
@@ -172,11 +185,15 @@ export const ScrollView = ({
   };
 
   React.useEffect(() => {
+    focusEpubBody();
     epubBody.addEventListener("mousedown", onMouseDown);
     epubBody.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("keydown", handleOnKeyDown);
+
     return () => {
       epubBody.removeEventListener("mousedown", onMouseDown);
       epubBody.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("keydown", handleOnKeyDown);
     };
   }, []);
 

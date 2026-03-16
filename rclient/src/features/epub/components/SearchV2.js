@@ -197,6 +197,7 @@ export const SearchV2 = ({
           maxWidth={"md"}
           open={open}
           onClose={handleClose}
+          disableRestoreFocus={true}
         >
           <DialogTitle>
             <Box>
