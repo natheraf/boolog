@@ -97,10 +97,12 @@ export const putFormattingStyleElement = (theme, formatting) => {
 
 export const putHighlightStyles = (color, backgroundColor) => {
   const highlightStyles = `
-      .temporary-mark {
+      .temporary-mark, .mark {
         all: unset !important;
         font-size: inherit !important; 
         font-weight: inherit !important;
+      }
+      .temporary-mark {
         color: ${color} !important;
         background-color: ${backgroundColor} !important;
       }
