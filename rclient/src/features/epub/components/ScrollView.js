@@ -124,19 +124,21 @@ export const ScrollView = ({
   };
 
   const handleKeyboardChapterJumping = (forward) => {
+    const currentPartBackCount = spine[spineIndex]?.backCount ?? 0;
     if (forward) {
-      const nextChapterStart = spineIndex + spine[spineIndex].frontCount + 1;
+      const nextChapterStart =
+        spineIndex + (spine[spineIndex]?.frontCount ?? 0) + 1;
       setProgress(nextChapterStart, 0);
     } else if (
       spineIndex > 0 &&
       partProgress === 0 &&
-      spine[spineIndex].backCount === 0
+      currentPartBackCount === 0
     ) {
-      const previousChapterPartCount = spine[spineIndex - 1].backCount;
+      const previousChapterPartCount = spine[spineIndex - 1]?.backCount ?? 0;
       const previousChapterStart = spineIndex - previousChapterPartCount - 1;
       setProgress(previousChapterStart, 0);
     } else {
-      const currentChapterStart = spineIndex - spine[spineIndex].backCount;
+      const currentChapterStart = spineIndex - currentPartBackCount;
       setProgress(currentChapterStart, 0);
       setForceFocus({ type: "partProgress" });
     }
@@ -159,16 +161,29 @@ export const ScrollView = ({
   const handleOnKeyDown = (event) => {
     if (
       ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
-      !["ArrowUp", "PageUp", "ArrowDown", "PageDown"].includes(event.key)
+      ![
+        "ArrowUp",
+        "PageUp",
+        "ArrowLeft",
+        "ArrowDown",
+        "PageDown",
+        "ArrowRight",
+      ].includes(event.key)
     ) {
       return;
     }
     const isCtrlOrCmd = event.ctrlKey || event.metaKey;
     const isShift = event.shiftKey;
-    const forward = ["ArrowRight", "PageDown"].includes(event.key);
-    if (isCtrlOrCmd) {
+    const forward = ["ArrowDown", "PageDown", "ArrowRight"].includes(event.key);
+    const scrollButtonPressed = [
+      "ArrowUp",
+      "PageUp",
+      "ArrowDown",
+      "PageDown",
+    ].includes(event.key);
+    if (isCtrlOrCmd && !scrollButtonPressed) {
       handleKeyboardChapterJumping(forward);
-    } else if (isShift) {
+    } else if (isShift && !scrollButtonPressed) {
       handlePartJumping(forward);
     } else {
       focusEpubBody();
