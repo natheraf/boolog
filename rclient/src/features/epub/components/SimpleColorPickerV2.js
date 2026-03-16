@@ -42,6 +42,10 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
     },
   ];
 
+  const customColorSelected =
+    highlightColor &&
+    !highlightColorOptions.some((option) => option.value === highlightColor);
+
   const handleOpenCustomColorPicker = () => {
     const customColorButton = document.getElementById("custom-color-button");
     setColorPickerAnchorEl(customColorButton);
@@ -116,14 +120,14 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
             <IconButton
               id="custom-color-button"
               onClick={handleOpenCustomColorPicker}
+              sx={{
+                border: customColorSelected && `solid gray`,
+              }}
             >
-              {!highlightColor ||
-              highlightColorOptions.some(
-                (option) => option.value === highlightColor
-              ) ? (
-                <PaletteOutlinedIcon htmlColor="gray" />
+              {customColorSelected ? (
+                <PaletteIcon fontSize="small" htmlColor={highlightColor} />
               ) : (
-                <PaletteIcon htmlColor={highlightColor} />
+                <PaletteOutlinedIcon fontSize="small" htmlColor="gray" />
               )}
             </IconButton>
           </>
