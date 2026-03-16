@@ -80,23 +80,29 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   };
 
   const setProgressHelper = (
-    spine,
-    part,
+    spineProgress,
+    partProgress,
     isHistoryEntry = false,
     doNotAddToHistory = false
   ) => {
-    console.log(spine, part);
-    epubObject.progress.spine = spine;
-    epubObject.progress.part = part;
-    prepareSpineIndex(spine);
+    console.log(spineProgress, partProgress);
+    spineProgress = Math.min(Math.max(0, spineProgress), spine.length - 1);
+    epubObject.progress.spine = spineProgress;
+    epubObject.progress.part = partProgress;
+    prepareSpineIndex(spineProgress);
     setForceFocus(null);
-    setProgress({ spine, part });
-    handleHistoryChange(spine, part, isHistoryEntry, doNotAddToHistory);
+    setProgress({ spine: spineProgress, part: partProgress });
+    handleHistoryChange(
+      spineProgress,
+      partProgress,
+      isHistoryEntry,
+      doNotAddToHistory
+    );
     clearTimeout(timeOutToSetProgress.current);
     timeOutToSetProgress.current = setTimeout(() => {
       updateEpubDataInDotNotation({
         key: epubObject.key,
-        progress: { spine, part },
+        progress: { spine: spineProgress, part: partProgress },
       });
     }, 500);
   };
