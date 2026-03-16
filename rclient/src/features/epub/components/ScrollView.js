@@ -123,25 +123,55 @@ export const ScrollView = ({
     epubBody.focus();
   };
 
+  const handleKeyboardChapterJumping = (forward) => {
+    if (forward) {
+      const nextChapterStart = spineIndex + spine[spineIndex].frontCount + 1;
+      setProgress(nextChapterStart, 0);
+    } else if (
+      spineIndex > 0 &&
+      partProgress === 0 &&
+      spine[spineIndex].backCount === 0
+    ) {
+      const previousChapterPartCount = spine[spineIndex - 1].backCount;
+      const previousChapterStart = spineIndex - previousChapterPartCount - 1;
+      setProgress(previousChapterStart, 0);
+    } else {
+      const currentChapterStart = spineIndex - spine[spineIndex].backCount;
+      setProgress(currentChapterStart, 0);
+      setForceFocus({ type: "partProgress" });
+    }
+  };
+
+  const handlePartJumping = (forward) => {
+    if (forward && partProgress === 0.999999) {
+      setProgress(spineIndex + 1, 0);
+    } else if (forward) {
+      setProgress(spineIndex, 0.999999);
+      setForceFocus({ type: "partProgress" });
+    } else if (partProgress === 0) {
+      setProgress(spineIndex - 1, 0.999999);
+    } else {
+      setProgress(spineIndex, 0);
+      setForceFocus({ type: "partProgress" });
+    }
+  };
+
   const handleOnKeyDown = (event) => {
-    if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+    if (
+      ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
+      !["ArrowUp", "PageUp", "ArrowDown", "PageDown"].includes(event.key)
+    ) {
       return;
     }
     const isCtrlOrCmd = event.ctrlKey || event.metaKey;
-    if (["ArrowUp", "PageUp", "ArrowDown", "PageDown"].includes(event.key)) {
+    const isShift = event.shiftKey;
+    const forward = ["ArrowRight", "PageDown"].includes(event.key);
+    if (isCtrlOrCmd) {
+      handleKeyboardChapterJumping(forward);
+    } else if (isShift) {
+      handlePartJumping(forward);
+    } else {
       focusEpubBody();
-    } else if (["ArrowLeft", "ArrowRight"].includes(event.key) && isCtrlOrCmd) {
-      if (event.key === "ArrowLeft" && partProgress === 0) {
-        setProgress(spineIndex - 1, 0.999999);
-      } else if (event.key === "ArrowLeft") {
-        setProgress(spineIndex, 0);
-        setForceFocus({ type: "partProgress" });
-      } else if (event.key === "ArrowRight" && partProgress === 0.999999) {
-        setProgress(spineIndex + 1, 0);
-      } else if (event.key === "ArrowRight") {
-        setProgress(spineIndex, 0.999999);
-        setForceFocus({ type: "partProgress" });
-      }
     }
   };
 

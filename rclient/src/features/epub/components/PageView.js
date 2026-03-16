@@ -103,17 +103,70 @@ export const PageView = ({
     setForceFocus(null);
   };
 
+  const goToLastPage = () => {
+    const totalPages = getTotalPages();
+    const lastPage = totalPages - 1;
+    setProgress(spineIndex, lastPage / totalPages);
+    setForceFocus({ type: "partProgress" });
+  };
+
+  const onLastPage = () => {
+    const totalPages = getTotalPages();
+    const isLastPage = currentPage + 1 === totalPages;
+    return isLastPage;
+  };
+
+  const handlePartJumping = (forward) => {
+    if (forward && onLastPage()) {
+      setProgress(spineIndex + 1, 0);
+    } else if (forward) {
+      goToLastPage();
+    } else if (currentPage === 0) {
+      setProgress(spineIndex - 1, 0.999999);
+    } else {
+      setProgress(spineIndex, 0);
+      setForceFocus({ type: "partProgress" });
+    }
+  };
+
+  const handleKeyboardChapterJumping = (forward) => {
+    if (forward) {
+      const nextChapterStart = spineIndex + spine[spineIndex].frontCount + 1;
+      setProgress(nextChapterStart, 0);
+    } else if (
+      spineIndex > 0 &&
+      currentPage === 0 &&
+      spine[spineIndex].backCount === 0
+    ) {
+      const previousChapterPartCount = spine[spineIndex - 1].backCount;
+      const previousChapterStart = spineIndex - previousChapterPartCount - 1;
+      setProgress(previousChapterStart, 0);
+    } else {
+      const currentChapterStart = spineIndex - spine[spineIndex].backCount;
+      setProgress(currentChapterStart, 0);
+      setForceFocus({ type: "partProgress" });
+    }
+  };
+
   const handleOnKeyDown = (event) => {
     if (
       isLoading ||
-      ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)
+      ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
+      !["ArrowLeft", "PageUp", "ArrowRight", "PageDown"].includes(event.key)
     ) {
       return;
     }
-    if (["ArrowLeft", "PageUp"].includes(event.key)) {
-      handlePreviousPage();
-    } else if (["ArrowRight", "PageDown"].includes(event.key)) {
+    const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+    const isShift = event.shiftKey;
+    const forward = ["ArrowRight", "PageDown"].includes(event.key);
+    if (isCtrlOrCmd) {
+      handleKeyboardChapterJumping(forward);
+    } else if (isShift) {
+      handlePartJumping(forward);
+    } else if (forward) {
       handleNextPage();
+    } else {
+      handlePreviousPage();
     }
   };
 
