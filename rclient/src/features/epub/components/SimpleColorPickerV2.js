@@ -11,15 +11,36 @@ import {
   Radio,
   RadioGroup,
   Stack,
-  TextField,
-  Tooltip,
 } from "@mui/material";
-import HelpIcon from "@mui/icons-material/Help";
 import PaletteIcon from "@mui/icons-material/Palette";
+import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 
 export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
   const [colorPickerAnchorEl, setColorPickerAnchorEl] = React.useState(null);
   const openColorPicker = Boolean(colorPickerAnchorEl);
+
+  const highlightColorOptions = [
+    {
+      value: "rgba(255, 255, 0, .2)",
+      buttonColor: "rgba(255, 255, 0, 1)",
+      label: "Yellow",
+    },
+    {
+      value: "rgba(255, 0, 0, .2)",
+      buttonColor: "rgba(255, 0, 0, 1)",
+      label: "Red",
+    },
+    {
+      value: "rgba(0, 255, 0, .2)",
+      label: "green",
+      buttonColor: "rgba(0, 255, 0, 1)",
+    },
+    {
+      value: "rgba(0, 0, 255, .2)",
+      label: "Blue",
+      buttonColor: "rgba(0, 0, 255, 1)",
+    },
+  ];
 
   const handleOpenCustomColorPicker = () => {
     const customColorButton = document.getElementById("custom-color-button");
@@ -57,28 +78,7 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
             value={highlightColor}
             onChange={handleColorInputChange}
           >
-            {[
-              {
-                value: "rgba(255, 255, 0, .2)",
-                buttonColor: "rgba(255, 255, 0, 1)",
-                label: "Yellow",
-              },
-              {
-                value: "rgba(255, 0, 0, .2)",
-                buttonColor: "rgba(255, 0, 0, 1)",
-                label: "Red",
-              },
-              {
-                value: "rgba(0, 255, 0, .2)",
-                label: "green",
-                buttonColor: "rgba(0, 255, 0, 1)",
-              },
-              {
-                value: "rgba(0, 0, 255, .2)",
-                label: "Blue",
-                buttonColor: "rgba(0, 0, 255, 1)",
-              },
-            ].map((obj) => (
+            {highlightColorOptions.map((obj) => (
               <FormControlLabel
                 key={obj.value}
                 value={obj.value}
@@ -117,7 +117,14 @@ export const SimpleColorPickerV2 = ({ highlightColor, setHighlightColor }) => {
               id="custom-color-button"
               onClick={handleOpenCustomColorPicker}
             >
-              <PaletteIcon htmlColor="gray" />
+              {!highlightColor ||
+              highlightColorOptions.some(
+                (option) => option.value === highlightColor
+              ) ? (
+                <PaletteOutlinedIcon htmlColor="gray" />
+              ) : (
+                <PaletteIcon htmlColor={highlightColor} />
+              )}
             </IconButton>
           </>
         </Stack>
