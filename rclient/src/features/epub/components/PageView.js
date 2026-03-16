@@ -40,6 +40,7 @@ export const PageView = ({
   const [currentPage, setCurrentPage] = React.useState(() =>
     Math.floor(partProgress * getTotalPages())
   );
+  const [isLoading, setIsLoading] = React.useState(true);
 
   const handleNextPage = () => {
     const totalPages = getTotalPages();
@@ -102,27 +103,44 @@ export const PageView = ({
     setForceFocus(null);
   };
 
+  const handleOnKeyDown = (event) => {
+    if (
+      isLoading ||
+      ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)
+    ) {
+      return;
+    }
+    if (["ArrowLeft"].includes(event.key)) {
+      handlePreviousPage();
+    } else if (["ArrowRight"].includes(event.key)) {
+      handleNextPage();
+    }
+  };
+
   /**
-   * Non-react elements need to refresh their functions attached on their listeners with updated react state.
-   * This is for history management
+   * keep react state data attached to non-react elements updated
+   * 1. for history management: Non-react elements need to refresh their functions attached on their listeners with updated react state.
+   * 2. refresh keydown listener with new state
    */
   React.useEffect(() => {
     const abortController = new AbortController();
-    attachOnClickListenersToLinkElements(
-      handlePathHref(
-        spineIndex,
-        spineIndexMap,
-        setProgressWithoutAddingHistory,
-        setForceFocus
-      ),
-      abortController.signal
-    );
+    if (!isLoading) {
+      attachOnClickListenersToLinkElements(
+        handlePathHref(
+          spineIndex,
+          spineIndexMap,
+          setProgressWithoutAddingHistory,
+          setForceFocus
+        ),
+        abortController.signal
+      );
+      document.addEventListener("keydown", handleOnKeyDown);
+    }
     return () => {
+      document.removeEventListener("keydown", handleOnKeyDown);
       abortController.abort();
     };
-  });
-
-  const [isLoading, setIsLoading] = React.useState(true);
+  }, [isLoading, currentPage]);
 
   React.useEffect(() => {
     setTimeout(() => {
