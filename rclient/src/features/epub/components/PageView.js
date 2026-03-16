@@ -110,9 +110,9 @@ export const PageView = ({
     ) {
       return;
     }
-    if (["ArrowLeft"].includes(event.key)) {
+    if (["ArrowLeft", "PageUp"].includes(event.key)) {
       handlePreviousPage();
-    } else if (["ArrowRight"].includes(event.key)) {
+    } else if (["ArrowRight", "PageDown"].includes(event.key)) {
       handleNextPage();
     }
   };
