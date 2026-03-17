@@ -6,6 +6,7 @@ import { EpubViewEditor } from "./EpubViewEditor";
 import CloseIcon from "@mui/icons-material/Close";
 import { EpubNavigationDisplayOption } from "./EpubNavigationDisplayOption";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
+import { EpubHeaderEditor } from "./EpubHeaderEditor";
 
 export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -60,6 +61,10 @@ export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
               </IconButton>
             </Tooltip>
           </Stack>
+          <EpubHeaderEditor
+            displayOptions={displayOptions}
+            setDisplayOptions={setDisplayOptionsHelper}
+          />
           <EpubViewEditor
             displayOptions={displayOptions}
             setDisplayOptions={setDisplayOptionsHelper}
