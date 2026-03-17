@@ -32,7 +32,7 @@ export const ScrollView = ({
   const isMouseDown = React.useRef(false);
   const hideCursorTimeoutId = React.useState();
 
-  const scrollToPercent = (percentage, smooth = false) => {
+  const scrollToPercent = (percentage) => {
     const epubBody = document.getElementById("epub-body");
     const contentHeight = document
       .getElementById("content")
@@ -51,7 +51,6 @@ export const ScrollView = ({
         : showABitOfBottomSentinel;
     return epubBody.scroll({
       top: showABitOfTopSentinel,
-      behavior: smooth ? "smooth" : "instant",
     });
   };
 
@@ -165,23 +164,12 @@ export const ScrollView = ({
   };
 
   const handleLeftRightArrowDown = (forward) => {
-    const contentRect = document
-      .getElementById("content")
-      .getBoundingClientRect();
-    const includeAppBarHeight = -contentRect.top + appBarHeight;
-    const deltaPercent = 0.5;
-    const delta =
-      includeAppBarHeight +
-      window.innerHeight * deltaPercent * (forward ? 1 : -1);
-    const percentage = delta / contentRect.height;
-    const avoidNegatives = Math.max(0, percentage);
-    const avoidOne = Math.min(0.999999, avoidNegatives);
-    if (avoidOne === 0) {
-      setProgress(spineIndex - 1, 0.999999);
-    } else if (avoidOne >= 1) {
-      setProgress(spineIndex + 1, 0);
-    }
-    scrollToPercent(avoidOne, false);
+    const deltaPercent = 0.9;
+    const delta = window.innerHeight * deltaPercent * (forward ? 1 : -1);
+    epubBody.scroll({
+      top: epubBody.scrollTop + delta,
+      behavior: "smooth",
+    });
   };
 
   const handleOnKeyDown = (event) => {
