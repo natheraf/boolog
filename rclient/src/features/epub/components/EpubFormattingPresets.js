@@ -9,11 +9,11 @@ import { Paper, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
 import { getFormattingWithPreset } from "../formattingUtils";
 
 export const EpubFormattingPresets = ({ formatting, setFormatting }) => {
-  const handleOnChange = (_event, newPreset) => {
-    if (newPreset === null) {
+  const handleOnChange = (_event, preset) => {
+    if (preset === null) {
       return;
     }
-    setFormatting(getFormattingWithPreset(newPreset, formatting));
+    setFormatting(getFormattingWithPreset({ ...formatting, preset }));
   };
 
   return (
