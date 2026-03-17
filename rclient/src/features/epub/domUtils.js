@@ -504,3 +504,18 @@ export const isIOS = () => {
     (navigator.userAgent.includes("Mac") && "ontouchend" in document)
   );
 };
+
+export const handleShowCursor = (element, show) => {
+  element.style.cursor = show ? "auto" : "none";
+};
+
+export const handleMouseMoveHider =
+  (epubBody, hideCursorTimeoutId) => (event) => {
+    handleShowCursor(epubBody, true);
+    clearTimeout(hideCursorTimeoutId.current);
+    if (event.target.classList.contains("epub-node")) {
+      hideCursorTimeoutId.current = setTimeout(() => {
+        handleShowCursor(epubBody, false);
+      }, 5000);
+    }
+  };

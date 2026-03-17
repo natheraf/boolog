@@ -2,7 +2,11 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import { Box, CircularProgress, Fade, Stack } from "@mui/material";
 import { SideButtons } from "./SideButtons";
-import { attachOnClickListenersToLinkElements } from "../domUtils";
+import {
+  attachOnClickListenersToLinkElements,
+  handleMouseMoveHider,
+  handleShowCursor,
+} from "../domUtils";
 import { handlePathHref } from "../epubUtils";
 import { ChapterNavigator } from "./ChapterNavigator";
 
@@ -17,6 +21,7 @@ export const PageView = ({
   setProgressWithoutAddingHistory,
   autoHide,
 }) => {
+  const epubBody = document.getElementById("epub-body");
   const spine = epubObject.spine;
   const spineIndexMap = epubObject.spineIndexMap;
   const columnGap = 1;
@@ -41,6 +46,7 @@ export const PageView = ({
     Math.floor(partProgress * getTotalPages())
   );
   const [isLoading, setIsLoading] = React.useState(true);
+  const hideCursorTimeoutId = React.useState();
 
   const handleNextPage = () => {
     const totalPages = getTotalPages();
@@ -158,6 +164,7 @@ export const PageView = ({
     ) {
       return;
     }
+    handleShowCursor(epubBody, false);
     const isCtrlOrCmd = event.ctrlKey || event.metaKey;
     const isShift = event.shiftKey;
     const forward = ["PageDown", "ArrowRight"].includes(event.key);
@@ -182,6 +189,10 @@ export const PageView = ({
     }
   };
 
+  const handleMouseMove = () => {
+    handleMouseMoveHider(epubBody, hideCursorTimeoutId);
+  };
+
   /**
    * keep react state data attached to non-react elements updated
    * 1. for history management: Non-react elements need to refresh their functions attached on their listeners with updated react state.
@@ -189,7 +200,6 @@ export const PageView = ({
    */
   React.useEffect(() => {
     const abortController = new AbortController();
-    const epubBody = document.getElementById("epub-body");
     if (!isLoading) {
       attachOnClickListenersToLinkElements(
         handlePathHref(
@@ -202,10 +212,12 @@ export const PageView = ({
       );
       document.addEventListener("keydown", handleOnKeyDown);
       epubBody.addEventListener("wheel", handleWheelDelta);
+      epubBody.addEventListener("mousemove", handleMouseMove);
     }
     return () => {
       document.removeEventListener("keydown", handleOnKeyDown);
       epubBody.removeEventListener("wheel", handleWheelDelta);
+      epubBody.removeEventListener("mousemove", handleMouseMove);
       abortController.abort();
     };
   }, [isLoading, currentPage]);

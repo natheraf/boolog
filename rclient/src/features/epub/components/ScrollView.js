@@ -1,7 +1,11 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { Box, Slide, Stack } from "@mui/material";
-import { attachOnClickListenersToLinkElements } from "../domUtils";
+import {
+  attachOnClickListenersToLinkElements,
+  handleMouseMoveHider,
+  handleShowCursor,
+} from "../domUtils";
 import { handlePathHref } from "../epubUtils";
 import { appBarHeight } from "./HeaderV2";
 
@@ -26,6 +30,7 @@ export const ScrollView = ({
     window.innerWidth - highlightBorderSafety
   );
   const isMouseDown = React.useRef(false);
+  const hideCursorTimeoutId = React.useState();
 
   const scrollToPercent = (percentage) => {
     const epubBody = document.getElementById("epub-body");
@@ -172,6 +177,7 @@ export const ScrollView = ({
     ) {
       return;
     }
+    handleShowCursor(epubBody, false);
     const isCtrlOrCmd = event.ctrlKey || event.metaKey;
     const isShift = event.shiftKey;
     const forward = ["ArrowDown", "PageDown", "ArrowRight"].includes(event.key);
@@ -242,15 +248,19 @@ export const ScrollView = ({
     isMouseDown.current = false;
     onScroll();
   };
+  const handleMouseMove = () => {
+    handleMouseMoveHider(epubBody, hideCursorTimeoutId);
+  };
 
   React.useEffect(() => {
     focusEpubBody();
     epubBody.addEventListener("mousedown", onMouseDown);
     epubBody.addEventListener("mouseup", onMouseUp);
-
+    epubBody.addEventListener("mousemove", handleMouseMove);
     return () => {
       epubBody.removeEventListener("mousedown", onMouseDown);
       epubBody.removeEventListener("mouseup", onMouseUp);
+      epubBody.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
