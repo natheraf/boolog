@@ -17,11 +17,7 @@ import * as React from "react";
 import { getAllUsers } from "../api/IndexedDB/Users";
 import { useTheme } from "@emotion/react";
 import { UserEdit } from "./UserEdit";
-import {
-  changeUser,
-  getStateValue,
-  setStateValue,
-} from "../api/IndexedDB/State";
+import { changeUser } from "../api/IndexedDB/State";
 import { UserInfoContext } from "../context/UserInfo";
 import { useNavigate } from "react-router-dom";
 import { handleSimpleRequest } from "../api/Axios";
@@ -54,7 +50,6 @@ export const Users = () => {
   const [openEditor, setOpenEditor] = React.useState(false);
   const [editObject, setEditObject] = React.useState(undefined);
   const [quickSettings, setQuickSettings] = React.useState([]);
-  const [epubHeaderAutoHide, setepubHeaderAutoHide] = React.useState(false);
 
   const handleQuickSettingsChange = (_event, newQuickSettings) => {
     setQuickSettings(newQuickSettings);
@@ -94,30 +89,17 @@ export const Users = () => {
       .catch((error) => addAlert(error.toString(), "error"));
   };
 
-  const toggleAutoHideReadingHeader = () => {
-    setepubHeaderAutoHide((prev) => {
-      setStateValue("epubHeaderAutoHide", !prev);
-      return !prev;
-    });
-  };
-
   React.useEffect(() => {
     getAllUsers().then((users) => setUsers(users));
-    getStateValue("epubHeaderAutoHide").then((value) => {
-      setepubHeaderAutoHide(value);
-      setQuickSettings(() => {
-        const res = [];
-        if (theme.palette.mode === "dark") {
-          res.push("dark");
-        }
-        if (theme.transitions.reduceMotion) {
-          res.push("reduceMotionOff");
-        }
-        if (value) {
-          res.push("epubHeaderAutoHide");
-        }
-        return res;
-      });
+    setQuickSettings(() => {
+      const res = [];
+      if (theme.palette.mode === "dark") {
+        res.push("dark");
+      }
+      if (theme.transitions.reduceMotion) {
+        res.push("reduceMotionOff");
+      }
+      return res;
     });
   }, []);
 
@@ -237,20 +219,6 @@ export const Users = () => {
                 value="reduceMotionOff"
               >
                 <AnimationIcon />
-              </ToggleButton>
-            </Tooltip>
-            <Tooltip
-              title={
-                epubHeaderAutoHide
-                  ? "Static Reading Header"
-                  : "Auto Hide Reading Header"
-              }
-            >
-              <ToggleButton
-                onClick={toggleAutoHideReadingHeader}
-                value="epubHeaderAutoHide"
-              >
-                {"AUTO"}
               </ToggleButton>
             </Tooltip>
           </ToggleButtonGroup>
