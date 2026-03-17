@@ -36,7 +36,7 @@ import {
   getEpubDataWithDefault,
   getEpubDataWithDefaultInDotNotation,
 } from "../api/IndexedDB/epubData";
-import { defaultFormatting, defaultStandardFormatting } from "../api/Local";
+import { getDefaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 import { handleSimpleRequest } from "../api/Axios";
 import { EpubReaderV2 } from "../features/epub/components/EpubReaderV2";
@@ -160,15 +160,7 @@ export const BookLog = () => {
       if (!data) {
         return addAlert("File not found", "error");
       }
-      const formatting = structuredClone(defaultFormatting);
-      Object.keys(formatting).forEach(
-        (key) => key.startsWith("_") && delete formatting[key]
-      );
-      const highlightBorderSafety = 25;
-      formatting.pageWidth = Math.min(
-        window.innerWidth - highlightBorderSafety,
-        700
-      );
+      const formatting = getDefaultFormatting(theme);
       getEpubDataWithDefault({
         key: "epubGlobalFormatting",
         formatting,

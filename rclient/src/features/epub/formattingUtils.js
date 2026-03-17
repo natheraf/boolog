@@ -35,11 +35,11 @@ export const putFormattingStyleElement = (theme, formatting) => {
     document.getElementById(linkId)?.remove();
   }
 
-  if (format.pageColor === "Standard") {
+  if (format.pageColor === "Original") {
     format.pageColor = theme.palette.background.paper;
   }
 
-  if (format.textColor === "Standard") {
+  if (format.textColor === "Original") {
     format.textColor = theme.palette.text.primary;
   }
 

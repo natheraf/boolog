@@ -36,6 +36,26 @@ export const userTemplates = [
   },
 ];
 
+export const getDefaultFormatting = (theme) => {
+  const formatting = { ...defaultFormatting, ...defaultStandardFormatting };
+  Object.keys(formatting).forEach(
+    (key) => key.startsWith("_") && delete formatting[key]
+  );
+  const highlightBorderSafety = 25;
+  formatting.pageWidth = Math.min(
+    window.innerWidth - highlightBorderSafety,
+    700
+  );
+  if (formatting.pageColor === "Original") {
+    formatting.pageColor = theme.palette.background.paper;
+  }
+
+  if (formatting.textColor === "Original") {
+    formatting.textColor = theme.palette.text.primary;
+  }
+  return formatting;
+};
+
 export const defaultFormatting = {
   fontSize: "Original",
   _fontSizeDefault: 1,
@@ -96,11 +116,11 @@ export const defaultStandardFormatting = {
     kind: "local",
   },
   textAlign: { label: "Original", value: "inherit" },
-  showDividers: false,
+  showDividers: true,
   showArrows: true,
   fontWeight: "Original",
-  textColor: "Standard",
-  pageColor: "Standard",
+  textColor: "Original",
+  pageColor: "Original",
   pageHeightMargins: 25,
   textIndent: "Original",
   showPageNavigator: true,
