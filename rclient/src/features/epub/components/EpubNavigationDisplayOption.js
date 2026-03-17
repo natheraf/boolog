@@ -25,7 +25,7 @@ export const EpubNavigationDisplayOption = ({
             control={<Checkbox />}
             checked={displayOptions.showSpineNavigator}
             onChange={handleCheckedOnChange("showSpineNavigator")}
-            label="Chapter Tabs on Left"
+            label="Left Chapter Tabs"
             slotProps={{ typography: { variant: "subtitle1" } }}
             labelPlacement="end"
           />
@@ -35,7 +35,7 @@ export const EpubNavigationDisplayOption = ({
                 control={<Checkbox />}
                 checked={displayOptions.showPageNavigator}
                 onChange={handleCheckedOnChange("showPageNavigator")}
-                label="Page Tabs on Right"
+                label="Right Page Tabs"
                 slotProps={{ typography: { variant: "subtitle1" } }}
                 labelPlacement="end"
               />
