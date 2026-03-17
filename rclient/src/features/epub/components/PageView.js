@@ -173,6 +173,15 @@ export const PageView = ({
     }
   };
 
+  const handleWheelDelta = (event) => {
+    const scrollUp = event.deltaY < 0;
+    if (scrollUp) {
+      handlePreviousPage();
+    } else {
+      handleNextPage();
+    }
+  };
+
   /**
    * keep react state data attached to non-react elements updated
    * 1. for history management: Non-react elements need to refresh their functions attached on their listeners with updated react state.
@@ -180,6 +189,7 @@ export const PageView = ({
    */
   React.useEffect(() => {
     const abortController = new AbortController();
+    const epubBody = document.getElementById("epub-body");
     if (!isLoading) {
       attachOnClickListenersToLinkElements(
         handlePathHref(
@@ -191,9 +201,11 @@ export const PageView = ({
         abortController.signal
       );
       document.addEventListener("keydown", handleOnKeyDown);
+      epubBody.addEventListener("wheel", handleWheelDelta);
     }
     return () => {
       document.removeEventListener("keydown", handleOnKeyDown);
+      epubBody.removeEventListener("wheel", handleWheelDelta);
       abortController.abort();
     };
   }, [isLoading, currentPage]);
