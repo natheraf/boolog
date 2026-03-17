@@ -4,14 +4,11 @@ import { getDefaultFormatting } from "../../../api/Local";
 import { useTheme } from "@emotion/react";
 import { getFormattingWithPreset } from "../formattingUtils";
 
-export const EpubFormattingResetButton = ({ epubPreset, setFormatting }) => {
+export const EpubFormattingResetButton = ({ setFormatting }) => {
   const theme = useTheme();
   const handleOnClick = () => {
     const defaultFormatting = getDefaultFormatting(theme);
-    const applyCurrentPreset = getFormattingWithPreset(
-      epubPreset,
-      defaultFormatting
-    );
+    const applyCurrentPreset = getFormattingWithPreset(defaultFormatting);
     setFormatting(applyCurrentPreset);
   };
 
@@ -23,6 +20,5 @@ export const EpubFormattingResetButton = ({ epubPreset, setFormatting }) => {
 };
 
 EpubFormattingResetButton.propTypes = {
-  epubPreset: PropTypes.string.isRequired,
   setFormatting: PropTypes.func.isRequired,
 };

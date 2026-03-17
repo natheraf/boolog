@@ -289,10 +289,7 @@ export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
             </Stack>
           </Paper>
         ))}
-      <EpubFormattingResetButton
-        epubPreset={formatting.preset}
-        setFormatting={setFormatting}
-      />
+      <EpubFormattingResetButton setFormatting={setFormatting} />
     </Stack>
   );
 };
