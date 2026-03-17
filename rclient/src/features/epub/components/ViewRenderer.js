@@ -60,8 +60,8 @@ export const ViewRenderer = ({
         epubObject={epubObject}
         spineIndex={spineIndex}
         formatting={formatting}
+        displayOptions={displayOptions}
         setProgress={setProgress}
-        autoHideHeader={displayOptions.autoHideHeader}
       />
       {viewMap.get(displayOptions.view)}
     </>

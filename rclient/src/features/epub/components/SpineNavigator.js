@@ -7,8 +7,9 @@ export const SpineNavigator = ({
   spineIndex,
   formatting,
   setProgress,
-  autoHideHeader,
+  displayOptions,
 }) => {
+  const autoHideHeader = displayOptions.autoHideHeader;
   const arrayForSpineNavigator = epubObject.chapterMeta;
   const spineNavigateSize = 10;
 
@@ -18,7 +19,7 @@ export const SpineNavigator = ({
 
   const viewHeight = window.innerHeight - appBarHeight * +!autoHideHeader;
 
-  return formatting.showSpineNavigator ? (
+  return displayOptions.showSpineNavigator ? (
     <Stack
       sx={{
         height: viewHeight,
@@ -56,6 +57,6 @@ SpineNavigator.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   formatting: PropTypes.object.isRequired,
+  displayOptions: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
-  autoHideHeader: PropTypes.bool.isRequired,
 };
