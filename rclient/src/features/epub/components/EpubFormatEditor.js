@@ -304,7 +304,7 @@ export const EpubFormatEditor = ({
             control={<Switch />}
             checked={formatting.showSpineNavigator}
             onChange={handleCheckedOnChange("showSpineNavigator")}
-            label="Show Chapters on Left"
+            label="Chapter Tabs on Left"
             slotProps={{ typography: { variant: "subtitle1" } }}
             labelPlacement="start"
           />
@@ -314,7 +314,7 @@ export const EpubFormatEditor = ({
                 control={<Switch />}
                 checked={formatting.showPageNavigator}
                 onChange={handleCheckedOnChange("showPageNavigator")}
-                label="Show Pages on Right"
+                label="Page Tabs on Right"
                 slotProps={{ typography: { variant: "subtitle1" } }}
                 labelPlacement="start"
               />
@@ -322,7 +322,7 @@ export const EpubFormatEditor = ({
                 control={<Switch />}
                 checked={formatting.showDividers}
                 onChange={handleCheckedOnChange("showDividers")}
-                label="Show Edge"
+                label="Content Edge"
                 slotProps={{ typography: { variant: "subtitle1" } }}
                 labelPlacement="start"
               />
