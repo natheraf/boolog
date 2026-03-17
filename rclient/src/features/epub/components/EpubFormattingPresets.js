@@ -6,28 +6,20 @@ import WbTwilightIcon from "@mui/icons-material/WbTwilight";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import EditIcon from "@mui/icons-material/Edit";
 import { Paper, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
-import { setStateValue } from "../../../api/IndexedDB/State";
 import { getFormattingWithPreset } from "../formattingUtils";
 
-export const EpubFormattingPresets = ({
-  formatting,
-  setFormatting,
-  preset,
-  setPreset,
-}) => {
+export const EpubFormattingPresets = ({ formatting, setFormatting }) => {
   const handleOnChange = (_event, newPreset) => {
     if (newPreset === null) {
       return;
     }
     setFormatting(getFormattingWithPreset(newPreset, formatting));
-    setPreset(newPreset);
-    setStateValue("epubPreset", newPreset);
   };
 
   return (
     <Paper>
       <ToggleButtonGroup
-        value={preset}
+        value={formatting.preset}
         exclusive
         onChange={handleOnChange}
         aria-label="color preset"
@@ -78,6 +70,4 @@ export const EpubFormattingPresets = ({
 EpubFormattingPresets.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
-  preset: PropTypes.string.isRequired,
-  setPreset: PropTypes.func.isRequired,
 };

@@ -6,8 +6,9 @@ export const SideButtons = ({
   leftButtonOnClick,
   rightButtonOnClick,
   formatting,
+  displayOptions,
 }) => {
-  const dividerVisibility = formatting.showDividers ? "visible" : "hidden";
+  const dividerVisibility = displayOptions.showDividers ? "visible" : "hidden";
   const showLeftDivider =
     formatting.textAlign.value === "end" ||
     formatting.textAlign.value === "center";
@@ -89,4 +90,5 @@ SideButtons.propTypes = {
   leftButtonOnClick: PropTypes.func.isRequired,
   rightButtonOnClick: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
+  displayOptions: PropTypes.object.isRequired,
 };

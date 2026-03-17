@@ -24,13 +24,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { formattingNumberFields, justifyIcons } from "../formattingUtils";
 import { EpubFormattingResetButton } from "./EpubFormattingResetButton";
 
-export const EpubFormatEditor = ({
-  formatting,
-  setFormatting,
-  epubPreset,
-  view,
-  setView,
-}) => {
+export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
   const [allFonts, setAllFonts] = React.useState(fontFamilies);
   const [fieldFocused, setFieldFocused] = React.useState(null);
   const [focusedFieldValue, setFocusedFieldValue] = React.useState(null);
@@ -170,7 +164,7 @@ export const EpubFormatEditor = ({
       {formattingNumberFields
         .filter(
           (obj) =>
-            (epubPreset === "custom" || obj.advancedOption !== true) &&
+            (formatting.preset === "custom" || obj.advancedOption !== true) &&
             (!obj.viewSpecific || obj.viewSpecific.includes(view))
         )
         .map((obj) => (
@@ -262,7 +256,7 @@ export const EpubFormatEditor = ({
           </ToggleButtonGroup>
         </Stack>
       </Paper>
-      {epubPreset === "custom" &&
+      {formatting.preset === "custom" &&
         [
           { title: "Text Color", value: "textColor" },
           { title: "Page Color", value: "pageColor" },
@@ -336,7 +330,7 @@ export const EpubFormatEditor = ({
         </Stack>
       </Paper>
       <EpubFormattingResetButton
-        epubPreset={epubPreset}
+        epubPreset={formatting.preset}
         setFormatting={setFormatting}
       />
     </Stack>
@@ -346,7 +340,5 @@ export const EpubFormatEditor = ({
 EpubFormatEditor.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
-  epubPreset: PropTypes.string.isRequired,
   view: PropTypes.string.isRequired,
-  setView: PropTypes.func.isRequired,
 };

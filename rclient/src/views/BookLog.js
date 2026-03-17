@@ -30,17 +30,15 @@ import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
-import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
 import {
   getEpubDataWithDefault,
   getEpubDataWithDefaultInDotNotation,
 } from "../api/IndexedDB/epubData";
-import { getDefaultFormatting } from "../api/Local";
+import { getDefaultDisplayOptions, getDefaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 import { handleSimpleRequest } from "../api/Axios";
 import { EpubReaderV2 } from "../features/epub/components/EpubReaderV2";
-import { getStateValue, setStateValue } from "../api/IndexedDB/State";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -160,25 +158,25 @@ export const BookLog = () => {
       if (!data) {
         return addAlert("File not found", "error");
       }
-      const formatting = getDefaultFormatting(theme);
+      const defaultFormatting = getDefaultFormatting(theme);
+      const defaultDisplayOptions = getDefaultDisplayOptions();
       getEpubDataWithDefault({
-        key: "epubGlobalFormatting",
-        formatting,
-      }).then((globalFormatting) => {
-        getEpubDataWithDefaultInDotNotation(id, {
-          key: id,
-          progress: { spine: 0, part: 0 },
-          notes: {},
-          memos: {},
-        }).then((res) => {
-          getStateValue("epubPreset").then((formattingPreset) => {
-            if (formattingPreset === undefined) {
-              formattingPreset = theme.palette.mode;
-              setStateValue("epubPreset", formattingPreset);
-            }
+        key: "epubGlobalDisplayOptions",
+        displayOptions: defaultDisplayOptions,
+      }).then((globalDisplayOptions) => {
+        getEpubDataWithDefault({
+          key: "epubGlobalFormatting",
+          formatting: defaultFormatting,
+        }).then((globalFormatting) => {
+          getEpubDataWithDefaultInDotNotation(id, {
+            key: id,
+            progress: { spine: 0, part: 0 },
+            notes: {},
+            memos: {},
+          }).then((res) => {
             data.epubObject = Object.assign(data.epubObject, res, {
               formatting: globalFormatting.formatting,
-              formattingPreset,
+              displayOptions: globalDisplayOptions.displayOptions,
             });
             setOpenEpubReader(Boolean(data.epubObject));
             setEpub({ object: data.epubObject, entryId: id });

@@ -16,6 +16,7 @@ import { EpubFormatterV2 } from "./EpubFormatterV2";
 import { HistoryButtons } from "./HistoryButtons";
 import { SearchV2 } from "./SearchV2";
 import { TableOfContents } from "./TableOfContents";
+import { EpubSettings } from "./EpubSettings";
 
 export const appBarHeight = 48;
 
@@ -23,10 +24,10 @@ export const HeaderV2 = ({
   epubObject,
   spineIndex,
   handleClose,
-  view,
-  setView,
   formatting,
   setFormatting,
+  displayOptions,
+  setDisplayOptions,
   history,
   historyIndex,
   setHistoryIndex,
@@ -36,8 +37,6 @@ export const HeaderV2 = ({
   setLoadedCSS,
   setFormatMenuIsOpen,
   setForceFocus,
-  autoHide,
-  setAutoHide,
 }) => {
   const { title, subtitle } = {};
   const theme = useTheme();
@@ -100,7 +99,7 @@ export const HeaderV2 = ({
 
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
-    if (autoHide) {
+    if (displayOptions.autoHideHeader) {
       epubBody.addEventListener("mousemove", onMouseMove);
       epubBody.addEventListener("touchend", handleTouchEnd);
       window.addEventListener("mouseup", onMouseUp);
@@ -113,7 +112,7 @@ export const HeaderV2 = ({
       window.removeEventListener("mouseup", onMouseUp);
       window.removeEventListener("mousedown", onMouseDown);
     };
-  }, [autoHide]);
+  }, [displayOptions.autoHideHeader]);
 
   return (
     <Slide direction="down" in={show}>
@@ -122,7 +121,7 @@ export const HeaderV2 = ({
         variant="outlined"
         elevation={0}
         sx={{
-          position: autoHide ? "fixed" : "static",
+          position: displayOptions.autoHideHeader ? "fixed" : "static",
           top: 0,
           width: "100%",
         }}
@@ -198,10 +197,15 @@ export const HeaderV2 = ({
               epubObject={epubObject}
               formatting={formatting}
               setFormatting={setFormatting}
-              view={view}
-              setView={setView}
+              view={displayOptions.view}
               setLoadedCSS={setLoadedCSS}
               setFormatMenuIsOpen={setFormatMenuIsOpen}
+            />
+            <EpubSettings
+              displayOptions={displayOptions}
+              setDisplayOptions={setDisplayOptions}
+              formatting={formatting}
+              setFormatting={setFormatting}
             />
           </Stack>
         </Toolbar>
@@ -214,10 +218,10 @@ HeaderV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   handleClose: PropTypes.func.isRequired,
-  view: PropTypes.string.isRequired,
-  setView: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
+  displayOptions: PropTypes.object.isRequired,
+  setDisplayOptions: PropTypes.func.isRequired,
   history: PropTypes.array.isRequired,
   historyIndex: PropTypes.number.isRequired,
   setHistoryIndex: PropTypes.func.isRequired,
@@ -227,6 +231,4 @@ HeaderV2.propTypes = {
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
   setForceFocus: PropTypes.func.isRequired,
-  autoHide: PropTypes.bool.isRequired,
-  setAutoHide: PropTypes.func.isRequired,
 };

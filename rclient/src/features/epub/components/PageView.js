@@ -17,9 +17,9 @@ export const PageView = ({
   forceFocus,
   setForceFocus,
   formatting,
+  displayOptions,
   setProgress,
   setProgressWithoutAddingHistory,
-  autoHide,
 }) => {
   const epubBody = document.getElementById("epub-body");
   const spine = epubObject.spine;
@@ -259,13 +259,13 @@ export const PageView = ({
           </Fade>
         </Stack>
       )}
-      {formatting.showPageNavigator && !isLoading && (
+      {displayOptions.showPageNavigator && !isLoading && (
         <ChapterNavigator
           epubObject={epubObject}
           spineIndex={spineIndex}
           formatting={formatting}
           setProgress={setProgress}
-          autoHide={autoHide}
+          autoHideHeader={displayOptions.autoHideHeader}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
         />
@@ -274,6 +274,7 @@ export const PageView = ({
         leftButtonOnClick={handlePreviousPage}
         rightButtonOnClick={handleNextPage}
         formatting={formatting}
+        displayOptions={displayOptions}
       >
         <Box
           sx={{
@@ -318,7 +319,7 @@ PageView.propTypes = {
   forceFocus: PropTypes.object,
   setForceFocus: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
+  displayOptions: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
   setProgressWithoutAddingHistory: PropTypes.func.isRequired,
-  autoHide: PropTypes.bool.isRequired,
 };

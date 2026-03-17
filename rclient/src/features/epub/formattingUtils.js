@@ -124,8 +124,8 @@ const presets = new Map([
   ["custom", {}],
 ]);
 
-export const getFormattingWithPreset = (presetName, formatting) => {
-  return { ...formatting, ...presets.get(presetName) };
+export const getFormattingWithPreset = (formatting) => {
+  return { ...formatting, ...presets.get(formatting.present) };
 };
 
 export const formattingNumberFields = [

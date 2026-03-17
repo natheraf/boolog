@@ -1,3 +1,5 @@
+import { isMobileDevice } from "./IndexedDB/common";
+
 export const userTemplates = [
   {
     name: "Grun",
@@ -49,9 +51,11 @@ export const getDefaultFormatting = (theme) => {
   if (formatting.pageColor === "Original") {
     formatting.pageColor = theme.palette.background.paper;
   }
-
   if (formatting.textColor === "Original") {
     formatting.textColor = theme.palette.text.primary;
+  }
+  if (formatting.hasOwnProperty("preset") === false) {
+    formatting.preset = theme.palette.mode;
   }
   return formatting;
 };
@@ -125,6 +129,20 @@ export const defaultStandardFormatting = {
   textIndent: "Original",
   showPageNavigator: true,
   showSpineNavigator: true,
+};
+
+export const getDefaultDisplayOptions = () => {
+  const options = structuredClone(defaultDisplayOptions);
+  options.autoHideHeader = isMobileDevice();
+  return options;
+};
+
+export const defaultDisplayOptions = {
+  showPageNavigator: true,
+  showSpineNavigator: true,
+  showDividers: true,
+  autoHideHeader: false,
+  view: "page",
 };
 
 export const fontFamilies = [

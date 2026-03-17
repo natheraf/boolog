@@ -64,8 +64,6 @@ const appDataDBOnUpgradeNeeded = function (event) {
         keyPath: "key",
       });
       state.put({ key: "userId", userId: 1 });
-      state.put({ key: "epubHeaderAutoHide", value: isMobileDevice() });
-      state.put({ key: "epubView", value: "page" });
   }
 };
 
@@ -90,7 +88,7 @@ export const getUserDB = () => `user${localStorage.getItem("userId")}`;
 // Posted by Michael Zaporozhets, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-02-20, License - CC BY-SA 4.0
 
-const isMobileDevice = function () {
+export const isMobileDevice = function () {
   let check = false;
   (function (a) {
     if (

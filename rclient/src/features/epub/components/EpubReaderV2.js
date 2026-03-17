@@ -6,7 +6,6 @@ import PropTypes from "prop-types";
 import { updateEpubDataInDotNotation } from "../../../api/IndexedDB/epubData";
 import { ViewRenderer } from "./ViewRenderer";
 import { loadImages } from "../epubUtils";
-import { getStateValue } from "../../../api/IndexedDB/State";
 import { useTheme } from "@emotion/react";
 import { AnnotatorV2 } from "./AnnotatorV2";
 import { waitForElement } from "../domUtils";
@@ -31,7 +30,9 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
     },
   ]);
   const [historyIndex, setHistoryIndex] = React.useState(0);
-  const [view, setView] = React.useState(null);
+  const [displayOptions, setDisplayOptions] = React.useState(
+    epubObject.displayOptions
+  );
   const [forceFocus, setForceFocus] = React.useState(null);
 
   const [formatting, setFormatting] = React.useState(epubObject.formatting);
@@ -41,8 +42,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
 
   const [preparedSpineIndexes, setPreparedSpineIndexes] = React.useState([]);
   const imageObjectURLs = React.useRef(new Map());
-
-  const [autoHide, setAutoHide] = React.useState(false);
 
   const [annotatorAnchorEl, setAnnotatorAnchorEl] = React.useState(null);
 
@@ -133,10 +132,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
 
   React.useEffect(() => {
     prepareSpineIndex(progress.spine);
-    getStateValue("epubHeaderAutoHide").then((autoHide) => {
-      setAutoHide(autoHide);
-      getStateValue("epubView").then(setView);
-    });
     waitForElement("#content").then(() => setRenderAnnotator(true));
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
@@ -150,7 +145,7 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
       onClose={handleClose}
       TransitionComponent={DialogSlideUpTransition}
     >
-      {view && (
+      {displayOptions.view && (
         <Box
           sx={{
             height: window.innerHeight,
@@ -163,10 +158,10 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             epubObject={epubObject}
             spineIndex={progress.spine}
             handleClose={handleClose}
-            view={view}
-            setView={setView}
             formatting={formatting}
             setFormatting={setFormatting}
+            displayOptions={displayOptions}
+            setDisplayOptions={setDisplayOptions}
             history={history}
             historyIndex={historyIndex}
             setHistoryIndex={setHistoryIndex}
@@ -176,8 +171,6 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
             setLoadedCSS={setLoadedCSS}
             setFormatMenuIsOpen={setFormatMenuIsOpen}
             setForceFocus={setForceFocus}
-            autoHide={autoHide}
-            setAutoHide={setAutoHide}
           />
           <Box
             id="epub-body"
@@ -207,9 +200,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
                 setProgressWithoutAddingHistory={
                   setProgressWithoutAddingHistory
                 }
-                view={view}
+                displayOptions={displayOptions}
                 formatMenuIsOpen={formatMenuIsOpen}
-                autoHide={autoHide}
               />
             ) : (
               <Stack
@@ -227,11 +219,10 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
           {renderAnnotator && (
             <AnnotatorV2
               epubObject={epubObject}
-              view={view}
+              displayOptions={displayOptions}
               spineIndex={progress.spine}
               anchorEl={annotatorAnchorEl}
               setAnchorEl={setAnnotatorAnchorEl}
-              formatting={formatting}
             />
           )}
         </Box>

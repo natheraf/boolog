@@ -9,7 +9,7 @@ export const ChapterNavigator = ({
   spineIndex,
   formatting,
   setProgress,
-  autoHide,
+  autoHideHeader,
   currentPage,
   setCurrentPage,
 }) => {
@@ -17,7 +17,7 @@ export const ChapterNavigator = ({
   const spine = epubObject.spine;
   const chapterMeta = epubObject.chapterMeta;
   const chapterNavigateSize = 10;
-  const viewHeight = window.innerHeight - appBarHeight * +!autoHide;
+  const viewHeight = window.innerHeight - appBarHeight * +!autoHideHeader;
 
   const arrayForPreviousChapterNavigator =
     spineIndex === null || spineIndex === spine.length - 1
@@ -185,7 +185,7 @@ ChapterNavigator.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
-  autoHide: PropTypes.bool.isRequired,
+  autoHideHeader: PropTypes.bool.isRequired,
   currentPage: PropTypes.number.isRequired,
   setCurrentPage: PropTypes.func.isRequired,
 };

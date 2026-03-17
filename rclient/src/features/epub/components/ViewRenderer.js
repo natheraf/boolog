@@ -18,9 +18,8 @@ export const ViewRenderer = ({
   formatting,
   setProgress,
   setProgressWithoutAddingHistory,
-  view,
+  displayOptions,
   formatMenuIsOpen,
-  autoHide,
 }) => {
   const viewMap = new Map([
     [
@@ -48,9 +47,9 @@ export const ViewRenderer = ({
         forceFocus={forceFocus}
         setForceFocus={setForceFocus}
         formatting={formatting}
+        displayOptions={displayOptions}
         setProgress={setProgress}
         setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
-        autoHide={autoHide}
       />,
     ],
   ]);
@@ -62,9 +61,9 @@ export const ViewRenderer = ({
         spineIndex={spineIndex}
         formatting={formatting}
         setProgress={setProgress}
-        autoHide={autoHide}
+        autoHideHeader={displayOptions.autoHideHeader}
       />
-      {(view && viewMap.get(view)) ?? null}
+      {viewMap.get(displayOptions.view)}
     </>
   );
 };
@@ -78,7 +77,6 @@ ViewRenderer.propTypes = {
   formatting: PropTypes.object.isRequired,
   setProgress: PropTypes.func.isRequired,
   setProgressWithoutAddingHistory: PropTypes.func.isRequired,
-  view: PropTypes.string.isRequired,
+  displayOptions: PropTypes.object.isRequired,
   formatMenuIsOpen: PropTypes.bool.isRequired,
-  autoHide: PropTypes.bool.isRequired,
 };

@@ -1,7 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { Backdrop, Box, Divider, Menu, Stack, Typography } from "@mui/material";
+import { Backdrop, Box, Menu, Stack } from "@mui/material";
 import {
   clearTemporaryMarks,
   handleInjectingMarkToEpubNodes,
@@ -11,7 +11,6 @@ import {
   handleDeleteMark,
   isIOS,
 } from "../domUtils";
-import { formatMemoKey } from "../formattingUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import { AnnotatorLeftSideBar } from "./AnnotatorLeftSideBar";
@@ -20,11 +19,10 @@ import { AnnotatorMemos } from "./AnnotatorMemos";
 
 export const AnnotatorV2 = ({
   epubObject,
-  view,
+  displayOptions,
   spineIndex,
   anchorEl,
   setAnchorEl,
-  formatting,
 }) => {
   const notes = epubObject.notes;
   const theme = useTheme();
@@ -344,7 +342,7 @@ export const AnnotatorV2 = ({
       content.removeEventListener("touchend", handleTouchSelect);
       content.removeEventListener("touchstart", clearTemporaryMarks);
     };
-  }, [view, spineIndex]);
+  }, [displayOptions.view, spineIndex]);
 
   return (
     <Backdrop
@@ -410,9 +408,8 @@ export const AnnotatorV2 = ({
 
 AnnotatorV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
-  view: PropTypes.string.isRequired,
+  displayOptions: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,
-  formatting: PropTypes.object.isRequired,
 };

@@ -19,7 +19,6 @@ import {
 } from "../formattingUtils";
 import { EpubFormatEditor } from "./EpubFormatEditor";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
-import { EpubViewEditor } from "./EpubViewEditor";
 
 /**
  * ReaderFormat Rewritten
@@ -30,7 +29,6 @@ export const EpubFormatterV2 = ({
   formatting,
   setFormatting,
   view,
-  setView,
   setLoadedCSS,
   setFormatMenuIsOpen,
 }) => {
@@ -70,8 +68,6 @@ export const EpubFormatterV2 = ({
     setFormatMenuIsOpen(false);
   };
 
-  const [epubPreset, setEpubPreset] = React.useState("custom");
-
   const setFormattingHelper = (newFormatting) => {
     setFormatting(newFormatting);
     putEpubData(
@@ -102,12 +98,7 @@ export const EpubFormatterV2 = ({
       document.head.insertAdjacentElement("beforeend", styleElement);
       stylingElementIds.current.push(styleElement.id);
     }
-    const initialPreset = epubObject.formattingPreset;
-    setEpubPreset(initialPreset);
-    const formattingWithPreset = getFormattingWithPreset(
-      initialPreset,
-      formatting
-    );
+    const formattingWithPreset = getFormattingWithPreset(formatting);
     setFormattingHelper(formattingWithPreset);
     setLoadedCSS(true);
     window.addEventListener("resize", updateWindowSize);
@@ -154,16 +145,11 @@ export const EpubFormatterV2 = ({
             <EpubFormattingPresets
               formatting={formatting}
               setFormatting={setFormattingHelper}
-              preset={epubPreset}
-              setPreset={setEpubPreset}
             />
-            <EpubViewEditor view={view} setView={setView} />
             <EpubFormatEditor
               formatting={formatting}
               setFormatting={setFormattingHelper}
-              epubPreset={epubPreset}
               view={view}
-              setView={setView}
             />
           </Stack>
         </Stack>
@@ -177,7 +163,6 @@ EpubFormatterV2.propTypes = {
   formatting: PropTypes.object.isRequired,
   setFormatting: PropTypes.func.isRequired,
   view: PropTypes.string.isRequired,
-  setView: PropTypes.func.isRequired,
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
 };
