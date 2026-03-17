@@ -178,6 +178,7 @@ export const AnnotatorNotes = ({
           <Typography
             sx={{
               zIndex: 2 /** to show above simple color picker backdrop */,
+              padding: 1,
             }}
             variant="h6"
             noWrap
