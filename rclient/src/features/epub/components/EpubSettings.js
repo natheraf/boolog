@@ -4,7 +4,7 @@ import { IconButton, Menu, Stack, Tooltip, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { EpubViewEditor } from "./EpubViewEditor";
 import CloseIcon from "@mui/icons-material/Close";
-import { EpubDisplayOption } from "./EpubDisplayOptions";
+import { EpubNavigationDisplayOption } from "./EpubNavigationDisplayOption";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
 
 export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
@@ -64,7 +64,7 @@ export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
             displayOptions={displayOptions}
             setDisplayOptions={setDisplayOptionsHelper}
           />
-          <EpubDisplayOption
+          <EpubNavigationDisplayOption
             displayOptions={displayOptions}
             setDisplayOptions={setDisplayOptionsHelper}
           />

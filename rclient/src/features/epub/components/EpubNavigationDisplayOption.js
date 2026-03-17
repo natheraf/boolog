@@ -7,7 +7,10 @@ import {
   Typography,
 } from "@mui/material";
 
-export const EpubDisplayOption = ({ displayOptions, setDisplayOptions }) => {
+export const EpubNavigationDisplayOption = ({
+  displayOptions,
+  setDisplayOptions,
+}) => {
   const handleCheckedOnChange = (key) => (event) => {
     const checked = event.target.checked;
     setDisplayOptions({ ...displayOptions, [key]: checked });
@@ -16,7 +19,7 @@ export const EpubDisplayOption = ({ displayOptions, setDisplayOptions }) => {
   return (
     <Paper sx={{ width: "100%", p: 1 }}>
       <Stack direction={"column"} alignItems={"center"} spacing={1}>
-        <Typography variant="h6">Display Options</Typography>
+        <Typography variant="h6">Navigation</Typography>
         <Stack direction={"column"}>
           <FormControlLabel
             control={<Checkbox />}
@@ -40,7 +43,7 @@ export const EpubDisplayOption = ({ displayOptions, setDisplayOptions }) => {
                 control={<Checkbox />}
                 checked={displayOptions.showDividers}
                 onChange={handleCheckedOnChange("showDividers")}
-                label="Content Edge"
+                label="Page Button Border"
                 slotProps={{ typography: { variant: "subtitle1" } }}
                 labelPlacement="end"
               />
@@ -52,7 +55,7 @@ export const EpubDisplayOption = ({ displayOptions, setDisplayOptions }) => {
   );
 };
 
-EpubDisplayOption.propTypes = {
+EpubNavigationDisplayOption.propTypes = {
   displayOptions: PropTypes.object.isRequired,
   setDisplayOptions: PropTypes.func.isRequired,
 };
