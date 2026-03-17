@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Box, Slide, Stack } from "@mui/material";
 import {
   attachOnClickListenersToLinkElements,
-  handleMouseMoveHider,
+  handleMouseMoveHiderOnTimeout,
   handleShowCursor,
 } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
@@ -32,7 +32,7 @@ export const ScrollView = ({
   const isMouseDown = React.useRef(false);
   const hideCursorTimeoutId = React.useState();
 
-  const scrollToPercent = (percentage) => {
+  const scrollToPercent = (percentage, smooth = false) => {
     const epubBody = document.getElementById("epub-body");
     const contentHeight = document
       .getElementById("content")
@@ -51,6 +51,7 @@ export const ScrollView = ({
         : showABitOfBottomSentinel;
     return epubBody.scroll({
       top: showABitOfTopSentinel,
+      behavior: smooth ? "smooth" : "instant",
     });
   };
 
@@ -163,6 +164,26 @@ export const ScrollView = ({
     }
   };
 
+  const handleLeftRightArrowDown = (forward) => {
+    const contentRect = document
+      .getElementById("content")
+      .getBoundingClientRect();
+    const includeAppBarHeight = -contentRect.top + appBarHeight;
+    const deltaPercent = 0.5;
+    const delta =
+      includeAppBarHeight +
+      window.innerHeight * deltaPercent * (forward ? 1 : -1);
+    const percentage = delta / contentRect.height;
+    const avoidNegatives = Math.max(0, percentage);
+    const avoidOne = Math.min(0.999999, avoidNegatives);
+    if (avoidOne === 0) {
+      setProgress(spineIndex - 1, 0.999999);
+    } else if (avoidOne >= 1) {
+      setProgress(spineIndex + 1, 0);
+    }
+    scrollToPercent(avoidOne, false);
+  };
+
   const handleOnKeyDown = (event) => {
     if (
       ["INPUT", "TEXTAREA"].includes(document.activeElement.tagName) ||
@@ -187,10 +208,13 @@ export const ScrollView = ({
       "ArrowDown",
       "PageDown",
     ].includes(event.key);
+    const leftOrRightArrow = ["ArrowLeft", "ArrowRight"].includes(event.key);
     if (isCtrlOrCmd && !scrollButtonPressed) {
       handleKeyboardChapterJumping(forward);
     } else if (isShift && !scrollButtonPressed) {
       handlePartJumping(forward);
+    } else if (leftOrRightArrow && !event.repeat) {
+      handleLeftRightArrowDown(forward);
     } else {
       focusEpubBody();
     }
@@ -248,8 +272,9 @@ export const ScrollView = ({
     isMouseDown.current = false;
     onScroll();
   };
-  const handleMouseMove = () => {
-    handleMouseMoveHider(epubBody, hideCursorTimeoutId);
+  const handleMouseMove = (event) => {
+    handleShowCursor(epubBody, true);
+    handleMouseMoveHiderOnTimeout(event, epubBody, hideCursorTimeoutId);
   };
 
   React.useEffect(() => {

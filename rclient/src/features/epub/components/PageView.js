@@ -4,7 +4,7 @@ import { Box, CircularProgress, Fade, Stack } from "@mui/material";
 import { SideButtons } from "./SideButtons";
 import {
   attachOnClickListenersToLinkElements,
-  handleMouseMoveHider,
+  handleMouseMoveHiderOnTimeout,
   handleShowCursor,
 } from "../domUtils";
 import { handlePathHref } from "../epubUtils";
@@ -189,8 +189,9 @@ export const PageView = ({
     }
   };
 
-  const handleMouseMove = () => {
-    handleMouseMoveHider(epubBody, hideCursorTimeoutId);
+  const handleMouseMove = (event) => {
+    handleShowCursor(epubBody, true);
+    handleMouseMoveHiderOnTimeout(event, epubBody, hideCursorTimeoutId);
   };
 
   /**

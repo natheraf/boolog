@@ -509,13 +509,16 @@ export const handleShowCursor = (element, show) => {
   element.style.cursor = show ? "auto" : "none";
 };
 
-export const handleMouseMoveHider =
-  (epubBody, hideCursorTimeoutId) => (event) => {
-    handleShowCursor(epubBody, true);
-    clearTimeout(hideCursorTimeoutId.current);
-    if (event.target.classList.contains("epub-node")) {
-      hideCursorTimeoutId.current = setTimeout(() => {
-        handleShowCursor(epubBody, false);
-      }, 5000);
-    }
-  };
+export const handleMouseMoveHiderOnTimeout = (
+  event,
+  epubBody,
+  hideCursorTimeoutId
+) => {
+  handleShowCursor(epubBody, true);
+  clearTimeout(hideCursorTimeoutId.current);
+  if (event.target.classList.contains("epub-node")) {
+    hideCursorTimeoutId.current = setTimeout(() => {
+      handleShowCursor(epubBody, false);
+    }, 5000);
+  }
+};
