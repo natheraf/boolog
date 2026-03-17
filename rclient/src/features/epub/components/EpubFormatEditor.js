@@ -22,6 +22,7 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import AddIcon from "@mui/icons-material/Add";
 import { formattingNumberFields, justifyIcons } from "../formattingUtils";
+import { EpubFormattingResetButton } from "./EpubFormattingResetButton";
 
 export const EpubFormatEditor = ({
   formatting,
@@ -334,6 +335,10 @@ export const EpubFormatEditor = ({
           )}
         </Stack>
       </Paper>
+      <EpubFormattingResetButton
+        epubPreset={epubPreset}
+        setFormatting={setFormatting}
+      />
     </Stack>
   );
 };
