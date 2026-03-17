@@ -17,7 +17,7 @@ export const EpubViewEditor = ({ displayOptions, setDisplayOptions }) => {
     if (newView === null) {
       return;
     }
-    setDisplayOptions((prev) => ({ ...prev, view: newView }));
+    setDisplayOptions({ ...displayOptions, view: newView });
   };
 
   return (

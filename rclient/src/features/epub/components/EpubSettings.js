@@ -5,6 +5,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { EpubViewEditor } from "./EpubViewEditor";
 import CloseIcon from "@mui/icons-material/Close";
 import { EpubDisplayOption } from "./EpubDisplayOptions";
+import { putEpubData } from "../../../api/IndexedDB/epubData";
 
 export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -16,6 +17,14 @@ export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const setDisplayOptionsHelper = (newDisplayOptions) => {
+    setDisplayOptions(newDisplayOptions);
+    putEpubData(
+      { key: "epubGlobalDisplayOptions", displayOptions: newDisplayOptions },
+      true
+    );
   };
 
   return (
@@ -53,11 +62,11 @@ export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
           </Stack>
           <EpubViewEditor
             displayOptions={displayOptions}
-            setDisplayOptions={setDisplayOptions}
+            setDisplayOptions={setDisplayOptionsHelper}
           />
           <EpubDisplayOption
             displayOptions={displayOptions}
-            setDisplayOptions={setDisplayOptions}
+            setDisplayOptions={setDisplayOptionsHelper}
           />
         </Stack>
       </Menu>

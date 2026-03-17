@@ -4,7 +4,7 @@ import { FormControlLabel, Paper, Stack, Switch } from "@mui/material";
 export const EpubDisplayOption = ({ displayOptions, setDisplayOptions }) => {
   const handleCheckedOnChange = (key) => (event) => {
     const checked = event.target.checked;
-    setDisplayOptions((prev) => ({ ...prev, [key]: checked }));
+    setDisplayOptions({ ...displayOptions, [key]: checked });
   };
 
   return (
