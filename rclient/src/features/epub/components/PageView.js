@@ -281,6 +281,8 @@ export const PageView = ({
             minWidth: `${pageWidth}px`,
             maxWidth: `${pageWidth}px`,
             overflow: "visible",
+            paddingTop: `${formatting.pageHeightMargins / 2}px`,
+            paddingBottom: `${formatting.pageHeightMargins / 2}px`,
           }}
         >
           <Box

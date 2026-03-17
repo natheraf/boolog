@@ -167,7 +167,11 @@ export const EpubFormatEditor = ({
         </Stack>
       </Paper>
       {formattingNumberFields
-        .filter((obj) => epubPreset === "custom" || obj.advancedOption !== true)
+        .filter(
+          (obj) =>
+            (epubPreset === "custom" || obj.advancedOption !== true) &&
+            (!obj.viewSpecific || obj.viewSpecific.includes(view))
+        )
         .map((obj) => (
           <Paper key={obj.value} sx={{ width: "100%", p: 1 }}>
             <Stack spacing={1} alignItems={"center"}>

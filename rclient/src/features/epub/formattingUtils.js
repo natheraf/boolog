@@ -159,12 +159,14 @@ export const formattingNumberFields = [
     advancedOption: true,
     decreaseIcon: HeightIcon,
     increaseIcon: VerticalAlignCenterIcon,
+    viewSpecific: ["page"],
   },
   {
     title: "Pages Shown",
     value: "pagesShown",
     endText: "pgs",
     advancedOption: true,
+    viewSpecific: ["page"],
   },
   {
     title: "Indent",
