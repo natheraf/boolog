@@ -116,14 +116,6 @@ export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
     }
   };
 
-  const handleCheckedOnChange = (key) => (event) => {
-    const checked = event.target.checked;
-    setFormatting({
-      ...formatting,
-      [key]: checked,
-    });
-  };
-
   React.useEffect(() => {
     getGoogleFonts().then((res) => {
       setAllFonts([...fontFamilies, ...res.items]);
@@ -297,38 +289,6 @@ export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
             </Stack>
           </Paper>
         ))}
-      <Paper sx={{ width: "100%", paddingRight: 3 }}>
-        <Stack direction={"column"}>
-          <FormControlLabel
-            control={<Switch />}
-            checked={formatting.showSpineNavigator}
-            onChange={handleCheckedOnChange("showSpineNavigator")}
-            label="Chapter Tabs on Left"
-            slotProps={{ typography: { variant: "subtitle1" } }}
-            labelPlacement="start"
-          />
-          {view === "page" && (
-            <>
-              <FormControlLabel
-                control={<Switch />}
-                checked={formatting.showPageNavigator}
-                onChange={handleCheckedOnChange("showPageNavigator")}
-                label="Page Tabs on Right"
-                slotProps={{ typography: { variant: "subtitle1" } }}
-                labelPlacement="start"
-              />
-              <FormControlLabel
-                control={<Switch />}
-                checked={formatting.showDividers}
-                onChange={handleCheckedOnChange("showDividers")}
-                label="Content Edge"
-                slotProps={{ typography: { variant: "subtitle1" } }}
-                labelPlacement="start"
-              />
-            </>
-          )}
-        </Stack>
-      </Paper>
       <EpubFormattingResetButton
         epubPreset={formatting.preset}
         setFormatting={setFormatting}
