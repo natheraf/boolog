@@ -4,7 +4,7 @@ import { AnnotationNotesGrouped } from "./AnnotationNotesGrouped";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
 import { trimAndHighlight, updateNoteMarksOrDeleteInDOM } from "../domUtils";
 import { SimpleColorPickerV2 } from "./SimpleColorPickerV2";
-import { Box, Menu } from "@mui/material";
+import { Box, Menu, Typography } from "@mui/material";
 import { AnnotationNotesUngrouped } from "./AnnotationNotesUngrouped";
 
 export const AnnotationNotesList = ({
@@ -16,6 +16,7 @@ export const AnnotationNotesList = ({
   goToNote,
 }) => {
   const spine = epubObject.spine;
+  const notesIsEmpty = Object.keys(notes).length === 0;
   const [expandedNotes, setExpandedNotes] = React.useState({});
   const [noteForEdit, setNoteForEdit] = React.useState(null);
   const [colorPickerAnchorEl, setColorPickerAnchorEl] = React.useState(null);
@@ -122,29 +123,41 @@ export const AnnotationNotesList = ({
           </Box>
         </Menu>
       )}
-      {grouped ? (
-        <AnnotationNotesGrouped
-          spine={spine}
-          spineIndex={spineIndex}
-          notes={notes}
-          expandedNotes={expandedNotes}
-          handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
-          handleExpandNote={handleExpandNote}
-          handleGoToHighlight={handleGoToHighlight}
-          handleOpenColorPicker={handleOpenColorPicker}
-          deleteNote={deleteNote}
-        />
-      ) : (
-        <AnnotationNotesUngrouped
-          notes={notes}
-          expandedNotes={expandedNotes}
-          handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
-          handleExpandNote={handleExpandNote}
-          handleGoToHighlight={handleGoToHighlight}
-          handleOpenColorPicker={handleOpenColorPicker}
-          deleteNote={deleteNote}
-        />
+      {notesIsEmpty && (
+        <Typography
+          sx={{
+            margin: 2,
+            justifySelf: "center",
+          }}
+          variant="h5"
+        >
+          {"No Notes"}
+        </Typography>
       )}
+      {!notesIsEmpty &&
+        (grouped ? (
+          <AnnotationNotesGrouped
+            spine={spine}
+            spineIndex={spineIndex}
+            notes={notes}
+            expandedNotes={expandedNotes}
+            handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
+            handleExpandNote={handleExpandNote}
+            handleGoToHighlight={handleGoToHighlight}
+            handleOpenColorPicker={handleOpenColorPicker}
+            deleteNote={deleteNote}
+          />
+        ) : (
+          <AnnotationNotesUngrouped
+            notes={notes}
+            expandedNotes={expandedNotes}
+            handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
+            handleExpandNote={handleExpandNote}
+            handleGoToHighlight={handleGoToHighlight}
+            handleOpenColorPicker={handleOpenColorPicker}
+            deleteNote={deleteNote}
+          />
+        ))}
     </>
   );
 };
