@@ -15,6 +15,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import CheckIcon from "@mui/icons-material/Check";
 import HelpIcon from "@mui/icons-material/Help";
 import CloseIcon from "@mui/icons-material/Close";
+import { annotatorHelpHTMLTooltipData } from "../../../api/Local";
 
 export const AnnotatorHeader = ({
   selectedText,
@@ -29,22 +30,6 @@ export const AnnotatorHeader = ({
 
   const handleOnClickHelp = () => {
     setShowHelp((prev) => !prev);
-  };
-  const helpHTMLTooltipData = {
-    memos: {
-      title: "Memos",
-      titleDescription: "Memos appear in every occurrence of a word/phrase",
-      subtitle: "Usage",
-      subtitleDescription:
-        "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear.",
-    },
-    notes: {
-      title: "Notes",
-      titleDescription: "Can be left empty.",
-      subtitle: "Highlight",
-      subtitleDescription:
-        "If no highlight color is selected and a note is written, the highlight will be transparent.",
-    },
   };
 
   const handleCopySelectedText = () => {
@@ -78,19 +63,21 @@ export const AnnotatorHeader = ({
           <Stack spacing={1}>
             <Stack direction="row" justifyContent={"space-between"}>
               <Typography variant="h6">
-                {helpHTMLTooltipData[tab].title}
+                {annotatorHelpHTMLTooltipData[tab].title}
               </Typography>
               <IconButton size="small" onClick={handleOnClickHelp}>
                 <CloseIcon htmlColor="gray" />
               </IconButton>
             </Stack>
             <Typography variant="subtitle2">
-              {helpHTMLTooltipData[tab].titleDescription}
+              {annotatorHelpHTMLTooltipData[tab].titleDescription}
             </Typography>
             <Divider />
-            <Typography>{helpHTMLTooltipData[tab].subtitle}</Typography>
+            <Typography>
+              {annotatorHelpHTMLTooltipData[tab].subtitle}
+            </Typography>
             <Typography variant="subtitle2">
-              {helpHTMLTooltipData[tab].subtitleDescription}
+              {annotatorHelpHTMLTooltipData[tab].subtitleDescription}
             </Typography>
           </Stack>
         }

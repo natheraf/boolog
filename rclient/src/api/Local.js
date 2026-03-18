@@ -2665,3 +2665,20 @@ export const getRelatorsLabelFromIdentifier = (id) =>
   relators.find(
     (obj) => obj["@id"] === `http://id.loc.gov/vocabulary/relators/${id}`
   )?.["http://www.loc.gov/mads/rdf/v1#authoritativeLabel"]?.[0]?.["@value"];
+
+export const annotatorHelpHTMLTooltipData = {
+  memos: {
+    title: "Memos",
+    titleDescription: "Memos appear in every occurrence of a word/phrase",
+    subtitle: "Usage",
+    subtitleDescription:
+      "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear.",
+  },
+  notes: {
+    title: "Notes",
+    titleDescription: "Can be left empty.",
+    subtitle: "Highlight",
+    subtitleDescription:
+      "If no highlight color is selected and a note is written, the highlight will be transparent.",
+  },
+};
