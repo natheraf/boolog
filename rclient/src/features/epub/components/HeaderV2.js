@@ -71,7 +71,7 @@ export const HeaderV2 = ({
       handleSetShow(true);
     } else if (showRef.current && (!keepShow || nearNavigatorTabs)) {
       handleSetShow(false);
-    } else if (showRef.current && keepShow && event.clientY > showAtY) {
+    } else if (showRef.current && keepShow) {
       clearTimeout(showTimeoutId.current);
       showTimeoutId.current = setTimeout(() => {
         handleSetShow(false);
