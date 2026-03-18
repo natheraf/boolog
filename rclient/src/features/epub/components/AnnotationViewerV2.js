@@ -10,31 +10,19 @@ import {
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import { AnnotationHeader } from "./AnnotationHeader";
 import { AnnotationNotesList } from "./AnnotationNotesList";
+import { getSortedNotes } from "../epubUtils";
 
-const readingOrderComparator = (dir) => (a, b) =>
-  dir === "asc"
-    ? Number.parseInt(a.selectedRangeIndexed.startContainerId) -
-        Number.parseInt(b.selectedRangeIndexed.startContainerId) ||
-      Number.parseInt(a.selectedRangeIndexed.startOffset) -
-        Number.parseInt(b.selectedRangeIndexed.startOffset)
-    : Number.parseInt(b.selectedRangeIndexed.endContainerId) -
-        Number.parseInt(a.selectedRangeIndexed.endContainerId) ||
-      Number.parseInt(b.selectedRangeIndexed.endOffset) -
-        Number.parseInt(a.selectedRangeIndexed.endOffset);
-
-const dateComparator = (key, dir) => (a, b) =>
-  dir === "asc"
-    ? Date.parse(a[key]) - Date.parse(b[key])
-    : Date.parse(b[key]) - Date.parse(a[key]);
-
-export const AnnotationViewerV2 = ({ epubObject, spineIndex }) => {
+export const AnnotationViewerV2 = ({
+  epubObject,
+  spineIndex,
+  setProgress,
+  setForceFocus,
+}) => {
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const width = greaterThanSmall
     ? `${Math.floor(window.innerWidth / 2)}px`
     : window.innerWidth - 32; // 16 is the menu margin gap from the window on each side
-  const epubNotes = epubObject.notes;
-  const spine = epubObject.spine;
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openAnnotation = Boolean(anchorEl);
   const [tab, setTab] = React.useState("notes");
@@ -42,77 +30,10 @@ export const AnnotationViewerV2 = ({ epubObject, spineIndex }) => {
     notes: { type: "reading_order", direction: "asc", grouped: true },
     memos: { type: "alphabetical", direction: "asc" },
   });
-  const getSortedGroupedNotes = (sort) => {
-    const sortType = sort.notes.type;
-    const sortDirection = sort.notes.direction;
-    const sortTypeToNoteKey = {
-      date_modified: "dateModified",
-      date_created: "dateCreated",
-    };
-    const res = {};
-    let prevChapter = null;
-    for (const chapterNodes of Object.values(epubNotes)) {
-      for (const [noteId, note] of Object.entries(chapterNodes)) {
-        const chapterLabel = spine[note.spineIndex].label;
-        if (prevChapter !== spine[note.spineIndex].label) {
-          res[chapterLabel] = [];
-        }
-        prevChapter = chapterLabel;
-        note.id = noteId;
-        note.chapterLabel = chapterLabel;
-        res[chapterLabel].push(note);
-      }
-    }
-    if (sortType === "reading_order") {
-      Object.values(res).forEach((list) =>
-        list.sort(readingOrderComparator(sortDirection))
-      );
-    } else {
-      Object.values(res).forEach((list) =>
-        list.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection))
-      );
-    }
-    return res;
-  };
-  const getSortedUngroupedNotes = (sort) => {
-    const sortType = sort.notes.type;
-    const sortDirection = sort.notes.direction;
-    const sortTypeToNoteKey = {
-      date_modified: "dateModified",
-      date_created: "dateCreated",
-    };
-    const res = [];
-    for (const chapterNodes of Object.values(epubNotes)) {
-      for (const [noteId, note] of Object.entries(chapterNodes)) {
-        const chapterLabel = spine[note.spineIndex].label;
-        note.id = noteId;
-        note.chapterLabel = chapterLabel;
-        res.push(note);
-      }
-    }
-    if (sortType === "reading_order") {
-      res.sort(readingOrderComparator(sortDirection));
-    } else {
-      res.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection));
-    }
-    return res;
-  };
-  const getSortedNotes = (sort) => {
-    const sortGrouped = sort.notes.grouped;
-    if (sortGrouped) {
-      return getSortedGroupedNotes(sort);
-    } else {
-      return getSortedUngroupedNotes(sort);
-    }
-  };
-  const [notes, setNotes] = React.useState(() => getSortedNotes(sort));
-
-  const setSortHelper = (value) => {
-    setSort(value);
-    setNotes(getSortedNotes(value));
-  };
+  const [notes, setNotes] = React.useState(null);
 
   const handleOpenAnnotation = (event) => {
+    setNotes(getSortedNotes(sort, epubObject));
     // updatedNotes.current.clear();
     // updatedMemos.current.clear();
     // scrollToCurrentChapterSubheader();
@@ -125,6 +46,21 @@ export const AnnotationViewerV2 = ({ epubObject, spineIndex }) => {
 
   const handleCloseAnnotation = () => {
     setAnchorEl(null);
+  };
+
+  const setSortHelper = (value) => {
+    setSort(value);
+    setNotes(getSortedNotes(value, epubObject));
+  };
+
+  const goToNote = (spineIndex, id) => {
+    handleCloseAnnotation();
+    setProgress(spineIndex, 0);
+    setForceFocus({
+      type: "element",
+      attributeName: "class",
+      attributeValue: id,
+    });
   };
 
   return (
@@ -147,12 +83,14 @@ export const AnnotationViewerV2 = ({ epubObject, spineIndex }) => {
           setSort={setSortHelper}
           handleCloseAnnotation={handleCloseAnnotation}
         />
-        {tab === "notes" && (
+        {tab === "notes" && notes && (
           <AnnotationNotesList
             epubObject={epubObject}
             spineIndex={spineIndex}
             notes={notes}
+            setNotes={setNotes}
             grouped={sort.notes.grouped}
+            goToNote={goToNote}
           />
         )}
       </Menu>
@@ -163,4 +101,6 @@ export const AnnotationViewerV2 = ({ epubObject, spineIndex }) => {
 AnnotationViewerV2.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
+  setProgress: PropTypes.func.isRequired,
+  setForceFocus: PropTypes.func.isRequired,
 };

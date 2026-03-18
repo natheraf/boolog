@@ -1,8 +1,10 @@
 import * as React from "react";
+import PropTypes from "prop-types";
 import {
   Box,
   CircularProgress,
   Slide,
+  Stack,
   styled,
   Tab,
   Tabs,
@@ -34,12 +36,11 @@ export const HtmlTooltip = styled(({ className, ...props }) => (
   },
 }));
 
-export const DialogSlideUpTransition = React.forwardRef(function Transition(
-  props,
-  ref
-) {
-  return <Slide direction="up" ref={ref} {...props} />;
-});
+export const DialogSlideUpTransition = React.forwardRef(
+  function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  }
+);
 
 export const CircularProgressWithLabel = (props) => {
   return (
@@ -68,3 +69,28 @@ export const CircularProgressWithLabel = (props) => {
     </Box>
   );
 };
+
+export const DatesInARow = ({ entry }) => {
+  return (
+    <Stack direction={"row"} justifyContent={"space-between"}>
+      {entry.dateModified && (
+        <Typography variant="subtitle2" color="gray">
+          {`Modified: ${new Date(entry.dateModified).toLocaleString(undefined, {
+            timeStyle: "short",
+            dateStyle: "short",
+          })}`}
+        </Typography>
+      )}
+      {entry.dateCreated && (
+        <Typography variant="subtitle2" color="gray">
+          {`Created: ${new Date(entry.dateCreated).toLocaleString(undefined, {
+            timeStyle: "short",
+            dateStyle: "short",
+          })}`}
+        </Typography>
+      )}
+    </Stack>
+  );
+};
+
+DatesInARow.propTypes = { entry: PropTypes.object.isRequired };

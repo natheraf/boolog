@@ -522,3 +522,17 @@ export const handleMouseMoveHiderOnTimeout = (
     }, 5000);
   }
 };
+
+export const updateNoteMarksOrDeleteInDOM = (note, deleteMark) => {
+  const nodes = document.getElementsByClassName(note.id);
+  if (deleteMark) {
+    disableHighlightNodes(nodes);
+  } else {
+    for (const node of nodes) {
+      node.setAttribute(
+        "style",
+        `background-color: ${note.highlightColor} !important;`
+      );
+    }
+  }
+};

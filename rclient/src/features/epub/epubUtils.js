@@ -443,3 +443,87 @@ export const handlePathHref =
       setForceFocus(forceFocus);
     }
   };
+
+const readingOrderComparator = (dir) => (a, b) =>
+  dir === "asc"
+    ? Number.parseInt(a.selectedRangeIndexed.startContainerId) -
+        Number.parseInt(b.selectedRangeIndexed.startContainerId) ||
+      Number.parseInt(a.selectedRangeIndexed.startOffset) -
+        Number.parseInt(b.selectedRangeIndexed.startOffset)
+    : Number.parseInt(b.selectedRangeIndexed.endContainerId) -
+        Number.parseInt(a.selectedRangeIndexed.endContainerId) ||
+      Number.parseInt(b.selectedRangeIndexed.endOffset) -
+        Number.parseInt(a.selectedRangeIndexed.endOffset);
+
+const dateComparator = (key, dir) => (a, b) =>
+  dir === "asc"
+    ? Date.parse(a[key]) - Date.parse(b[key])
+    : Date.parse(b[key]) - Date.parse(a[key]);
+
+const getSortedGroupedNotes = (sort, epubObject) => {
+  const epubNotes = epubObject.notes;
+  const spine = epubObject.spine;
+  const sortType = sort.notes.type;
+  const sortDirection = sort.notes.direction;
+  const sortTypeToNoteKey = {
+    date_modified: "dateModified",
+    date_created: "dateCreated",
+  };
+  const res = {};
+  let prevChapter = null;
+  for (const chapterNodes of Object.values(epubNotes)) {
+    for (const [noteId, note] of Object.entries(chapterNodes)) {
+      const chapterLabel = spine[note.spineIndex].label;
+      if (prevChapter !== spine[note.spineIndex].label) {
+        res[chapterLabel] = [];
+      }
+      prevChapter = chapterLabel;
+      note.id = noteId;
+      note.chapterLabel = chapterLabel;
+      res[chapterLabel].push(note);
+    }
+  }
+  if (sortType === "reading_order") {
+    Object.values(res).forEach((list) =>
+      list.sort(readingOrderComparator(sortDirection))
+    );
+  } else {
+    Object.values(res).forEach((list) =>
+      list.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection))
+    );
+  }
+  return res;
+};
+const getSortedUngroupedNotes = (sort, epubObject) => {
+  const epubNotes = epubObject.notes;
+  const spine = epubObject.spine;
+  const sortType = sort.notes.type;
+  const sortDirection = sort.notes.direction;
+  const sortTypeToNoteKey = {
+    date_modified: "dateModified",
+    date_created: "dateCreated",
+  };
+  const res = [];
+  for (const chapterNodes of Object.values(epubNotes)) {
+    for (const [noteId, note] of Object.entries(chapterNodes)) {
+      const chapterLabel = spine[note.spineIndex].label;
+      note.id = noteId;
+      note.chapterLabel = chapterLabel;
+      res.push(note);
+    }
+  }
+  if (sortType === "reading_order") {
+    res.sort(readingOrderComparator(sortDirection));
+  } else {
+    res.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection));
+  }
+  return res;
+};
+export const getSortedNotes = (sort, epubObject) => {
+  const sortGrouped = sort.notes.grouped;
+  if (sortGrouped) {
+    return getSortedGroupedNotes(sort, epubObject);
+  } else {
+    return getSortedUngroupedNotes(sort, epubObject);
+  }
+};

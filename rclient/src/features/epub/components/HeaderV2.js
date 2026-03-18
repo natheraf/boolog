@@ -200,6 +200,8 @@ export const HeaderV2 = ({
             <AnnotationViewerV2
               epubObject={epubObject}
               spineIndex={spineIndex}
+              setProgress={setProgressWithoutAddingHistory}
+              setForceFocus={setForceFocus}
             />
             <EpubFormatterV2
               epubObject={epubObject}

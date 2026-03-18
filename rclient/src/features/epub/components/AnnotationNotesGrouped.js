@@ -1,51 +1,24 @@
-import * as React from "react";
 import PropTypes from "prop-types";
 import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
-  Box,
-  IconButton,
-  Paper,
   Stack,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { Textarea } from "../../../components/Textarea";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import LinkIcon from "@mui/icons-material/Link";
-import PaletteIcon from "@mui/icons-material/Palette";
-import DeleteIcon from "@mui/icons-material/Delete";
-
-const DatesInARow = ({ entry }) => {
-  return (
-    <Stack direction={"row"} justifyContent={"space-between"}>
-      {entry.dateModified && (
-        <Typography variant="subtitle2" color="gray">
-          {`Modified: ${new Date(entry.dateModified).toLocaleString(undefined, {
-            timeStyle: "short",
-            dateStyle: "short",
-          })}`}
-        </Typography>
-      )}
-      {entry.dateCreated && (
-        <Typography variant="subtitle2" color="gray">
-          {`Created: ${new Date(entry.dateCreated).toLocaleString(undefined, {
-            timeStyle: "short",
-            dateStyle: "short",
-          })}`}
-        </Typography>
-      )}
-    </Stack>
-  );
-};
+import { AnnotationViewerNoteEntry } from "./AnnotationViewerNoteEntry";
 
 export const AnnotationNotesGrouped = ({
   spine,
   spineIndex,
   notes,
   expandedNotes,
+  handleNoteTextAreaOnChange,
+  handleExpandNote,
+  handleGoToHighlight,
+  handleOpenColorPicker,
+  deleteNote,
 }) => {
   const currentChapter = spine[spineIndex].label;
   const chapterNameToElementId = (chapterName) =>
@@ -70,99 +43,17 @@ export const AnnotationNotesGrouped = ({
       <AccordionDetails>
         <Stack spacing={2}>
           {chapterNotes.map((note, arrayIndex) => (
-            <Paper key={note.id} elevation={24} sx={{ padding: 1 }}>
-              <Stack spacing={1}>
-                <DatesInARow entry={note} />
-                {expandedNotes.has(note.id) ? (
-                  <Box
-                    sx={{ overflowX: "auto" }}
-                    dangerouslySetInnerHTML={{
-                      __html:
-                        expandedNotes.get(note.id) ?? "something went wrong...",
-                    }}
-                  />
-                ) : (
-                  <Typography>
-                    <span
-                      style={{
-                        backgroundColor: note.highlightColor,
-                      }}
-                    >
-                      {note.selectedText}
-                    </span>
-                  </Typography>
-                )}
-                <Stack sx={{ width: "100%" }}>
-                  <Typography variant="body">Note</Typography>
-                  <Textarea
-                    value={note.note}
-                    // onChange={handleNoteTextAreaOnChange(
-                    //   note,
-                    //   note.id,
-                    //   arrayIndex
-                    // )}
-                    onKeyDown={(event) => {
-                      event.stopPropagation();
-                    }}
-                    sx={{
-                      [`&:focus`]: {
-                        boxShadow: "inherit",
-                        borderColor: `inherit`,
-                      },
-                      [`&:hover:focus`]: {
-                        borderColor: `inherit`,
-                      },
-                    }}
-                    minRows={1}
-                  />
-                </Stack>
-                <Stack spacing={1} direction="row">
-                  <Tooltip title="Preview">
-                    <IconButton
-                      // onClick={() => handleExpandNote(note)}
-                      size="small"
-                      disabled={expandedNotes.has(note.id)}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Go to location">
-                    <IconButton
-                      // onClick={() =>
-                      //   handleGoToHighlight(note.spineIndex, note.id)
-                      // }
-                      size="small"
-                    >
-                      <LinkIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Change Color">
-                    <IconButton
-                      // onClick={handleOpenColorPicker(note, note.id, arrayIndex)}
-                      size="small"
-                    >
-                      <PaletteIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title="Delete">
-                    <IconButton
-                      // onClick={() =>
-                      //   updateNoteMarksOrDeleteInDOM(
-                      //     note,
-                      //     note.id,
-                      //     true,
-                      //     arrayIndex
-                      //   )
-                      // }
-                      size="small"
-                      className={"note-delete-button"}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-              </Stack>
-            </Paper>
+            <AnnotationViewerNoteEntry
+              key={note.id}
+              note={note}
+              expandedNotes={expandedNotes}
+              arrayIndex={arrayIndex}
+              handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
+              handleExpandNote={handleExpandNote}
+              handleGoToHighlight={handleGoToHighlight}
+              handleOpenColorPicker={handleOpenColorPicker}
+              deleteNote={deleteNote}
+            />
           ))}
         </Stack>
       </AccordionDetails>
@@ -175,4 +66,9 @@ AnnotationNotesGrouped.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   notes: PropTypes.object.isRequired,
   expandedNotes: PropTypes.object.isRequired,
+  handleNoteTextAreaOnChange: PropTypes.func.isRequired,
+  handleExpandNote: PropTypes.func.isRequired,
+  handleGoToHighlight: PropTypes.func.isRequired,
+  handleOpenColorPicker: PropTypes.func.isRequired,
+  deleteNote: PropTypes.func.isRequired,
 };
