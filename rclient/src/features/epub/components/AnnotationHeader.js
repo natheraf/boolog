@@ -1,14 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import {
-  AppBar,
-  IconButton,
-  Paper,
-  Stack,
-  Tooltip,
-  useMediaQuery,
-} from "@mui/material";
-import { useTheme } from "@emotion/react";
+import { AppBar, IconButton, Paper, Stack, Tooltip } from "@mui/material";
 import { SmallTab, SmallTabs } from "../../CustomComponents";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
@@ -22,11 +14,6 @@ export const AnnotationHeader = ({
   setSort,
   handleCloseAnnotation,
 }) => {
-  const theme = useTheme();
-  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const width = greaterThanSmall
-    ? `${Math.floor(window.innerWidth / 2)}px`
-    : window.innerWidth - 32; // 16 is the menu margin gap from the window on each side
   const tabOptions = [
     { title: "Notes", icon: BorderColorIcon, value: "notes" },
     { title: "Memos", icon: StickyNote2Icon, value: "memos" },
@@ -46,7 +33,7 @@ export const AnnotationHeader = ({
       sx={{
         marginTop: -1,
         p: 1,
-        width,
+        width: "100%",
       }}
     >
       <Stack spacing={2}>
