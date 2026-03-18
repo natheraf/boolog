@@ -17,6 +17,7 @@ import { HistoryButtons } from "./HistoryButtons";
 import { SearchV2 } from "./SearchV2";
 import { TableOfContents } from "./TableOfContents";
 import { EpubSettings } from "./EpubSettings";
+import { AnnotationViewerV2 } from "./AnnotationViewerV2";
 
 export const appBarHeight = 48;
 
@@ -196,15 +197,10 @@ export const HeaderV2 = ({
               setProgress={setProgressWithoutAddingHistory}
               setForceFocus={setForceFocus}
             />
-            {/* <AnnotationViewer
-            spine={spine.current}
-            entryId={entryId}
-            clearTemporaryMarks={annotatorProps.clearTemporaryMarks}
-            notes={notes.current}
-            memos={epubObject.memos}
-            currentSpineIndex={spinePointer}
-            goToNote={annotatorProps.goToNote}
-          /> */}
+            <AnnotationViewerV2
+              epubObject={epubObject}
+              spineIndex={spineIndex}
+            />
             <EpubFormatterV2
               epubObject={epubObject}
               formatting={formatting}
