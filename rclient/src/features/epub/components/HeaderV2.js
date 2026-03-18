@@ -53,17 +53,25 @@ export const HeaderV2 = ({
 
   const onMouseMove = (event) => {
     const keepShowHeight = appBarHeight * 3;
-    const showAtY = 5;
-    if (!showRef.current && event.clientY <= showAtY && !mouseDown.current) {
+    const keepShow = event.clientY <= keepShowHeight;
+    const showAtY = 10;
+    const navigatorTabsBuffer = 12;
+    const nearNavigatorTabs = !(
+      event.clientX > navigatorTabsBuffer &&
+      event.clientX < window.innerWidth - navigatorTabsBuffer
+    );
+    const inYRange = event.clientY <= showAtY;
+    if (
+      !showRef.current &&
+      inYRange &&
+      !mouseDown.current &&
+      !nearNavigatorTabs
+    ) {
       clearTimeout(showTimeoutId.current);
       handleSetShow(true);
-    } else if (showRef.current && event.clientY > keepShowHeight) {
+    } else if (showRef.current && (!keepShow || nearNavigatorTabs)) {
       handleSetShow(false);
-    } else if (
-      showRef.current &&
-      event.clientY <= keepShowHeight &&
-      event.clientY > showAtY
-    ) {
+    } else if (showRef.current && keepShow && event.clientY > showAtY) {
       clearTimeout(showTimeoutId.current);
       showTimeoutId.current = setTimeout(() => {
         handleSetShow(false);
@@ -100,22 +108,23 @@ export const HeaderV2 = ({
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
     if (displayOptions.autoHideHeader) {
-      epubBody.addEventListener("mousemove", onMouseMove);
       epubBody.addEventListener("touchend", handleTouchEnd);
-      window.addEventListener("mouseup", onMouseUp);
-      window.addEventListener("mousedown", onMouseDown);
-      handleSetShow(false);
+      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mouseup", onMouseUp);
+      document.addEventListener("mousedown", onMouseDown);
     }
+    setShow(!displayOptions.autoHideHeader);
     return () => {
-      epubBody.removeEventListener("mousemove", onMouseMove);
+      clearTimeout(showTimeoutId.current);
       epubBody.removeEventListener("touchend", handleTouchEnd);
-      window.removeEventListener("mouseup", onMouseUp);
-      window.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener("mousedown", onMouseDown);
     };
   }, [displayOptions.autoHideHeader]);
 
   return (
-    <Slide direction="down" in={show}>
+    <Slide direction="down" in={show} mountOnEnter>
       <AppBar
         id="appBar"
         variant="outlined"
