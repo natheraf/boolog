@@ -107,9 +107,12 @@ export const HeaderV2 = ({
 
   React.useEffect(() => {
     const epubBody = document.getElementById("epub-body");
+    const dialogContainer = document.getElementsByClassName(
+      "MuiDialog-container"
+    )[0];
     if (displayOptions.autoHideHeader) {
       epubBody.addEventListener("touchend", handleTouchEnd);
-      document.addEventListener("mousemove", onMouseMove);
+      dialogContainer.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
       document.addEventListener("mousedown", onMouseDown);
     }
@@ -117,7 +120,7 @@ export const HeaderV2 = ({
     return () => {
       clearTimeout(showTimeoutId.current);
       epubBody.removeEventListener("touchend", handleTouchEnd);
-      document.removeEventListener("mousemove", onMouseMove);
+      dialogContainer.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
       document.removeEventListener("mousedown", onMouseDown);
     };
