@@ -82,7 +82,7 @@ export const PageView = ({
     if (attributeName === "id") {
       element = document.getElementById(attributeValue);
     } else if (attributeName === "class") {
-      element = document.getElementsByClassName(attributeName)[0];
+      element = document.getElementsByClassName(attributeValue)[0];
     } else {
       element = document.querySelector(
         `[${attributeName}="${attributeValue}"]`
