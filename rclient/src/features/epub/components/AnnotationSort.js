@@ -58,25 +58,25 @@ export const AnnotationSort = ({ tab, sort, setSort }) => {
     if (newSortType === null) {
       return;
     }
-    setSort((prev) => ({
-      ...prev,
-      [tab]: { ...prev[tab], type: newSortType },
-    }));
+    setSort({
+      ...sort,
+      [tab]: { ...sort[tab], type: newSortType },
+    });
   };
   const handleDirectionChange = (_event, newSortDirection) => {
     if (newSortDirection === null) {
       return;
     }
-    setSort((prev) => ({
-      ...prev,
-      [tab]: { ...prev[tab], direction: newSortDirection },
-    }));
+    setSort({
+      ...sort,
+      [tab]: { ...sort[tab], direction: newSortDirection },
+    });
   };
   const handleGroupedChange = () => {
-    setSort((prev) => ({
-      ...prev,
-      [tab]: { ...prev[tab], grouped: !sortGrouped },
-    }));
+    setSort({
+      ...sort,
+      [tab]: { ...sort[tab], grouped: !sortGrouped },
+    });
   };
 
   return (
