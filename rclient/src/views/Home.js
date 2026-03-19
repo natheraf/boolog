@@ -125,6 +125,10 @@ export const Home = () => {
               press/resize the highlight on mobile.
             </Typography>
             <Typography variant="h6">
+              Right click the highlight to edit it. Or edit it in annotation
+              viewer.
+            </Typography>
+            <Typography variant="h6">
               To view all your notes and memos for the book: click on the
               annotation viewer button top right.
             </Typography>
@@ -137,15 +141,11 @@ export const Home = () => {
             </Typography>
             <Typography variant="h6">
               To change formatting: icon top right. fonts have google fonts if
-              your connected to the internet and is cached on device.
+              your connected to the internet.
             </Typography>
             <Typography variant="h6">
-              To change pages/chapters: use the small tabs on top for pages and
-              the bottom for chapters.
-            </Typography>
-            <Typography variant="h6">
-              Having performance issues: go to formatting and disable `Show
-              Pages on Top` and `Show Chapters on Bottom`
+              Small tabs on the right for pages and the left for chapters allow
+              you to navigate quickly or see your progress.
             </Typography>
             <Typography variant="h6">
               Press on your profile picture and there are buttons to toggle
