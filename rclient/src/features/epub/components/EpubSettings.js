@@ -8,11 +8,16 @@ import { EpubNavigationDisplayOption } from "./EpubNavigationDisplayOption";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
 import { EpubHeaderEditor } from "./EpubHeaderEditor";
 
-export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
+export const EpubSettings = ({
+  displayOptions,
+  setDisplayOptions,
+  clearHeaderHideTimeoutId,
+}) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openSettings = Boolean(anchorEl);
 
   const handleOpen = (event) => {
+    clearHeaderHideTimeoutId();
     setAnchorEl(event.currentTarget);
   };
 
@@ -82,4 +87,5 @@ export const EpubSettings = ({ displayOptions, setDisplayOptions }) => {
 EpubSettings.propTypes = {
   displayOptions: PropTypes.object.isRequired,
   setDisplayOptions: PropTypes.func.isRequired,
+  clearHeaderHideTimeoutId: PropTypes.func.isRequired,
 };

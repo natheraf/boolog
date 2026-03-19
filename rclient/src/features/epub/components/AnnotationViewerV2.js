@@ -19,6 +19,7 @@ export const AnnotationViewerV2 = ({
   spineIndex,
   setProgress,
   setForceFocus,
+  clearHeaderHideTimeoutId,
 }) => {
   const theme = useTheme();
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
@@ -36,6 +37,7 @@ export const AnnotationViewerV2 = ({
   const [memos, setMemos] = React.useState(null);
 
   const handleOpenAnnotation = (event) => {
+    clearHeaderHideTimeoutId();
     setNotes(getSortedNotes(sort, epubObject));
     setMemos(getSortedMemos(sort, epubObject));
     setAnchorEl(event.currentTarget);
@@ -119,4 +121,5 @@ AnnotationViewerV2.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   setProgress: PropTypes.func.isRequired,
   setForceFocus: PropTypes.func.isRequired,
+  clearHeaderHideTimeoutId: PropTypes.func.isRequired,
 };

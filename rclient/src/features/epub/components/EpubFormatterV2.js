@@ -31,6 +31,7 @@ export const EpubFormatterV2 = ({
   view,
   setLoadedCSS,
   setFormatMenuIsOpen,
+  clearHeaderHideTimeoutId,
 }) => {
   const theme = useTheme();
   const stylingElementIds = React.useRef([]);
@@ -60,6 +61,7 @@ export const EpubFormatterV2 = ({
   const openFormatting = Boolean(anchorEl);
 
   const handleOpenFormatting = (event) => {
+    clearHeaderHideTimeoutId();
     setAnchorEl(event.currentTarget);
     setFormatMenuIsOpen(true);
   };
@@ -165,4 +167,5 @@ EpubFormatterV2.propTypes = {
   view: PropTypes.string.isRequired,
   setLoadedCSS: PropTypes.func.isRequired,
   setFormatMenuIsOpen: PropTypes.func.isRequired,
+  clearHeaderHideTimeoutId: PropTypes.func.isRequired,
 };

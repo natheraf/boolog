@@ -44,8 +44,12 @@ export const HeaderV2 = ({
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [show, setShow] = React.useState(true);
   const showRef = React.useRef(false);
-  const showTimeoutId = React.useRef(null);
+  const hideTimeoutId = React.useRef(null);
   const mouseDown = React.useRef(false);
+
+  const clearHeaderHideTimeoutId = () => {
+    clearTimeout(hideTimeoutId.current);
+  };
 
   const handleSetShow = (value) => {
     setShow(value);
@@ -68,13 +72,13 @@ export const HeaderV2 = ({
       !mouseDown.current &&
       !nearNavigatorTabs
     ) {
-      clearTimeout(showTimeoutId.current);
+      clearTimeout(hideTimeoutId.current);
       handleSetShow(true);
     } else if (showRef.current && (!keepShow || nearNavigatorTabs)) {
       handleSetShow(false);
     } else if (showRef.current && keepShow) {
-      clearTimeout(showTimeoutId.current);
-      showTimeoutId.current = setTimeout(() => {
+      clearTimeout(hideTimeoutId.current);
+      hideTimeoutId.current = setTimeout(() => {
         handleSetShow(false);
       }, 2000);
     }
@@ -119,7 +123,7 @@ export const HeaderV2 = ({
     }
     setShow(!displayOptions.autoHideHeader);
     return () => {
-      clearTimeout(showTimeoutId.current);
+      clearTimeout(hideTimeoutId.current);
       epubBody.removeEventListener("touchend", handleTouchEnd);
       dialogContainer.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
@@ -202,6 +206,7 @@ export const HeaderV2 = ({
               spineIndex={spineIndex}
               setProgress={setProgressWithoutAddingHistory}
               setForceFocus={setForceFocus}
+              clearHeaderHideTimeoutId={clearHeaderHideTimeoutId}
             />
             <EpubFormatterV2
               epubObject={epubObject}
@@ -210,12 +215,14 @@ export const HeaderV2 = ({
               view={displayOptions.view}
               setLoadedCSS={setLoadedCSS}
               setFormatMenuIsOpen={setFormatMenuIsOpen}
+              clearHeaderHideTimeoutId={clearHeaderHideTimeoutId}
             />
             <EpubSettings
               displayOptions={displayOptions}
               setDisplayOptions={setDisplayOptions}
               formatting={formatting}
               setFormatting={setFormatting}
+              clearHeaderHideTimeoutId={clearHeaderHideTimeoutId}
             />
           </Stack>
         </Toolbar>
