@@ -8,7 +8,7 @@ import { ViewRenderer } from "./ViewRenderer";
 import { loadImages } from "../epubUtils";
 import { useTheme } from "@emotion/react";
 import { AnnotatorV2 } from "./AnnotatorV2";
-import { clearTemporaryMarks, waitForElement } from "../domUtils";
+import { waitForElement } from "../domUtils";
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
@@ -133,12 +133,8 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
   React.useEffect(() => {
     prepareSpineIndex(progress.spine);
     waitForElement("#content").then(() => setRenderAnnotator(true));
-    document.addEventListener("mousedown", clearTemporaryMarks);
-    document.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       imageObjectURLs.current.keys().forEach(URL.revokeObjectURL);
-      document.removeEventListener("mousedown", clearTemporaryMarks);
-      document.addEventListener("touchstart", clearTemporaryMarks);
     };
   }, []);
 
