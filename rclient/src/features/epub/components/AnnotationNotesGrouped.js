@@ -23,41 +23,44 @@ export const AnnotationNotesGrouped = ({
 }) => {
   const currentChapter = spine[spineIndex].label;
 
-  return Object.entries(notes).map(([chapterName, chapterNotes]) => (
-    <Accordion
-      key={chapterName}
-      id={chapterNameToElementId(chapterName)}
-      defaultExpanded={chapterName === currentChapter}
-    >
-      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography
-          sx={{
-            fontWeight: chapterName === currentChapter ? "bold" : "unset",
-          }}
-          component="span"
+  return Object.entries(notes).map(
+    ([chapterName, chapterNotes]) =>
+      chapterNotes.length > 0 && (
+        <Accordion
+          key={chapterName}
+          id={chapterNameToElementId(chapterName)}
+          defaultExpanded={chapterName === currentChapter}
         >
-          {chapterName}
-        </Typography>
-      </AccordionSummary>
-      <AccordionDetails>
-        <Stack spacing={2}>
-          {chapterNotes.map((note, arrayIndex) => (
-            <AnnotationViewerNoteEntry
-              key={note.id}
-              note={note}
-              expandedNotes={expandedNotes}
-              arrayIndex={arrayIndex}
-              handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
-              handleExpandNote={handleExpandNote}
-              handleGoToHighlight={handleGoToHighlight}
-              handleOpenColorPicker={handleOpenColorPicker}
-              deleteNote={deleteNote}
-            />
-          ))}
-        </Stack>
-      </AccordionDetails>
-    </Accordion>
-  ));
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography
+              sx={{
+                fontWeight: chapterName === currentChapter ? "bold" : "unset",
+              }}
+              component="span"
+            >
+              {chapterName}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2}>
+              {chapterNotes.map((note, arrayIndex) => (
+                <AnnotationViewerNoteEntry
+                  key={note.id}
+                  note={note}
+                  expandedNotes={expandedNotes}
+                  arrayIndex={arrayIndex}
+                  handleNoteTextAreaOnChange={handleNoteTextAreaOnChange}
+                  handleExpandNote={handleExpandNote}
+                  handleGoToHighlight={handleGoToHighlight}
+                  handleOpenColorPicker={handleOpenColorPicker}
+                  deleteNote={deleteNote}
+                />
+              ))}
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      )
+  );
 };
 
 AnnotationNotesGrouped.propTypes = {
