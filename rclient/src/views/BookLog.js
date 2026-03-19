@@ -30,15 +30,15 @@ import { useTheme } from "@emotion/react";
 import { CollapsibleFab } from "../components/CollapsibleFab";
 import { CreateBook } from "./CreateBook";
 import { AlertsContext } from "../context/Alerts";
-import { EpubReader } from "../components/EpubReader";
 import { getFile } from "../api/IndexedDB/Files";
 import {
   getEpubDataWithDefault,
   getEpubDataWithDefaultInDotNotation,
 } from "../api/IndexedDB/epubData";
-import { defaultFormatting, defaultStandardFormatting } from "../api/Local";
+import { getDefaultDisplayOptions, getDefaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
 import { handleSimpleRequest } from "../api/Axios";
+import { EpubReaderV2 } from "../features/epub/components/EpubReaderV2";
 
 export const BookLog = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
@@ -158,40 +158,26 @@ export const BookLog = () => {
       if (!data) {
         return addAlert("File not found", "error");
       }
-      const formatting = structuredClone(defaultFormatting);
-      Object.keys(formatting).forEach(
-        (key) => key.startsWith("_") && delete formatting[key]
-      );
-      formatting.pageWidth = Math.min(window.innerWidth - 25, 700);
-      const standardFormatting = Object.assign(
-        formatting,
-        structuredClone(defaultStandardFormatting)
-      );
+      const defaultFormatting = getDefaultFormatting(theme);
+      const defaultDisplayOptions = getDefaultDisplayOptions();
       getEpubDataWithDefault({
-        key: "epubStandardFormatting",
-        formatting: standardFormatting,
-      }).then((standardFormatting) => {
-        data.epubObject.standardFormatting = standardFormatting;
+        key: "epubGlobalDisplayOptions",
+        displayOptions: defaultDisplayOptions,
+      }).then((globalDisplayOptions) => {
         getEpubDataWithDefault({
           key: "epubGlobalFormatting",
-          formatting,
-        }).then((res) => {
-          const globalFormatting = res.formatting;
+          formatting: defaultFormatting,
+        }).then((globalFormatting) => {
           getEpubDataWithDefaultInDotNotation(id, {
             key: id,
-            formatting: {
-              useStandardFormatting: true,
-              useGlobalFormatting: true,
-              value: globalFormatting,
-            },
             progress: { spine: 0, part: 0 },
             notes: {},
             memos: {},
           }).then((res) => {
-            if (res.formatting.useGlobalFormatting) {
-              res.formatting.value = globalFormatting;
-            }
-            data.epubObject = Object.assign(data.epubObject, res);
+            data.epubObject = Object.assign(data.epubObject, res, {
+              formatting: globalFormatting.formatting,
+              displayOptions: globalDisplayOptions.displayOptions,
+            });
             setOpenEpubReader(Boolean(data.epubObject));
             setEpub({ object: data.epubObject, entryId: id });
           });
@@ -361,71 +347,70 @@ export const BookLog = () => {
         syncMediaObject={() => window.location.reload()}
       />
       {epub && openEpubReader ? (
-        <EpubReader
-          open={openEpubReader}
-          setOpen={setOpenEpubReader}
+        <EpubReaderV2
+          setOpenEpubReader={setOpenEpubReader}
           epubObject={epub.object}
-          entryId={epub.entryId}
           key={epub.entryId}
         />
-      ) : null}
-      <Stack onDrop={handleDrop} onDragOver={handleDragOver}>
-        {showImportSample ? (
-          <Fade timeout={2000} in={true}>
-            <Typography
-              sx={{
-                alignSelf: "center",
-                padding: 1,
-                color: theme.palette.primary.main,
-                cursor: "pointer",
-              }}
-              onClick={importSampleBook}
-            >
-              Start with a sample book
-            </Typography>
-          </Fade>
-        ) : null}
-        {statuses.map((obj, index) => (
-          <Slide
-            key={obj.status}
-            timeout={(100 * index + 300) * theme.transitions.reduceMotion}
-            in={true}
-          >
-            <Accordion
-              expanded={expanded[obj.status]}
-              slots={{ transition: Collapse }}
-              slotProps={{
-                transition: { timeout: 400 * theme.transitions.reduceMotion },
-              }}
-              onChange={() => {
-                setExpanded((prev) => ({
-                  ...prev,
-                  [obj.status]: !prev[obj.status],
-                }));
-              }}
-            >
-              <AccordionSummary
-                aria-controls={obj.label}
-                expandIcon={<ExpandMoreIcon />}
+      ) : (
+        <Stack onDrop={handleDrop} onDragOver={handleDragOver}>
+          {showImportSample ? (
+            <Fade timeout={2000} in={true}>
+              <Typography
+                sx={{
+                  alignSelf: "center",
+                  padding: 1,
+                  color: theme.palette.primary.main,
+                  cursor: "pointer",
+                }}
+                onClick={importSampleBook}
               >
-                <Stack direction="row" spacing={2} alignItems={"center"}>
-                  {obj.labelIcon}
-                  <Typography variant="h5">{obj.label}</Typography>
-                </Stack>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Paper elevation={0} sx={{ p: 2 }}>
-                  <Tiles
-                    objectArray={library[obj.status]}
-                    keysData={keysData}
-                    actionArea={actionArea}
-                  />
-                </Paper>
-              </AccordionDetails>
-            </Accordion>
-          </Slide>
-        ))}
-      </Stack>
+                Start with a sample book
+              </Typography>
+            </Fade>
+          ) : null}
+          {statuses.map((obj, index) => (
+            <Slide
+              key={obj.status}
+              timeout={(100 * index + 300) * theme.transitions.reduceMotion}
+              in={true}
+            >
+              <Accordion
+                expanded={expanded[obj.status]}
+                slots={{ transition: Collapse }}
+                slotProps={{
+                  transition: { timeout: 400 * theme.transitions.reduceMotion },
+                }}
+                onChange={() => {
+                  setExpanded((prev) => ({
+                    ...prev,
+                    [obj.status]: !prev[obj.status],
+                  }));
+                }}
+              >
+                <AccordionSummary
+                  aria-controls={obj.label}
+                  expandIcon={<ExpandMoreIcon />}
+                >
+                  <Stack direction="row" spacing={2} alignItems={"center"}>
+                    {obj.labelIcon}
+                    <Typography variant="h5">{obj.label}</Typography>
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Paper elevation={0} sx={{ p: 2 }}>
+                    <Tiles
+                      objectArray={library[obj.status]}
+                      keysData={keysData}
+                      actionArea={actionArea}
+                    />
+                  </Paper>
+                </AccordionDetails>
+              </Accordion>
+            </Slide>
+          ))}
+        </Stack>
+      )}
     </>
   );
 };

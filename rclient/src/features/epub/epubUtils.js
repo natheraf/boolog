@@ -1,6 +1,52 @@
 import { getRelatorsLabelFromIdentifier } from "../../api/Local";
 import { handleSearchOnDocument } from "./domUtils";
 
+export const loadImages = (epubObject, spineIndex, imageObjectURLs) => {
+  const pageHeight = window.innerHeight;
+  const spine = epubObject.spine;
+  const images = epubObject.images;
+  const parser = new DOMParser();
+  const page = parser.parseFromString(spine[spineIndex].element, "text/html");
+  const imageElements = page.querySelectorAll("img, image");
+  for (const element of imageElements) {
+    const tag = element.tagName.toLowerCase();
+    let url;
+    if (tag === "img") {
+      const src = element
+        .getAttribute("ogsrc")
+        ?.substring(element.getAttribute("ogsrc").startsWith("../") * 3);
+      url =
+        imageObjectURLs.get(src) ??
+        URL.createObjectURL(getEpubValueFromPath(images, src));
+      element.src = url;
+      imageObjectURLs.set(src, url);
+      if (["DIV", "SECTION"].includes(element.parentElement.tagName)) {
+        element.style.display = "block";
+      }
+      element.style.objectFit = "scale-down";
+      element.style.margin = "auto";
+      element.style.maxHeight = `${pageHeight}px`;
+      element.style.maxWidth = "100%";
+    } else if (tag === "image") {
+      let src = null;
+      for (const key of ["xlink:href", "oghref", "ogsrc"]) {
+        if (element.getAttribute(key) !== null) {
+          src = element.getAttribute(key);
+        }
+      }
+      src = src?.substring(src.startsWith("../") * 3);
+      url =
+        imageObjectURLs.get(src) ??
+        URL.createObjectURL(getEpubValueFromPath(images, src));
+      imageObjectURLs.set(src, url);
+      element.setAttribute("href", url);
+      element.style.height = "100%";
+      element.style.width = "";
+    }
+  }
+  spine[spineIndex].element = page.documentElement.outerHTML;
+};
+
 export const handleSearchEpub = (needle, spine) => {
   const results = [];
   const parser = new DOMParser();
@@ -116,7 +162,6 @@ export const processEpub = (epubObject) => {
         }
         node.style.objectFit = "scale-down";
         node.style.margin = "auto";
-        node.id = node.getAttribute("src");
         node.setAttribute("ogsrc", node.getAttribute("src"));
       } else if (tag === "image") {
         node.style.height = "100%";
@@ -125,10 +170,6 @@ export const processEpub = (epubObject) => {
           node.setAttribute("ogsrc", node.getAttribute("src"));
         node.getAttribute("href") &&
           node.setAttribute("oghref", node.getAttribute("href"));
-        node.id =
-          node.getAttribute("src") ||
-          node.getAttribute("href") ||
-          node.getAttribute("xlink:href");
       } else if (tag === "a") {
         node.setAttribute("linkto", node.getAttribute("href"));
         node.removeAttribute("href");
@@ -367,3 +408,142 @@ export const processEpub = (epubObject) => {
     toc,
   };
 };
+
+export const handlePathHref =
+  (spineIndex, spineIndexMap, setProgress, setForceFocus) => (path) => {
+    if (window.getSelection().isCollapsed === false) {
+      return;
+    }
+    if (path.startsWith("http")) {
+      return window.open(path, "_blank");
+    }
+    if (path.startsWith("../")) {
+      path = path.substring(3);
+    } else if (path.startsWith("/")) {
+      path = path.substring(1);
+    }
+    const pathWithoutId =
+      path.includes("#") === false
+        ? path
+        : path.substring(0, path.indexOf("#"));
+    if (pathWithoutId.length > 0) {
+      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
+      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
+        setProgress(pathSpineIndex, 0);
+      }
+    }
+    let linkFragment = null;
+    if (path.includes("#")) {
+      linkFragment = path.substring(path.indexOf("#") + 1);
+      const forceFocus = {
+        type: "element",
+        attributeName: "id",
+        attributeValue: linkFragment,
+      };
+      setForceFocus(forceFocus);
+    }
+  };
+
+const readingOrderComparator = (dir) => (a, b) =>
+  dir === "asc"
+    ? Number.parseInt(a.selectedRangeIndexed.startContainerId) -
+        Number.parseInt(b.selectedRangeIndexed.startContainerId) ||
+      Number.parseInt(a.selectedRangeIndexed.startOffset) -
+        Number.parseInt(b.selectedRangeIndexed.startOffset)
+    : Number.parseInt(b.selectedRangeIndexed.endContainerId) -
+        Number.parseInt(a.selectedRangeIndexed.endContainerId) ||
+      Number.parseInt(b.selectedRangeIndexed.endOffset) -
+        Number.parseInt(a.selectedRangeIndexed.endOffset);
+
+const dateComparator = (dir, get) => (a, b) =>
+  dir === "asc"
+    ? Date.parse(get(a)) - Date.parse(get(b))
+    : Date.parse(get(b)) - Date.parse(get(a));
+
+const sortTypeToKey = {
+  date_modified: "dateModified",
+  date_created: "dateCreated",
+};
+
+const getSortedGroupedNotes = (sort, epubObject) => {
+  const epubNotes = epubObject.notes;
+  const spine = epubObject.spine;
+  const sortType = sort.notes.type;
+  const sortDirection = sort.notes.direction;
+  const res = {};
+  let prevChapter = null;
+  for (const chapterNodes of Object.values(epubNotes)) {
+    for (const [noteId, note] of Object.entries(chapterNodes)) {
+      const chapterLabel = spine[note.spineIndex].label;
+      if (prevChapter !== spine[note.spineIndex].label) {
+        res[chapterLabel] = [];
+      }
+      prevChapter = chapterLabel;
+      note.id = noteId;
+      note.chapterLabel = chapterLabel;
+      res[chapterLabel].push(note);
+    }
+  }
+  if (sortType === "reading_order") {
+    Object.values(res).forEach((list) =>
+      list.sort(readingOrderComparator(sortDirection))
+    );
+  } else {
+    Object.values(res).forEach((list) =>
+      list.sort(
+        dateComparator(sortDirection, (e) => e[sortTypeToKey[sortType]])
+      )
+    );
+  }
+  return res;
+};
+const getSortedUngroupedNotes = (sort, epubObject) => {
+  const epubNotes = epubObject.notes;
+  const spine = epubObject.spine;
+  const sortType = sort.notes.type;
+  const sortDirection = sort.notes.direction;
+  const res = [];
+  for (const chapterNodes of Object.values(epubNotes)) {
+    for (const [noteId, note] of Object.entries(chapterNodes)) {
+      const chapterLabel = spine[note.spineIndex].label;
+      note.id = noteId;
+      note.chapterLabel = chapterLabel;
+      res.push(note);
+    }
+  }
+  if (sortType === "reading_order") {
+    res.sort(readingOrderComparator(sortDirection));
+  } else {
+    res.sort(dateComparator(sortDirection, (e) => e[sortTypeToKey[sortType]]));
+  }
+  return res;
+};
+export const getSortedNotes = (sort, epubObject) => {
+  const sortGrouped = sort.notes.grouped;
+  if (sortGrouped) {
+    return getSortedGroupedNotes(sort, epubObject);
+  } else {
+    return getSortedUngroupedNotes(sort, epubObject);
+  }
+};
+
+const localeComparator = (dir, get) => (a, b) =>
+  dir === "asc" ? get(a).localeCompare(get(b)) : get(b).localeCompare(get(a));
+
+export const getSortedMemos = (sort, epubObject) => {
+  const memos = epubObject.memos;
+  const sortType = sort.memos.type;
+  const sortDirection = sort.memos.direction;
+  if (sortType === "alphabetical") {
+    return Object.entries(memos).sort(
+      localeComparator(sortDirection, (e) => e[0])
+    );
+  } else {
+    return Object.entries(memos).sort(
+      dateComparator(sortDirection, (e) => e[1][sortTypeToKey[sortType]])
+    );
+  }
+};
+
+export const chapterNameToElementId = (chapterName) =>
+  `chapter-name-${chapterName.toLowerCase().split(" ").join("-")}`;

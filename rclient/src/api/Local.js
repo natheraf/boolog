@@ -1,3 +1,5 @@
+import { isMobileDevice } from "./IndexedDB/common";
+
 export const userTemplates = [
   {
     name: "Grun",
@@ -35,6 +37,28 @@ export const userTemplates = [
       "https://images.unsplash.com/photo-1561731216-c3a4d99437d5?q=80&w=1064&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
   },
 ];
+
+export const getDefaultFormatting = (theme) => {
+  const formatting = { ...defaultFormatting, ...defaultStandardFormatting };
+  Object.keys(formatting).forEach(
+    (key) => key.startsWith("_") && delete formatting[key]
+  );
+  const highlightBorderSafety = 25;
+  formatting.pageWidth = Math.min(
+    window.innerWidth - highlightBorderSafety,
+    700
+  );
+  if (formatting.pageColor === "Original") {
+    formatting.pageColor = theme.palette.background.paper;
+  }
+  if (formatting.textColor === "Original") {
+    formatting.textColor = theme.palette.text.primary;
+  }
+  if (formatting.hasOwnProperty("preset") === false) {
+    formatting.preset = theme.palette.mode;
+  }
+  return formatting;
+};
 
 export const defaultFormatting = {
   fontSize: "Original",
@@ -96,16 +120,58 @@ export const defaultStandardFormatting = {
     kind: "local",
   },
   textAlign: { label: "Original", value: "inherit" },
-  showDividers: false,
+  showDividers: true,
   showArrows: true,
   fontWeight: "Original",
-  textColor: "Standard",
-  pageColor: "Standard",
+  textColor: "Original",
+  pageColor: "Original",
   pageHeightMargins: 25,
   textIndent: "Original",
   showPageNavigator: true,
   showSpineNavigator: true,
 };
+
+export const getDefaultDisplayOptions = () => {
+  const options = structuredClone(defaultDisplayOptions);
+  options.autoHideHeader = isMobileDevice();
+  return options;
+};
+
+export const defaultDisplayOptions = {
+  showPageNavigator: true,
+  showSpineNavigator: true,
+  showDividers: true,
+  autoHideHeader: false,
+  view: "page",
+};
+
+export const fontFamilies = [
+  { label: "Original", value: "inherit", group: null, kind: "local" },
+
+  { label: "Serif", value: "serif", group: "Generic", kind: "local" },
+  {
+    label: "Sans-Serif",
+    value: "sans-serif",
+    group: "Generic",
+    kind: "local",
+  },
+  {
+    label: "Monospace",
+    value: "monospace",
+    group: "Generic",
+    kind: "local",
+  },
+  { label: "Cursive", value: "cursive", group: "Generic", kind: "local" },
+  { label: "Fantasy", value: "fantasy", group: "Generic", kind: "local" },
+  { label: "Math", value: "math", group: "Generic" },
+  { label: "Fangsong", value: "fangsong", group: "Generic", kind: "local" },
+  {
+    label: "System-UI",
+    value: "system-ui",
+    group: "Generic",
+    kind: "local",
+  },
+];
 
 const relators = [
   {
@@ -2599,3 +2665,20 @@ export const getRelatorsLabelFromIdentifier = (id) =>
   relators.find(
     (obj) => obj["@id"] === `http://id.loc.gov/vocabulary/relators/${id}`
   )?.["http://www.loc.gov/mads/rdf/v1#authoritativeLabel"]?.[0]?.["@value"];
+
+export const annotatorHelpHTMLTooltipData = {
+  memos: {
+    title: "Memos",
+    titleDescription: "Memos appear in every occurrence of a word/phrase",
+    subtitle: "Usage",
+    subtitleDescription:
+      "Jot down something to remind yourself of a character, place, or thing. Whenever you highlight this again, this memo will appear.",
+  },
+  notes: {
+    title: "Notes",
+    titleDescription: "Can be left empty.",
+    subtitle: "Highlight",
+    subtitleDescription:
+      "If no highlight color is selected and a note is written, the highlight will be transparent.",
+  },
+};

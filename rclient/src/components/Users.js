@@ -49,18 +49,9 @@ export const Users = () => {
   const [users, setUsers] = React.useState([]);
   const [openEditor, setOpenEditor] = React.useState(false);
   const [editObject, setEditObject] = React.useState(undefined);
-  const [quickSettings, setQuickSettings] = React.useState(() => {
-    const res = [];
-    if (theme.palette.mode === "dark") {
-      res.push("dark");
-    }
-    if (theme.transitions.reduceMotion) {
-      res.push("reduceMotionOff");
-    }
-    return res;
-  });
+  const [quickSettings, setQuickSettings] = React.useState([]);
 
-  const handleQuickSettingsChange = (event, newQuickSettings) => {
+  const handleQuickSettingsChange = (_event, newQuickSettings) => {
     setQuickSettings(newQuickSettings);
   };
 
@@ -100,7 +91,17 @@ export const Users = () => {
 
   React.useEffect(() => {
     getAllUsers().then((users) => setUsers(users));
-  }, [openEditor]);
+    setQuickSettings(() => {
+      const res = [];
+      if (theme.palette.mode === "dark") {
+        res.push("dark");
+      }
+      if (theme.transitions.reduceMotion) {
+        res.push("reduceMotionOff");
+      }
+      return res;
+    });
+  }, []);
 
   return (
     <Box>

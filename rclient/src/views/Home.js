@@ -22,6 +22,9 @@ export const Home = () => {
   const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
+    "Update 3/2/26 11:30PM": [
+      "ISSUE: [iPhone 13 - ios 18.7.1 - latest CHROME] scroll view stutters at the start of the first scroll. unreproducible on the same device on safari and brave, and [Galaxy S21 FE 5G - Android 15 - latest CHROME]",
+    ],
     "Update 7/20/25 9:18PM": [
       "fixed issue with ios highlighting the first paragraph when cutoff",
       "standard formatting available",

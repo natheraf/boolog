@@ -61,6 +61,36 @@ export const waitForElement = (selector) =>
     });
   });
 
+export const waitForElements = (selector) =>
+  new Promise((resolve) => {
+    if (document.querySelectorAll(selector)) {
+      return resolve(document.querySelectorAll(selector));
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelectorAll(selector)) {
+        observer.disconnect();
+        resolve(document.querySelectorAll(selector));
+      }
+    });
+
+    // If you get "parameter 1 is not of type 'Node'" error, see https://stackoverflow.com/a/77855838/492336
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+  });
+
+export const changePermanentMarksToTemporary = (noteId) => {
+  const nodes = [...document.getElementsByClassName(noteId)];
+  for (const node of nodes) {
+    node.classList.remove(noteId, "mark");
+    node.classList.add("temporary-mark");
+    node.removeAttribute("noteid");
+    node.removeAttribute("style");
+  }
+};
+
 export const deleteNodesAndLiftChildren = (nodes) => {
   const updates = [];
   for (const node of nodes) {
@@ -84,6 +114,9 @@ export const deleteNodesAndLiftChildren = (nodes) => {
 export const disableHighlightNodes = (nodes) => {
   deleteNodesAndLiftChildren(nodes);
 };
+
+export const handleDeleteMark = (noteId) =>
+  disableHighlightNodes(document.getElementsByClassName(noteId));
 
 export const changeTemporaryMarksToPermanent = (nodes, noteId) => {
   for (const node of nodes) {
@@ -280,9 +313,13 @@ export const getLastTextNode = (node) => {
   return lastNode;
 };
 
-const getNearestEpubAncestor = (node) => {
+export const getNearestEpubAncestor = (node) => {
   let it = node;
-  while (it !== null && it.classList?.contains("epub-node") === false) {
+  while (
+    it &&
+    (it.nodeType !== Node.ELEMENT_NODE ||
+      it.classList.contains("epub-node") === false)
+  ) {
     it = it.parentElement;
   }
   return it;
@@ -344,7 +381,7 @@ export const trimAndHighlight = (
 
 export const getPreviousTextNode = (node) => {
   do {
-    if (node.previousElementSibling !== null) {
+    if (node.previousElementSibling) {
       node = node.previousElementSibling;
     } else {
       while (node.previousElementSibling === null) {
@@ -356,4 +393,146 @@ export const getPreviousTextNode = (node) => {
     }
   } while (node.nodeType !== Node.TEXT_NODE);
   return node;
+};
+
+export const attachOnClickListenersToLinkElements = (
+  handlePathHref,
+  abortControllerSignal
+) => {
+  [...document.getElementsByClassName("content")].forEach((content) => {
+    content?.querySelectorAll("a[linkto]").forEach((node) => {
+      const tag = node.tagName.toLowerCase();
+      if (tag === "a" && node.getAttribute("linkto") !== "null") {
+        node.style.cursor = "pointer";
+        node.addEventListener(
+          "click",
+          () => {
+            handlePathHref(node.getAttribute("linkto"));
+          },
+          { signal: abortControllerSignal }
+        );
+      }
+    });
+  });
+};
+
+export const clearTemporaryMarks = () => {
+  if (document.getElementsByClassName("temporary-mark").length > 0) {
+    deleteNodesAndLiftChildren(
+      document.getElementsByClassName("temporary-mark")
+    );
+  }
+};
+
+export const trimSelectedRange = (range) => {
+  let startOffset = range.startOffset;
+  const startTextContent = range.startContainer.textContent;
+  while (
+    startOffset < startTextContent.length &&
+    startTextContent[startOffset] === " "
+  ) {
+    startOffset += 1;
+  }
+  let endOffset = range.endOffset;
+  while (
+    endOffset > 0 &&
+    range.endContainer.textContent[endOffset - 1] === " "
+  ) {
+    endOffset -= 1;
+  }
+  range.setStart(range.startContainer, startOffset);
+  range.setEnd(range.endContainer, endOffset);
+};
+
+export const getActualEndContainer = (range) => {
+  let { endContainer, endOffset, startContainer } = range;
+
+  let it = endContainer;
+  let deepestCommonAncestor = endContainer;
+  while (!deepestCommonAncestor.contains(startContainer)) {
+    it = deepestCommonAncestor;
+    deepestCommonAncestor = deepestCommonAncestor.parentElement;
+  }
+
+  if (endOffset === 0 && endContainer) {
+    it = it.previousElementSibling;
+    if (it) {
+      endContainer = it;
+      endOffset = it.textContent.length;
+    } else if (endContainer.parentNode) {
+      endContainer = endContainer.parentNode;
+      endOffset = endContainer.textContent.length;
+    }
+  }
+
+  return [endContainer, endOffset];
+};
+
+export const setRangeToTextNodesOnly = (range) => {
+  const content = document.getElementById("content");
+  if (range.endContainer instanceof HTMLElement) {
+    let previousEpubNodeTextNode = null;
+    let walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode;
+      if (
+        [Node.DOCUMENT_POSITION_PRECEDING].includes(
+          textNode.compareDocumentPosition(range.endContainer)
+        )
+      ) {
+        break;
+      }
+      if (getNearestEpubAncestor(textNode)) {
+        previousEpubNodeTextNode = textNode;
+      }
+    }
+    range.setEnd(previousEpubNodeTextNode, previousEpubNodeTextNode.length);
+  }
+};
+
+export const isIOS = () => {
+  return (
+    [
+      "iPad Simulator",
+      "iPhone Simulator",
+      "iPod Simulator",
+      "iPad",
+      "iPhone",
+      "iPod",
+    ].includes(navigator.platform) ||
+    // iPad on iOS 13 detection
+    (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+  );
+};
+
+export const handleShowCursor = (element, show) => {
+  element.style.cursor = show ? "auto" : "none";
+};
+
+export const handleMouseMoveHiderOnTimeout = (
+  event,
+  epubBody,
+  hideCursorTimeoutId
+) => {
+  handleShowCursor(epubBody, true);
+  clearTimeout(hideCursorTimeoutId.current);
+  if (event.target.classList.contains("epub-node")) {
+    hideCursorTimeoutId.current = setTimeout(() => {
+      handleShowCursor(epubBody, false);
+    }, 5000);
+  }
+};
+
+export const updateNoteMarksOrDeleteInDOM = (note, deleteMark) => {
+  const nodes = document.getElementsByClassName(note.id);
+  if (deleteMark) {
+    disableHighlightNodes(nodes);
+  } else {
+    for (const node of nodes) {
+      node.setAttribute(
+        "style",
+        `background-color: ${note.highlightColor} !important;`
+      );
+    }
+  }
 };

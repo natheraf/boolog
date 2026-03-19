@@ -125,3 +125,32 @@ const getGoogleFontsHelper = (db) =>
     };
     request.onerror = (error) => reject(new Error(error));
   });
+
+export const getStateValue = (key) =>
+  openDatabase("appData", appDataDBVersion, (db) => getValueHelper(db, key));
+
+const getValueHelper = (db, key) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("state", "readonly");
+    const objectStore = transaction.objectStore("state");
+    const request = objectStore.get(key);
+    request.onsuccess = (event) => {
+      const result = event.target.result;
+      resolve(result?.value);
+    };
+    request.onerror = (error) => reject(new Error(error));
+  });
+
+export const setStateValue = (key, value) =>
+  openDatabase("appData", appDataDBVersion, (db) =>
+    setValueHelper(db, key, value)
+  );
+
+const setValueHelper = (db, key, value) =>
+  new Promise((resolve, reject) => {
+    const transaction = db.transaction("state", "readwrite");
+    const objectStore = transaction.objectStore("state");
+    const request = objectStore.put({ key, value });
+    request.onsuccess = () => resolve(value);
+    request.onerror = (error) => reject(new Error(error));
+  });
