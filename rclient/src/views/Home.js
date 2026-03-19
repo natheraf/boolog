@@ -1,5 +1,4 @@
 import * as React from "react";
-import { AlertsContext } from "../context/Alerts";
 import {
   Accordion,
   AccordionDetails,
@@ -7,21 +6,29 @@ import {
   Button,
   Divider,
   Stack,
-  TextField,
   Typography,
 } from "@mui/material";
 import { handleSimpleRequest } from "../api/Axios";
-import { getAllBooks } from "../api/IndexedDB/Books";
-import { addUser, deleteUser, getAllUsers } from "../api/IndexedDB/Users";
-import { changeUser, getCurrentUser } from "../api/IndexedDB/State";
 import { UserInfoContext } from "../context/UserInfo";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
-  const addAlert = React.useContext(AlertsContext).addAlert;
 
   const updates = {
+    "Update 3/19/26 1:13AM": [
+      "Rewrite of the reader is now live",
+      "progress reliability. no more losing progress and opening to a random page on open",
+      "highlight reliability. no more infinite loops (i hope)",
+      "page tabs reliability. not 100% but should be more accurate to how many pages are left and the current location",
+      "----Whats new----",
+      "SCROLL VIEW LESGOOOOOO",
+      "auto hide header in reader",
+      "new formatter",
+      "back and forward buttons (history)",
+      "navigation tabs are now on the sides rather than top and bottom",
+      "prob other stuff idk",
+    ],
     "Update 3/2/26 11:30PM": [
       "ISSUE: [iPhone 13 - ios 18.7.1 - latest CHROME] scroll view stutters at the start of the first scroll. unreproducible on the same device on safari and brave, and [Galaxy S21 FE 5G - Android 15 - latest CHROME]",
     ],
@@ -167,159 +174,6 @@ export const Home = () => {
           </Accordion>
         ))}
       </Stack>
-      {/* <Button
-        onClick={() =>
-          handleSimpleRequest(
-            "post",
-            {
-              database: "userAppData",
-              collection: "epubData",
-              data: [
-                {
-                  dateCreated: "2025-05-02T18:16:06.610Z",
-                  dateModified: "2025-05-02T18:16:06.610Z",
-                  entryId: "1746045537241_7grb",
-                  highlightColor: "rgba(255, 255, 0, .2)",
-                  key: "notes.6.1746209766610_yrbn",
-                  note: "",
-                  selectedRangeIndexed: {
-                    startContainerId: "151",
-                    startOffset: 0,
-                    endContainerId: "151",
-                    endOffset: 24,
-                  },
-                  selectedText: "Urano Motosu loved books",
-                  spineIndex: 6,
-                },
-              ],
-            },
-            "generic/update/multiple"
-          ).then((result) => console.log(result))
-        }
-      >
-        test update
-      </Button> */}
-      {/* <div>
-        <Button onClick={() => addAlert("info", "info")}>info</Button>
-        <Button onClick={() => addAlert("success", "success")}>success</Button>
-        <Button onClick={() => addAlert("warning", "warning")}>warning</Button>
-        <Button onClick={() => addAlert("error", "error")}>error</Button>
-        <Button
-          onClick={() => {
-            getAllBooks()
-              .then((res) => {
-                handleSimpleRequest(
-                  "POST",
-                  {
-                    data: res.map((entry) => {
-                      entry.shelf = "books";
-                      return entry;
-                    }),
-                  },
-                  "lists/put/multiple"
-                ).then((res) => console.log(res.data));
-              })
-              .catch((error) => addAlert(error.message, "error"));
-          }}
-        >
-          Update all entries
-        </Button>
-        <Button
-          onClick={() => {
-            handleSimpleRequest("GET", {}, "lists/get/all").then((res) =>
-              console.log(res.data)
-            );
-          }}
-        >
-          Get all entries
-        </Button>
-        <Button
-          onClick={() => {
-            handleSimpleRequest("GET", {}, "lists/get/multiple", {
-              shelves: ["books", "movies"],
-            }).then((res) => console.log(res.data));
-          }}
-        >
-          Get books and movies
-        </Button>
-
-        <br />
-
-        <Button
-          onClick={() => {
-            handleSimpleRequest(
-              "POST",
-              {
-                data: {
-                  key0: "value0",
-                  key1: "value1",
-                  key2: "value2",
-                  key3: "value3",
-                },
-              },
-              "settings/set/multiple"
-            )
-              .then((res) => console.log(res.data))
-              .catch((error) => console.log(error));
-          }}
-        >
-          set settings
-        </Button>
-        <Button
-          onClick={() => {
-            handleSimpleRequest("GET", {}, "settings/get/all")
-              .then((res) => console.log(res.data))
-              .catch((error) => console.log(error));
-          }}
-        >
-          get all settings
-        </Button>
-
-        <br />
-
-        <Button
-          onClick={() => getAllUsers().then((result) => console.log(result))}
-        >
-          get all users
-        </Button>
-        <Button
-          onClick={() => getCurrentUser().then((result) => console.log(result))}
-        >
-          get cur user
-        </Button>
-        <TextField
-          onKeyDown={(event) =>
-            event.key === "Enter"
-              ? addUser({ name: event.target.value }).then((result) =>
-                  console.log(result)
-                )
-              : null
-          }
-          label="add user with name"
-        />
-        <TextField
-          onKeyDown={(event) =>
-            event.key === "Enter"
-              ? deleteUser(parseInt(event.target.value)).then((result) =>
-                  console.log(result)
-                )
-              : null
-          }
-          label="delete user from userId"
-        />
-        <br />
-        <TextField
-          onKeyDown={(event) =>
-            event.key === "Enter"
-              ? changeUser(parseInt(event.target.value)).then((result) => {
-                  userInfoContext.refreshAndIsLoggedIn();
-                  localStorage.setItem("userId", result);
-                })
-              : null
-          }
-          label="change current userId"
-        />
-      </div> */}
     </div>
   );
 };
