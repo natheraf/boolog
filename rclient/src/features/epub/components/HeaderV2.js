@@ -43,6 +43,7 @@ export const HeaderV2 = ({
   const subtitle = epubObject.spine[spineIndex]?.label;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
+  const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
   const [show, setShow] = React.useState(true);
   const showRef = React.useRef(false);
   const hideTimeoutId = React.useRef(null);
@@ -149,40 +150,33 @@ export const HeaderV2 = ({
           direction="row"
           alignItems={"center"}
           justifyContent={"space-between"}
-          spacing={2}
+          spacing={greaterThanSmall ? 1 : 0}
           sx={{ minHeight: `${appBarHeight}px`, height: `${appBarHeight}px` }}
           variant="dense"
         >
-          <Stack
-            alignItems={"center"}
-            direction="row"
-            spacing={1}
-            sx={{ overflow: "hidden" }}
-          >
-            <Tooltip title="Close (esc)">
-              <IconButton
-                edge="start"
-                color="inherit"
-                onClick={handleClose}
-                aria-label="close"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-            {greaterThanSmall ? (
-              <Stack spacing={-0.5}>
-                <Typography variant="subtitle2" noWrap>
-                  {title ?? "Untitled"}
+          <Tooltip title="Close (esc)">
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleClose}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </IconButton>
+          </Tooltip>
+          {greaterThanSmall ? (
+            <Stack spacing={-0.5} sx={{ overflow: "hidden" }}>
+              <Typography variant="subtitle2" noWrap>
+                {title ?? "Untitled"}
+              </Typography>
+              {subtitle && (
+                <Typography variant="subtitle1" noWrap>
+                  {subtitle}
                 </Typography>
-                {subtitle && (
-                  <Typography variant="subtitle1" noWrap>
-                    {subtitle}
-                  </Typography>
-                )}
-              </Stack>
-            ) : null}
-          </Stack>
-          <Stack spacing={1} direction={"row"}>
+              )}
+            </Stack>
+          ) : null}
+          <Stack spacing={greaterThanMedium ? 1 : 0} direction={"row"}>
             <HistoryButtons
               epubObject={epubObject}
               history={history}
