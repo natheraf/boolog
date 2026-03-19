@@ -30,6 +30,8 @@ export const PageView = ({
     formatting.pageWidth,
     window.innerWidth - highlightBorderSafety
   );
+  const firstTouchXRef = React.useRef(null);
+  const firstTouchYRef = React.useRef(null);
 
   const getTotalPages = () =>
     document.getElementById("content")
@@ -194,6 +196,34 @@ export const PageView = ({
     handleMouseMoveHiderOnTimeout(event, epubBody, hideCursorTimeoutId);
   };
 
+  const handleTouchStart = (event) => {
+    firstTouchXRef.current = event.touches[0].clientX;
+    firstTouchYRef.current = event.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (event) => {
+    if (firstTouchXRef.current === null || firstTouchYRef.current === null) {
+      return;
+    }
+    const x = event.changedTouches[0].clientX;
+    const y = event.changedTouches[0].clientY;
+    const xDiff = firstTouchXRef.current - x;
+    const yDiff = firstTouchYRef.current - y;
+    const deltaTrigger = 69;
+    if (
+      Math.abs(xDiff) > Math.abs(yDiff) &&
+      window.getSelection()?.isCollapsed
+    ) {
+      if (xDiff > deltaTrigger) {
+        handleNextPage();
+      } else if (xDiff < -deltaTrigger) {
+        handlePreviousPage();
+      }
+    }
+    firstTouchXRef.current = null;
+    firstTouchYRef.current = null;
+  };
+
   /**
    * keep react state data attached to non-react elements updated
    * 1. for history management: Non-react elements need to refresh their functions attached on their listeners with updated react state.
@@ -214,11 +244,15 @@ export const PageView = ({
       document.addEventListener("keydown", handleOnKeyDown);
       epubBody.addEventListener("wheel", handleWheelDelta);
       epubBody.addEventListener("mousemove", handleMouseMove);
+      epubBody.addEventListener("touchstart", handleTouchStart);
+      epubBody.addEventListener("touchend", handleTouchEnd);
     }
     return () => {
       document.removeEventListener("keydown", handleOnKeyDown);
       epubBody.removeEventListener("wheel", handleWheelDelta);
       epubBody.removeEventListener("mousemove", handleMouseMove);
+      epubBody.removeEventListener("touchstart", handleTouchStart);
+      epubBody.removeEventListener("touchend", handleTouchEnd);
       abortController.abort();
     };
   }, [isLoading, currentPage]);
