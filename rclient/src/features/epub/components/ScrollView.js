@@ -220,6 +220,7 @@ export const ScrollView = ({
         handlePathHref(
           spineIndex,
           spineIndexMap,
+          setProgress,
           setProgressWithoutAddingHistory,
           setForceFocus
         ),

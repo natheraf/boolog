@@ -410,7 +410,14 @@ export const processEpub = (epubObject) => {
 };
 
 export const handlePathHref =
-  (spineIndex, spineIndexMap, setProgress, setForceFocus) => (path) => {
+  (
+    spineIndex,
+    spineIndexMap,
+    setProgress,
+    setProgressWithoutAddingHistory,
+    setForceFocus
+  ) =>
+  (path) => {
     if (window.getSelection().isCollapsed === false) {
       return;
     }
@@ -422,19 +429,24 @@ export const handlePathHref =
     } else if (path.startsWith("/")) {
       path = path.substring(1);
     }
-    const pathWithoutId =
-      path.includes("#") === false
-        ? path
-        : path.substring(0, path.indexOf("#"));
+
+    const pathHasId = path.includes("#");
+    const pathWithoutId = pathHasId
+      ? path.substring(0, path.indexOf("#"))
+      : path;
+    let newSpineIndex = spineIndex;
     if (pathWithoutId.length > 0) {
-      const pathSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
-      if (typeof pathSpineIndex === "number" && pathSpineIndex !== spineIndex) {
-        setProgress(pathSpineIndex, 0);
+      newSpineIndex = getEpubValueFromPath(spineIndexMap, pathWithoutId);
+    }
+    if (typeof newSpineIndex === "number" && newSpineIndex !== spineIndex) {
+      if (pathHasId) {
+        setProgressWithoutAddingHistory(newSpineIndex, 0);
+      } else {
+        setProgress(newSpineIndex, 0);
       }
     }
-    let linkFragment = null;
-    if (path.includes("#")) {
-      linkFragment = path.substring(path.indexOf("#") + 1);
+    if (pathHasId) {
+      const linkFragment = path.substring(path.indexOf("#") + 1);
       const forceFocus = {
         type: "element",
         attributeName: "id",

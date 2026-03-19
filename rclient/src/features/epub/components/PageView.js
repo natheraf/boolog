@@ -236,6 +236,7 @@ export const PageView = ({
         handlePathHref(
           spineIndex,
           spineIndexMap,
+          setProgress,
           setProgressWithoutAddingHistory,
           setForceFocus
         ),
