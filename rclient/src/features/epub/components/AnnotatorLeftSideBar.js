@@ -17,9 +17,7 @@ export const AnnotatorLeftSideBar = ({
       ? theme.palette.secondary.light
       : theme.palette.secondary.dark;
   const unSelectedColor =
-    theme.palette.mode === "light"
-      ? theme.palette.primary.light
-      : theme.palette.primary.dark;
+    theme.palette.mode === "light" ? "#ffffff99" : "#c7c7c799";
 
   const handleOnClick = (index) => () => {
     setCurrentTabIndex(index);
