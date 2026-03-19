@@ -137,7 +137,6 @@ export const HeaderV2 = ({
     <Slide direction="down" in={show} mountOnEnter>
       <AppBar
         id="appBar"
-        variant="outlined"
         elevation={0}
         sx={{
           position: displayOptions.autoHideHeader ? "fixed" : "static",
