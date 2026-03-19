@@ -1,16 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import {
-  Stack,
-  ToggleButton,
-  ToggleButtonGroup,
-  useMediaQuery,
-} from "@mui/material";
-import { useTheme } from "@emotion/react";
+import { Grid, ToggleButton, ToggleButtonGroup } from "@mui/material";
 
 export const AnnotationSort = ({ tab, sort, setSort }) => {
-  const theme = useTheme();
-  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const sortType = tab === "notes" ? sort.notes.type : sort.memos.type;
   const sortOptions =
     tab === "notes"
@@ -80,12 +72,13 @@ export const AnnotationSort = ({ tab, sort, setSort }) => {
   };
 
   return (
-    <Stack
+    <Grid
+      container
       justifyContent={"center"}
       alignItems={"center"}
-      direction={greaterThanSmall ? "row" : "column"}
+      direction={"row"}
       sx={{ marginBottom: 1 }}
-      spacing={2}
+      gap={2}
     >
       <ToggleButtonGroup
         exclusive
@@ -121,7 +114,7 @@ export const AnnotationSort = ({ tab, sort, setSort }) => {
           Group By Chapters
         </ToggleButton>
       )}
-    </Stack>
+    </Grid>
   );
 };
 
