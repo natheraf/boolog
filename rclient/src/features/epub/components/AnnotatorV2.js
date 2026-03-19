@@ -327,20 +327,16 @@ export const AnnotatorV2 = ({
     abortController.current = new AbortController();
     placeHighlights();
     const content = document.getElementById("content");
-    content.addEventListener("mousedown", clearTemporaryMarks);
     content.addEventListener("mouseup", handleMouseUp);
     content.addEventListener("mousedown", clearMouseUpTimeout);
     content.addEventListener("touchend", handleTouchSelect);
-    content.addEventListener("touchstart", clearTemporaryMarks);
     return () => {
       abortController.current.abort();
       deleteHighlights();
-      content.removeEventListener("mousedown", clearTemporaryMarks);
       content.removeEventListener("mouseup", handleMouseUp);
       clearMouseUpTimeout();
       content.removeEventListener("mousedown", clearMouseUpTimeout);
       content.removeEventListener("touchend", handleTouchSelect);
-      content.removeEventListener("touchstart", clearTemporaryMarks);
     };
   }, [displayOptions.view, spineIndex]);
 
