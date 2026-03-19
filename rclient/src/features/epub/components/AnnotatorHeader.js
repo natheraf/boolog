@@ -16,6 +16,9 @@ import CheckIcon from "@mui/icons-material/Check";
 import HelpIcon from "@mui/icons-material/Help";
 import CloseIcon from "@mui/icons-material/Close";
 import { annotatorHelpHTMLTooltipData } from "../../../api/Local";
+import GoogleIcon from "@mui/icons-material/Google";
+import SearchIcon from "@mui/icons-material/Search";
+import { waitForElement } from "../domUtils";
 
 export const AnnotatorHeader = ({
   selectedText,
@@ -46,6 +49,36 @@ export const AnnotatorHeader = ({
     if (isCtrlOrCmd && event.key === "c" && notSelectingText) {
       handleCopySelectedText();
     }
+  };
+
+  const handleOnClickGoogle = () => {
+    if (selectedText) {
+      window.open(
+        `https://www.google.com/search?q=${encodeURIComponent(selectedText)}`,
+        "_blank"
+      );
+    }
+  };
+
+  const handleSearch = () => {
+    const searchButton = document.getElementById("open-search-button");
+    searchButton.click();
+    waitForElement("#search-text-field").then((textField) => {
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+        window.HTMLInputElement.prototype,
+        "value"
+      ).set;
+      nativeInputValueSetter.call(textField, selectedText);
+      textField.dispatchEvent(new Event("input", { bubbles: true }));
+      const enterEvent = new KeyboardEvent("keydown", {
+        key: "Enter",
+        code: "Enter",
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+      });
+      textField.dispatchEvent(enterEvent);
+    });
   };
 
   React.useEffect(() => {
@@ -92,7 +125,17 @@ export const AnnotatorHeader = ({
         </Stack>
       </HtmlTooltip>
       <Stack direction={"row"} alignItems={"center"}>
-        <Tooltip placement="top" title={"Copy Selected Text (ctrl + c)"}>
+        <Tooltip placement="top" title={"Google"}>
+          <IconButton onClick={handleOnClickGoogle}>
+            <GoogleIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip placement="top" title={"Search"}>
+          <IconButton onClick={handleSearch}>
+            <SearchIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip placement="top" title={"Copy (ctrl + c)"}>
           <IconButton onClick={handleCopySelectedText}>
             {copySuccess ? (
               <Zoom in={true} timeout={500}>

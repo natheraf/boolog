@@ -187,7 +187,7 @@ export const SearchV2 = ({
   return (
     <>
       <Tooltip title="Search">
-        <IconButton onClick={handleClickOpen}>
+        <IconButton id="open-search-button" onClick={handleClickOpen}>
           <SearchIcon />
         </IconButton>
       </Tooltip>
