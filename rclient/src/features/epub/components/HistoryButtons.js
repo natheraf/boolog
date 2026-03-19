@@ -130,7 +130,7 @@ export const HistoryButtons = ({
           ))}
       </Menu>
       <Stack direction={"row"}>
-        <Tooltip title={"Back (q)"}>
+        <Tooltip title={"Back"}>
           <span>
             <IconButton
               id="back-button"
@@ -142,7 +142,7 @@ export const HistoryButtons = ({
             </IconButton>
           </span>
         </Tooltip>
-        <Tooltip title={"Forward (e)"}>
+        <Tooltip title={"Forward"}>
           <span>
             <IconButton
               id="forward-button"

@@ -35,7 +35,7 @@ export const EpubSettings = ({
 
   return (
     <>
-      <Tooltip title="Settings (f)">
+      <Tooltip title="Settings">
         <IconButton onClick={handleOpen}>
           <SettingsIcon />
         </IconButton>

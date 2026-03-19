@@ -112,7 +112,7 @@ export const EpubFormatterV2 = ({
 
   return (
     <Box>
-      <Tooltip title="Format (f)">
+      <Tooltip title="Format">
         <IconButton onClick={handleOpenFormatting}>
           <TextFormatIcon />
         </IconButton>
