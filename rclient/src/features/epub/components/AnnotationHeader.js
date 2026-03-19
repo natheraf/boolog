@@ -20,15 +20,13 @@ export const AnnotationHeader = ({
   ];
   const tabIndexValue = tabOptions.findIndex((option) => option.value === tab);
 
-  const handleOnChangeTab = (event, index) => {
-    // if (tabValueMap[value] === "notes") {
-    //   scrollToCurrentChapterSubheader();
-    // }
+  const handleOnChangeTab = (_event, index) => {
     setTab(tabOptions[index].value);
   };
 
   return (
     <AppBar
+      id="annotation-viewer-header"
       position="sticky"
       sx={{
         marginTop: -1,

@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { AnnotationViewerNoteEntry } from "./AnnotationViewerNoteEntry";
+import { chapterNameToElementId } from "../epubUtils";
 
 export const AnnotationNotesGrouped = ({
   spine,
@@ -21,8 +22,6 @@ export const AnnotationNotesGrouped = ({
   deleteNote,
 }) => {
   const currentChapter = spine[spineIndex].label;
-  const chapterNameToElementId = (chapterName) =>
-    `chapter-name-${chapterName.toLowerCase().split(" ").join("-")}`;
 
   return Object.entries(notes).map(([chapterName, chapterNotes]) => (
     <Accordion

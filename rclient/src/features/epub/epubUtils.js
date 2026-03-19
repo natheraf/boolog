@@ -544,3 +544,6 @@ export const getSortedMemos = (sort, epubObject) => {
     );
   }
 };
+
+export const chapterNameToElementId = (chapterName) =>
+  `chapter-name-${chapterName.toLowerCase().split(" ").join("-")}`;
