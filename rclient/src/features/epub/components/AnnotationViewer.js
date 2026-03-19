@@ -56,6 +56,11 @@ const LastModified = ({ entry }) => {
   );
 };
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const AnnotationViewer = ({
   spine,
   entryId,

@@ -15,6 +15,11 @@ import { AnnotationViewer } from "./AnnotationViewer";
 import { ReaderFormat } from "../../../components/ReaderFormat";
 import { SearchV2 } from "./SearchV2";
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const Header = ({
   handleClose,
   title,

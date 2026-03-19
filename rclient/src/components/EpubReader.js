@@ -37,6 +37,11 @@ let pageTracker = 0;
 
 let imagesInMemory = new Set();
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const EpubReader = ({ open, setOpen, epubObject, entryId }) => {
   const theme = useTheme();
   const opacityOfSideElements = 0.4;

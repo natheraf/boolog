@@ -31,6 +31,11 @@ import CloseIcon from "@mui/icons-material/Close";
 import CloudIcon from "@mui/icons-material/Cloud";
 import { UserInfoContext } from "../context/UserInfo";
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const ReaderFormat = ({
   formatting,
   setFormatting,

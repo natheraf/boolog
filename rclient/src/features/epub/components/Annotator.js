@@ -67,6 +67,11 @@ const formatMemoKey = (key) => {
   return key;
 };
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const Annotator = ({
   entryId,
   memos,
@@ -107,7 +112,7 @@ export const Annotator = ({
   );
 
   const [memo, setMemo] = React.useState(
-    memoKeyOfHighlight ? memos[memoKeyOfHighlight]?.memo ?? "" : ""
+    memoKeyOfHighlight ? (memos[memoKeyOfHighlight]?.memo ?? "") : ""
   );
   const [note, setNote] = React.useState(
     notes[spineIndex]?.[anchorEl?.getAttribute(noteIdAttribute)]?.note ?? ""
@@ -487,11 +492,11 @@ export const Annotator = ({
                   10
                 : selectionRect.bottom - selectionParentRect.top + 10
               : anchorEl
-              ? anchorEl.getBoundingClientRect().top >
-                Math.floor(window.innerHeight / 2)
-                ? -10
-                : anchorEl.getBoundingClientRect().height + 10
-              : -20,
+                ? anchorEl.getBoundingClientRect().top >
+                  Math.floor(window.innerHeight / 2)
+                  ? -10
+                  : anchorEl.getBoundingClientRect().height + 10
+                : -20,
           horizontal:
             selectionParentRect && selectionRect
               ? selectionRect.right -
