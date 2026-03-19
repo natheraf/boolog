@@ -7,6 +7,7 @@ export const AnnotatorLeftSideBar = ({
   tabOptions,
   currentTabIndex,
   setCurrentTabIndex,
+  annotatorHeight,
 }) => {
   const theme = useTheme();
   const barWidth = 30;
@@ -24,14 +25,9 @@ export const AnnotatorLeftSideBar = ({
     setCurrentTabIndex(index);
   };
 
+  const height = annotatorHeight * 0.95;
   return (
-    <Stack
-      sx={{
-        position: "absolute",
-        left: -barWidth,
-        height: "100%",
-      }}
-    >
+    <Stack sx={{ height }}>
       {tabOptions.map((option, index) => (
         <Tooltip
           title={option.title}
@@ -68,4 +64,5 @@ AnnotatorLeftSideBar.propTypes = {
   tabOptions: PropTypes.array.isRequired,
   currentTabIndex: PropTypes.number.isRequired,
   setCurrentTabIndex: PropTypes.func.isRequired,
+  annotatorHeight: PropTypes.number.isRequired,
 };

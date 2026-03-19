@@ -1,7 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
-import { Backdrop, Box, Menu, Stack } from "@mui/material";
+import { Backdrop, Box, Menu, Paper, Stack } from "@mui/material";
 import {
   clearTemporaryMarks,
   handleInjectingMarkToEpubNodes,
@@ -366,21 +366,20 @@ export const AnnotatorV2 = ({
           slotProps={{
             paper: {
               sx: {
-                overflow: "visible",
+                backgroundColor: "transparent",
+                backgroundImage: "none",
               },
             },
           }}
         >
-          <Stack
-            direction={"row"}
-            sx={{ position: "relative", overflow: "visible" }}
-          >
+          <Stack alignItems={"center"} direction={"row"}>
             <AnnotatorLeftSideBar
               tabOptions={tabOptions}
               currentTabIndex={currentTabIndex}
               setCurrentTabIndex={setCurrentTabIndex}
+              annotatorHeight={annotatorHeight}
             />
-            <Box sx={{ width: annotatorWidth, height: annotatorHeight }}>
+            <Paper sx={{ width: annotatorWidth, height: annotatorHeight }}>
               {tabOptions[currentTabIndex].value === "note" ? (
                 <AnnotatorNotes
                   epubObject={epubObject}
@@ -398,7 +397,7 @@ export const AnnotatorV2 = ({
                   selectedText={selectedText.current}
                 />
               )}
-            </Box>
+            </Paper>
           </Stack>
         </Menu>
       )}
