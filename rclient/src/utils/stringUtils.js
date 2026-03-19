@@ -34,8 +34,8 @@ export const getSearchPreview = (text, index, needle) => {
     index - half < 0
       ? 0
       : text.indexOf(" ", index - half) >= index
-      ? index - half
-      : text.indexOf(" ", index - half);
+        ? index - half
+        : text.indexOf(" ", index - half);
   const unusedStartChars = half - (index - startIndex);
   let endIndex = Math.min(text.length, index + half + unusedStartChars);
   while (
@@ -53,4 +53,11 @@ export const getSearchPreview = (text, index, needle) => {
     previewPrefix: text.substring(startIndex, index),
     previewSuffix: text.substring(index + needle.length, endIndex),
   };
+};
+
+export const addAlphaToHex = (hex, opacity) => {
+  const baseHex = hex.replace("#", "");
+  const alpha = Math.round(opacity * 255);
+  const alphaHex = alpha.toString(16).toUpperCase().padStart(2, "0");
+  return `#${baseHex}${alphaHex}`;
 };
