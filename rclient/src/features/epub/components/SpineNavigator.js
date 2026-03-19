@@ -1,6 +1,7 @@
 import PropTypes from "prop-types";
 import { Box, Stack, Tooltip } from "@mui/material";
 import { appBarHeight } from "./HeaderV2";
+import { navigationTabSize } from "../../../api/Local";
 
 export const SpineNavigator = ({
   epubObject,
@@ -11,7 +12,7 @@ export const SpineNavigator = ({
 }) => {
   const autoHideHeader = displayOptions.autoHideHeader;
   const arrayForSpineNavigator = epubObject.chapterMeta;
-  const spineNavigateSize = 10;
+  const spineNavigateSize = navigationTabSize;
 
   const handleOnClick = (spineIndex) => {
     setProgress(spineIndex, 0);

@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import { Box, Stack, Tooltip } from "@mui/material";
 import { appBarHeight } from "./HeaderV2";
 import { useTheme } from "@emotion/react";
+import { navigationTabSize } from "../../../api/Local";
+import { isMobileDevice } from "../../../api/IndexedDB/common";
 
 export const ChapterNavigator = ({
   epubObject,
@@ -16,8 +18,15 @@ export const ChapterNavigator = ({
   const theme = useTheme();
   const spine = epubObject.spine;
   const chapterMeta = epubObject.chapterMeta;
-  const chapterNavigateSize = 10;
   const viewHeight = window.innerHeight - appBarHeight * +!autoHideHeader;
+  const chapterNavigateSize = navigationTabSize;
+  const isMobile = isMobileDevice();
+  const rightOffset = isMobile ? 1 : 3;
+  const previousAndNextChapterTabsRadius = isMobile ? "0px" : "7px";
+  const currentChapterTabsRadius = isMobile ? "0px" : "10px";
+  const currentChapterBottomBorder = isMobile
+    ? ""
+    : `3px solid ${formatting.textColor}`;
 
   const arrayForPreviousChapterNavigator =
     spineIndex === null || spineIndex === spine.length - 1
@@ -115,10 +124,10 @@ export const ChapterNavigator = ({
               opacity: 0.4,
               cursor: "pointer",
               height: `${getChapterPartSizeInNav(index, "previous")}%`,
-              borderTopLeftRadius: "7px",
-              borderBottomLeftRadius: "7px",
+              borderTopLeftRadius: previousAndNextChapterTabsRadius,
+              borderBottomLeftRadius: previousAndNextChapterTabsRadius,
               position: "relative",
-              right: -3,
+              right: -rightOffset,
             }}
           />
         </Tooltip>
@@ -137,9 +146,9 @@ export const ChapterNavigator = ({
                 opacity: currentPage < index ? 0.3 : 0.4,
                 cursor: "pointer",
                 height: "100%",
-                borderTopLeftRadius: "10px",
-                borderBottomLeftRadius: "10px",
-                borderBottom: `3px solid ${formatting.textColor}`,
+                borderTopLeftRadius: currentChapterTabsRadius,
+                borderBottomLeftRadius: currentChapterTabsRadius,
+                borderBottom: currentChapterBottomBorder,
                 position: "relative",
               }}
             />
@@ -168,10 +177,10 @@ export const ChapterNavigator = ({
               opacity: 0.2,
               cursor: "pointer",
               height: `${getChapterPartSizeInNav(index, "next")}%`,
-              borderTopLeftRadius: "7px",
-              borderBottomLeftRadius: "7px",
+              borderTopLeftRadius: previousAndNextChapterTabsRadius,
+              borderBottomLeftRadius: previousAndNextChapterTabsRadius,
               position: "relative",
-              right: -3,
+              right: -rightOffset,
             }}
           />
         </Tooltip>
