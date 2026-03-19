@@ -88,7 +88,14 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
         justifyContent={"space-between"}
       >
         <HtmlTooltip
-          title={<Typography variant="subtitle2">{selectedText}</Typography>}
+          title={
+            <Stack>
+              <Typography variant="subtitle2">{selectedText}</Typography>
+              <Typography variant="subtitle2">
+                {`(${memoKey.toUpperCase()})`}
+              </Typography>
+            </Stack>
+          }
           placement="right"
           enterDelay={200}
           enterNextDelay={200}
