@@ -10,7 +10,8 @@ import {
 import TextSnippetIcon from "@mui/icons-material/TextSnippet";
 import { AnnotationHeader } from "./AnnotationHeader";
 import { AnnotationNotesList } from "./AnnotationNotesList";
-import { getSortedNotes } from "../epubUtils";
+import { getSortedMemos, getSortedNotes } from "../epubUtils";
+import { AnnotationMemosList } from "./AnnotationMemosList";
 
 export const AnnotationViewerV2 = ({
   epubObject,
@@ -31,17 +32,12 @@ export const AnnotationViewerV2 = ({
     memos: { type: "alphabetical", direction: "asc" },
   });
   const [notes, setNotes] = React.useState(null);
+  const [memos, setMemos] = React.useState(null);
 
   const handleOpenAnnotation = (event) => {
     setNotes(getSortedNotes(sort, epubObject));
-    // updatedNotes.current.clear();
-    // updatedMemos.current.clear();
-    // scrollToCurrentChapterSubheader();
-    // setNotes(noteSort);
-    // setMemoAsArray(updateMemosAsArray());
-    // clearTemporaryMarks();
+    setMemos(getSortedMemos(sort, epubObject));
     setAnchorEl(event.currentTarget);
-    // setExpandedNotesMap(new Map());
   };
 
   const handleCloseAnnotation = () => {
@@ -50,7 +46,11 @@ export const AnnotationViewerV2 = ({
 
   const setSortHelper = (value) => {
     setSort(value);
-    setNotes(getSortedNotes(value, epubObject));
+    if (tab === "notes") {
+      setNotes(getSortedNotes(value, epubObject));
+    } else if (tab === "memos") {
+      setMemos(getSortedMemos(value, epubObject));
+    }
   };
 
   const goToNote = (spineIndex, id) => {
@@ -61,6 +61,29 @@ export const AnnotationViewerV2 = ({
       attributeName: "class",
       attributeValue: id,
     });
+  };
+
+  const listComponent = (tab, notes, memos) => {
+    if (tab === "notes" && notes) {
+      return (
+        <AnnotationNotesList
+          epubObject={epubObject}
+          spineIndex={spineIndex}
+          notes={notes}
+          setNotes={setNotes}
+          grouped={sort.notes.grouped}
+          goToNote={goToNote}
+        />
+      );
+    } else if (tab === "memos" && memos) {
+      return (
+        <AnnotationMemosList
+          epubObject={epubObject}
+          memos={memos}
+          setMemos={setMemos}
+        />
+      );
+    }
   };
 
   return (
@@ -83,16 +106,7 @@ export const AnnotationViewerV2 = ({
           setSort={setSortHelper}
           handleCloseAnnotation={handleCloseAnnotation}
         />
-        {tab === "notes" && notes && (
-          <AnnotationNotesList
-            epubObject={epubObject}
-            spineIndex={spineIndex}
-            notes={notes}
-            setNotes={setNotes}
-            grouped={sort.notes.grouped}
-            goToNote={goToNote}
-          />
-        )}
+        {listComponent(tab, notes, memos)}
       </Menu>
     </>
   );

@@ -455,20 +455,21 @@ const readingOrderComparator = (dir) => (a, b) =>
       Number.parseInt(b.selectedRangeIndexed.endOffset) -
         Number.parseInt(a.selectedRangeIndexed.endOffset);
 
-const dateComparator = (key, dir) => (a, b) =>
+const dateComparator = (dir, get) => (a, b) =>
   dir === "asc"
-    ? Date.parse(a[key]) - Date.parse(b[key])
-    : Date.parse(b[key]) - Date.parse(a[key]);
+    ? Date.parse(get(a)) - Date.parse(get(b))
+    : Date.parse(get(b)) - Date.parse(get(a));
+
+const sortTypeToKey = {
+  date_modified: "dateModified",
+  date_created: "dateCreated",
+};
 
 const getSortedGroupedNotes = (sort, epubObject) => {
   const epubNotes = epubObject.notes;
   const spine = epubObject.spine;
   const sortType = sort.notes.type;
   const sortDirection = sort.notes.direction;
-  const sortTypeToNoteKey = {
-    date_modified: "dateModified",
-    date_created: "dateCreated",
-  };
   const res = {};
   let prevChapter = null;
   for (const chapterNodes of Object.values(epubNotes)) {
@@ -489,7 +490,9 @@ const getSortedGroupedNotes = (sort, epubObject) => {
     );
   } else {
     Object.values(res).forEach((list) =>
-      list.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection))
+      list.sort(
+        dateComparator(sortDirection, (e) => e[sortTypeToKey[sortType]])
+      )
     );
   }
   return res;
@@ -499,10 +502,6 @@ const getSortedUngroupedNotes = (sort, epubObject) => {
   const spine = epubObject.spine;
   const sortType = sort.notes.type;
   const sortDirection = sort.notes.direction;
-  const sortTypeToNoteKey = {
-    date_modified: "dateModified",
-    date_created: "dateCreated",
-  };
   const res = [];
   for (const chapterNodes of Object.values(epubNotes)) {
     for (const [noteId, note] of Object.entries(chapterNodes)) {
@@ -515,7 +514,7 @@ const getSortedUngroupedNotes = (sort, epubObject) => {
   if (sortType === "reading_order") {
     res.sort(readingOrderComparator(sortDirection));
   } else {
-    res.sort(dateComparator(sortTypeToNoteKey[sortType], sortDirection));
+    res.sort(dateComparator(sortDirection, (e) => e[sortTypeToKey[sortType]]));
   }
   return res;
 };
@@ -525,5 +524,23 @@ export const getSortedNotes = (sort, epubObject) => {
     return getSortedGroupedNotes(sort, epubObject);
   } else {
     return getSortedUngroupedNotes(sort, epubObject);
+  }
+};
+
+const localeComparator = (dir, get) => (a, b) =>
+  dir === "asc" ? get(a).localeCompare(get(b)) : get(b).localeCompare(get(a));
+
+export const getSortedMemos = (sort, epubObject) => {
+  const memos = epubObject.memos;
+  const sortType = sort.memos.type;
+  const sortDirection = sort.memos.direction;
+  if (sortType === "alphabetical") {
+    return Object.entries(memos).sort(
+      localeComparator(sortDirection, (e) => e[0])
+    );
+  } else {
+    return Object.entries(memos).sort(
+      dateComparator(sortDirection, (e) => e[1][sortTypeToKey[sortType]])
+    );
   }
 };
