@@ -4,8 +4,8 @@ import { DatesInARow } from "../../CustomComponents";
 import { Textarea } from "../../../components/Textarea";
 
 export const AnnotationMemosList = ({ epubObject, memos, setMemos }) => {
-  const setMemosHelper = (key, value, arrayIndex) => {
-    const memo = epubObject.memos[key];
+  const setMemosHelper = (key, memoKey, value, arrayIndex) => {
+    const memo = epubObject.memos[memoKey];
     memo[key] = value;
     memo.dateModified = new Date().toJSON();
     setMemos((prev) =>
@@ -18,8 +18,8 @@ export const AnnotationMemosList = ({ epubObject, memos, setMemos }) => {
     );
   };
 
-  const handleMemoTextAreaOnChange = (key, arrayIndex) => (event) => {
-    setMemosHelper(key, event.target.value, arrayIndex);
+  const handleMemoTextAreaOnChange = (memoKey, arrayIndex) => (event) => {
+    setMemosHelper("memo", memoKey, event.target.value, arrayIndex);
   };
 
   return memos.length === 0 ? (
@@ -41,9 +41,7 @@ export const AnnotationMemosList = ({ epubObject, memos, setMemos }) => {
         key={key}
       >
         <DatesInARow entry={entry} />
-        <Typography variant="h6">
-          {key[0].toUpperCase() + key.substring(1)}
-        </Typography>
+        <Typography variant="h6">{key.toUpperCase()}</Typography>
         <Textarea
           value={entry.memo}
           onChange={handleMemoTextAreaOnChange(key, arrayIndex)}
