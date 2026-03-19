@@ -23,7 +23,7 @@ export const AnnotationViewerV2 = ({
   const theme = useTheme();
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
   const width = greaterThanMedium
-    ? `${Math.floor(window.innerWidth / 2)}px`
+    ? `${Math.min(700, Math.floor(window.innerWidth / 2))}px`
     : window.innerWidth - 48; // 24 is the menu margin gap from the window on each side
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openAnnotation = Boolean(anchorEl);
