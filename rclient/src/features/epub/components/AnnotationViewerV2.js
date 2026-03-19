@@ -1,6 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import {
+  Box,
   IconButton,
   Menu,
   Tooltip,
@@ -20,10 +21,10 @@ export const AnnotationViewerV2 = ({
   setForceFocus,
 }) => {
   const theme = useTheme();
-  const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
-  const width = greaterThanSmall
+  const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
+  const width = greaterThanMedium
     ? `${Math.floor(window.innerWidth / 2)}px`
-    : window.innerWidth - 32; // 16 is the menu margin gap from the window on each side
+    : window.innerWidth - 48; // 24 is the menu margin gap from the window on each side
   const [anchorEl, setAnchorEl] = React.useState(null);
   const openAnnotation = Boolean(anchorEl);
   const [tab, setTab] = React.useState("notes");
@@ -97,16 +98,17 @@ export const AnnotationViewerV2 = ({
         anchorEl={anchorEl}
         open={openAnnotation}
         onClose={handleCloseAnnotation}
-        sx={{ width }}
       >
-        <AnnotationHeader
-          tab={tab}
-          setTab={setTab}
-          sort={sort}
-          setSort={setSortHelper}
-          handleCloseAnnotation={handleCloseAnnotation}
-        />
-        {listComponent(tab, notes, memos)}
+        <Box sx={{ width }}>
+          <AnnotationHeader
+            tab={tab}
+            setTab={setTab}
+            sort={sort}
+            setSort={setSortHelper}
+            handleCloseAnnotation={handleCloseAnnotation}
+          />
+          {listComponent(tab, notes, memos)}
+        </Box>
       </Menu>
     </>
   );
