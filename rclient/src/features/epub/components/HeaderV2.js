@@ -39,7 +39,8 @@ export const HeaderV2 = ({
   setFormatMenuIsOpen,
   setForceFocus,
 }) => {
-  const { title, subtitle } = {};
+  const title = epubObject.metadata?.common?.title?.value;
+  const subtitle = epubObject.spine[spineIndex]?.label;
   const theme = useTheme();
   const greaterThanSmall = useMediaQuery(theme.breakpoints.up("sm"));
   const [show, setShow] = React.useState(true);
