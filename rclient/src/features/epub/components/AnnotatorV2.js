@@ -379,7 +379,7 @@ export const AnnotatorV2 = ({
               setCurrentTabIndex={setCurrentTabIndex}
               annotatorHeight={annotatorHeight}
             />
-            <Paper sx={{ width: annotatorWidth, height: annotatorHeight }}>
+            <Paper sx={{ width: annotatorWidth, minHeight: annotatorHeight }}>
               {tabOptions[currentTabIndex].value === "note" ? (
                 <AnnotatorNotes
                   epubObject={epubObject}
