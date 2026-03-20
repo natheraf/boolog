@@ -27,6 +27,7 @@ export const AnnotatorSimilarMemosList = ({ epubObject, memoKey }) => {
                     textWrap: "balance",
                     wordBreak: "break-word",
                   }}
+                  textAlign={"center"}
                   variant="subtitle1"
                 >
                   {memo.memoKey.toUpperCase()}
