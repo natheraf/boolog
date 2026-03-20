@@ -1,7 +1,7 @@
 import * as React from "react";
 import PropTypes from "prop-types";
 import { AnnotationNotesGrouped } from "./AnnotationNotesGrouped";
-import { putEpubData } from "../../../api/IndexedDB/epubData";
+import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import { trimAndHighlight, updateNoteMarksOrDeleteInDOM } from "../domUtils";
 import { SimpleColorPickerV2 } from "./SimpleColorPickerV2";
 import { Box, Menu, Typography } from "@mui/material";
@@ -14,7 +14,9 @@ export const AnnotationNotesList = ({
   setNotes,
   grouped,
   goToNote,
+  setEmptyNotes,
 }) => {
+  const epubNotes = epubObject.notes;
   const spine = epubObject.spine;
   const notesIsEmpty = Object.keys(notes).length === 0;
   const [expandedNotes, setExpandedNotes] = React.useState({});
@@ -37,10 +39,22 @@ export const AnnotationNotesList = ({
         )
       );
     }
-    const epubNote = epubObject.notes[spineIndex][id];
+    const epubNote = epubNotes[spineIndex][id];
     epubNote[key] = value;
     epubNote.dateModified = new Date().toJSON();
     putEpubData(epubNote);
+    const isNoteEmpty =
+      epubNote.note.length === 0 && epubNote.highlightColor === null;
+    if (isNoteEmpty) {
+      setEmptyNotes((prev) => {
+        if (!prev.some((entry) => entry.id === id)) {
+          prev = [...prev, { spineIndex, id }];
+        }
+        return prev;
+      });
+    } else {
+      setEmptyNotes((prev) => prev.filter((entry) => entry.id !== id));
+    }
   };
 
   const deleteNote = (note, arrayIndex) => {
@@ -53,7 +67,8 @@ export const AnnotationNotesList = ({
     } else {
       setNotes((prev) => prev.filter((_obj, index) => index !== arrayIndex));
     }
-    delete epubObject.notes[note.spineIndex][note.id];
+    deleteEpubData(epubNotes[note.spineIndex][note.id]);
+    delete epubNotes[note.spineIndex][note.id];
     updateNoteMarksOrDeleteInDOM(note, true);
   };
 
@@ -169,4 +184,5 @@ AnnotationNotesList.propTypes = {
   setNotes: PropTypes.func.isRequired,
   grouped: PropTypes.bool.isRequired,
   goToNote: PropTypes.func.isRequired,
+  setEmptyNotes: PropTypes.func.isRequired,
 };

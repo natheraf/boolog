@@ -8,19 +8,19 @@ export const AnnotationMemosList = ({
   epubObject,
   memos,
   setMemos,
-  setDeleteMemos,
+  setEmptyMemos,
 }) => {
   const setMemosHelper = (memoKey, key, value, arrayIndex) => {
-    const deleteMemo = value.length === 0;
-    if (deleteMemo) {
-      setDeleteMemos((prev) => {
+    const isMemoEmpty = value.length === 0;
+    if (isMemoEmpty) {
+      setEmptyMemos((prev) => {
         if (!prev.includes(memoKey)) {
           prev = [...prev, memoKey];
         }
         return prev;
       });
     } else {
-      setDeleteMemos((prev) => prev.filter((key) => key !== memoKey));
+      setEmptyMemos((prev) => prev.filter((key) => key !== memoKey));
     }
     const memo = epubObject.memos[memoKey];
     memo[key] = value;
@@ -87,5 +87,5 @@ AnnotationMemosList.propTypes = {
   epubObject: PropTypes.object.isRequired,
   memos: PropTypes.array.isRequired,
   setMemos: PropTypes.func.isRequired,
-  setDeleteMemos: PropTypes.func.isRequired,
+  setEmptyMemos: PropTypes.func.isRequired,
 };

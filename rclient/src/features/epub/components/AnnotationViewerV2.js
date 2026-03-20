@@ -14,6 +14,7 @@ import { AnnotationNotesList } from "./AnnotationNotesList";
 import { getSortedMemos, getSortedNotes } from "../epubUtils";
 import { AnnotationMemosList } from "./AnnotationMemosList";
 import { deleteEpubData } from "../../../api/IndexedDB/epubData";
+import { deleteNodesAndLiftChildren } from "../domUtils";
 
 export const AnnotationViewerV2 = ({
   epubObject,
@@ -22,6 +23,8 @@ export const AnnotationViewerV2 = ({
   setForceFocus,
   clearHeaderHideTimeoutId,
 }) => {
+  const epubMemos = epubObject.memos;
+  const epubNotes = epubObject.notes;
   const theme = useTheme();
   const greaterThanMedium = useMediaQuery(theme.breakpoints.up("md"));
   const width = greaterThanMedium
@@ -36,7 +39,8 @@ export const AnnotationViewerV2 = ({
   });
   const [notes, setNotes] = React.useState(null);
   const [memos, setMemos] = React.useState(null);
-  const [deleteMemos, setDeleteMemos] = React.useState([]);
+  const [emptyMemos, setEmptyMemos] = React.useState([]);
+  const [emptyNotes, setEmptyNotes] = React.useState([]);
 
   const handleOpenAnnotation = (event) => {
     clearHeaderHideTimeoutId();
@@ -46,11 +50,17 @@ export const AnnotationViewerV2 = ({
   };
 
   const handleCloseAnnotation = () => {
-    deleteMemos.forEach((memoKey) => {
-      deleteEpubData(epubObject.memos[memoKey]);
-      delete epubObject.memos[memoKey];
+    emptyMemos.forEach((memoKey) => {
+      deleteEpubData(epubMemos[memoKey]);
+      delete epubMemos[memoKey];
     });
-    setDeleteMemos([]);
+    setEmptyMemos([]);
+    emptyNotes.forEach((entry) => {
+      deleteEpubData(epubNotes[entry.spineIndex][entry.id]);
+      delete epubNotes[entry.spineIndex][entry.id];
+      deleteNodesAndLiftChildren(document.getElementsByClassName(entry.id));
+    });
+    setEmptyNotes([]);
     setAnchorEl(null);
   };
 
@@ -83,6 +93,7 @@ export const AnnotationViewerV2 = ({
           setNotes={setNotes}
           grouped={sort.notes.grouped}
           goToNote={goToNote}
+          setEmptyNotes={setEmptyNotes}
         />
       );
     } else if (tab === "memos" && memos) {
@@ -91,7 +102,7 @@ export const AnnotationViewerV2 = ({
           epubObject={epubObject}
           memos={memos}
           setMemos={setMemos}
-          setDeleteMemos={setDeleteMemos}
+          setEmptyMemos={setEmptyMemos}
         />
       );
     }
