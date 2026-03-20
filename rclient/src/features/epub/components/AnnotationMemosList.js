@@ -10,10 +10,11 @@ export const AnnotationMemosList = ({ epubObject, memos, setMemos }) => {
     memo.dateModified = new Date().toJSON();
     setMemos((prev) =>
       prev.map(([key, entry], index) => {
+        const newEntry = { ...entry };
         if (index === arrayIndex) {
-          entry[key] = value;
+          newEntry[key] = value;
         }
-        return [key, entry];
+        return [key, newEntry];
       })
     );
   };
