@@ -2,25 +2,42 @@ import PropTypes from "prop-types";
 import { Paper, Stack, Typography } from "@mui/material";
 import { DatesInARow } from "../../CustomComponents";
 import { Textarea } from "../../../components/Textarea";
+import { putEpubData } from "../../../api/IndexedDB/epubData";
 
-export const AnnotationMemosList = ({ epubObject, memos, setMemos }) => {
-  const setMemosHelper = (key, memoKey, value, arrayIndex) => {
+export const AnnotationMemosList = ({
+  epubObject,
+  memos,
+  setMemos,
+  setDeleteMemos,
+}) => {
+  const setMemosHelper = (memoKey, key, value, arrayIndex) => {
+    const deleteMemo = value.length === 0;
+    if (deleteMemo) {
+      setDeleteMemos((prev) => {
+        if (!prev.includes(memoKey)) {
+          prev = [...prev, memoKey];
+        }
+        return prev;
+      });
+    } else {
+      setDeleteMemos((prev) => prev.filter((key) => key !== memoKey));
+    }
     const memo = epubObject.memos[memoKey];
     memo[key] = value;
     memo.dateModified = new Date().toJSON();
     setMemos((prev) =>
       prev.map(([key, entry], index) => {
-        const newEntry = { ...entry };
         if (index === arrayIndex) {
-          newEntry[key] = value;
+          entry[key] = value;
         }
-        return [key, newEntry];
+        return [key, entry];
       })
     );
+    putEpubData(memo);
   };
 
   const handleMemoTextAreaOnChange = (memoKey, arrayIndex) => (event) => {
-    setMemosHelper("memo", memoKey, event.target.value, arrayIndex);
+    setMemosHelper(memoKey, "memo", event.target.value, arrayIndex);
   };
 
   return memos.length === 0 ? (
@@ -70,4 +87,5 @@ AnnotationMemosList.propTypes = {
   epubObject: PropTypes.object.isRequired,
   memos: PropTypes.array.isRequired,
   setMemos: PropTypes.func.isRequired,
+  setDeleteMemos: PropTypes.func.isRequired,
 };

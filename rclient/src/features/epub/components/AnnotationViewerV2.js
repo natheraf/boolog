@@ -13,6 +13,7 @@ import { AnnotationHeader } from "./AnnotationHeader";
 import { AnnotationNotesList } from "./AnnotationNotesList";
 import { getSortedMemos, getSortedNotes } from "../epubUtils";
 import { AnnotationMemosList } from "./AnnotationMemosList";
+import { deleteEpubData } from "../../../api/IndexedDB/epubData";
 
 export const AnnotationViewerV2 = ({
   epubObject,
@@ -35,6 +36,7 @@ export const AnnotationViewerV2 = ({
   });
   const [notes, setNotes] = React.useState(null);
   const [memos, setMemos] = React.useState(null);
+  const [deleteMemos, setDeleteMemos] = React.useState([]);
 
   const handleOpenAnnotation = (event) => {
     clearHeaderHideTimeoutId();
@@ -44,6 +46,11 @@ export const AnnotationViewerV2 = ({
   };
 
   const handleCloseAnnotation = () => {
+    deleteMemos.forEach((memoKey) => {
+      deleteEpubData(epubObject.memos[memoKey]);
+      delete epubObject.memos[memoKey];
+    });
+    setDeleteMemos([]);
     setAnchorEl(null);
   };
 
@@ -84,6 +91,7 @@ export const AnnotationViewerV2 = ({
           epubObject={epubObject}
           memos={memos}
           setMemos={setMemos}
+          setDeleteMemos={setDeleteMemos}
         />
       );
     }
