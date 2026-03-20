@@ -25,7 +25,14 @@ export const AnnotatorLeftSideBar = ({
 
   const height = annotatorHeight * 0.95;
   return (
-    <Stack sx={{ height }}>
+    <Stack
+      sx={{
+        height,
+        position: "relative",
+        top: (annotatorHeight * 0.05) / 2,
+        alignSelf: "start",
+      }}
+    >
       {tabOptions.map((option, index) => (
         <Tooltip
           title={option.title}
