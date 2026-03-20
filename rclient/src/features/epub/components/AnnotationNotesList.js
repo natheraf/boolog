@@ -69,6 +69,7 @@ export const AnnotationNotesList = ({
     }
     deleteEpubData(epubNotes[note.spineIndex][note.id]);
     delete epubNotes[note.spineIndex][note.id];
+    setEmptyNotes((prev) => prev.filter((entry) => entry.id !== note.id));
     updateNoteMarksOrDeleteInDOM(note, true);
   };
 
