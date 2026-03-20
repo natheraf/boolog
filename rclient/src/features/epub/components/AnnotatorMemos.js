@@ -7,7 +7,8 @@ import { AnnotatorHeader } from "./AnnotatorHeader";
 import { formatMemoKey } from "../formattingUtils";
 import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import { getNewId } from "../../../api/IndexedDB/common";
-import { AnnotatorSimilarMemos } from "./AnnotatorSimilarMemos";
+import { AnnotatorSimilarMemosTabs } from "./AnnotatorSimilarMemosTabs";
+import { AnnotatorSimilarMemosList } from "./AnnotatorSimilarMemosList";
 
 export const AnnotatorMemos = ({ epubObject, selectedText }) => {
   const memos = epubObject.memos;
@@ -114,7 +115,7 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
         }}
         minRows={2}
       />
-      <AnnotatorSimilarMemos epubObject={epubObject} memoKey={memoKey} />
+      <AnnotatorSimilarMemosList epubObject={epubObject} memoKey={memoKey} />
     </Stack>
   );
 };

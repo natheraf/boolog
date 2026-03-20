@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Stack, tabsClasses, Typography } from "@mui/material";
 import { SmallTab, SmallTabs } from "../../CustomComponents";
 
-export const AnnotatorSimilarMemos = ({ epubObject, memoKey }) => {
+export const AnnotatorSimilarMemosTabs = ({ epubObject, memoKey }) => {
   const memos = epubObject.memos;
   const similarMemos = Object.values(memos).filter(
     (entry) =>
@@ -59,7 +59,7 @@ export const AnnotatorSimilarMemos = ({ epubObject, memoKey }) => {
   );
 };
 
-AnnotatorSimilarMemos.propTypes = {
+AnnotatorSimilarMemosTabs.propTypes = {
   epubObject: PropTypes.object.isRequired,
   memoKey: PropTypes.string.isRequired,
 };
