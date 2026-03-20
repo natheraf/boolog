@@ -46,7 +46,8 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
           memo,
           dateCreated: date,
           dateModified: date,
-          selectedText: selectedText,
+          selectedText,
+          memoKey,
         };
       }
       putEpubData(memos[memoKey]);

@@ -1,3 +1,4 @@
+import { formatMemoKey } from "../../features/epub/formattingUtils";
 import { handleSimpleRequest } from "../Axios";
 import { defaultFormatting } from "../Local";
 import { dotNotationArrayToStandard, getLevelDotNotation } from "../utils";
@@ -282,7 +283,7 @@ const getEpubDataWithDefaultInDotNotationHelper = (
       const memos = res.memos;
       for (const [key, memo] of Object.entries(memos)) {
         delete memos[key];
-        memos[memo.selectedText] = memo;
+        memos[memo.memoKey] = memo;
       }
       resolve(res);
     });
