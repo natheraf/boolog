@@ -56,6 +56,9 @@ export const AnnotationViewerNoteEntry = ({
             onKeyDown={(event) => {
               event.stopPropagation();
             }}
+            placeholder={
+              note.highlightColor === null && "Deleted if left empty"
+            }
             sx={{
               [`&:focus`]: {
                 boxShadow: "inherit",

@@ -66,6 +66,7 @@ export const AnnotationMemosList = ({
           onKeyDown={(event) => {
             event.stopPropagation();
           }}
+          placeholder="Deleted if left empty"
           sx={{
             [`&:focus`]: {
               boxShadow: "inherit",
