@@ -31,7 +31,7 @@ export const AnnotatorSimilarMemos = ({ epubObject, memoKey }) => {
         sx={{
           [`& .${tabsClasses.scrollButtons}`]: {
             "&.Mui-disabled": { opacity: 0.3 },
-            width: "15px",
+            width: "20px",
           },
         }}
       >
