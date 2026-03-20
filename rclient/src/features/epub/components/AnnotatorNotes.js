@@ -187,7 +187,6 @@ export const AnnotatorNotes = ({
           </Typography>
         </Stack>
       </HtmlTooltip>
-      <Divider />
       <Textarea
         id="annotator-text-area"
         value={note}
