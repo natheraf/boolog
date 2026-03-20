@@ -7,6 +7,7 @@ import { AnnotatorHeader } from "./AnnotatorHeader";
 import { formatMemoKey } from "../formattingUtils";
 import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import { getNewId } from "../../../api/IndexedDB/common";
+import { AnnotatorSimilarMemos } from "./AnnotatorSimilarMemos";
 
 export const AnnotatorMemos = ({ epubObject, selectedText }) => {
   const memos = epubObject.memos;
@@ -83,30 +84,23 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
         tab={"memos"}
       />
       <Divider />
-      <Stack
-        direction={"row"}
-        alignItems={"center"}
-        justifyContent={"space-between"}
+      <HtmlTooltip
+        title={
+          <Stack>
+            <Typography variant="subtitle2">{selectedText}</Typography>
+            <Typography variant="subtitle2">
+              {`(${memoKey.toUpperCase()})`}
+            </Typography>
+          </Stack>
+        }
+        placement="right"
+        enterDelay={200}
+        enterNextDelay={200}
       >
-        <HtmlTooltip
-          title={
-            <Stack>
-              <Typography variant="subtitle2">{selectedText}</Typography>
-              <Typography variant="subtitle2">
-                {`(${memoKey.toUpperCase()})`}
-              </Typography>
-            </Stack>
-          }
-          placement="right"
-          enterDelay={200}
-          enterNextDelay={200}
-        >
-          <Typography variant="h6" noWrap>
-            {selectedText}
-          </Typography>
-        </HtmlTooltip>
-      </Stack>
-      <Divider />
+        <Typography variant="h6" noWrap>
+          {selectedText}
+        </Typography>
+      </HtmlTooltip>
       <Textarea
         id="annotator-text-area"
         value={memo}
@@ -118,8 +112,9 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
             borderColor: `inherit`,
           },
         }}
-        minRows={3}
+        minRows={2}
       />
+      <AnnotatorSimilarMemos epubObject={epubObject} memoKey={memoKey} />
     </Stack>
   );
 };
