@@ -4,6 +4,11 @@ import { Box, Fade, Stack } from "@mui/material";
 import { attachOnClickListenersToLinkElements } from "../domUtils";
 import { getEpubValueFromPath } from "../epubUtils";
 
+/**
+ * @deprecated
+ * @param {*} param0
+ * @returns
+ */
 export const ContinuousScrollView = ({
   epubObject,
   spineIndex,
