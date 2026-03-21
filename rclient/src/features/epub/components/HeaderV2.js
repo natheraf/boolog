@@ -192,7 +192,8 @@ export const HeaderV2 = ({
             <TableOfContents
               epubObject={epubObject}
               spineIndex={spineIndex}
-              setProgress={setProgressWithoutAddingHistory}
+              setProgress={setProgress}
+              setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
               setForceFocus={setForceFocus}
             />
             <AnnotationViewerV2

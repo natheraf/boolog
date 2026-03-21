@@ -19,6 +19,7 @@ export const TableOfContents = ({
   epubObject,
   spineIndex,
   setProgress,
+  setProgressWithoutAddingHistory,
   setForceFocus,
 }) => {
   const theme = useTheme();
@@ -37,7 +38,13 @@ export const TableOfContents = ({
   };
 
   const handleOnClick = (src) => {
-    handlePathHref(spineIndex, spineIndexMap, setProgress, setForceFocus)(src);
+    handlePathHref(
+      spineIndex,
+      spineIndexMap,
+      setProgress,
+      setProgressWithoutAddingHistory,
+      setForceFocus
+    )(src);
     handleCloseToc();
   };
 
@@ -95,5 +102,6 @@ TableOfContents.propTypes = {
   epubObject: PropTypes.object.isRequired,
   spineIndex: PropTypes.number.isRequired,
   setProgress: PropTypes.func.isRequired,
+  setProgressWithoutAddingHistory: PropTypes.func.isRequired,
   setForceFocus: PropTypes.func.isRequired,
 };
