@@ -334,7 +334,7 @@ export const processEpub = (epubObject) => {
 
   const otherMetaObjects =
     contentMeta.meta?.filter(
-      (obj) => obj.hasOwnProperty("@_refines") === false
+      (obj) => obj?.hasOwnProperty("@_refines") === false
     ) ?? [];
   for (const obj of otherMetaObjects) {
     if (obj.hasOwnProperty("@_property")) {
@@ -374,12 +374,6 @@ export const processEpub = (epubObject) => {
     },
     authors: { value: [] },
   };
-  if (
-    metadata.common.uId.value === null ||
-    typeof metadata.common.uId.value === "object"
-  ) {
-    throw new Error("unable to find uId");
-  }
   const addAllCreators = (obj) => {
     if (obj.hasOwnProperty("value") && obj.hasOwnProperty("role")) {
       metadata.common.authors.value[(obj["display-seq"] ?? 1) - 1] = obj.value;

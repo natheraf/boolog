@@ -66,7 +66,7 @@ export const addBookFromEpub = (file) =>
           words: metadata.common.words.value,
           status: "Reading",
           api_source: "Local",
-          xId: metadata.common.uId.value,
+          xId: metadata.common.uId.value ?? getNewId(),
           fileId,
           cover_url: metadata.common.cover.value,
         };
