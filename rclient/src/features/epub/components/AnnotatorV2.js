@@ -365,6 +365,7 @@ export const AnnotatorV2 = ({
           }}
           slotProps={{
             paper: {
+              elevation: 0,
               sx: {
                 backgroundColor: "transparent",
                 backgroundImage: "none",
