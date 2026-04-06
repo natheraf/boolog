@@ -123,7 +123,7 @@ export const defaultFormatting = {
 };
 
 export const defaultStandardFormatting = {
-  fontSize: 1.2,
+  fontSize: 1.4,
   lineHeight: "Original",
   pageWidth: 700,
   pagesShown: 1,
