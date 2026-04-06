@@ -16,6 +16,9 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
 
   const updates = {
+    "Update 4/06/26 1:33AM": [
+      "Search iterator at the bottom after going to search result location",
+    ],
     "Update 3/19/26 1:13AM": [
       "Rewrite of the reader is now live",
       "progress reliability. no more losing progress and opening to a random page on open",
