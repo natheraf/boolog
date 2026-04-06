@@ -14,6 +14,7 @@ import {
 import TocIcon from "@mui/icons-material/Toc";
 import CloseIcon from "@mui/icons-material/Close";
 import { handlePathHref } from "../epubUtils";
+import { waitForElement } from "../domUtils";
 
 export const TableOfContents = ({
   epubObject,
@@ -32,6 +33,9 @@ export const TableOfContents = ({
 
   const handleOpenToc = (event) => {
     setAnchorEl(event.currentTarget);
+    waitForElement("#toc-current-chapter").then((currentChapter) => {
+      currentChapter?.scrollIntoView({ block: "center" });
+    });
   };
   const handleCloseToc = () => {
     setAnchorEl(null);
@@ -78,6 +82,11 @@ export const TableOfContents = ({
           {toc.map((obj) => (
             <Typography
               key={`${obj.src}-${obj.label}`}
+              id={
+                currentSpineIndexLabel === obj.label
+                  ? "toc-current-chapter"
+                  : null
+              }
               onClick={() => handleOnClick(obj.src)}
               sx={{
                 cursor: "pointer",
