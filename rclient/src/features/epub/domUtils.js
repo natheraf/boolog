@@ -9,7 +9,9 @@ const handleSearchOnElement = (needle, element) => {
   let index = textLower.indexOf(needle);
   const res = [];
   while (index !== -1) {
-    const nodeId = element.getAttribute("nodeid");
+    const nodeId =
+      element.getAttribute("nodeid") ??
+      getNearestEpubChild(element).getAttribute("nodeid");
     res.push({
       startContainerId: nodeId,
       endContainerId: nodeId,
@@ -323,6 +325,19 @@ export const getNearestEpubAncestor = (node) => {
     it = it.parentElement;
   }
   return it;
+};
+
+const getNearestEpubChild = (node) => {
+  for (const child of node.children) {
+    if (child.hasAttribute("nodeid")) {
+      return child;
+    }
+    const greater = getNearestEpubChild(child);
+    if (greater !== null) {
+      return greater;
+    }
+  }
+  return null;
 };
 
 const trimRangeOfEpubNodes = (doc, startId, endId) => {
