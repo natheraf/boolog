@@ -16,6 +16,13 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
 
   const updates = {
+    "Update 4/06/26 2:52PM": [
+      "fix: large text clipping on narrow screens",
+      "feat: toc scrolls to current chapter",
+      "feat: larger default font size",
+      "feat: chapter navigation tab sizes changes based on chapter length",
+      "feat: new app icon",
+    ],
     "Update 4/06/26 1:33AM": [
       "Search iterator at the bottom after going to search result location",
     ],

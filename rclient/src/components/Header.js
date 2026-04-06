@@ -18,6 +18,7 @@ import { AlertsContext } from "../context/Alerts";
 import { UserInfoContext } from "../context/UserInfo";
 import { Users } from "./Users";
 import GitHubIcon from "@mui/icons-material/GitHub";
+import { AppIcon } from "../features/header/AppIcon";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -50,20 +51,9 @@ export const Header = () => {
           justifyContent={{ xs: "space-around", sm: "space-between" }}
         >
           <Stack direction="row" alignItems={"center"} spacing={5} pr={5}>
-            <Box
-              component="img"
-              src={require("../assets/logo_remix0-trimmed.png")}
-              alt={`logo`}
-              sx={{
-                borderRadius: "5px",
-                display: "block",
-                width: "auto",
-                height: "auto",
-                maxWidth: "50px",
-                maxHeight: "50px",
-              }}
-              onClick={() => navigate("/")}
-            />
+            <Box onClick={() => navigate("/")}>
+              <AppIcon />
+            </Box>
             <Link
               to={"/books"}
               style={{ textDecoration: "none", color: "white" }}
