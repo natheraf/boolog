@@ -2,30 +2,26 @@ import * as React from "react";
 import PropTypes from "prop-types";
 import {
   Autocomplete,
-  FormControlLabel,
   IconButton,
   InputAdornment,
-  MenuItem,
   Paper,
-  Select,
   Stack,
-  Switch,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { getGoogleFonts } from "../../../api/GoogleAPI";
-import { defaultFormatting, fontFamilies } from "../../../api/Local";
+import { defaultFormatting } from "../../../api/Local";
 import RemoveIcon from "@mui/icons-material/Remove";
 import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 import AddIcon from "@mui/icons-material/Add";
 import { formattingNumberFields, justifyIcons } from "../formattingUtils";
 import { EpubFormattingResetButton } from "./EpubFormattingResetButton";
+import { GlobalDataContext } from "../../context/GlobalData";
 
 export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
-  const [allFonts, setAllFonts] = React.useState(fontFamilies);
+  const { allFonts } = React.useContext(GlobalDataContext);
   const [fieldFocused, setFieldFocused] = React.useState(null);
   const [focusedFieldValue, setFocusedFieldValue] = React.useState(null);
 
@@ -115,12 +111,6 @@ export const EpubFormatEditor = ({ formatting, setFormatting, view }) => {
       setFocusedFieldValue(newValue);
     }
   };
-
-  React.useEffect(() => {
-    getGoogleFonts().then((res) => {
-      setAllFonts([...fontFamilies, ...res.items]);
-    });
-  }, []);
 
   return (
     <Stack spacing={2} alignItems={"center"} sx={{ width: "100%" }}>
