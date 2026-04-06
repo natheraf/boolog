@@ -39,25 +39,16 @@ app.use(express.static("../rclient/build"));
 const port = process.env.PORT || 8080;
 
 /**
- * If `dev` was in our arguments, we will start the app by listening for HTTP requests. This is used for development.
+ * If `dev` was in our arguments, we will start the app by listening for HTTP requests. This is
+used for development.
  *
  * Otherwise we will start our app in production mode with SSL certificates.
  */
 if (process.argv.includes("dev")) {
   app.listen(port, () => console.log(`Express Server on port ${port}`));
 } else {
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(__dirname, "../rclient/build/index.html"));
-  });
-  const fs = require("fs");
-  const https = require("https");
-  const httpServer = https.createServer(
-    {
-      key: fs.readFileSync(process.env.PRIVATEKEY, "utf-8"),
-      cert: fs.readFileSync(process.env.CERTIFICATE, "utf-8"),
-    },
-    app
-  );
-
-  httpServer.listen(port, () => console.log(`Express Server on port ${port}`));
+  // app.get("*", (_, res) => {
+  //   res.sendFile(path.join(__dirname, "../rclient/build/index.html"));
+  // });
+  app.listen(port, () => console.log(`Express Server on port ${port}`));
 }
