@@ -85,6 +85,10 @@ export const putFormattingStyleElement = (theme, formatting) => {
           ? ""
           : `text-indent: ${format.textIndent}rem !important;`
       }
+
+      overflow-wrap: break-word; /* breaks long words onto the next line */
+      word-break: break-word;    /* broader support fallback */
+      white-space: normal;       /* make sure wrapping is allowed */
     `;
   const styleId = `epub-css-user-formatting`;
   const styleElement =
