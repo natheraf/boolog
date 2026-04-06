@@ -53,6 +53,7 @@ export const SearchIterator = ({
   };
 
   const handleGoToSearchResult = (chapterResultsIndex, searchResultIndex) => {
+    clearTimeout(hideTimeoutId.current);
     clearTemporaryMarks();
     const searchResult =
       searchResults[chapterResultsIndex].searchResults[searchResultIndex];
