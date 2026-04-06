@@ -13,6 +13,16 @@ export const SpineNavigator = ({
   const autoHideHeader = displayOptions.autoHideHeader;
   const arrayForSpineNavigator = epubObject.chapterMeta;
   const spineNavigateSize = navigationTabSize;
+  const totalWords = epubObject.metadata.common.words.value;
+
+  const getChapterPartSizeInNav = (index) => {
+    return Math.max(
+      1,
+      Math.ceil(
+        ((arrayForSpineNavigator[index]?.wordCount ?? 1) / totalWords) * 100
+      )
+    );
+  };
 
   const handleOnClick = (spineIndex) => {
     setProgress(spineIndex, 0);
@@ -34,7 +44,7 @@ export const SpineNavigator = ({
       }}
       direction={"column"}
     >
-      {arrayForSpineNavigator.map((obj) => (
+      {arrayForSpineNavigator.map((obj, index) => (
         <Tooltip key={obj.label} title={obj.label} placement="right" arrow>
           <Box
             onClick={() => handleOnClick(obj.spineStartIndex)}
@@ -42,7 +52,7 @@ export const SpineNavigator = ({
               backgroundColor: formatting.textColor,
               opacity: spineIndex >= obj.spineStartIndex ? 0.5 : 0.2,
               cursor: "pointer",
-              height: "100%",
+              height: `${getChapterPartSizeInNav(index)}%`,
               width: "100%",
               borderTopRightRadius: "10px",
               borderBottomRightRadius: "10px",
