@@ -30,6 +30,7 @@ import { handleSearchEpub } from "../epubUtils";
 import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import { useTheme } from "@emotion/react";
+import { EpubContext } from "./context/EpubState";
 
 export const SearchV2 = ({
   epubObject,
@@ -37,6 +38,12 @@ export const SearchV2 = ({
   goToAndPreloadImages,
   setForceFocus,
 }) => {
+  const {
+    searchV2SearchResults,
+    setSearchV2SearchResults,
+    searchV2CurrentSearchSelection,
+    setSearchV2CurrentSearchSelection,
+  } = React.useContext(EpubContext);
   const spine = epubObject.spine;
   const currentChapterLabel = spine[currentSpineIndex].label;
   const theme = useTheme();
@@ -49,8 +56,15 @@ export const SearchV2 = ({
   const [textfieldFocused, setTextfieldFocused] = React.useState(false);
   const [canSearch, setCanSearch] = React.useState(false);
   const [searchTextfieldValue, setSearchTextfieldValue] = React.useState("");
-  const [searchResults, setSearchResults] = React.useState([]);
+  const [searchResults, setSearchResults] = [
+    searchV2SearchResults,
+    setSearchV2SearchResults,
+  ];
   const [searchTimeTaken, setSearchTimeTaken] = React.useState(null);
+  const [currentSearchSelection, setCurrentSearchSelection] = [
+    searchV2CurrentSearchSelection,
+    setSearchV2CurrentSearchSelection,
+  ];
 
   const millisecondsToSeconds = (ms, precision = 3) =>
     Math.trunc(ms * Math.pow(10, precision - 3)) / Math.pow(10, precision);
@@ -154,35 +168,40 @@ export const SearchV2 = ({
       );
     };
 
-  const searchResultHandleOnClick = (searchResult) => () => {
-    goToAndPreloadImages(searchResult.spineIndex, 0);
-    waitForElement(`[nodeid='${searchResult.startContainerId}']`).then(() => {
-      const range = searchResult;
-      range.startContainer = document.querySelector(
-        `[nodeId="${range.startContainerId}"]`
-      );
-      range.endContainer = document.querySelector(
-        `[nodeId="${range.endContainerId}"]`
-      );
-      handleInjectingMarkToEpubNodes(
-        document,
-        null,
-        range,
-        "",
-        "temporary-mark"
-      );
-      waitForElement(".temporary-mark").then((element) => {
-        element.id = getNewId();
-        const forceFocus = {
-          type: "element",
-          attributeName: "id",
-          attributeValue: element.id,
-        };
-        setForceFocus(forceFocus);
+  const searchResultHandleOnClick =
+    (chapterResultsIndex, searchResultIndex, searchResult) => () => {
+      setCurrentSearchSelection({
+        chapterResultsIndex,
+        searchResultIndex,
       });
-    });
-    handleClose();
-  };
+      goToAndPreloadImages(searchResult.spineIndex, 0);
+      waitForElement(`[nodeid='${searchResult.startContainerId}']`).then(() => {
+        const range = searchResult;
+        range.startContainer = document.querySelector(
+          `[nodeId="${range.startContainerId}"]`
+        );
+        range.endContainer = document.querySelector(
+          `[nodeId="${range.endContainerId}"]`
+        );
+        handleInjectingMarkToEpubNodes(
+          document,
+          null,
+          range,
+          "",
+          "temporary-mark"
+        );
+        waitForElement(".temporary-mark").then((element) => {
+          element.id = getNewId();
+          const forceFocus = {
+            type: "element",
+            attributeName: "id",
+            attributeValue: element.id,
+          };
+          setForceFocus(forceFocus);
+        });
+      });
+      handleClose();
+    };
 
   return (
     <>
@@ -333,6 +352,8 @@ export const SearchV2 = ({
                               <Tooltip title="Go to location">
                                 <IconButton
                                   onClick={searchResultHandleOnClick(
+                                    chapterResultsIndex,
+                                    searchResultIndex,
                                     searchResult
                                   )}
                                   size="small"

@@ -9,13 +9,23 @@ import { loadImages } from "../epubUtils";
 import { useTheme } from "@emotion/react";
 import { AnnotatorV2 } from "./AnnotatorV2";
 import { waitForElement } from "../domUtils";
+import { EpubProvider } from "./context/EpubProvider";
+import { SearchIterator } from "./SearchIterator";
+
+export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
+  return (
+    <EpubProvider>
+      <Reader epubObject={epubObject} setOpenEpubReader={setOpenEpubReader} />
+    </EpubProvider>
+  );
+};
 
 /**
  * Main wrapper for epub reader v2. Epub state manager.
  * @param {*} param0
  * @returns
  */
-export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
+const Reader = ({ epubObject, setOpenEpubReader }) => {
   const theme = useTheme();
   const spine = epubObject.spine;
   const timeOutToSetProgress = React.useRef(null);
@@ -225,6 +235,10 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
               setAnchorEl={setAnnotatorAnchorEl}
             />
           )}
+          <SearchIterator
+            setProgressWithoutAddingHistory={setProgressWithoutAddingHistory}
+            setForceFocus={setForceFocus}
+          />
         </Box>
       )}
     </Dialog>
@@ -232,6 +246,11 @@ export const EpubReaderV2 = ({ epubObject, setOpenEpubReader }) => {
 };
 
 EpubReaderV2.propTypes = {
+  epubObject: PropTypes.object.isRequired,
+  setOpenEpubReader: PropTypes.func.isRequired,
+};
+
+Reader.propTypes = {
   epubObject: PropTypes.object.isRequired,
   setOpenEpubReader: PropTypes.func.isRequired,
 };
