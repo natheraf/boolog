@@ -25,6 +25,7 @@ export const AnnotatorV2 = ({
   spineIndex,
   anchorEl,
   setAnchorEl,
+  formatting,
 }) => {
   const notes = epubObject.notes;
   const theme = useTheme();
@@ -356,6 +357,7 @@ export const AnnotatorV2 = ({
         anchorEl={anchorEl}
         selectedRangeIndexed={selectedRangeIndexed}
         attachContextMenuListenersToMarks={attachContextMenuListenersToMarks}
+        formatting={formatting}
       />
     ),
     memo: (
@@ -419,4 +421,5 @@ AnnotatorV2.propTypes = {
   spineIndex: PropTypes.number.isRequired,
   anchorEl: PropTypes.object,
   setAnchorEl: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
 };

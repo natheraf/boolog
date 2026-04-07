@@ -19,6 +19,7 @@ export const AnnotatorNotes = ({
   anchorEl,
   selectedRangeIndexed,
   attachContextMenuListenersToMarks,
+  formatting,
 }) => {
   const noteIdAttribute = "noteid";
   const noteId = React.useRef(
@@ -172,8 +173,12 @@ export const AnnotatorNotes = ({
       >
         <Stack
           direction={"row"}
-          className="content"
-          sx={{ overflow: "hidden", width: "100%" }}
+          sx={{
+            overflow: "hidden",
+            width: "100%",
+            backgroundColor: formatting.pageColor,
+            color: formatting.textColor,
+          }}
         >
           <Typography
             sx={{
@@ -215,4 +220,5 @@ AnnotatorNotes.propTypes = {
   anchorEl: PropTypes.object.isRequired,
   selectedRangeIndexed: PropTypes.object,
   attachContextMenuListenersToMarks: PropTypes.func.isRequired,
+  formatting: PropTypes.object.isRequired,
 };

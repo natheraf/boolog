@@ -233,6 +233,7 @@ const Reader = ({ epubObject, setOpenEpubReader }) => {
               spineIndex={progress.spine}
               anchorEl={annotatorAnchorEl}
               setAnchorEl={setAnnotatorAnchorEl}
+              formatting={formatting}
             />
           )}
           <SearchIterator
