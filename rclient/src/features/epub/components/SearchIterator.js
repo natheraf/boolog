@@ -1,13 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  Box,
-  IconButton,
-  Paper,
-  Slide,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { IconButton, Paper, Slide, Stack, Typography } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import {
@@ -18,6 +11,7 @@ import {
 import { getNewId } from "../../../api/IndexedDB/common";
 import { EpubContext } from "./context/EpubState";
 import CloseIcon from "@mui/icons-material/Close";
+import MyLocationIcon from "@mui/icons-material/MyLocation";
 
 export const SearchIterator = ({
   setProgressWithoutAddingHistory,
@@ -45,8 +39,9 @@ export const SearchIterator = ({
   const [show, setShow] = React.useState(false);
   const showRef = React.useRef(false);
   const hideTimeoutId = React.useRef(null);
-  const showHeight = 150;
+  const showHeight = 250;
   const peekHeight = 12;
+  const needle = searchResults?.[0]?.searchResults?.[0]?.needle ?? "";
 
   const handleClose = () => {
     setSearchV2CurrentSearchSelection(null);
@@ -117,6 +112,10 @@ export const SearchIterator = ({
       return;
     }
     handleGoToSearchResult(newChapterResultsIndex, newSearchResultIndex);
+  };
+
+  const handleGoToCurrentSearchResult = () => {
+    handleGoToSearchResult(chapterResultsIndex, searchResultIndex);
   };
 
   const handleSetShow = (value) => {
@@ -203,7 +202,7 @@ export const SearchIterator = ({
             zIndex: 1,
           }}
         >
-          <Stack spacing={1}>
+          <Stack>
             <Stack
               direction={"row"}
               alignItems={"center"}
@@ -216,7 +215,10 @@ export const SearchIterator = ({
                 <CloseIcon />
               </IconButton>
             </Stack>
-            <Stack direction={"row"} justifyContent={"center"}>
+            <Typography noWrap textAlign="start" color="gray" variant="h6">
+              {`"${needle}"`}
+            </Typography>
+            <Stack justifyContent={"center"}>
               <Typography textAlign="center">{chapterLabel}</Typography>
             </Stack>
             <Stack direction={"row"} justifyContent={"space-between"}>
@@ -234,6 +236,9 @@ export const SearchIterator = ({
                 <Typography variant="subtitle1">
                   {searchResults?.[chapterResultsIndex]?.searchResults?.length}
                 </Typography>
+                <IconButton onClick={handleGoToCurrentSearchResult}>
+                  <MyLocationIcon />
+                </IconButton>
               </Stack>
               <IconButton disabled={onLastResult} onClick={handleIterateNext}>
                 <NavigateNextIcon />
