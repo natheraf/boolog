@@ -1,6 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Divider, IconButton, Stack, Typography } from "@mui/material";
+import {
+  Divider,
+  IconButton,
+  LinearProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { AnnotatorHeader } from "./AnnotatorHeader";
 import { HtmlTooltip } from "../../CustomComponents";
 import { merriamWebsterDictionaryLookup } from "../../../api/DictionaryAPI";
@@ -62,6 +68,43 @@ export const AnnotatorDictionary = ({ selectedText }) => {
       .catch(console.error);
   }, []);
 
+  const searchResults =
+    lookupResults && lookupResults?.length > 0 ? (
+      <Stack>
+        <Stack direction={"row"} justifyContent={"space-between"}>
+          <IconButton
+            size="small"
+            disabled={onFirstResult}
+            onClick={handleIteratePrevious}
+          >
+            <NavigateBeforeIcon />
+          </IconButton>
+          <Stack direction={"row"} alignItems={"center"} spacing={1}>
+            <Typography variant="subtitle1">
+              {lookupResultsIndex + 1}
+            </Typography>
+            <Typography variant="subtitle1">/</Typography>
+            <Typography variant="subtitle1">{lookupResults.length}</Typography>
+          </Stack>
+          <IconButton
+            size="small"
+            disabled={onLastResult}
+            onClick={handleIterateNext}
+          >
+            <NavigateNextIcon />
+          </IconButton>
+        </Stack>
+        <DefinitionCard
+          key={getDataFromMWEntry(lookupResults[lookupResultsIndex]).id}
+          entry={getDataFromMWEntry(lookupResults[lookupResultsIndex])}
+        />
+      </Stack>
+    ) : (
+      <Typography variant="h6" alignSelf={"center"}>
+        No Dictionary Results
+      </Typography>
+    );
+
   return (
     <Stack
       id="annotator-body"
@@ -93,38 +136,10 @@ export const AnnotatorDictionary = ({ selectedText }) => {
             {selectedText}
           </Typography>
         </HtmlTooltip>
-        {lookupResults?.length > 0 && (
-          <Stack>
-            <Stack direction={"row"} justifyContent={"space-between"}>
-              <IconButton
-                size="small"
-                disabled={onFirstResult}
-                onClick={handleIteratePrevious}
-              >
-                <NavigateBeforeIcon />
-              </IconButton>
-              <Stack direction={"row"} alignItems={"center"} spacing={1}>
-                <Typography variant="subtitle1">
-                  {lookupResultsIndex + 1}
-                </Typography>
-                <Typography variant="subtitle1">/</Typography>
-                <Typography variant="subtitle1">
-                  {lookupResults.length}
-                </Typography>
-              </Stack>
-              <IconButton
-                size="small"
-                disabled={onLastResult}
-                onClick={handleIterateNext}
-              >
-                <NavigateNextIcon />
-              </IconButton>
-            </Stack>
-            <DefinitionCard
-              key={getDataFromMWEntry(lookupResults[lookupResultsIndex]).id}
-              entry={getDataFromMWEntry(lookupResults[lookupResultsIndex])}
-            />
-          </Stack>
+        {lookupResults === null ? (
+          <LinearProgress sx={{ marginTop: 1 }} />
+        ) : (
+          searchResults
         )}
       </Stack>
     </Stack>

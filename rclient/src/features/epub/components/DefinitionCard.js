@@ -25,8 +25,8 @@ export const DefinitionCard = ({ entry }) => {
         <Typography color="gray">{entry.id}</Typography>
       </Stack>
       <Stack direction={"row"} justifyContent={"space-between"}>
-        {entry.offensive && <Typography color="error">Offensive</Typography>}
         <Typography>{entry.pronunciation}</Typography>
+        {entry.offensive && <Typography color="error">Offensive</Typography>}
         <Typography>{entry.functionalLabel}</Typography>
       </Stack>
       <Stack direction={"row"} justifyContent={"space-between"}>
