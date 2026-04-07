@@ -13,9 +13,11 @@ import {
 } from "../domUtils";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import StickyNote2Icon from "@mui/icons-material/StickyNote2";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { AnnotatorLeftSideBar } from "./AnnotatorLeftSideBar";
 import { AnnotatorNotes } from "./AnnotatorNotes";
 import { AnnotatorMemos } from "./AnnotatorMemos";
+import { AnnotatorDictionary } from "./AnnotatorDictionary";
 
 export const AnnotatorV2 = ({
   epubObject,
@@ -39,6 +41,7 @@ export const AnnotatorV2 = ({
   const tabOptions = [
     { title: "Note", icon: BorderColorIcon, value: "note" },
     { title: "Memo", icon: StickyNote2Icon, value: "memo" },
+    { title: "Dictionary", icon: MenuBookIcon, value: "dictionary" },
   ];
 
   const selectedRangeIndexed = React.useRef(null);
@@ -344,6 +347,26 @@ export const AnnotatorV2 = ({
     };
   }, [displayOptions.view, spineIndex]);
 
+  const components = anchorEl && {
+    note: (
+      <AnnotatorNotes
+        epubObject={epubObject}
+        spineIndex={spineIndex}
+        selectedText={selectedText.current}
+        anchorEl={anchorEl}
+        selectedRangeIndexed={selectedRangeIndexed}
+        attachContextMenuListenersToMarks={attachContextMenuListenersToMarks}
+      />
+    ),
+    memo: (
+      <AnnotatorMemos
+        epubObject={epubObject}
+        selectedText={selectedText.current}
+      />
+    ),
+    dictionary: <AnnotatorDictionary selectedText={selectedText.current} />,
+  };
+
   return (
     <Backdrop
       open={openAnnotator}
@@ -381,23 +404,7 @@ export const AnnotatorV2 = ({
               annotatorHeight={annotatorHeight}
             />
             <Paper sx={{ width: annotatorWidth, minHeight: annotatorHeight }}>
-              {tabOptions[currentTabIndex].value === "note" ? (
-                <AnnotatorNotes
-                  epubObject={epubObject}
-                  spineIndex={spineIndex}
-                  selectedText={selectedText.current}
-                  anchorEl={anchorEl}
-                  selectedRangeIndexed={selectedRangeIndexed}
-                  attachContextMenuListenersToMarks={
-                    attachContextMenuListenersToMarks
-                  }
-                />
-              ) : (
-                <AnnotatorMemos
-                  epubObject={epubObject}
-                  selectedText={selectedText.current}
-                />
-              )}
+              {components?.[tabOptions[currentTabIndex].value]}
             </Paper>
           </Stack>
         </Menu>

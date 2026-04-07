@@ -26,7 +26,7 @@ export const AnnotatorHeader = ({
   handleClear,
   tab,
 }) => {
-  const tabNames = { notes: "Notes", memos: "Memos" };
+  const tabNames = { notes: "Notes", memos: "Memos", dictionary: "Dictionary" };
   const [showHelp, setShowHelp] = React.useState(false);
   const [copySuccess, setCopySuccess] = React.useState(false);
   const copySuccessTimeout = React.useRef(null);
@@ -82,48 +82,50 @@ export const AnnotatorHeader = ({
   };
 
   React.useEffect(() => {
-    const annotatorNodes = document.getElementById("annotator-body");
-    annotatorNodes.addEventListener("keydown", handleOnKeyDown);
+    const annotatorMenu = document.getElementById("annotator-menu");
+    annotatorMenu.addEventListener("keydown", handleOnKeyDown);
     return () => {
-      annotatorNodes.removeEventListener("keydown", handleOnKeyDown);
+      annotatorMenu.removeEventListener("keydown", handleOnKeyDown);
     };
   }, []);
 
   return (
     <Stack direction={"row"} justifyContent={"space-between"}>
-      <HtmlTooltip
-        title={
-          <Stack spacing={1}>
-            <Stack direction="row" justifyContent={"space-between"}>
-              <Typography variant="h6">
-                {annotatorHelpHTMLTooltipData[tab].title}
-              </Typography>
-              <IconButton size="small" onClick={handleOnClickHelp}>
-                <CloseIcon htmlColor="gray" />
-              </IconButton>
-            </Stack>
-            <Typography variant="subtitle2">
-              {annotatorHelpHTMLTooltipData[tab].titleDescription}
-            </Typography>
-            <Divider />
-            <Typography>
-              {annotatorHelpHTMLTooltipData[tab].subtitle}
-            </Typography>
-            <Typography variant="subtitle2">
-              {annotatorHelpHTMLTooltipData[tab].subtitleDescription}
-            </Typography>
-          </Stack>
-        }
-        open={showHelp}
-        placement="top"
-      >
-        <Stack direction="row" alignItems="center" spacing={1}>
-          <Typography variant="h5">{tabNames[tab]}</Typography>
-          <IconButton size="small" onClick={handleOnClickHelp}>
-            <HelpIcon fontSize="small" htmlColor={"gray"} />
-          </IconButton>
-        </Stack>
-      </HtmlTooltip>
+      <Stack direction="row" alignItems="center" spacing={1}>
+        <Typography variant="h5">{tabNames[tab]}</Typography>
+        {annotatorHelpHTMLTooltipData[tab] && (
+          <HtmlTooltip
+            title={
+              <Stack spacing={1}>
+                <Stack direction="row" justifyContent={"space-between"}>
+                  <Typography variant="h6">
+                    {annotatorHelpHTMLTooltipData[tab].title}
+                  </Typography>
+                  <IconButton size="small" onClick={handleOnClickHelp}>
+                    <CloseIcon htmlColor="gray" />
+                  </IconButton>
+                </Stack>
+                <Typography variant="subtitle2">
+                  {annotatorHelpHTMLTooltipData[tab].titleDescription}
+                </Typography>
+                <Divider />
+                <Typography>
+                  {annotatorHelpHTMLTooltipData[tab].subtitle}
+                </Typography>
+                <Typography variant="subtitle2">
+                  {annotatorHelpHTMLTooltipData[tab].subtitleDescription}
+                </Typography>
+              </Stack>
+            }
+            open={showHelp}
+            placement="top"
+          >
+            <IconButton size="small" onClick={handleOnClickHelp}>
+              <HelpIcon fontSize="small" htmlColor={"gray"} />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </Stack>
       <Stack direction={"row"} alignItems={"center"}>
         <Tooltip placement="top" title={"Google"}>
           <IconButton onClick={handleOnClickGoogle}>

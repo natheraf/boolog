@@ -4,6 +4,7 @@ const {
 } = require("../../externalAPI/google/googleAPI");
 const { getDatabase } = require("../database");
 const { sampleEpubPath } = require("../config/resources.config");
+const { lookupMWDictionary } = require("../../externalAPI/dictionaryAPI");
 
 const getGoogleFonts = () =>
   new Promise((resolve, reject) => {
@@ -43,6 +44,16 @@ exports.get = (req, res) => {
       "Content-Type": "application/epub+zip",
     });
     readStream.pipe(res);
+  } else if (key === "mwDictionary") {
+    const query = req.query.query;
+    lookupMWDictionary(query).then((lookupResult) =>
+      res.status(200).send({ lookupResult })
+    );
+  } else if (key === "mwThesaurus") {
+    const query = req.query.query;
+    lookupMWThesaurus(query).then((lookupResult) =>
+      res.status(200).send({ lookupResult })
+    );
   } else {
     res.status(500).send({ message: "no key found" });
   }
