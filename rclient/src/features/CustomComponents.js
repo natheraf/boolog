@@ -3,6 +3,8 @@ import PropTypes from "prop-types";
 import {
   Box,
   CircularProgress,
+  Dialog,
+  Menu,
   Slide,
   Stack,
   styled,
@@ -12,6 +14,7 @@ import {
   tooltipClasses,
   Typography,
 } from "@mui/material";
+import { isMobileDevice } from "../api/IndexedDB/common";
 
 export const SmallTabs = styled(Tabs)(({ tabpanelheight }) => ({
   height: tabpanelheight,
@@ -94,3 +97,12 @@ export const DatesInARow = ({ entry }) => {
 };
 
 DatesInARow.propTypes = { entry: PropTypes.object.isRequired };
+
+export const DynamicMenuAndDialog = (props) => {
+  const onMobileDevice = isMobileDevice();
+  return onMobileDevice ? (
+    <Dialog {...props} fullScreen />
+  ) : (
+    <Menu {...props} />
+  );
+};

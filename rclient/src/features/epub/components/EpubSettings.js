@@ -1,12 +1,13 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import { IconButton, Menu, Stack, Tooltip, Typography } from "@mui/material";
+import { Divider, IconButton, Stack, Tooltip, Typography } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { EpubViewEditor } from "./EpubViewEditor";
 import CloseIcon from "@mui/icons-material/Close";
 import { EpubNavigationDisplayOption } from "./EpubNavigationDisplayOption";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
 import { EpubHeaderEditor } from "./EpubHeaderEditor";
+import { DynamicMenuAndDialog } from "../../CustomComponents";
 
 export const EpubSettings = ({
   displayOptions,
@@ -40,17 +41,13 @@ export const EpubSettings = ({
           <SettingsIcon />
         </IconButton>
       </Tooltip>
-      <Menu
+      <DynamicMenuAndDialog
         anchorEl={anchorEl}
         open={openSettings}
         onClose={handleClose}
         disableRestoreFocus={true}
       >
-        <Stack
-          spacing={2}
-          alignItems={"center"}
-          sx={{ width: "300px", padding: 2 }}
-        >
+        <Stack spacing={2} alignItems={"center"} sx={{ padding: 2 }}>
           <Stack
             direction={"row"}
             alignItems={"center"}
@@ -66,6 +63,7 @@ export const EpubSettings = ({
               </IconButton>
             </Tooltip>
           </Stack>
+          <Divider flexItem />
           <EpubHeaderEditor
             displayOptions={displayOptions}
             setDisplayOptions={setDisplayOptionsHelper}
@@ -79,7 +77,7 @@ export const EpubSettings = ({
             setDisplayOptions={setDisplayOptionsHelper}
           />
         </Stack>
-      </Menu>
+      </DynamicMenuAndDialog>
     </>
   );
 };

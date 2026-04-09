@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import {
   Divider,
   IconButton,
-  Menu,
   Stack,
   Tooltip,
   Typography,
@@ -15,6 +14,7 @@ import TocIcon from "@mui/icons-material/Toc";
 import CloseIcon from "@mui/icons-material/Close";
 import { handlePathHref } from "../epubUtils";
 import { waitForElement } from "../domUtils";
+import { DynamicMenuAndDialog } from "../../CustomComponents";
 
 export const TableOfContents = ({
   epubObject,
@@ -59,13 +59,13 @@ export const TableOfContents = ({
           <TocIcon />
         </IconButton>
       </Tooltip>
-      <Menu
+      <DynamicMenuAndDialog
         anchorEl={anchorEl}
         open={openToc}
         onClose={handleCloseToc}
         disableRestoreFocus={true}
       >
-        <Stack spacing={2} sx={{ width: "300px", padding: 2 }}>
+        <Stack spacing={2} sx={{ padding: 2 }} justifySelf={"center"}>
           <Stack
             direction={"row"}
             alignItems={"center"}
@@ -89,6 +89,7 @@ export const TableOfContents = ({
               }
               onClick={() => handleOnClick(obj.src)}
               sx={{
+                width: "300px",
                 cursor: "pointer",
                 fontWeight:
                   currentSpineIndexLabel === obj.label ? "bold" : "inherit",
@@ -102,7 +103,7 @@ export const TableOfContents = ({
             </Typography>
           ))}
         </Stack>
-      </Menu>
+      </DynamicMenuAndDialog>
     </>
   );
 };

@@ -31,6 +31,7 @@ import PropTypes from "prop-types";
 import { getNewId } from "../../../api/IndexedDB/common";
 import { useTheme } from "@emotion/react";
 import { EpubContext } from "./context/EpubState";
+import CloseIcon from "@mui/icons-material/Close";
 
 export const SearchV2 = ({
   epubObject,
@@ -212,15 +213,14 @@ export const SearchV2 = ({
       </Tooltip>
       {open && (
         <Dialog
-          fullWidth={true}
-          maxWidth={"md"}
+          fullScreen
           open={open}
           onClose={handleClose}
           disableRestoreFocus={true}
         >
           <DialogTitle>
             <Box>
-              <Stack spacing={2} direction={"row"}>
+              <Stack spacing={1} direction={"row"}>
                 <TextField
                   id={"search-text-field"}
                   label={"Search"}
@@ -254,6 +254,9 @@ export const SearchV2 = ({
                 >
                   <SearchIcon />
                 </Button>
+                <IconButton onClick={handleClose}>
+                  <CloseIcon />
+                </IconButton>
               </Stack>
             </Box>
           </DialogTitle>

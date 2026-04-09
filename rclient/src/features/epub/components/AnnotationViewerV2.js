@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import {
   Box,
   IconButton,
-  Menu,
   Tooltip,
   useMediaQuery,
   useTheme,
@@ -15,6 +14,7 @@ import { getSortedMemos, getSortedNotes } from "../epubUtils";
 import { AnnotationMemosList } from "./AnnotationMemosList";
 import { deleteEpubData } from "../../../api/IndexedDB/epubData";
 import { deleteNodesAndLiftChildren } from "../domUtils";
+import { DynamicMenuAndDialog } from "../../CustomComponents";
 
 export const AnnotationViewerV2 = ({
   epubObject,
@@ -115,12 +115,12 @@ export const AnnotationViewerV2 = ({
           <TextSnippetIcon />
         </IconButton>
       </Tooltip>
-      <Menu
+      <DynamicMenuAndDialog
         anchorEl={anchorEl}
         open={openAnnotation}
         onClose={handleCloseAnnotation}
       >
-        <Box sx={{ width }}>
+        <Box sx={{ width: "100%" }}>
           <AnnotationHeader
             tab={tab}
             setTab={setTab}
@@ -130,7 +130,7 @@ export const AnnotationViewerV2 = ({
           />
           {listComponent(tab, notes, memos)}
         </Box>
-      </Menu>
+      </DynamicMenuAndDialog>
     </>
   );
 };
