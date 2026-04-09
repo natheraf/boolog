@@ -13,6 +13,7 @@ import { merriamWebsterDictionaryLookup } from "../../../api/DictionaryAPI";
 import { DefinitionCard } from "./DefinitionCard";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { getDataFromMWEntry } from "../../dictionary/MWParser";
 
 export const AnnotatorDictionary = ({ selectedText }) => {
   const [lookupResults, setLookupResults] = React.useState(null);
@@ -34,30 +35,9 @@ export const AnnotatorDictionary = ({ selectedText }) => {
     setLookupResultsIndex((prev) => prev + 1);
   };
 
-  const getDataFromMWEntry = (entry) => {
-    const dataMap = {
-      id: entry?.meta?.id,
-      term: entry?.meta?.id?.includes(":")
-        ? entry?.meta?.id?.substring(0, entry?.meta?.id?.indexOf(":"))
-        : entry?.meta?.id,
-      offensive: entry?.meta?.offensive,
-      pronunciation: entry?.hwi?.prs?.[0]?.mw,
-      audio: entry?.hwi?.prs?.[0]?.sound?.audio,
-      functionalLabel: entry?.fl,
-      shortDefinitions: entry?.shortdef,
-      date: entry?.date,
-      dateFormatted: entry?.date?.includes("{")
-        ? entry?.date?.substring(0, entry.date.indexOf("{"))
-        : entry?.date,
-    };
-    dataMap.shortDefinitions ??= [];
-    return dataMap;
-  };
-
   React.useEffect(() => {
     merriamWebsterDictionaryLookup(selectedText)
       .then((res) => {
-        console.log(res);
         setLookupResults(
           res.lookupResult.filter(
             (result) =>
@@ -79,7 +59,12 @@ export const AnnotatorDictionary = ({ selectedText }) => {
           >
             <NavigateBeforeIcon />
           </IconButton>
-          <Stack direction={"row"} alignItems={"center"} spacing={1}>
+          <Stack
+            sx={{ userSelect: "none" }}
+            direction={"row"}
+            alignItems={"center"}
+            spacing={1}
+          >
             <Typography variant="subtitle1">
               {lookupResultsIndex + 1}
             </Typography>
@@ -100,7 +85,7 @@ export const AnnotatorDictionary = ({ selectedText }) => {
         />
       </Stack>
     ) : (
-      <Typography variant="h6" alignSelf={"center"}>
+      <Typography color="error" variant="h6" alignSelf={"center"}>
         No Dictionary Results
       </Typography>
     );

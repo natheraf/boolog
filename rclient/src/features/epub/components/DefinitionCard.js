@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { IconButton, Stack, Typography } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 
 export const DefinitionCard = ({ entry }) => {
   const [shortDefinitionIndex, setShortDefinitionIndex] = React.useState(0);
@@ -18,16 +19,41 @@ export const DefinitionCard = ({ entry }) => {
     setShortDefinitionIndex((prev) => (onLastResult ? prev : prev + 1));
   };
 
+  const readWord = () => {
+    if (entry.hasOwnProperty("audio")) {
+      new Audio(entry.audio).play();
+    }
+  };
+
   return (
-    <Stack>
-      <Stack direction={"row"} spacing={1}>
-        <Typography>{entry.term}</Typography>
-        <Typography color="gray">{entry.id}</Typography>
+    <Stack sx={{ maxHeight: "200px" }}>
+      <Stack
+        direction={"row"}
+        alignItems={"center"}
+        justifyContent={"space-between"}
+      >
+        <Stack
+          sx={{ maxWidth: 240, overflow: "none" }}
+          direction={"row"}
+          spacing={1}
+        >
+          <Typography>{entry.term}</Typography>
+          <Typography noWrap color="gray">
+            {entry.idNum}
+          </Typography>
+        </Stack>
+        <Typography>{entry.functionalLabel}</Typography>
       </Stack>
       <Stack direction={"row"} justifyContent={"space-between"}>
-        <Typography>{entry.pronunciation}</Typography>
+        <Typography>
+          {entry.pronunciation ? `/${entry.pronunciation}/` : ""}
+        </Typography>
         {entry.offensive && <Typography color="error">Offensive</Typography>}
-        <Typography>{entry.functionalLabel}</Typography>
+        {entry?.audio && (
+          <IconButton onClick={readWord} size="small">
+            <VolumeUpIcon fontSize="small" />
+          </IconButton>
+        )}
       </Stack>
       <Stack direction={"row"} justifyContent={"space-between"}>
         <IconButton
@@ -37,7 +63,12 @@ export const DefinitionCard = ({ entry }) => {
         >
           <NavigateBeforeIcon />
         </IconButton>
-        <Stack direction={"row"} alignItems={"center"} spacing={1}>
+        <Stack
+          sx={{ userSelect: "none" }}
+          direction={"row"}
+          alignItems={"center"}
+          spacing={1}
+        >
           <Typography variant="subtitle1">
             {shortDefinitionIndex + 1}
           </Typography>
@@ -54,7 +85,9 @@ export const DefinitionCard = ({ entry }) => {
           <NavigateNextIcon />
         </IconButton>
       </Stack>
-      <Typography>{entry.shortDefinitions[shortDefinitionIndex]}</Typography>
+      <Typography sx={{ overflow: "auto", scrollbarWidth: "thin" }}>
+        {entry.shortDefinitions[shortDefinitionIndex]}
+      </Typography>
       {entry.dateFormatted && (
         <Typography color="gray">
           {"First known use: "}
