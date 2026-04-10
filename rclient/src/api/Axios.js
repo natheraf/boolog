@@ -60,6 +60,16 @@ export const handleFetch = (httpMethod, object, route, query = {}) => {
   return fetch(url, options);
 };
 
+export const handleFetchPost = (body, route) => {
+  body.localUserId = localStorage.getItem("userId");
+  const url = `${api}/${route}`;
+  return fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+};
+
 /**
  * Http request that uses data form content type to send ONLY ONE file.
  * The file needs to be in keyed as `blob`. All other value type should be non-objects / primitive types.

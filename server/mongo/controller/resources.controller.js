@@ -5,6 +5,7 @@ const {
 const { getDatabase } = require("../database");
 const { sampleEpubPath } = require("../config/resources.config");
 const { lookupMWDictionary } = require("../../externalAPI/dictionaryAPI");
+const { default: OpenAI } = require("openai");
 
 const getGoogleFonts = () =>
   new Promise((resolve, reject) => {
@@ -57,4 +58,43 @@ exports.get = (req, res) => {
   } else {
     res.status(500).send({ message: "no key found" });
   }
+};
+
+exports.gemma4 = async (req, res) => {
+  const { messages } = req.body;
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  const client = new OpenAI({
+    baseURL: process.env.LLAMA_HOST,
+    apiKey: "dummy",
+  });
+
+  const promptStart = Date.now();
+  const stream = await client.chat.completions.create({
+    model: "gemma-4",
+    messages,
+    stream: true,
+    stream_options: { include_usage: true },
+  });
+  const promptMs = Date.now() - promptStart;
+
+  const genStart = Date.now();
+  for await (const chunk of stream) {
+    const token = chunk.choices[0]?.delta?.content;
+    if (token) {
+      res.write(`data: ${JSON.stringify({ token })}\n\n`);
+    }
+    if (chunk.usage) {
+      res.write(
+        `data: ${JSON.stringify({
+          usage: { ...chunk.usage, genMs: Date.now() - genStart, promptMs },
+        })}\n\n`
+      );
+    }
+  }
+
+  res.write("data: [DONE]\n\n");
+  res.end();
 };

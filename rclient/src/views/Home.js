@@ -11,6 +11,7 @@ import {
 import { handleSimpleRequest } from "../api/Axios";
 import { UserInfoContext } from "../context/UserInfo";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Chat } from "../features/ai/Chat";
 
 export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
@@ -100,6 +101,7 @@ export const Home = () => {
 
   return (
     <div>
+      <Chat />
       <Button onClick={nuke} color="error">
         If something is broken, click here to nuke local storage. Will logout
         and reset app.

@@ -47,6 +47,7 @@ used for development.
 if (process.argv.includes("dev")) {
   app.listen(port, () => console.log(`Express Server on port ${port}`));
 } else {
+  process.env.LLAMA_HOST = "http://localhost:8081/v1";
   // app.get("*", (_, res) => {
   //   res.sendFile(path.join(__dirname, "../rclient/build/index.html"));
   // });
