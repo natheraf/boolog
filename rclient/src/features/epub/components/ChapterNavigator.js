@@ -63,7 +63,7 @@ export const ChapterNavigator = ({
       index = spineIndex + index + 1;
     }
     return Math.max(
-      2,
+      1,
       Math.ceil(
         ((spine[index]?.wordCount ?? 1) /
           (chapterMeta[spine[index].chapterMetaIndex]?.wordCount ?? 1)) *
