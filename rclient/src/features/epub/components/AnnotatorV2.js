@@ -364,18 +364,21 @@ export const AnnotatorV2 = ({
         selectedRangeIndexed={selectedRangeIndexed}
         attachContextMenuListenersToMarks={attachContextMenuListenersToMarks}
         formatting={formatting}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
     ),
     memo: (
       <AnnotatorMemos
         epubObject={epubObject}
         selectedText={selectedText.current}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
     ),
     dictionary: (
       <AnnotatorDictionary
         selectedText={selectedText.current}
         selectedTextContext={selectedTextContext.current}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
     ),
   };

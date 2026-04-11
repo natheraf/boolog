@@ -20,6 +20,7 @@ export const AnnotatorNotes = ({
   selectedRangeIndexed,
   attachContextMenuListenersToMarks,
   formatting,
+  handleCloseAnnotator,
 }) => {
   const noteIdAttribute = "noteid";
   const noteId = React.useRef(
@@ -163,6 +164,7 @@ export const AnnotatorNotes = ({
         canClear={canClear}
         handleClear={handleClear}
         tab={"notes"}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
       <Divider />
       <HtmlTooltip
@@ -221,4 +223,5 @@ AnnotatorNotes.propTypes = {
   selectedRangeIndexed: PropTypes.object,
   attachContextMenuListenersToMarks: PropTypes.func.isRequired,
   formatting: PropTypes.object.isRequired,
+  handleCloseAnnotator: PropTypes.func.isRequired,
 };

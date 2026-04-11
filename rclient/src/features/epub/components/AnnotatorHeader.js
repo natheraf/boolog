@@ -25,6 +25,7 @@ export const AnnotatorHeader = ({
   canClear,
   handleClear,
   tab,
+  handleCloseAnnotator,
 }) => {
   const tabNames = { notes: "Notes", memos: "Memos", dictionary: "Dictionary" };
   const [showHelp, setShowHelp] = React.useState(false);
@@ -61,6 +62,7 @@ export const AnnotatorHeader = ({
   };
 
   const handleSearch = () => {
+    handleCloseAnnotator();
     const searchButton = document.getElementById("open-search-button");
     searchButton.click();
     waitForElement("#search-text-field").then((textField) => {
@@ -169,4 +171,5 @@ AnnotatorHeader.propTypes = {
   canClear: PropTypes.bool.isRequired,
   handleClear: PropTypes.func.isRequired,
   tab: PropTypes.string.isRequired,
+  handleCloseAnnotator: PropTypes.func.isRequired,
 };

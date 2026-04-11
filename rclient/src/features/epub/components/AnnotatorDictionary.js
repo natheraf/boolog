@@ -20,7 +20,11 @@ import AssistantIcon from "@mui/icons-material/Assistant";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { AnnotatorDictionaryAI } from "./AnnotatorDictionaryAI";
 
-export const AnnotatorDictionary = ({ selectedText, selectedTextContext }) => {
+export const AnnotatorDictionary = ({
+  selectedText,
+  selectedTextContext,
+  handleCloseAnnotator,
+}) => {
   const [lookupResults, setLookupResults] = React.useState(null);
   const [lookupResultsIndex, setLookupResultsIndex] = React.useState(0);
   const [useAIDictionary, setUseAIDictionary] = React.useState(false);
@@ -120,6 +124,7 @@ export const AnnotatorDictionary = ({ selectedText, selectedTextContext }) => {
         canClear={false}
         handleClear={() => {}}
         tab={"dictionary"}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
       <Divider />
       <Stack>
@@ -175,4 +180,5 @@ export const AnnotatorDictionary = ({ selectedText, selectedTextContext }) => {
 AnnotatorDictionary.propTypes = {
   selectedText: PropTypes.string,
   selectedTextContext: PropTypes.object,
+  handleCloseAnnotator: PropTypes.func.isRequired,
 };

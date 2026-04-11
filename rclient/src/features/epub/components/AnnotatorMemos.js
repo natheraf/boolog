@@ -7,10 +7,13 @@ import { AnnotatorHeader } from "./AnnotatorHeader";
 import { formatMemoKey } from "../formattingUtils";
 import { deleteEpubData, putEpubData } from "../../../api/IndexedDB/epubData";
 import { getNewId } from "../../../api/IndexedDB/common";
-import { AnnotatorSimilarMemosTabs } from "./AnnotatorSimilarMemosTabs";
 import { AnnotatorSimilarMemosList } from "./AnnotatorSimilarMemosList";
 
-export const AnnotatorMemos = ({ epubObject, selectedText }) => {
+export const AnnotatorMemos = ({
+  epubObject,
+  selectedText,
+  handleCloseAnnotator,
+}) => {
   const memos = epubObject.memos;
   const entryId = epubObject.key;
   const memoKey = formatMemoKey(selectedText);
@@ -83,6 +86,7 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
         canClear={canClear}
         handleClear={handleClear}
         tab={"memos"}
+        handleCloseAnnotator={handleCloseAnnotator}
       />
       <Divider />
       <HtmlTooltip
@@ -123,4 +127,5 @@ export const AnnotatorMemos = ({ epubObject, selectedText }) => {
 AnnotatorMemos.propTypes = {
   epubObject: PropTypes.object.isRequired,
   selectedText: PropTypes.string.isRequired,
+  handleCloseAnnotator: PropTypes.func.isRequired,
 };
