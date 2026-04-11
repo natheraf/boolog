@@ -106,12 +106,11 @@ export const Home = () => {
   return (
     <div>
       <Chat />
-      <Button onClick={nuke} color="error">
-        If something is broken, click here to nuke local storage. Will logout
-        and reset app.
-      </Button>
       <Stack spacing={3}>
         <Stack spacing={2}>
+          <Typography color="error" variant="h4">
+            THIS IS A PRE-ALPHA
+          </Typography>
           <Typography variant="h4">
             Hi, this is an epub reader / reading tracker!
           </Typography>
@@ -132,6 +131,10 @@ export const Home = () => {
           <Typography variant="h5">
             To open the epub, click on the picture of the book cover.
           </Typography>
+          <Button onClick={nuke} color="error">
+            If something is broken, click here to nuke local storage. Will
+            logout and reset app.
+          </Button>
         </Stack>
 
         <Divider />
