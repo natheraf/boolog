@@ -37,6 +37,7 @@ export const AnnotatorV2 = ({
 
   const appearTop = React.useRef(true);
   const selectedText = React.useRef(null);
+  const selectedTextContext = React.useRef(null);
 
   const [currentTabIndex, setCurrentTabIndex] = React.useState(1);
   const tabOptions = [
@@ -166,6 +167,11 @@ export const AnnotatorV2 = ({
       const endNode = range.endContainer;
       let startContainerParent = getNearestEpubAncestor(startNode);
       let endContainerParent = getNearestEpubAncestor(endNode);
+
+      selectedTextContext.current = {
+        start: startContainerParent.textContent,
+        end: endContainerParent.textContent,
+      };
 
       let startOffsetFromParent = range.startOffset;
       let walker = document.createTreeWalker(
@@ -366,7 +372,12 @@ export const AnnotatorV2 = ({
         selectedText={selectedText.current}
       />
     ),
-    dictionary: <AnnotatorDictionary selectedText={selectedText.current} />,
+    dictionary: (
+      <AnnotatorDictionary
+        selectedText={selectedText.current}
+        selectedTextContext={selectedTextContext.current}
+      />
+    ),
   };
 
   return (

@@ -6,9 +6,10 @@ import ReactMarkdown from "react-markdown";
 
 export const AnnotatorDictionaryAI = ({
   selectedText,
-  hasDictionaryResults,
+  hasNoDictionaryResults,
   loadingAIDefinition,
   setLoadingAIDefinition,
+  selectedTextContext,
 }) => {
   const [err, setErr] = React.useState(false);
   const [aiResponse, setAiResponse] = React.useState(null);
@@ -21,7 +22,7 @@ export const AnnotatorDictionaryAI = ({
         messages: [
           {
             role: "user",
-            content: `Define in a few words: ${selectedText}`,
+            content: `With the context ${JSON.stringify(selectedTextContext)}. Concisely give a definition with and without context: ${selectedText}.`,
           },
         ],
       },
@@ -83,7 +84,7 @@ export const AnnotatorDictionaryAI = ({
 
   return (
     <Stack spacing={1}>
-      {!aiResponse && hasDictionaryResults && (
+      {!aiResponse && hasNoDictionaryResults && (
         <Typography color="error" variant="h6" alignSelf={"center"}>
           No Dictionary Results
         </Typography>
@@ -100,7 +101,9 @@ export const AnnotatorDictionaryAI = ({
         </Typography>
       )}
       {aiResponse && tps && (
-        <Stack>
+        <Stack
+          sx={{ maxHeight: "200px", overflow: "auto", scrollbarWidth: "thin" }}
+        >
           {typeof aiResponse === "string" ? (
             <ReactMarkdown>{aiResponse}</ReactMarkdown>
           ) : (
@@ -121,7 +124,8 @@ export const AnnotatorDictionaryAI = ({
 
 AnnotatorDictionaryAI.propTypes = {
   selectedText: PropTypes.string.isRequired,
-  hasDictionaryResults: PropTypes.bool.isRequired,
+  hasNoDictionaryResults: PropTypes.bool.isRequired,
   loadingAIDefinition: PropTypes.bool.isRequired,
   setLoadingAIDefinition: PropTypes.func.isRequired,
+  selectedTextContext: PropTypes.object,
 };

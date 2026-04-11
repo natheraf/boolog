@@ -20,13 +20,14 @@ import AssistantIcon from "@mui/icons-material/Assistant";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { AnnotatorDictionaryAI } from "./AnnotatorDictionaryAI";
 
-export const AnnotatorDictionary = ({ selectedText }) => {
+export const AnnotatorDictionary = ({ selectedText, selectedTextContext }) => {
   const [lookupResults, setLookupResults] = React.useState(null);
   const [lookupResultsIndex, setLookupResultsIndex] = React.useState(0);
   const [useAIDictionary, setUseAIDictionary] = React.useState(false);
   const [loadingAIDefinition, setLoadingAIDefinition] = React.useState(false);
   const onFirstResult = lookupResultsIndex === 0;
   const onLastResult = lookupResultsIndex === lookupResults?.length - 1;
+  const hasNoResults = lookupResults?.length === 0;
 
   const handleIteratePrevious = () => {
     if (onFirstResult) {
@@ -60,7 +61,7 @@ export const AnnotatorDictionary = ({ selectedText }) => {
   }, []);
 
   const searchResults =
-    lookupResults && lookupResults.length > 0 && !useAIDictionary ? (
+    lookupResults && !hasNoResults && !useAIDictionary ? (
       <Stack>
         <Stack direction={"row"} justifyContent={"space-between"}>
           <IconButton
@@ -98,9 +99,10 @@ export const AnnotatorDictionary = ({ selectedText }) => {
     ) : (
       <AnnotatorDictionaryAI
         selectedText={selectedText}
-        hasDictionaryResults={lookupResults?.length === 0}
+        hasNoDictionaryResults={hasNoResults}
         loadingAIDefinition={loadingAIDefinition}
         setLoadingAIDefinition={setLoadingAIDefinition}
+        selectedTextContext={selectedTextContext}
       />
     );
 
@@ -141,7 +143,7 @@ export const AnnotatorDictionary = ({ selectedText }) => {
             </Typography>
           </HtmlTooltip>
           <IconButton
-            disabled={loadingAIDefinition && !useAIDictionary}
+            disabled={hasNoResults || (loadingAIDefinition && !useAIDictionary)}
             onClick={toggleAI}
             size="small"
           >
@@ -172,4 +174,5 @@ export const AnnotatorDictionary = ({ selectedText }) => {
 
 AnnotatorDictionary.propTypes = {
   selectedText: PropTypes.string,
+  selectedTextContext: PropTypes.object,
 };
