@@ -168,10 +168,20 @@ export const AnnotatorV2 = ({
       let startContainerParent = getNearestEpubAncestor(startNode);
       let endContainerParent = getNearestEpubAncestor(endNode);
 
-      selectedTextContext.current = {
-        start: startContainerParent.textContent,
-        end: endContainerParent.textContent,
-      };
+      if (startContainerParent.contains(endContainerParent)) {
+        selectedTextContext.current = {
+          context: startContainerParent.textContent,
+        };
+      } else if (endContainerParent.contains(startContainerParent)) {
+        selectedTextContext.current = {
+          context: endContainerParent.textContent,
+        };
+      } else {
+        selectedTextContext.current = {
+          startContext: startContainerParent.textContent,
+          endContext: endContainerParent.textContent,
+        };
+      }
 
       let startOffsetFromParent = range.startOffset;
       let walker = document.createTreeWalker(
