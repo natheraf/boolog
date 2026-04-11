@@ -78,34 +78,47 @@ export const Chat = () => {
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
 
+    let buffer = "";
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
 
-      const lines = decoder.decode(value).split("\n\n").filter(Boolean);
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop();
 
       for (const line of lines) {
-        const data = line.replace("data: ", "");
-        if (data === "[DONE]") break;
-        const parsed = JSON.parse(data);
-
-        if (parsed.token) {
-          assistantMessage += parsed.token;
-          setMessages([
-            ...newMessages,
-            { role: "assistant", content: assistantMessage },
-          ]);
+        if (!line.trim()) {
+          continue;
         }
-
-        if (parsed.usage) {
-          const usage = parsed.usage;
-          setTps((prev) => [
-            ...prev,
-            {
-              generation: usage.completion_tokens / (usage.genMs / 1000),
-              prompt: usage.prompt_tokens / (usage.promptMs / 1000),
-            },
-          ]);
+        const data = line.replace("data: ", "");
+        if (data === "[DONE]") {
+          break;
+        }
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.token) {
+            assistantMessage += parsed.token;
+            setMessages([
+              ...newMessages,
+              { role: "assistant", content: assistantMessage },
+            ]);
+          }
+          if (parsed.usage) {
+            const usage = parsed.usage;
+            setTps((prev) => [
+              ...prev,
+              {
+                generation: usage.completion_tokens / (usage.genMs / 1000),
+                prompt: usage.prompt_tokens / (usage.promptMs / 1000),
+              },
+            ]);
+          }
+        } catch (e) {
+          // Incomplete SSE chunk, will be completed in next iteration
+          buffer = line + "\n\n" + buffer;
         }
       }
     }
