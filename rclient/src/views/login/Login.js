@@ -303,7 +303,7 @@ export const Login = () => {
                   />
                   <div
                     id="g_id_onload"
-                    data-client_id="1006864146530-vr0rvajagjoomnkidutg8oiaqupl6odm.apps.googleusercontent.com"
+                    data-client_id={process.env.REACT_APP_GOOGLE_CLIENT_ID}
                     data-auto_prompt="false"
                     data-context="use"
                     data-ux_mode="popup"
