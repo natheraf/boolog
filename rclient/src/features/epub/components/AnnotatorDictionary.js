@@ -1,10 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
+  CircularProgress,
   Divider,
   IconButton,
   LinearProgress,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { AnnotatorHeader } from "./AnnotatorHeader";
@@ -14,10 +16,15 @@ import { DefinitionCard } from "./DefinitionCard";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { getDataFromMWEntry } from "../../dictionary/MWParser";
+import AssistantIcon from "@mui/icons-material/Assistant";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import { AnnotatorDictionaryAI } from "./AnnotatorDictionaryAI";
 
 export const AnnotatorDictionary = ({ selectedText }) => {
   const [lookupResults, setLookupResults] = React.useState(null);
   const [lookupResultsIndex, setLookupResultsIndex] = React.useState(0);
+  const [useAIDictionary, setUseAIDictionary] = React.useState(false);
+  const [loadingAIDefinition, setLoadingAIDefinition] = React.useState(false);
   const onFirstResult = lookupResultsIndex === 0;
   const onLastResult = lookupResultsIndex === lookupResults?.length - 1;
 
@@ -35,6 +42,10 @@ export const AnnotatorDictionary = ({ selectedText }) => {
     setLookupResultsIndex((prev) => prev + 1);
   };
 
+  const toggleAI = () => {
+    setUseAIDictionary((prev) => !prev);
+  };
+
   React.useEffect(() => {
     merriamWebsterDictionaryLookup(selectedText)
       .then((res) => {
@@ -49,7 +60,7 @@ export const AnnotatorDictionary = ({ selectedText }) => {
   }, []);
 
   const searchResults =
-    lookupResults && lookupResults?.length > 0 ? (
+    lookupResults && lookupResults.length > 0 && !useAIDictionary ? (
       <Stack>
         <Stack direction={"row"} justifyContent={"space-between"}>
           <IconButton
@@ -85,9 +96,12 @@ export const AnnotatorDictionary = ({ selectedText }) => {
         />
       </Stack>
     ) : (
-      <Typography color="error" variant="h6" alignSelf={"center"}>
-        No Dictionary Results
-      </Typography>
+      <AnnotatorDictionaryAI
+        selectedText={selectedText}
+        hasDictionaryResults={lookupResults?.length === 0}
+        loadingAIDefinition={loadingAIDefinition}
+        setLoadingAIDefinition={setLoadingAIDefinition}
+      />
     );
 
   return (
@@ -107,20 +121,45 @@ export const AnnotatorDictionary = ({ selectedText }) => {
       />
       <Divider />
       <Stack>
-        <HtmlTooltip
-          title={
-            <Stack>
-              <Typography variant="subtitle2">{selectedText}</Typography>
-            </Stack>
-          }
-          placement="right"
-          enterDelay={200}
-          enterNextDelay={200}
+        <Stack
+          direction={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
         >
-          <Typography variant="h6" noWrap>
-            {selectedText}
-          </Typography>
-        </HtmlTooltip>
+          <HtmlTooltip
+            title={
+              <Stack>
+                <Typography variant="subtitle2">{selectedText}</Typography>
+              </Stack>
+            }
+            placement="top"
+            enterDelay={200}
+            enterNextDelay={200}
+          >
+            <Typography variant="h6" noWrap>
+              {selectedText}
+            </Typography>
+          </HtmlTooltip>
+          <IconButton
+            disabled={loadingAIDefinition && !useAIDictionary}
+            onClick={toggleAI}
+            size="small"
+          >
+            {useAIDictionary ? (
+              <Tooltip title="Use Dictionary">
+                <MenuBookIcon fontSize="small" />
+              </Tooltip>
+            ) : (
+              <Tooltip title="Ask AI">
+                {loadingAIDefinition ? (
+                  <CircularProgress sx={{ color: "gray" }} size={20} />
+                ) : (
+                  <AssistantIcon fontSize="small" />
+                )}
+              </Tooltip>
+            )}
+          </IconButton>
+        </Stack>
         {lookupResults === null ? (
           <LinearProgress sx={{ marginTop: 1 }} />
         ) : (
