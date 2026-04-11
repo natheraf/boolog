@@ -11,7 +11,6 @@ import {
   Stack,
   Tooltip,
   Typography,
-  Zoom,
 } from "@mui/material";
 import AssistantIcon from "@mui/icons-material/Assistant";
 import CloseIcon from "@mui/icons-material/Close";
@@ -166,7 +165,7 @@ export const Chat = () => {
       spacing={1}
       alignItems={"end"}
     >
-      <Slide in={open} direction="left">
+      <Slide in={open} direction="up">
         <Paper
           component={Stack}
           spacing={1}
@@ -269,7 +268,7 @@ export const Chat = () => {
           </Stack>
         </Paper>
       </Slide>
-      <Zoom in={true} direction="up">
+      <Slide in={true} direction="up">
         <Tooltip
           title={open ? "Click to Close" : "Talk to Gemma 4"}
           placement={"left"}
@@ -278,7 +277,7 @@ export const Chat = () => {
             {open ? <CloseIcon /> : <AssistantIcon />}
           </Fab>
         </Tooltip>
-      </Zoom>
+      </Slide>
     </Stack>
   );
 };

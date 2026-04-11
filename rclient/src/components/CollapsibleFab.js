@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Fab, Slide, Stack, Tooltip, Zoom } from "@mui/material";
+import { Fab, Slide, Stack, Tooltip } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import SearchIcon from "@mui/icons-material/Search";
@@ -49,13 +49,13 @@ export const CollapsibleFab = ({ setOpenEditor, setIsImporting }) => {
   ];
 
   return (
-    <Zoom in={true}>
+    <Slide in={true} direction="up">
       <Stack
         gap={3}
         sx={{
           position: "fixed",
           bottom: 25,
-          right: 25,
+          right: 10,
           zIndex: 1,
         }}
       >
@@ -97,6 +97,6 @@ export const CollapsibleFab = ({ setOpenEditor, setIsImporting }) => {
           </Fab>
         </Tooltip>
       </Stack>
-    </Zoom>
+    </Slide>
   );
 };
