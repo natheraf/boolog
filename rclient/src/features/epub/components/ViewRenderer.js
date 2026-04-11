@@ -59,6 +59,7 @@ export const ViewRenderer = ({
       <SpineNavigator
         epubObject={epubObject}
         spineIndex={spineIndex}
+        partProgress={partProgress}
         formatting={formatting}
         displayOptions={displayOptions}
         setProgress={setProgress}
