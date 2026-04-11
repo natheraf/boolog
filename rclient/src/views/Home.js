@@ -17,6 +17,10 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
 
   const updates = {
+    "Update 4/11/26 2:39PM": [
+      "feat: dictionary in annotator now calls for AI when no definitions are found",
+      "feat: total progress percentage bottom left in reader",
+    ],
     "Update 4/09/26 7:55PM": [
       "feat: dictionary in annotator can now play audio",
       "feat: use full screen dialog on mobile and menu otherwise in reader",
