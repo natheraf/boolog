@@ -95,7 +95,13 @@ export const BookLog = () => {
       key: "sampleEpub",
     })
       .then((res) => {
-        const file = new File([res.data], "file", {
+        const contentDisposition = res.headers["content-disposition"];
+        const filename = contentDisposition
+          ? decodeURIComponent(
+              contentDisposition.split("filename*=UTF-8''")[1] ?? ""
+            ) || contentDisposition.split("filename=")[1]?.replace(/"/g, "")
+          : "Unnamed_File";
+        const file = new File([res.data], filename, {
           type: res.data.type,
         });
         addBookFromEpub(file).then(() => (window.location.href = "/books"));

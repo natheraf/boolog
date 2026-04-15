@@ -39,10 +39,13 @@ exports.get = (req, res) => {
       res.status(200).send({ searchResults })
     );
   } else if (key === "sampleEpub") {
-    const fs = require("fs");
+    const fs = require("node:fs");
+    const path = require("node:path");
     const readStream = fs.createReadStream(sampleEpubPath);
+    const filename = path.basename(sampleEpubPath);
     res.writeHead(200, {
       "Content-Type": "application/epub+zip",
+      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
     });
     readStream.pipe(res);
   } else if (key === "mwDictionary") {

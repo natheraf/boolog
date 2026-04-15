@@ -5,7 +5,11 @@ require("dotenv").config();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-const corsOptions = { origin: "http://localhost:3000", credentials: true };
+const corsOptions = {
+  origin: "http://localhost:3000",
+  exposedHeaders: ["Content-Disposition"],
+  credentials: true,
+};
 app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
 app.use(cors(corsOptions));
 app.use(express.json());
