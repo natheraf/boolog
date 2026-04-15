@@ -52,43 +52,6 @@ export const Sync = ({ children }) => {
         (_e, index) =>
           new Promise((resolve, _reject) => (resolves[index] = resolve))
       );
-      listFiles()
-        .then(async (driveList) => {
-          driveList = driveList.data.list.files;
-          const driveFileIds = new Map(
-            driveList.map((driveFile) => [
-              driveFile.appProperties.boologId,
-              driveFile.id,
-            ])
-          );
-          const localFiles = await getAllFiles();
-          for (const localFile of localFiles) {
-            if (driveFileIds.has(localFile._id) === false) {
-              await sendOneToDrive(localFile);
-            }
-            driveFileIds.delete(localFile._id);
-          }
-          for (const [fileId, driveFileId] of driveFileIds.entries()) {
-            await getOneFromDrive(driveFileId, fileId);
-          }
-          console.log("finish drive sync");
-        })
-        .catch((error) => {
-          if (
-            error.status === 409 &&
-            error.response.data.message === "Not signed in to Google"
-          ) {
-            console.error(error);
-          } else {
-            throw error;
-          }
-        })
-        .finally(() => {
-          setLoadingProgress((prev) =>
-            prev.map((e, index) => (index === 0 ? { ...e, finished: true } : e))
-          );
-          resolves[0]();
-        });
 
       handleSimpleRequest("GET", {}, "generic/get/all", {
         database: "userAppData",
@@ -104,20 +67,19 @@ export const Sync = ({ children }) => {
           const entriesNeedCloudUpdate = [];
           for (const localEntry of lastUpdatedTimestamps) {
             const key = localEntry.entryId ?? localEntry.key;
+            const localLastUpdate = localEntry._lastUpdated;
+            const remoteLastUpdate = remoteEpubData.get(key)._lastUpdated;
             if (
               remoteEpubData.has(key) === false &&
-              lastCloudWritten >= localEntry._lastUpdated
+              lastCloudWritten >= localLastUpdate
             ) {
-              console.log(localEntry, lastCloudWritten);
               await deleteAllEpubDataOfKey(localEntry, true);
             } else if (
               remoteEpubData.has(key) === false ||
-              remoteEpubData.get(key)._lastUpdated < localEntry._lastUpdated
+              remoteLastUpdate < localLastUpdate
             ) {
               entriesNeedCloudUpdate.push(localEntry);
-            } else if (
-              remoteEpubData.get(key)._lastUpdated > localEntry._lastUpdated
-            ) {
+            } else if (remoteLastUpdate > localLastUpdate) {
               await putCloudEpubData(remoteEpubData.get(key), true);
             }
             remoteEpubData.delete(key);
@@ -197,6 +159,48 @@ export const Sync = ({ children }) => {
           );
           resolves[2]();
         });
+
+      Promise.all(promises.slice(1)).then(async () =>
+        listFiles()
+          .then(async (driveList) => {
+            driveList = driveList.data.list.files;
+            const driveFileIds = new Map(
+              driveList.map((driveFile) => [
+                driveFile.appProperties.boologId,
+                driveFile.id,
+              ])
+            );
+            const localFiles = await getAllFiles();
+            for (const localFile of localFiles) {
+              if (driveFileIds.has(localFile._id) === false) {
+                await sendOneToDrive(localFile);
+              }
+              driveFileIds.delete(localFile._id);
+            }
+            for (const [fileId, driveFileId] of driveFileIds.entries()) {
+              await getOneFromDrive(driveFileId, fileId);
+            }
+            console.log("finish drive sync");
+          })
+          .catch((error) => {
+            if (
+              error.status === 409 &&
+              error.response.data.message === "Not signed in to Google"
+            ) {
+              console.error(error);
+            } else {
+              throw error;
+            }
+          })
+          .finally(() => {
+            setLoadingProgress((prev) =>
+              prev.map((e, index) =>
+                index === 0 ? { ...e, finished: true } : e
+              )
+            );
+            resolves[0]();
+          })
+      );
 
       Promise.all(promises).then(async () => {
         await updateLastSynced(Date.now());
