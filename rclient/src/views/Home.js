@@ -8,7 +8,6 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { handleSimpleRequest } from "../api/Axios";
 import { UserInfoContext } from "../context/UserInfo";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Chat } from "../features/ai/Chat";
@@ -91,18 +90,6 @@ export const Home = () => {
     ],
   };
 
-  const nuke = async () => {
-    const databases = await indexedDB.databases();
-    for (const database of databases) {
-      window.indexedDB.deleteDatabase(database.name);
-    }
-
-    window.localStorage.clear();
-
-    await handleSimpleRequest("post", {}, "auth/signout");
-    userInfoContext.refreshAndIsLoggedIn().then(() => window.location.reload());
-  };
-
   return (
     <div>
       <Chat />
@@ -131,7 +118,7 @@ export const Home = () => {
           <Typography variant="h5">
             To open the epub, click on the picture of the book cover.
           </Typography>
-          <Button onClick={nuke} color="error">
+          <Button onClick={userInfoContext.nuke} color="error">
             If something is broken, click here to nuke local storage. Will
             logout and reset app.
           </Button>

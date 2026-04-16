@@ -78,17 +78,6 @@ export const Users = () => {
     });
   };
 
-  const handleLogout = () => {
-    handleSimpleRequest("post", {}, "auth/signout")
-      .then((res) => {
-        addAlert(res.data.message, "info");
-        userInfoContext
-          .refreshAndIsLoggedIn()
-          .then(() => window.location.reload());
-      })
-      .catch((error) => addAlert(error.toString(), "error"));
-  };
-
   React.useEffect(() => {
     getAllUsers().then((users) => setUsers(users));
     setQuickSettings(() => {
@@ -147,7 +136,7 @@ export const Users = () => {
               <ListItemText primary={"Edit User"} />
             </ListItemButton>
             {userInfoContext.isLoggedIn() ? (
-              <ListItemButton onClick={handleLogout}>
+              <ListItemButton onClick={userInfoContext.handleLogout}>
                 <ListItemIcon>
                   <LogoutIcon />
                 </ListItemIcon>

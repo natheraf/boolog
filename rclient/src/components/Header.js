@@ -11,31 +11,12 @@ import {
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
-import { useTheme } from "@mui/material/styles";
-import { ThemeContext } from "../App";
-import { handleSimpleRequest } from "../api/Axios";
-import { AlertsContext } from "../context/Alerts";
-import { UserInfoContext } from "../context/UserInfo";
 import { Users } from "./Users";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import { AppIcon } from "../features/header/AppIcon";
 
 export const Header = () => {
   const navigate = useNavigate();
-  const addAlert = React.useContext(AlertsContext).addAlert;
-  const { toggleColorMode, toggleReduceMotion } =
-    React.useContext(ThemeContext);
-  const theme = useTheme();
-  const userInfoContext = React.useContext(UserInfoContext);
-
-  const handleLogout = () => {
-    handleSimpleRequest("post", {}, "auth/signout")
-      .then((res) => {
-        addAlert(res.data.message, "info");
-        userInfoContext.refreshAndIsLoggedIn().then(() => navigate("/"));
-      })
-      .catch((error) => addAlert(error.toString(), "error"));
-  };
 
   return (
     <AppBar
