@@ -1,8 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { handleFetchPost } from "../../../api/Axios";
-import { CircularProgress, Stack, Tooltip, Typography } from "@mui/material";
+import {
+  Button,
+  CircularProgress,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import ReactMarkdown from "react-markdown";
+import AssistantIcon from "@mui/icons-material/Assistant";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 
 export const AnnotatorDictionaryAI = ({
   selectedText,
@@ -79,7 +87,9 @@ export const AnnotatorDictionaryAI = ({
   };
 
   React.useEffect(() => {
-    sendMessage();
+    if (!hasNoDictionaryResults) {
+      sendMessage();
+    }
   }, []);
 
   return (
@@ -88,6 +98,15 @@ export const AnnotatorDictionaryAI = ({
         <Typography color="error" variant="h6" alignSelf={"center"}>
           No Dictionary Results
         </Typography>
+      )}
+      {!aiResponse && !loadingAIDefinition && hasNoDictionaryResults && (
+        <Button
+          variant="outlined"
+          onClick={sendMessage}
+          endIcon={<AutoAwesomeIcon fontSize="small" />}
+        >
+          Ask AI
+        </Button>
       )}
       {loadingAIDefinition && (
         <Stack spacing={2} alignItems={"center"}>
