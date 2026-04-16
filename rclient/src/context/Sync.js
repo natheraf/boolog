@@ -33,9 +33,7 @@ let ranOnce = false;
 
 export const Sync = ({ children }) => {
   const userInfoContext = React.useContext(UserInfoContext);
-  const [isLoading, setIsLoading] = React.useState(
-    userInfoContext.isLoggedIn()
-  );
+  const [isLoading, setIsLoading] = React.useState(true);
   const [loadingProgress, setLoadingProgress] = React.useState([
     { label: "Syncing Drive Files...", finished: false },
     { label: "Syncing Epub Data...", finished: false },
@@ -210,6 +208,8 @@ export const Sync = ({ children }) => {
         await updateLastSynced(Date.now());
         setIsLoading(false);
       });
+    } else {
+      trimFiles().then(() => setIsLoading(false));
     }
   }, []);
 
