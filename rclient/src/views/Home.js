@@ -16,6 +16,7 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
 
   const updates = {
+    "Update 4/16/26 12:01AM": ["fix: google drive sync issues"],
     "Update 4/11/26 2:39PM": [
       "feat: dictionary in annotator now calls for AI when no definitions are found",
       "feat: total progress percentage bottom left in reader",
