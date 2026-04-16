@@ -56,6 +56,7 @@ export const GoogleAuth = () => {
     if (!warnNoDriveScope) {
       handleLogin();
     }
+    localStorage.setItem("allowGoogleDriveWrites", !warnNoDriveScope);
     setWarnDriveScope(scope.includes(googleDriveScope) === false);
   };
 

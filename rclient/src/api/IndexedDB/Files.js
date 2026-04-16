@@ -17,7 +17,10 @@ const addFileHelper = (db, data) =>
     }
     const request = objectStore.add(data);
     request.onsuccess = async (event) => {
-      if (localOnly === false) {
+      if (
+        localOnly === false &&
+        localStorage.getItem("allowGoogleDriveWrites") === "true"
+      ) {
         await sendOne(data).catch(console.error);
       }
       console.log("added file!");
@@ -66,7 +69,10 @@ const deleteFileHelper = (db, id, localOnly) =>
     const transaction = db.transaction(filesObjectStore, "readwrite");
     const objectStore = transaction.objectStore(filesObjectStore);
     const onDeletedLocal = () => {
-      if (localOnly === true) {
+      if (
+        localOnly === true ||
+        localStorage.getItem("allowGoogleDriveWrites") !== "true"
+      ) {
         return resolve();
       }
       deleteDriveFile(id)

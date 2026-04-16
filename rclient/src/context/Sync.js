@@ -158,7 +158,10 @@ export const Sync = ({ children }) => {
           resolves[2]();
         });
 
-      Promise.all(promises.slice(1)).then(async () =>
+      Promise.all(promises.slice(1)).then(() => {
+        if (localStorage.getItem("allowGoogleDriveWrites") !== "true") {
+          return resolves[0]();
+        }
         listFiles()
           .then(async (driveList) => {
             await trimFiles();
@@ -201,8 +204,8 @@ export const Sync = ({ children }) => {
               )
             );
             resolves[0]();
-          })
-      );
+          });
+      });
 
       Promise.all(promises).then(async () => {
         await updateLastSynced(Date.now());

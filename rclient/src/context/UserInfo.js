@@ -31,6 +31,7 @@ export const UserInfo = ({ children }) => {
   const handleLogout = React.useCallback(() => {
     handleSimpleRequest("post", {}, "auth/signout")
       .then((_res) => {
+        localStorage.removeItem("allowGoogleDriveWrites");
         window.location.reload();
       })
       .catch((error) => addAlert(error.toString(), "error"));
