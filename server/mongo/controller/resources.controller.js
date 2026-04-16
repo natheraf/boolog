@@ -42,10 +42,10 @@ exports.get = (req, res) => {
     const fs = require("node:fs");
     const path = require("node:path");
     const readStream = fs.createReadStream(sampleEpubPath);
-    const filename = path.basename(sampleEpubPath);
+    const fileName = path.basename(sampleEpubPath);
     res.writeHead(200, {
       "Content-Type": "application/epub+zip",
-      "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
+      "Content-Disposition": `attachment; filename="${fileName}"`,
     });
     readStream.pipe(res);
   } else if (key === "mwDictionary") {

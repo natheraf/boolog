@@ -5,7 +5,7 @@ const { getUser } = require("../controller/auth.controller.js");
 
 const verifyToken = (req, res, next) => {
   const token =
-    req.signedCookies[req.body.localUserId ?? req.query.localUserId];
+    req.signedCookies[req.query.localUserId ?? req.body.localUserId];
 
   if (!token) {
     return res.status(403).send({

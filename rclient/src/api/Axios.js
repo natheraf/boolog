@@ -105,7 +105,7 @@ export const handleDataFormRequest = (
       formData.append(key, object[key]);
     }
   }
-  formData.append("file", object.blob);
+  formData.append("file", object.blob, object.blob.name);
   return new Promise((resolve, reject) =>
     httpMethodFunctions
       .get(httpMethod)(`${api}/${route}${queryString}`, formData, {
@@ -115,7 +115,7 @@ export const handleDataFormRequest = (
       })
       .then((res) => resolve(res))
       .catch((error) => {
-        return reject(Error(error?.response?.data?.message));
+        console.log(error);
       })
   );
 };
@@ -133,3 +133,11 @@ export const getRandomWord = (amount, minLength, maxLength) =>
       .then((response) => resolve(response.json()))
       .catch((error) => reject(Error(error)))
   );
+
+export const getFilenameFromContentDisposition = (res) => {
+  const contentDisposition = res.headers["content-disposition"];
+  const filename = contentDisposition
+    ? contentDisposition.split("filename=")[1]?.replace(/"/g, "")
+    : "Unnamed_File";
+  return filename;
+};

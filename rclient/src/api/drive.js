@@ -1,5 +1,9 @@
 import { addEpub } from "../features/files/fileUtils";
-import { handleDataFormRequest, handleSimpleRequest } from "./Axios";
+import {
+  getFilenameFromContentDisposition,
+  handleDataFormRequest,
+  handleSimpleRequest,
+} from "./Axios";
 
 /**
  *
@@ -8,7 +12,9 @@ import { handleDataFormRequest, handleSimpleRequest } from "./Axios";
  */
 export const sendOne = (object) => {
   delete object.epubObject;
-  return handleDataFormRequest("POST", object, "drive/put/one");
+  return handleDataFormRequest("POST", object, "drive/put/one/stream", {
+    _id: object._id,
+  });
 };
 
 /**
@@ -38,9 +44,13 @@ export const getOne = (fileDriveId, fileId) =>
       fileDriveId,
     })
       .then((res) => {
-        const file = new File([res.data], "file", {
-          type: res.data.type,
-        });
+        const file = new File(
+          [res.data],
+          getFilenameFromContentDisposition(res),
+          {
+            type: res.data.type,
+          }
+        );
         addEpub(file, fileId).then(resolve);
       })
       .catch((error) =>

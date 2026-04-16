@@ -37,7 +37,10 @@ import {
 } from "../api/IndexedDB/epubData";
 import { getDefaultDisplayOptions, getDefaultFormatting } from "../api/Local";
 import { Loading } from "../features/loading/Loading";
-import { handleSimpleRequest } from "../api/Axios";
+import {
+  getFilenameFromContentDisposition,
+  handleSimpleRequest,
+} from "../api/Axios";
 import { EpubReaderV2 } from "../features/epub/components/EpubReaderV2";
 
 export const BookLog = () => {
@@ -95,15 +98,13 @@ export const BookLog = () => {
       key: "sampleEpub",
     })
       .then((res) => {
-        const contentDisposition = res.headers["content-disposition"];
-        const filename = contentDisposition
-          ? decodeURIComponent(
-              contentDisposition.split("filename*=UTF-8''")[1] ?? ""
-            ) || contentDisposition.split("filename=")[1]?.replace(/"/g, "")
-          : "Unnamed_File";
-        const file = new File([res.data], filename, {
-          type: res.data.type,
-        });
+        const file = new File(
+          [res.data],
+          getFilenameFromContentDisposition(res),
+          {
+            type: res.data.type,
+          }
+        );
         addBookFromEpub(file).then(() => (window.location.href = "/books"));
       })
       .catch((error) =>

@@ -37,6 +37,21 @@ module.exports = function (app) {
     googleController.putOne
   );
 
+  app.post(
+    "/api/drive/put/one/stream",
+    [
+      authJwt.verifyToken,
+      authController.checkUserIdExists,
+      authController.updateLastWritten,
+      authJwt.attachUserToRequest,
+      googleWare.hasGoogleSignInAndScopes([googleDriveScope]),
+      googleWare.getGoogleOAuth2Client,
+      googleMid.storeNewGoogleTokens,
+      googleWare.getDriveAppdataFolderId,
+    ],
+    googleController.putOneStream
+  );
+
   app.get(
     "/api/drive/list/all",
     [

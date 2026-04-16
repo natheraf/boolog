@@ -12,8 +12,17 @@ const corsOptions = {
 };
 app.use(cookieParser(process.env.COOKIE_PARSER_SECRET));
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// disable preprocessing requests unless
+const unlessPaths = ["/api/drive/put/one/stream"];
+const unless = (paths, middleware) => (req, res, next) => {
+  if (paths.includes(req.path)) {
+    return next();
+  }
+  return middleware(req, res, next);
+};
+app.use(unless(unlessPaths, express.json()));
+app.use(unless(unlessPaths, express.urlencoded({ extended: true })));
 
 /**
  * Connecting to database. The `drop` argument drops and resync all tables.

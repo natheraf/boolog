@@ -1,6 +1,46 @@
+const { PassThrough } = require("node:stream");
+const Busboy = require("busboy");
 const { google } = require("googleapis");
-const stream = require("stream");
 
+const putOneStream = async (req, res) => {
+  const busboy = Busboy({ headers: req.headers });
+  busboy.on("file", (_fieldname, fileStream, { filename, mimeType }) => {
+    const passThrough = new PassThrough();
+    fileStream.pipe(passThrough);
+    const drive =
+      req.drive ??
+      google.drive({ version: "v3", auth: req.googleOauth2Client });
+    drive.files
+      .create({
+        requestBody: {
+          name: filename,
+          parents: [req.driveAppdataFolderId],
+          mimeType: mimeType,
+          appProperties: {
+            boologId: req.query._id,
+          },
+        },
+        media: {
+          mimeType: mimeType,
+          body: passThrough,
+        },
+      })
+      .then((response) => res.status(200).send())
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send({ message: error.message });
+      });
+  });
+  busboy.on("error", (err) => res.status(500).json({ error: err.message }));
+  req.pipe(busboy);
+};
+
+/**
+ * @deprecated
+ * @param {*} req
+ * @param {*} res
+ * @returns
+ */
 const putOne = async (req, res) => {
   if (!req.file) {
     return res.status(400).send({ message: "Files missing from request" });
@@ -19,7 +59,7 @@ const putOne = async (req, res) => {
       },
       media: {
         mimeType: req.file.mimetype,
-        body: new stream.PassThrough().end(req.file.buffer),
+        body: new PassThrough().end(req.file.buffer),
       },
     })
     .then((response) => res.status(200).send())
@@ -51,15 +91,20 @@ const getOne = (req, res) => {
   }
   const drive =
     req.drive ?? google.drive({ version: "v3", auth: req.googleOauth2Client });
-  res.header("Content-Type", "application/epub+zip");
   drive.files
-    .get(
-      {
-        fileId: req.query.fileDriveId,
-        alt: "media",
-      },
-      { responseType: "stream" }
-    )
+    .get({
+      fileId: req.query.fileDriveId,
+      fields: "name, mimeType",
+    })
+    .then((metadata) => {
+      const fileName = metadata.data.name;
+      res.header("Content-Type", "application/epub+zip");
+      res.header("Content-Disposition", `attachment; filename="${fileName}"`);
+      return drive.files.get(
+        { fileId: req.query.fileDriveId, alt: "media" },
+        { responseType: "stream" }
+      );
+    })
     .then((response) => {
       response.data
         .on("error", (error) => {
@@ -96,6 +141,7 @@ const deleteOne = (req, res) => {
 const googleController = {
   listAll,
   putOne,
+  putOneStream,
   getOne,
   deleteOne,
 };

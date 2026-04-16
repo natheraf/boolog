@@ -68,7 +68,6 @@ export const Sync = ({ children }) => {
           for (const localEntry of lastUpdatedTimestamps) {
             const key = localEntry.entryId ?? localEntry.key;
             const localLastUpdate = localEntry._lastUpdated;
-            const remoteLastUpdate = remoteEpubData.get(key)._lastUpdated;
             if (
               remoteEpubData.has(key) === false &&
               lastCloudWritten >= localLastUpdate
@@ -76,10 +75,10 @@ export const Sync = ({ children }) => {
               await deleteAllEpubDataOfKey(localEntry, true);
             } else if (
               remoteEpubData.has(key) === false ||
-              remoteLastUpdate < localLastUpdate
+              remoteEpubData.get(key)._lastUpdated < localLastUpdate
             ) {
               entriesNeedCloudUpdate.push(localEntry);
-            } else if (remoteLastUpdate > localLastUpdate) {
+            } else if (remoteEpubData.get(key)._lastUpdated > localLastUpdate) {
               await putCloudEpubData(remoteEpubData.get(key), true);
             }
             remoteEpubData.delete(key);
