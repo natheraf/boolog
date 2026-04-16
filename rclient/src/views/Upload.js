@@ -6,7 +6,7 @@ import {
 import { Button, Divider, Stack, TextField, Typography } from "@mui/material";
 import { EpubReader } from "../components/EpubReader";
 import { exportFile, getFile } from "../api/IndexedDB/Files";
-import { deleteFile, getOne, listFiles, sendOne } from "../api/drive";
+import { deleteOne, getOne, listFiles, sendOne } from "../api/drive";
 
 export const Upload = () => {
   const [file, setFile] = React.useState(null);
@@ -45,7 +45,7 @@ export const Upload = () => {
   };
 
   const handleDeleteBookFromDrive = (fileDriveId) => {
-    deleteFile(fileDriveId);
+    deleteOne(fileDriveId);
   };
 
   const handleGetDriveFilesList = () => {

@@ -1,6 +1,7 @@
 import { filesObjectStore, userDBVersion } from "./config";
 import { openDatabase, getNewId, getUserDB } from "./common";
-import { sendOne, deleteFile as deleteDriveFile } from "../drive";
+import { sendOne, deleteOne as deleteDriveFile } from "../drive";
+import { getAllBooks } from "./Books";
 
 export const addFile = (data) =>
   openDatabase(getUserDB(), userDBVersion, (db) => addFileHelper(db, data));
@@ -100,4 +101,29 @@ const getAllFilesHelper = (db) =>
     const onError = (error) => reject(new Error(error));
     request.onerror = onError;
     request.onsuccess = (event) => resolve(event.target.result);
+  });
+
+export const trimFiles = async () => {
+  const fileIds = await getFileIdsToTrim();
+  await Promise.all(fileIds.map(deleteFile));
+};
+
+const getFileIdsToTrim = () =>
+  new Promise((resolve, reject) => {
+    getAllBooks()
+      .then((books) => {
+        getAllFiles().then((allFiles) => {
+          const fileIdsWithEpubEntries = new Set(
+            books.map((entry) => entry.fileId)
+          );
+          const res = [];
+          for (const file of allFiles) {
+            if (fileIdsWithEpubEntries.has(file._id) === false) {
+              res.push(file._id);
+            }
+          }
+          return resolve(res);
+        });
+      })
+      .catch(reject);
   });

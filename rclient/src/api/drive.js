@@ -4,6 +4,7 @@ import {
   handleDataFormRequest,
   handleSimpleRequest,
 } from "./Axios";
+import { getAllBooks } from "./IndexedDB/Books";
 
 /**
  *
@@ -23,7 +24,7 @@ export const sendOne = (object) => {
  * @param {string} [fileDriveId]
  * @return {Promise}
  */
-export const deleteFile = async (localId, fileDriveId) => {
+export const deleteOne = async (localId, fileDriveId) => {
   if (fileDriveId === undefined) {
     const driveList = (await listFiles()).data.list.files;
     fileDriveId = driveList.find(
@@ -57,3 +58,26 @@ export const getOne = (fileDriveId, fileId) =>
         error instanceof Error ? reject(error) : new Error("unknown error")
       )
   );
+
+export const trimDriveFiles = async (remoteFilesMap) => {
+  remoteFilesMap = new Map(remoteFilesMap);
+  const filesToTrim = await getDriveFilesToTrim(remoteFilesMap);
+  for (const [fileId, driveId] of filesToTrim) {
+    await deleteOne(fileId, driveId);
+    remoteFilesMap.delete(fileId);
+  }
+  return remoteFilesMap;
+};
+
+const getDriveFilesToTrim = async (remoteFilesMap) => {
+  const fileIdsWithEpubEntries = new Set(
+    (await getAllBooks()).map((entry) => entry.fileId)
+  );
+  const res = [];
+  for (const [fileId, driveId] of remoteFilesMap.entries()) {
+    if (fileIdsWithEpubEntries.has(fileId) === false) {
+      res.push([fileId, driveId]);
+    }
+  }
+  return res;
+};

@@ -18,11 +18,12 @@ import {
   syncMultipleToCloud as syncMultipleEpubDataToCloud,
 } from "../api/IndexedDB/epubData";
 import { arrayToMap } from "../api/utils";
-import { getAllFiles } from "../api/IndexedDB/Files";
+import { getAllFiles, trimFiles } from "../api/IndexedDB/Files";
 import {
   getOne as getOneFromDrive,
   listFiles,
   sendOne as sendOneToDrive,
+  trimDriveFiles,
 } from "../api/drive";
 import { Loading } from "../features/loading/Loading";
 import { Box } from "@mui/material";
@@ -162,13 +163,17 @@ export const Sync = ({ children }) => {
       Promise.all(promises.slice(1)).then(async () =>
         listFiles()
           .then(async (driveList) => {
+            await trimFiles();
             driveList = driveList.data.list.files;
-            const driveFileIds = new Map(
-              driveList.map((driveFile) => [
-                driveFile.appProperties.boologId,
-                driveFile.id,
-              ])
+            const driveFileIds = await trimDriveFiles(
+              new Map(
+                driveList.map((driveFile) => [
+                  driveFile.appProperties.boologId,
+                  driveFile.id,
+                ])
+              )
             );
+
             const localFiles = await getAllFiles();
             for (const localFile of localFiles) {
               if (driveFileIds.has(localFile._id) === false) {
