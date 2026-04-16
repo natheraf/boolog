@@ -16,9 +16,9 @@ const addFileHelper = (db, data) =>
       data._id = getNewId();
     }
     const request = objectStore.add(data);
-    request.onsuccess = async (event) => {
+    request.onsuccess = (event) => {
       if (localOnly === false) {
-        await sendOne(data);
+        sendOne(data);
       }
       console.log("added file!");
       resolve(event);
