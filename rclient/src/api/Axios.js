@@ -116,6 +116,7 @@ export const handleDataFormRequest = (
       .then((res) => resolve(res))
       .catch((error) => {
         console.log(error);
+        reject(error);
       })
   );
 };
