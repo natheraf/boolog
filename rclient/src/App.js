@@ -15,6 +15,7 @@ import { Upload } from "./views/Upload";
 import { PrivacyPolicy } from "./views/legal/PrivacyPolicy";
 import { TermsOfService } from "./views/legal/TermsOfService";
 import { GoogleAuth } from "./views/login/GoogleAuth";
+import { LandingPage } from "./features/landing/LandingPage";
 
 export const ThemeContext = React.createContext({
   toggleColorMode: () => {},
@@ -109,6 +110,7 @@ function App() {
                 <Route path="/upload" element={<Upload />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
                 <Route path="/terms-of-service" element={<TermsOfService />} />
+                <Route path="/landing" element={<LandingPage />} />
                 <Route path="login">
                   <Route path="" element={<Login />} />
                   <Route

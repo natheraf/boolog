@@ -15,6 +15,7 @@ import {
   Typography,
 } from "@mui/material";
 import { isMobileDevice } from "../api/IndexedDB/common";
+import { GlobalDataContext } from "./context/GlobalData";
 
 export const SmallTabs = styled(Tabs)(({ tabpanelheight }) => ({
   height: tabpanelheight,
@@ -105,4 +106,36 @@ export const DynamicMenuAndDialog = (props) => {
   ) : (
     <Menu {...props} />
   );
+};
+
+export const RandomFontTypography = ({ children, variant, fontSize }) => {
+  const { randomFont } = React.useContext(GlobalDataContext);
+  const font = randomFont?.family ?? null;
+  return (
+    <HtmlTooltip
+      title={
+        <Stack alignItems={"center"}>
+          <Typography fontFamily={font}>{font}</Typography>
+          <Typography>{`${font}`}</Typography>
+        </Stack>
+      }
+    >
+      <Typography
+        variant={variant}
+        sx={{
+          fontSize,
+          fontFamily: font,
+          userSelect: "none",
+        }}
+      >
+        {children}
+      </Typography>
+    </HtmlTooltip>
+  );
+};
+
+RandomFontTypography.propTypes = {
+  children: PropTypes.any,
+  variant: PropTypes.string,
+  fontSize: PropTypes.string,
 };
