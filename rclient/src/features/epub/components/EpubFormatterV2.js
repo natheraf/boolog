@@ -3,8 +3,8 @@ import PropTypes from "prop-types";
 import { useTheme } from "@emotion/react";
 import {
   Box,
+  Divider,
   IconButton,
-  Menu,
   Paper,
   Stack,
   Tooltip,
@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import TextFormatIcon from "@mui/icons-material/TextFormat";
 import CloseIcon from "@mui/icons-material/Close";
-import { EpubFormattingPresets } from "./EpubFormattingPresets";
+import { EpubFormattingPresetsWithPreviews } from "./EpubFormattingPresetsWithPreviews";
 import {
   putFormattingStyleElement,
   putHighlightStyles,
@@ -20,6 +20,7 @@ import {
 } from "../formattingUtils";
 import { EpubFormatEditor } from "./EpubFormatEditor";
 import { putEpubData } from "../../../api/IndexedDB/epubData";
+import { DynamicMenuAndDialog } from "../../CustomComponents";
 
 /**
  * ReaderFormat Rewritten
@@ -118,21 +119,16 @@ export const EpubFormatterV2 = ({
           <TextFormatIcon />
         </IconButton>
       </Tooltip>
-      <Menu
+      <DynamicMenuAndDialog
         anchorEl={anchorEl}
         open={openFormatting}
         onClose={handleCloseFormatting}
         disableRestoreFocus={true}
       >
-        <Stack
-          spacing={2}
-          alignItems={"center"}
-          sx={{ width: "300px", padding: 2 }}
-        >
+        <Stack spacing={2} sx={{ padding: 2, maxWidth: "400px" }}>
           <Paper
             elevation={0}
             sx={{
-              width: "100%",
               position: "sticky",
               top: 10,
               padding: 1,
@@ -156,10 +152,11 @@ export const EpubFormatterV2 = ({
             </Stack>
           </Paper>
           <Stack spacing={2} alignItems={"center"}>
-            <EpubFormattingPresets
+            <EpubFormattingPresetsWithPreviews
               formatting={formatting}
               setFormatting={setFormattingHelper}
             />
+            <Divider flexItem />
             <EpubFormatEditor
               formatting={formatting}
               setFormatting={setFormattingHelper}
@@ -167,7 +164,7 @@ export const EpubFormatterV2 = ({
             />
           </Stack>
         </Stack>
-      </Menu>
+      </DynamicMenuAndDialog>
     </Box>
   );
 };

@@ -120,9 +120,10 @@ export const putHighlightStyles = (color, backgroundColor) => {
   return styleId;
 };
 
-const presets = new Map([
+export const presets = new Map([
   ["midNight", { pageColor: "black", textColor: "#ffffff90" }],
   ["dark", { pageColor: "black", textColor: "white" }],
+  ["ash", { pageColor: "#111111", textColor: "#ffffff90" }],
   ["twilight", { pageColor: "#FDF4DC", textColor: "black" }],
   ["light", { pageColor: "white", textColor: "black" }],
   ["custom", {}],
