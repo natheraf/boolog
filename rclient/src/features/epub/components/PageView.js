@@ -210,7 +210,7 @@ export const PageView = ({
     const y = event.changedTouches[0].clientY;
     const xDiff = firstTouchXRef.current - x;
     const yDiff = firstTouchYRef.current - y;
-    const deltaTrigger = 69;
+    const deltaTrigger = 30;
     if (
       Math.abs(xDiff) > Math.abs(yDiff) &&
       window.getSelection()?.isCollapsed
