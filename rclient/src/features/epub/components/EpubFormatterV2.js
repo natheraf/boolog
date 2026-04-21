@@ -5,6 +5,7 @@ import {
   Box,
   IconButton,
   Menu,
+  Paper,
   Stack,
   Tooltip,
   Typography,
@@ -128,21 +129,32 @@ export const EpubFormatterV2 = ({
           alignItems={"center"}
           sx={{ width: "300px", padding: 2 }}
         >
-          <Stack
-            direction={"row"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-            sx={{ width: "100%" }}
+          <Paper
+            elevation={0}
+            sx={{
+              width: "100%",
+              position: "sticky",
+              top: 10,
+              padding: 1,
+              zIndex: 1,
+            }}
           >
-            <Typography noWrap variant="h5">
-              {"Formatting"}
-            </Typography>
-            <Tooltip title={"Close (esc)"}>
-              <IconButton onClick={handleCloseFormatting} size="small">
-                <CloseIcon />
-              </IconButton>
-            </Tooltip>
-          </Stack>
+            <Stack
+              direction={"row"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+              sx={{ width: "100%" }}
+            >
+              <Typography noWrap variant="h5">
+                {"Formatting"}
+              </Typography>
+              <Tooltip title={"Close (esc)"}>
+                <IconButton onClick={handleCloseFormatting} size="small">
+                  <CloseIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
+          </Paper>
           <Stack spacing={2} alignItems={"center"}>
             <EpubFormattingPresets
               formatting={formatting}

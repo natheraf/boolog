@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import {
   Divider,
   IconButton,
+  Paper,
   Stack,
   Tooltip,
   Typography,
@@ -66,18 +67,20 @@ export const TableOfContents = ({
         disableRestoreFocus={true}
       >
         <Stack spacing={2} sx={{ padding: 2 }} justifySelf={"center"}>
-          <Stack
-            direction={"row"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
-          >
-            <Typography noWrap variant="h6">
-              {"Table Of Contents"}
-            </Typography>
-            <IconButton onClick={handleCloseToc} size="small">
-              <CloseIcon />
-            </IconButton>
-          </Stack>
+          <Paper elevation={0} sx={{ position: "sticky", top: 10, padding: 1 }}>
+            <Stack
+              direction={"row"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+            >
+              <Typography noWrap variant="h6">
+                {"Table Of Contents"}
+              </Typography>
+              <IconButton onClick={handleCloseToc} size="small">
+                <CloseIcon />
+              </IconButton>
+            </Stack>
+          </Paper>
           <Divider />
           {toc.map((obj) => (
             <Typography
