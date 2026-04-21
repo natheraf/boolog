@@ -197,7 +197,12 @@ export const PageView = ({
   };
 
   const handleTouchStart = (event) => {
-    event.preventDefault();
+    if (
+      event.touches[0].pageX < highlightBorderSafety ||
+      event.touches[0].pageX > window.innerWidth - highlightBorderSafety
+    ) {
+      event.preventDefault();
+    }
     firstTouchXRef.current = event.touches[0].clientX;
     firstTouchYRef.current = event.touches[0].clientY;
   };
