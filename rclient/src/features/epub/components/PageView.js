@@ -197,6 +197,7 @@ export const PageView = ({
   };
 
   const handleTouchStart = (event) => {
+    event.preventDefault();
     firstTouchXRef.current = event.touches[0].clientX;
     firstTouchYRef.current = event.touches[0].clientY;
   };
