@@ -16,6 +16,12 @@ export const Home = () => {
   const userInfoContext = React.useContext(UserInfoContext);
 
   const updates = {
+    "Update 4/21/26 7:18PM": [
+      "fix: prevent back swipe on ios",
+      "feat: easier to turn pages",
+      "feat: pin headers in reader menus so close button is accessible",
+      "feat: formatting menu is now fullscreen on mobile and show preset previews",
+    ],
     "Update 4/16/26 12:01AM": ["fix: google drive sync issues"],
     "Update 4/11/26 2:39PM": [
       "feat: dictionary in annotator now calls for AI when no definitions are found",
