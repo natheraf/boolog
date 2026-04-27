@@ -11,7 +11,10 @@ export const epubDotNotationDepth = {
   notes: 2,
 };
 
-const globalEpubDataKeys = ["epubGlobalFormatting"];
+const globalEpubDataKeys = new Set([
+  "epubGlobalFormatting",
+  "epubGlobalDisplayOptions",
+]);
 
 const formattingCloudSyncWhitelist = [
   "fontFamily",
@@ -121,7 +124,7 @@ const deleteAllEpubDataOfKeyHelper = (db, data, localOnly) =>
     const transaction = db.transaction(epubDataObjectStore, "readwrite");
     const objectStore = transaction.objectStore(epubDataObjectStore);
     let request;
-    if (globalEpubDataKeys.includes(data.key)) {
+    if (globalEpubDataKeys.has(data.key)) {
       if (localOnly !== true) {
         syncMultipleToCloud([{ deleted: true, key: data.key }]);
       }
@@ -139,7 +142,10 @@ const deleteAllEpubDataOfKeyHelper = (db, data, localOnly) =>
     request.onerror = onError;
     request.onsuccess = (event) => {
       const cursor = event.target.result;
-      if (cursor) {
+      if (
+        cursor &&
+        (cursor?.key === data?.key || cursor?.key === data?.entryId)
+      ) {
         const deleteRequest = cursor.delete();
         deleteRequest.onerror = onError;
         deleteRequest.onsuccess = () => cursor.continue();
@@ -182,7 +188,7 @@ export const putCloudEpubData = async (object, localOnly) => {
       };
     }
   }
-  if (globalEpubDataKeys.includes(object.key)) {
+  if (globalEpubDataKeys.has(object.key)) {
     return putEpubData(object, true, localOnly);
   } else {
     return Promise.all([
@@ -391,12 +397,9 @@ const getEpubDataWithDefaultHelper = (db, data) =>
     request.onsuccess = (event) => {
       const value = event.target.result;
       if (value === undefined) {
-        const transaction = db.transaction(epubDataObjectStore, "readwrite");
-        const objectStore = transaction.objectStore(epubDataObjectStore);
-        data._lastUpdated = Date.now();
-        const request = objectStore.add(data);
-        request.onsuccess = () => resolve(data);
-        request.onerror = (error) => reject(new Error(error));
+        putEpubData(data, true)
+          .then(() => resolve(data))
+          .catch(console.error);
       } else {
         resolve(value);
       }
@@ -432,7 +435,7 @@ const getAllEpubDataWithLastUpdatedHelper = (db) =>
   });
 
 export const getWholeEpubData = async (key) => {
-  if (globalEpubDataKeys.includes(key)) {
+  if (globalEpubDataKeys.has(key)) {
     return await getEpubData(key);
   } else {
     return dotNotationEpubObjectsArrayToStandard(
