@@ -20,6 +20,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import { handleFetchPost } from "../../api/Axios";
 import RecyclingIcon from "@mui/icons-material/Recycling";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export const Chat = () => {
   const width = Math.max(300, window.innerWidth / 2);
@@ -226,7 +227,9 @@ export const Chat = () => {
                             overflowWrap: "break-word",
                           }}
                         >
-                          <ReactMarkdown>{message.content}</ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                          </ReactMarkdown>
                         </Box>
                       ) : (
                         message.content
